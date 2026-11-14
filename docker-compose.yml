@@ -1,0 +1,10 @@
+# Optional: run the API in a container (the front end runs with `npm run dev` in web/).
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      TD_ALLOWED_ORIGINS: "http://localhost:5173"

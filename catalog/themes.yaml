@@ -1,0 +1,19 @@
+# Theme cards (gate 1: relevance). Which variable plays which role in a theme
+# is declared on the variable card (variables.yaml -> themes), so there is one
+# source of truth. Roles: target, driver, response, cross_check.
+
+- id: heat
+  name: { simple: Heat, scientific: Temperature }
+  question:
+    simple: Is it getting hotter or colder here?
+    scientific: Is near-surface air temperature trending in this region?
+- id: water
+  name: { simple: Water, scientific: Water cycle }
+  question:
+    simple: Is it getting wetter or drier here?
+    scientific: Are precipitation, soil moisture, evaporation or humidity trending in this region?
+- id: air
+  name: { simple: Air, scientific: Atmospheric composition }
+  question:
+    simple: Is the air getting hazier or smokier here?
+    scientific: Are aerosol optical depth, aerosol species or CO trending in this region?
