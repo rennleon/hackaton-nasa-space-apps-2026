@@ -14,7 +14,19 @@ npm install && npm run dev
 
 This syncs the dependencies, regenerates the static results, starts the API (http://localhost:8000, docs at
 `/docs`) and the web app (http://localhost:5173) with `[api]` / `[web]` logs, and stops both on Ctrl+C.
-Run one side alone with `npm run dev:api` or `npm run dev:web`. The pre-loaded regions also work without the
+Run one side alone with `npm run dev:api` or `npm run dev:web`.
+
+**Use it from other devices on your network** (phone, tablet, another laptop):
+
+```bash
+npm run lan
+```
+
+It builds the app and serves it on your private LAN address only (e.g. `http://192.168.0.6:4173`). It serves the
+production build, not the dev server; the API stays on `127.0.0.1` and is reached only through the web server's
+`/api` proxy, so it is never exposed to the network. There is no password: use it on a trusted Wi-Fi, not a public
+one. If another device can't connect, allow TCP port 4173 from your local network in your firewall. Set `LAN_HOST`
+to choose the address, or `API_PORT` / `WEB_PORT` to change ports (e.g. while `npm run dev` is also running). The pre-loaded regions also work without the
 API (static files), so the demo never depends on a live NASA service.
 
 ## Repo layout (monorepo)
