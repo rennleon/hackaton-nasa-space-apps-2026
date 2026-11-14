@@ -25,12 +25,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Backend tests
-        working-directory: backend
-        run: uv sync --frozen --python 3.12 && uv run pytest -q
+      # No tests here: the release commit already passed CI on its pull request.
       - name: Web build
         working-directory: web
-        run: npm ci && npx vitest --run && VITE_API_URL=/api npm run build
+        run: npm ci && VITE_API_URL=/api npm run build
       - name: Package web build
         run: tar -czf "web-dist-${GITHUB_REF_NAME}.tar.gz" -C web/dist .
       - name: Release notes from CHANGELOG

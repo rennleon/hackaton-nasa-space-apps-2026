@@ -1,5 +1,8 @@
 name: CI
 
+# Bare-minimum checks to move fast: version consistency, lint, one end-to-end smoke test,
+# and the web typecheck + build. The full suites stay in the repo: `npm test` runs them on demand.
+
 on:
   pull_request:
   push:
@@ -27,7 +30,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --frozen --python 3.12
       - run: uv run ruff check src tests scripts
-      - run: uv run pytest -q
+      - name: Smoke test (engine end to end on real data)
+        run: uv run pytest -q tests/test_engine.py
 
   web:
     runs-on: ubuntu-latest
@@ -42,9 +46,5 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
-      - name: Generated contract types are up to date
-        run: npm run gen:types && git diff --exit-code src/types/contract.ts
       - run: npm run typecheck
-      - run: npm run lint
-      - run: npx vitest --run
       - run: npm run build

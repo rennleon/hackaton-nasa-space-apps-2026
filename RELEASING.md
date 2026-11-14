@@ -19,7 +19,7 @@
    This bumps every version field, moves the Unreleased notes under the new version, regenerates the
    static results, commits `release: vX.Y.Z` and creates the tag. It does not push.
 4. Publish: `git push origin main --follow-tags`.
-   Pushing the tag runs `.github/workflows/release.yml`: tests, a check that the tag matches `VERSION`, the web
+   Pushing the tag runs `.github/workflows/release.yml` (no tests; CI already ran on the PR): a check that the tag matches `VERSION`, the web
    build attached as `web-dist-vX.Y.Z.tar.gz`, the API image `ghcr.io/<owner>/<repo>-api:vX.Y.Z`, and a GitHub
    Release with the CHANGELOG notes.
 
