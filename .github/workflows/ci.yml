@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/version.mjs check
+
+  backend:
+    runs-on: ubuntu-latest
+    env:
+      TD_POWER_OFFLINE: "1" # tests never call NASA POWER; the committed cache serves pre-loaded regions
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --python 3.12
+      - run: uv run ruff check src tests scripts
+      - run: uv run pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Generated contract types are up to date
+        run: npm run gen:types && git diff --exit-code src/types/contract.ts
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npx vitest --run
+      - run: npm run build

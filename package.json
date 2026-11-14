@@ -12,6 +12,10 @@
     "dev:api": "cd backend && uv run uvicorn trend_detective.api:app --port 8000 --reload",
     "dev:web": "cd web && VITE_API_URL=/api npm run dev -- --port 5173 --strictPort",
     "precompute": "cd backend && TD_POWER_OFFLINE=1 uv run python scripts/precompute.py",
-    "test": "cd backend && uv run pytest -q && cd ../web && npx vitest --run"
-  }
+    "test": "cd backend && uv run pytest -q && cd ../web && npx vitest --run",
+    "version:check": "node scripts/version.mjs check",
+    "version:set": "node scripts/version.mjs set",
+    "release": "node scripts/release.mjs"
+  },
+  "version": "0.1.0"
 }

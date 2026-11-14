@@ -29,6 +29,12 @@ one. If another device can't connect, allow TCP port 4173 from your local networ
 to choose the address, or `API_PORT` / `WEB_PORT` to change ports (e.g. while `npm run dev` is also running). The pre-loaded regions also work without the
 API (static files), so the demo never depends on a live NASA service.
 
+## Versions and rollback
+
+The current version is in `VERSION` (also shown in the app footer and at `/health`). Releases are git tags
+`vX.Y.Z` with a GitHub Release each; cut one with `npm run release -- patch|minor|major`. See
+[RELEASING.md](RELEASING.md) for releasing and rolling back, and [CHANGELOG.md](CHANGELOG.md) for what changed.
+
 ## Repo layout (monorepo)
 
 ```text

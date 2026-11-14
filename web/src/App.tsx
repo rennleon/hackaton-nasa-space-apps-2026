@@ -77,7 +77,7 @@ export default function App({ client: injected }: { client?: DataClient }) {
         )}
       </main>
       <footer className="footer">
-        Map data &copy; OpenStreetMap contributors. Data: NASA satellite and model products via NASA Giovanni (GES DISC); results computed by our analysis engine.
+        Map data &copy; OpenStreetMap contributors. Data: NASA satellite and model products via NASA Giovanni (GES DISC); results computed by our analysis engine. · v{__APP_VERSION__}
       </footer>
     </ViewProvider>
   )
