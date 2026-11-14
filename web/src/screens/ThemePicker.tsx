@@ -1,12 +1,14 @@
 import { useData, useView } from '../context'
 import type { Route } from '../lib/route'
+import { parsePlace, placeRegion } from '../lib/place'
 
 const ICONS: Record<string, string> = { heat: '🌡', water: '💧', air: '🌫' }
 
 export function ThemePicker({ route, go }: { route: Route; go: (r: Route) => void }) {
   const { catalog } = useData()
   const { t, view } = useView()
-  const region = catalog.regions.find((r) => r.id === route.region)
+  const place = parsePlace(route.place)
+  const region = place ? placeRegion(place) : catalog.regions.find((r) => r.id === route.region)
   return (
     <div className="page">
       <nav aria-label="Breadcrumb">
@@ -24,7 +26,7 @@ export function ThemePicker({ route, go }: { route: Route; go: (r: Route) => voi
         <ul className="theme-grid">
           {catalog.themes.map((th) => (
             <li key={th.id}>
-              <button type="button" className="theme-card" onClick={() => go({ screen: 'shortlist', region: region.id, theme: th.id })}>
+              <button type="button" className="theme-card" onClick={() => go({ screen: 'shortlist', region: place ? undefined : region.id, place: route.place, theme: th.id })}>
                 <span aria-hidden="true" className="theme-icon">
                   {ICONS[th.id] ?? '•'}
                 </span>

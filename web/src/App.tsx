@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createClient } from './data'
+import { createClient, defaultApiUrl } from './data'
 import type { DataClient } from './data/client'
 import { DataProvider, GlossaryProvider, ViewProvider } from './context'
 import { parseHash, toHash, type Route } from './lib/route'
@@ -35,7 +35,7 @@ async function loadCatalog(client: DataClient): Promise<Catalog> {
 }
 
 export default function App({ client: injected }: { client?: DataClient }) {
-  const client = useMemo(() => injected ?? createClient(), [injected])
+  const client = useMemo(() => injected ?? createClient(defaultApiUrl()), [injected])
   const cat = useAsync(() => loadCatalog(client), [client])
   const [route, go] = useRoute()
 

@@ -49,6 +49,7 @@ from .robustness import leave_one_year_out
 from .selection import stage1
 from .sources import SourceChain
 from .sources.giovanni_csv import GiovanniCsvSource
+from .sources.power import PowerSource
 from .stats import TrendTests, seasonal_mk, trend_tests, years_to_detect
 from .timeutil import from_index, month_index, month_to_float
 from .verdict import VerdictInputs, build_verdict, cant_tell, decide
@@ -78,7 +79,11 @@ class EngineContext:
     @classmethod
     def from_repo(cls, root: Path | None = None) -> EngineContext:
         root = root or repo_root()
-        return cls(Catalog.load(root / "catalog"), SourceChain([GiovanniCsvSource(root / "data" / "raw")]))
+        sources = SourceChain([
+            GiovanniCsvSource(root / "data" / "raw"),
+            PowerSource(cache_dir=root / "data" / "cache" / "power"),
+        ])
+        return cls(Catalog.load(root / "catalog"), sources)
 
     def series(self, variable_id: str, region: RegionCard | str) -> MonthlySeries | None:
         r = self.catalog.regions[region] if isinstance(region, str) else region
@@ -274,13 +279,20 @@ def analyze_region(
         gate_years, unit = float(len(season_means(p, season.months)[0])), "season-years"
     else:
         gate_years, unit = window.years, "years"
-    checks = fitness(var, region, gate_years, unit) + quality(p, var, season.months if season else None)
+    n_cells = series.provenance.n_cells if series.provenance else None
+    checks = fitness(var, region, gate_years, unit, n_cells) + quality(p, var, season.months if season else None)
     gates = Gates(passed=all(c.passed for c in checks), checks=checks)
 
     chips: list[Chip] = []
     bc = bbox_chip(series.provenance, region, var.grid_deg)
     if bc:
         chips.append(bc)
+    if series.provenance and series.provenance.source_kind == "nasa_power" and region.geometry.kind == "shape":
+        chips.append(Chip(
+            code="area_is_bounding_box", severity="info",
+            text=Text(simple="We use the rectangle around this place. It includes some land and lake nearby.",
+                      scientific="NASA POWER mean over the shape's bounding box (includes neighbouring areas)."),
+        ))
     if window.reason == "drift_cut":
         art = next(a for a in var.artifacts if a.action == "end_window_before")
         chips.append(Chip(code="drift_years_excluded", severity="info", text=art.note))

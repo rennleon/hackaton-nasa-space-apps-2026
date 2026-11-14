@@ -7,7 +7,8 @@ import type { AnalysisResult } from '../types/contract'
 
 const fake = (over: Partial<DataClient>): DataClient => ({
   regions: async () => [], themes: async () => [], variables: async () => [], glossary: async () => [],
-  scan: async () => { throw new Error('x') }, result: async () => { throw new Error('x') }, analyze: async () => { throw new Error('x') }, ...over,
+  scan: async () => { throw new Error('x') }, result: async () => { throw new Error('x') }, analyze: async () => { throw new Error('x') },
+  customScan: async () => { throw new Error('x') }, customResult: async () => { throw new Error('x') }, ...over,
 })
 const res = { verdict: { label: 'significant' } } as unknown as AnalysisResult
 

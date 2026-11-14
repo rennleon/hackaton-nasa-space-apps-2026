@@ -6,22 +6,30 @@ import { SelectionPanel, VerdictCard } from '../components/Verdict'
 import { Term } from '../components/Term'
 import type { Route } from '../lib/route'
 import { parseYm } from '../lib/text'
+import { COPY } from '../lib/copy'
+import { LiveNotice } from '../components/LiveNotice'
+import { parsePlace, placeRegion } from '../lib/place'
 
 export function VariableView({ route, go }: { route: Route; go: (r: Route) => void }) {
   const { client, catalog } = useData()
   const { t, view } = useView()
-  const region = catalog.regions.find((r) => r.id === route.region)
+  const place = parsePlace(route.place)
+  const custom = place !== null
+  const region = place ? placeRegion(place) : catalog.regions.find((r) => r.id === route.region)
   const card = catalog.variables.find((v) => v.id === route.variable)
-  const custom = Boolean(route.start || route.end)
+  const customPeriod = Boolean(route.start || route.end)
   const res = useAsync(async () => {
     if (!region || !card) throw new Error('unknown region or variable')
-    if (!custom) return client.result(region.id, card.id, route.season)
+    if (place) {
+      return client.customResult(place, card.id, { start: route.start ? `${route.start}-01` : undefined, end: route.end ? `${route.end}-12` : undefined })
+    }
+    if (!customPeriod) return client.result(region.id, card.id, route.season)
     return client.analyze(region.id, card.id, {
       start: route.start ? `${route.start}-01` : undefined,
       end: route.end ? `${route.end}-12` : undefined,
       seasonId: route.season,
     })
-  }, [region?.id, card?.id, route.season, route.start, route.end])
+  }, [region?.id, card?.id, route.place, route.season, route.start, route.end])
 
   const [start, setStart] = useState(route.start ?? '')
   const [end, setEnd] = useState(route.end ?? '')
@@ -43,7 +51,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
   const seasons = region.declared_seasons.filter((s) => s.variable === card.id)
   const minYear = parseYm(card.record_start).y
   const w = res.data?.window
-  const back = () => go({ screen: 'shortlist', region: region.id, theme: route.theme, season: route.season })
+  const back = () => go({ screen: 'shortlist', region: custom ? undefined : region.id, place: route.place, theme: route.theme, season: route.season })
   const apply = (e: React.FormEvent) => {
     e.preventDefault()
     go({ ...route, start: start || undefined, end: end || undefined })
@@ -62,6 +70,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
       </p>
 
       <div className="controls">
+        {!custom && (
         <div role="tablist" aria-label="Time of year" className="tabs">
           <button role="tab" type="button" aria-selected={!route.season} onClick={() => go({ ...route, season: undefined })}>
             All months
@@ -72,6 +81,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
             </button>
           ))}
         </div>
+        )}
         <form className="period" onSubmit={apply}>
           <label>
             <span>{view === 'simple' ? 'From year' : 'Start year'}</span>
@@ -84,7 +94,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
           <button type="submit" className="btn" disabled={invalid}>
             Analyze period
           </button>
-          {custom && (
+          {customPeriod && (
             <button type="button" className="link" onClick={() => go({ ...route, start: undefined, end: undefined })}>
               Reset to default
             </button>
@@ -93,14 +103,16 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
         </form>
       </div>
 
-      {res.loading && <p aria-live="polite">Loading…</p>}
-      {res.error && (
+      {res.loading && <p aria-live="polite">{custom ? t(COPY.loadingPlace) : 'Loading…'}</p>}
+      {res.error && custom && <LiveNotice error={res.error} go={go} />}
+      {res.error && !custom && (
         <p role="alert" className="error">
           No result is available for this combination yet.
         </p>
       )}
       {res.data && (
         <>
+          {custom && <p className="muted small">{t(COPY.powerCredit)}</p>}
           {(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable && (
             <p role="status" className="notice">
               Custom period unavailable right now, showing the default.

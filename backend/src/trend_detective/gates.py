@@ -25,7 +25,10 @@ def no_data() -> GateCheck:
     )
 
 
-def fitness(variable: VariableCard, region: RegionCard, years: float, unit: str = "years") -> list[GateCheck]:
+def fitness(
+    variable: VariableCard, region: RegionCard, years: float, unit: str = "years", n_cells: int | None = None
+) -> list[GateCheck]:
+    """n_cells: grid cells the source actually returned (overrides the estimate from the region size)."""
     checks: list[GateCheck] = []
     if variable.coverage != "global":
         w, s, e, n = variable.coverage
@@ -36,22 +39,41 @@ def fitness(variable: VariableCard, region: RegionCard, years: float, unit: str 
                 code="coverage",
                 passed=inside,
                 detail=Text(
-                    simple="This data covers this place." if inside else "This data does not cover this place.",
+                    simple="This data covers this place."
+                    if inside
+                    else "This data does not cover this place.",
                     scientific=f"Variable coverage {variable.coverage} vs region bbox {region.geometry.bbox}.",
                 ),
             )
         )
-    cells = region.geometry.cells(variable.grid_deg)
-    checks.append(
-        GateCheck(
-            code="cells",
-            passed=cells >= MIN_CELLS,
-            detail=Text(
-                simple=f"About {cells:.0f} map squares cover this place (we need at least {MIN_CELLS:.0f}).",
-                scientific=f"≈{cells:.1f} grid cells at {variable.grid_deg}° (minimum {MIN_CELLS:.0f}).",
-            ),
+    cells = float(n_cells) if n_cells is not None else region.geometry.cells(variable.grid_deg)
+    if region.geometry.kind == "point" or n_cells == 1:
+        small_box = region.geometry.kind != "point"
+        checks.append(
+            GateCheck(
+                code="cells",
+                passed=True,
+                detail=Text(
+                    simple="Your box is small, so we use the map square in its middle."
+                    if small_box
+                    else "One place: we use the map square around it.",
+                    scientific=f"Single {variable.grid_deg}° grid cell"
+                    + (" at the box centre (box below the source's regional minimum)." if small_box else "."),
+                ),
+            )
         )
-    )
+        cells = None
+    if cells is not None:
+        checks.append(
+            GateCheck(
+                code="cells",
+                passed=cells >= MIN_CELLS,
+                detail=Text(
+                    simple=f"About {cells:.0f} map squares cover this place (we need at least {MIN_CELLS:.0f}).",
+                    scientific=f"≈{cells:.1f} grid cells at {variable.grid_deg}° (minimum {MIN_CELLS:.0f}).",
+                ),
+            )
+        )
     checks.append(
         GateCheck(
             code="record_length",
@@ -104,7 +126,7 @@ def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None
 def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> Chip | None:
     """Rule 3: the box we get should be the box we asked for. Giovanni's 'Data Bounding
     Box' is interpreted as grid-cell centres (assumption), so edges are centres ± grid/2."""
-    if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox":
+    if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox" or prov.source_kind != "giovanni_csv":
         return None
     w, s, e, n = prov.data_bbox
     h = grid_deg / 2

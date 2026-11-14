@@ -98,12 +98,17 @@ class VariableCard(Card):
 
 
 class Geometry(Card):
-    kind: Literal["bbox", "shape"]
+    """bbox: an area (W, S, E, N). shape: a Giovanni shape with its bounding box.
+    point: one place; bbox = [lon, lat, lon, lat] (a live source returns its grid cell)."""
+
+    kind: Literal["bbox", "shape", "point"]
     bbox: list[float]  # W, S, E, N
     shape_ref: str | None = None
     area_fraction: float = 1.0
 
     def cells(self, grid_deg: float) -> float:
+        if self.kind == "point":
+            return 1.0
         w, s, e, n = self.bbox
         return ((e - w) / grid_deg) * ((n - s) / grid_deg) * self.area_fraction
 

@@ -88,6 +88,11 @@ class VerdictInputs:
     then_now: ThenNow | None = None
 
 
+def _place(region: RegionCard) -> str:
+    """Region name inside a sentence: a user-chosen place reads 'your place', not 'Your place'."""
+    return "your place" if region.id.startswith("custom") else region.name.simple
+
+
 def _subject(x: VerdictInputs) -> str:
     s = x.variable.words.subject
     return f"{s} in the {x.season.name.simple}" if x.season else s
@@ -101,7 +106,7 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     direction = "increase" if up else "decrease"
     amount = f"{abs(x.slope_per_decade):.{d}f}"
     y0, y1 = x.window.start[:4], x.window.end[:4]
-    region_s, region_sc = x.region.name.simple, x.region.name.scientific
+    region_s, region_sc = _place(x.region), x.region.name.scientific
     subj = _subject(x)
     certainty = CERTAINTY[label]
     season_sc = f", {x.season.name.scientific} means" if x.season else ""
@@ -131,7 +136,8 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     if certainty in ("sure", "maybe") and tn:
         a, b = kid_number(tn.value_then, tn.kid_scale), kid_number(tn.value_now, tn.kid_scale)
         if a == b:
-            how_s = f"The change from {tn.year_then} to {tn.year_now} is smaller than 1 {tn.kid_label}."
+            one = "degree" if tn.kid_label == "degrees" else tn.kid_label
+            how_s = f"Since {tn.year_then} it changed by less than 1 {one}."
         else:
             how_s = f"In {tn.year_then}: about {a} {tn.kid_label}. In {tn.year_now}: about {b}."
         how_sc = f"{slope_sc}{level_sc}."
@@ -208,7 +214,7 @@ def cant_tell(variable: VariableCard, region: RegionCard, reasons: list[Text]) -
     return Verdict(
         label="cant_tell",
         certainty="cant_tell",
-        answer=Text(simple=f"We can't answer this for {region.name.simple} yet.",
+        answer=Text(simple=f"We can't answer this for {_place(region)} yet.",
                     scientific=f"{variable.name.scientific}, {region.name.scientific}: not assessable."),
         how_much=Text(simple=first.simple, scientific=rsc),
         headline=Text(simple=METER_WORDS["cant_tell"], scientific="Not assessable"),

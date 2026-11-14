@@ -1,4 +1,5 @@
-import type { AnalyzeOptions, AnalysisOutcome, DataClient } from './client'
+import type { Place } from '../lib/place'
+import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient } from './client'
 
 /** Tries the API first and falls back to the static twin when it fails. */
 export class FallbackClient implements DataClient {
@@ -31,4 +32,16 @@ export class FallbackClient implements DataClient {
       return custom ? { ...res, customPeriodUnavailable: true } : res
     }
   }
+
+  /** No static twin for a custom place: the API's rejection of bad input passes through, anything else is "unavailable". */
+  private async live<T>(fn: (c: DataClient) => Promise<T>): Promise<T> {
+    try {
+      return await fn(this.api)
+    } catch (err) {
+      if (err instanceof HttpError && err.status >= 400 && err.status < 500) throw err
+      throw err instanceof LiveDataUnavailable ? err : new LiveDataUnavailable(err instanceof Error ? err.message : undefined)
+    }
+  }
+  customScan = (p: Place, t: string) => this.live((c) => c.customScan(p, t))
+  customResult = (p: Place, v: string, o: { start?: string; end?: string }) => this.live((c) => c.customResult(p, v, o))
 }

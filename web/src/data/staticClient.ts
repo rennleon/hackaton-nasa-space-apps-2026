@@ -1,9 +1,10 @@
 import type { AnalysisResult, ScanResult } from '../types/contract'
 import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types/catalog'
-import { getJson, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
+import { getJson, LiveDataUnavailable, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
 
 /** Reads the precomputed JSON files under `<base>/data/`. */
 export class StaticClient implements DataClient {
+  readonly customPlaces = false
   private base: string
   constructor(base: string = import.meta.env.BASE_URL ?? '/') {
     this.base = base.endsWith('/') ? base : base + '/'
@@ -34,5 +35,11 @@ export class StaticClient implements DataClient {
   async analyze(regionId: string, variableId: string, opts: AnalyzeOptions): Promise<AnalysisOutcome> {
     const res = await this.result(regionId, variableId, opts.seasonId)
     return opts.start || opts.end ? { ...res, customPeriodUnavailable: true } : res
+  }
+  customScan(): Promise<ScanResult> {
+    return Promise.reject(new LiveDataUnavailable('No live API configured'))
+  }
+  customResult(): Promise<AnalysisResult> {
+    return Promise.reject(new LiveDataUnavailable('No live API configured'))
   }
 }

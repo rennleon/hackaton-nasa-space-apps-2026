@@ -17,6 +17,8 @@ const client: DataClient = {
   scan: async (r, t) => read(`public/data/results/${r}/scan_${t}.json`),
   result: async (_r, v, s) => fixture(s ? `${v}__${s}` : v === 'gpm_precip' ? 'gpm_precip_cant_tell' : v),
   analyze: async (_r, v) => fixture(v),
+  customScan: async () => { throw new Error('unused') },
+  customResult: async () => { throw new Error('unused') },
 }
 
 beforeEach(() => {

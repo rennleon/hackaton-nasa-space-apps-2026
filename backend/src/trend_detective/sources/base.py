@@ -18,6 +18,11 @@ from ..catalog import RegionCard, VariableCard
 from ..contract import Provenance
 
 
+class LiveSourceUnavailable(RuntimeError):
+    """A live source could not be reached (network error, timeout, 5xx). Never cache this
+    as 'no data': the API answers 503 so the front end can say 'live data is down'."""
+
+
 @dataclass
 class RawSeries:
     months: list[str]  # "YYYY-MM", strictly increasing, may have gaps

@@ -117,3 +117,13 @@
   definition:
     simple: A computer mixed many measurements with the rules of physics to work this out. It is not a direct measurement.
     scientific: Model or reanalysis product (e.g. MERRA-2, GLDAS); not independent of the observations it assimilates.
+- id: latitude
+  term: { simple: how far north or south, scientific: latitude }
+  definition:
+    simple: How far a place is from the middle line of the Earth, going north or south.
+    scientific: Angular distance north (+) or south (−) of the equator, in degrees.
+- id: longitude
+  term: { simple: how far east or west, scientific: longitude }
+  definition:
+    simple: How far a place is east or west of a line through London.
+    scientific: Angular distance east (+) or west (−) of the prime meridian, in degrees.

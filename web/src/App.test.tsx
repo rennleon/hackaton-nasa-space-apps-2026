@@ -14,6 +14,8 @@ const client: DataClient = {
   scan: async (r, t) => read(`results/${r}/scan_${t}.json`),
   result: async (r, v, s) => read(`results/${r}/${s ? `${v}__${s}` : v}.json`),
   analyze: async (r, v) => read(`results/${r}/${v}.json`),
+  customScan: async () => { throw new Error('unused') },
+  customResult: async () => { throw new Error('unused') },
 }
 
 beforeEach(() => {

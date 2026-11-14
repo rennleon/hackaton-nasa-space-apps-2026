@@ -62,6 +62,7 @@ class Provenance(Model):
     title: str | None = None
     requested_bbox: list[float] | None = None  # W, S, E, N as requested
     data_bbox: list[float] | None = None  # W, S, E, N as reported by the source
+    n_cells: int | None = None  # grid cells actually averaged, when the source reports them
     retrieved_at: str | None = None  # ISO date when known
 
 

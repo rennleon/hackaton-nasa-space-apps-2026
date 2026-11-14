@@ -79,6 +79,7 @@ export interface Provenance {
   title: string | null;
   requested_bbox: number[] | null;
   data_bbox: number[] | null;
+  n_cells: number | null;
   retrieved_at: string | null;
 }
 /**

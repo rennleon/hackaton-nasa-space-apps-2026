@@ -4,6 +4,19 @@ NASA Space Apps 2026: a guided tool that helps students and the public find out 
 by how much, and whether the change is real, using NASA Earth-science data. Every result can be read in a
 **Simple** view (kid-friendly words, backed by a dictionary) or a **Scientific** view.
 
+## Run it
+
+From the repo root (needs Node ≥ 20 and [uv](https://docs.astral.sh/uv/)):
+
+```bash
+npm install && npm run dev
+```
+
+This syncs the dependencies, regenerates the static results, starts the API (http://localhost:8000, docs at
+`/docs`) and the web app (http://localhost:5173) with `[api]` / `[web]` logs, and stops both on Ctrl+C.
+Run one side alone with `npm run dev:api` or `npm run dev:web`. The pre-loaded regions also work without the
+API (static files), so the demo never depends on a live NASA service.
+
 ## Repo layout (monorepo)
 
 ```text
@@ -14,7 +27,7 @@ backend/    Python: analysis engine + FastAPI (uv project)
 web/        React + Vite + TypeScript front end
 ```
 
-## Backend
+## Backend (details)
 
 ```bash
 cd backend

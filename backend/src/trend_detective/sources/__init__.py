@@ -1,3 +1,3 @@
-from .base import RawSeries, SeriesSource, SourceChain
+from .base import LiveSourceUnavailable, RawSeries, SeriesSource, SourceChain
 
-__all__ = ["RawSeries", "SeriesSource", "SourceChain"]
+__all__ = ["LiveSourceUnavailable", "RawSeries", "SeriesSource", "SourceChain"]

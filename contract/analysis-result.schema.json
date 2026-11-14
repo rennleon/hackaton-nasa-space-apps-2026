@@ -301,6 +301,18 @@
           "default": null,
           "title": "Data Bbox"
         },
+        "n_cells": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "N Cells"
+        },
         "retrieved_at": {
           "anyOf": [
             {
@@ -320,6 +332,7 @@
         "title",
         "requested_bbox",
         "data_bbox",
+        "n_cells",
         "retrieved_at"
       ],
       "title": "Provenance",

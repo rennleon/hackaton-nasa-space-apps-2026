@@ -1,5 +1,5 @@
 import { useData, useView } from '../context'
-import { RegionMap } from '../components/RegionMap'
+import { PlaceChooser } from '../components/PlaceChooser'
 import { DEMOS } from '../lib/demos'
 import type { Route } from '../lib/route'
 
@@ -25,9 +25,9 @@ export function Home({ go }: { go: (r: Route) => void }) {
         </div>
       </section>
       <div className="home-grid">
-        <RegionMap regions={listed} onSelect={(id) => go({ screen: 'theme', region: id })} className="map map-home" />
+        <PlaceChooser regions={listed} go={go} />
         <section aria-labelledby="regions-h">
-          <h2 id="regions-h">{view === 'simple' ? 'Choose a place' : 'Regions'}</h2>
+          <h2 id="regions-h">{view === 'simple' ? 'Ready-made places' : 'Pre-loaded regions'}</h2>
           <ul className="region-list">
             {listed.map((r) => (
               <li key={r.id} className="card">
