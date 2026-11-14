@@ -1,0 +1,38 @@
+import type { AnalysisResult, ScanResult } from '../types/contract'
+import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types/catalog'
+import { getJson, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
+
+/** Reads the precomputed JSON files under `<base>/data/`. */
+export class StaticClient implements DataClient {
+  private base: string
+  constructor(base: string = import.meta.env.BASE_URL ?? '/') {
+    this.base = base.endsWith('/') ? base : base + '/'
+  }
+  private url(path: string) {
+    return `${this.base}data/${path}`
+  }
+  regions() {
+    return getJson<RegionCard[]>(this.url('catalog/regions.json'))
+  }
+  themes() {
+    return getJson<ThemeCard[]>(this.url('catalog/themes.json'))
+  }
+  variables() {
+    return getJson<VariableCard[]>(this.url('catalog/variables.json'))
+  }
+  glossary() {
+    return getJson<GlossaryTerm[]>(this.url('catalog/glossary.json'))
+  }
+  scan(regionId: string, themeId: string) {
+    return getJson<ScanResult>(this.url(`results/${regionId}/scan_${themeId}.json`))
+  }
+  result(regionId: string, variableId: string, seasonId?: string) {
+    const name = seasonId ? `${variableId}__${seasonId}` : variableId
+    return getJson<AnalysisResult>(this.url(`results/${regionId}/${name}.json`))
+  }
+  /** Static files only hold the default settings: a custom period is answered with the default and a flag. */
+  async analyze(regionId: string, variableId: string, opts: AnalyzeOptions): Promise<AnalysisOutcome> {
+    const res = await this.result(regionId, variableId, opts.seasonId)
+    return opts.start || opts.end ? { ...res, customPeriodUnavailable: true } : res
+  }
+}

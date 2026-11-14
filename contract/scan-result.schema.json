@@ -1,0 +1,272 @@
+{
+  "$defs": {
+    "RegionRef": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "RegionRef",
+      "type": "object"
+    },
+    "ScanEntry": {
+      "properties": {
+        "variable_id": {
+          "title": "Variable Id",
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        },
+        "role": {
+          "enum": [
+            "target",
+            "driver",
+            "response",
+            "cross_check"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "source_type": {
+          "enum": [
+            "observed",
+            "model"
+          ],
+          "title": "Source Type",
+          "type": "string"
+        },
+        "shortlist_label": {
+          "enum": [
+            "changing",
+            "possibly_changing",
+            "no_detectable_change",
+            "cant_tell"
+          ],
+          "title": "Shortlist Label",
+          "type": "string"
+        },
+        "verdict_label": {
+          "enum": [
+            "significant",
+            "significant_fragile",
+            "borderline",
+            "possibly_changing",
+            "no_detectable_change",
+            "cant_tell"
+          ],
+          "title": "Verdict Label",
+          "type": "string"
+        },
+        "slope_per_decade": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Slope Per Decade"
+        },
+        "units": {
+          "$ref": "#/$defs/UnitsInfo"
+        },
+        "p_decisive": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "P Decisive"
+        },
+        "p_adjusted": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "P Adjusted"
+        },
+        "worth_investigating": {
+          "title": "Worth Investigating",
+          "type": "boolean"
+        },
+        "mdt_per_decade": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mdt Per Decade"
+        },
+        "why": {
+          "$ref": "#/$defs/Text"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "variable_id",
+        "name",
+        "role",
+        "source_type",
+        "shortlist_label",
+        "verdict_label",
+        "slope_per_decade",
+        "units",
+        "p_decisive",
+        "p_adjusted",
+        "worth_investigating",
+        "mdt_per_decade",
+        "why",
+        "reason"
+      ],
+      "title": "ScanEntry",
+      "type": "object"
+    },
+    "Text": {
+      "additionalProperties": false,
+      "properties": {
+        "simple": {
+          "title": "Simple",
+          "type": "string"
+        },
+        "scientific": {
+          "title": "Scientific",
+          "type": "string"
+        }
+      },
+      "required": [
+        "simple",
+        "scientific"
+      ],
+      "title": "Text",
+      "type": "object"
+    },
+    "UnitsInfo": {
+      "properties": {
+        "display": {
+          "title": "Display",
+          "type": "string"
+        },
+        "simple": {
+          "title": "Simple",
+          "type": "string"
+        },
+        "decimals": {
+          "title": "Decimals",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "display",
+        "simple",
+        "decimals"
+      ],
+      "title": "UnitsInfo",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "engine_version": {
+      "title": "Engine Version",
+      "type": "string"
+    },
+    "region": {
+      "$ref": "#/$defs/RegionRef"
+    },
+    "theme_id": {
+      "title": "Theme Id",
+      "type": "string"
+    },
+    "alpha": {
+      "title": "Alpha",
+      "type": "number"
+    },
+    "method": {
+      "const": "benjamini_hochberg",
+      "default": "benjamini_hochberg",
+      "title": "Method",
+      "type": "string"
+    },
+    "window_start": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Window Start"
+    },
+    "window_end": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Window End"
+    },
+    "common_window": {
+      "title": "Common Window",
+      "type": "boolean"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/ScanEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "engine_version",
+    "region",
+    "theme_id",
+    "alpha",
+    "method",
+    "window_start",
+    "window_end",
+    "common_window",
+    "entries"
+  ],
+  "title": "ScanResult",
+  "type": "object"
+}
