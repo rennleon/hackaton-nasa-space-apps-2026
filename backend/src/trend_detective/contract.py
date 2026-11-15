@@ -210,11 +210,22 @@ class StartYearSensitivity(Model):
     classification: Literal["holds", "mostly", "depends"]
 
 
+class CellAgreement(Model):
+    """Do the grid cells inside a box go the way the box average goes? (Counts only, no map.)"""
+
+    n_cells: int  # cells with enough data in the window
+    n_same_sign: int  # cells whose own slope has the sign of the box slope
+    n_opposite: int  # n_cells - n_same_sign
+    n_opposite_sure: int  # opposite-sign cells that are significant after Benjamini-Hochberg FDR across the cells
+    verdict: Literal["agree", "mostly", "mixed"]
+
+
 class Robustness(Model):
     leave_one_year_out: LeaveOneYearOut | None = None
     drift_label_with_late_years: str | None = None
     cross_check: Comparison | None = None
     spatial: Comparison | None = None
+    cell_agreement: CellAgreement | None = None  # boxes only, variable page only (the scan skips it)
 
 
 class SelectionCheck(Model):

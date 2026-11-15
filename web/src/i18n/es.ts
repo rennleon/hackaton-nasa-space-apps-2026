@@ -841,5 +841,23 @@ const es: Record<string, string> = {
   'start.clim.span.scientific': 'Valores en esta vista: de {lo} a {hi}{unit}.',
   'start.clim.same': 'Todo este mapa se ve igual: {lo}.',
   'start.clim.unitLine': 'Unidad: {unit}',
+
+  // Do the parts of the box agree? (TrustPanel, cell agreement)
+  'result.trust.cells.simple': '¿Las partes de tu zona están de acuerdo?',
+  'result.trust.cells.sci': 'Acuerdo entre celdas',
+  'result.trust.cells.sq.simple': 'cuadrados del mapa',
+  'result.trust.cells.sq.sci': 'celdas de la malla',
+  'result.trust.cells.agreeAll': 'Revisamos {n} {sq} de tu zona. Todos van hacia el mismo lado.',
+  'result.trust.cells.agree': 'Revisamos {n} {sq} de tu zona. {k} van hacia el mismo lado.',
+  'result.trust.cells.mostly': 'Revisamos {n} {sq} de tu zona. {k} van hacia el mismo lado. Unos pocos no.',
+  'result.trust.cells.mixed': 'Revisamos {n} {sq} de tu zona. Partes de tu zona van en sentidos opuestos. Pueden anularse entre sí.',
+  'result.trust.cells.count.sci':
+    'Celdas con el mismo signo de pendiente que la media de la caja: {k} de {n}. Opuestas: {m}, de las cuales {sure} significativas (FDR de Benjamini–Hochberg, α = 0.05).',
+  'result.trust.cells.rule.sci':
+    'Resultado: {verdict}. De acuerdo: al menos 80 % de las celdas comparte el signo de la caja y ninguna celda opuesta es segura. Mixto: alguna celda opuesta es segura, o menos de 60 % comparte el signo.',
+  'result.trust.cells.vAgree.sci': 'de acuerdo',
+  'result.trust.cells.vMostly.sci': 'en su mayoría de acuerdo',
+  'result.trust.cells.vMixed.sci': 'mixto',
+  'result.trust.cells.ref.sci': 'Wilks (2016), Bull. Amer. Meteor. Soc. 97(12):2263–2273',
 }
 export default es

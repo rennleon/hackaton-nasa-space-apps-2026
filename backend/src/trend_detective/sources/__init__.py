@@ -1,7 +1,8 @@
-from .base import LiveSourceUnavailable, RawSeries, SeriesSource, SourceChain
+from .base import CellSeries, LiveSourceUnavailable, RawSeries, SeriesSource, SourceChain
 from .giovanni_api import GiovanniApiSource, GiovanniBoxTooLarge, GiovanniUnitMismatch
 
 __all__ = [
+    "CellSeries",
     "GiovanniApiSource",
     "GiovanniBoxTooLarge",
     "GiovanniUnitMismatch",

@@ -121,6 +121,15 @@ class RawSeries:
     provenance: Provenance
 
 
+@dataclass
+class CellSeries:
+    """One grid cell's monthly series in native units (NaN = missing), as the box mean was built from."""
+    lat: float
+    lon: float
+    months: list[str]
+    values: np.ndarray
+
+
 @runtime_checkable
 class SeriesSource(Protocol):
     kind: str
@@ -141,6 +150,20 @@ class SourceChain:
             series = src.fetch(variable, region)
             if series is not None:
                 return series
+        return None
+
+    def cell_series(
+        self, variable: VariableCard, region: RegionCard, source_kind: str | None = None
+    ) -> list[CellSeries] | None:
+        """The per-cell series behind a box mean, read from the source that built it (`source_kind` is the
+        series' provenance kind). Optional on a source; None when it cannot say or the cells are not cached."""
+        for src in self.sources:
+            if source_kind is not None and getattr(src, "kind", None) != source_kind:
+                continue
+            fn = getattr(src, "cell_series", None)
+            out = fn(variable, region) if fn else None
+            if out:
+                return out
         return None
 
     def all_fill(self, variable: VariableCard, region: RegionCard) -> bool:

@@ -71,7 +71,7 @@ describe('sortEntries', () => {
 const result: AnalysisResult = {
   schema_version: '1', engine_version: 't', region: { id: 'r', name: { simple: 'r', scientific: 'r' } },
   season: null, season_series: null, seasonal_share: null, selection: null, start_years: null, yearly_series: null, then_now: null, tests: [], persistence: null, detectability: null,
-  robustness: { leave_one_year_out: null, drift_label_with_late_years: null, cross_check: null, spatial: null }, chips: [],
+  robustness: { leave_one_year_out: null, drift_label_with_late_years: null, cross_check: null, spatial: null, cell_agreement: null }, chips: [],
   variable: { id: 'v', giovanni_id: 'g', name: { simple: 'v', scientific: 'v' }, definition: { simple: '', scientific: '' }, source_type: 'observed', instrument: 'X', units, instrument_id: null, platform: null, delivered_by: null, cell_deg: null },
   provenance: null, window: { start: '2002-09', end: '2003-01', reason: 'drift_cut', years: 0.4 },
   gates: { passed: true, checks: [] }, published: null, published_context: [],

@@ -1,5 +1,44 @@
 {
   "$defs": {
+    "CellAgreement": {
+      "description": "Do the grid cells inside a box go the way the box average goes? (Counts only, no map.)",
+      "properties": {
+        "n_cells": {
+          "title": "N Cells",
+          "type": "integer"
+        },
+        "n_same_sign": {
+          "title": "N Same Sign",
+          "type": "integer"
+        },
+        "n_opposite": {
+          "title": "N Opposite",
+          "type": "integer"
+        },
+        "n_opposite_sure": {
+          "title": "N Opposite Sure",
+          "type": "integer"
+        },
+        "verdict": {
+          "enum": [
+            "agree",
+            "mostly",
+            "mixed"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "n_cells",
+        "n_same_sign",
+        "n_opposite",
+        "n_opposite_sure",
+        "verdict"
+      ],
+      "title": "CellAgreement",
+      "type": "object"
+    },
     "Chip": {
       "properties": {
         "code": {
@@ -581,13 +620,25 @@
             }
           ],
           "default": null
+        },
+        "cell_agreement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CellAgreement"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "leave_one_year_out",
         "drift_label_with_late_years",
         "cross_check",
-        "spatial"
+        "spatial",
+        "cell_agreement"
       ],
       "title": "Robustness",
       "type": "object"

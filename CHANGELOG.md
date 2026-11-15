@@ -12,6 +12,10 @@ for how to release and how to roll back.
   from the first full year to the last one that still leaves 15 years (window end fixed). Context only: the
   headline stays on the declared window. New `start_years` field on the result (not for declared seasons or
   when no trend is computed). Cites Liebmann et al. (2010), doi:10.1175/2010BAMS3030.1.
+- "Do the parts of your box agree?": for a box, the result page counts how many grid cells go the same way
+  as the box average, and how many go the opposite way with a sure trend of their own (Benjamini–Hochberg
+  FDR across the cells; Wilks 2016). It tests whether the box mixes opposite changes that cancel out. Counts
+  only, no map; shown in "Tell me more", skipped in the scan, and never changes the verdict.
 - "How it works" page (`#/how`): the whole data pipeline as a step-by-step flow, in both views and
   both languages.
 - "The change is bigger in some months than in others": an info chip (context only, never changes the

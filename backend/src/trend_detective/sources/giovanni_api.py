@@ -53,7 +53,7 @@ import numpy as np
 
 from ..catalog import RegionCard, VariableCard
 from ..contract import Provenance
-from .base import LiveSourceUnavailable, RawSeries, UnitMismatch, area_mean, normalize_unit
+from .base import CellSeries, LiveSourceUnavailable, RawSeries, UnitMismatch, area_mean, normalize_unit
 
 log = logging.getLogger(__name__)
 
@@ -552,6 +552,51 @@ class GiovanniApiSource:
         with self._lock:
             (self._all_fill.add if raw is None and meta.get("all_fill") else self._all_fill.discard)(str(path))
         return raw
+
+    def cell_series(self, variable: VariableCard, region: RegionCard) -> list[CellSeries] | None:
+        """The per-cell monthly series a box mean is built from, read from the cell cache only (never the
+        network). None for a point, a box of one cell, or when any cell is not cached."""
+        gid = variable.giovanni_id
+        geom = region.geometry
+        if not gid or geom.kind == "point":
+            return None
+        points = plan_cells(variable, region)
+        if len(points) < 2:
+            return None
+        end_year = self.end_year or last_complete_year()
+        if variable.record_end:
+            end_year = min(end_year, int(variable.record_end[:4]))
+        chunks = plan_chunks(variable.cadence, variable.record_start, end_year)
+        out: list[CellSeries] = []
+        seen: set[tuple[float, float]] = set()
+        for la, lo in points:
+            if self.offline:
+                texts = self._offline_texts(gid, la, lo)
+            else:
+                hits = [self._read(self.cache_path(gid, la, lo, ch)) for ch in chunks]
+                if any(h is None for h in hits):
+                    return None
+                texts = [h for h in hits if h]
+            parsed = [parse_timeseries(t) for t in texts if t.strip()]
+            if not parsed:
+                continue
+            for p in parsed:
+                check_unit(variable, p.unit)
+            stamps = [s for p in parsed for s in p.stamps]
+            values = np.concatenate([p.values for p in parsed])
+            if len(parsed) > 1:  # same de-duplication as _fetch_cells
+                _, first = np.unique(np.array(stamps[::-1]), return_index=True)
+                keep = np.sort(len(stamps) - 1 - first)
+                stamps, values = [stamps[i] for i in keep], values[keep]
+            p0 = parsed[0]
+            key = (round(p0.lat, 4), round(p0.lon, 4))
+            if not self._inside(p0, geom.bbox) or key in seen:
+                continue
+            seen.add(key)
+            months, vals = to_months(stamps, values, variable.cadence, variable.min_valid_days)
+            if np.isfinite(vals).any():
+                out.append(CellSeries(p0.lat, p0.lon, months, vals))
+        return out or None
 
     def all_fill(self, variable: VariableCard, region: RegionCard) -> bool:
         """The last fetch of this series got an answer for every cell, and all of it was fill (undef)."""
