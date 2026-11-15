@@ -1,0 +1,21 @@
+/* Verdict palette (colour-blind safe: every state also has its own icon, word and border style). */
+:root {
+  --v-sure: #0b5f58; --v-sure-bg: #dcf2ef;
+  --v-maybe: #7a4e00; --v-maybe-bg: #fdecc4;
+  --v-soon: #444d58; --v-soon-bg: #e8ebef;
+  --v-cant: #444d58;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --v-sure: #7fdcd1; --v-sure-bg: #12363a;
+    --v-maybe: #f3c968; --v-maybe-bg: #3d3010;
+    --v-soon: #c4ccd5; --v-soon-bg: #2a323a;
+    --v-cant: #c4ccd5;
+  }
+}
+.vchip { display: inline-flex; align-items: center; gap: 0.4em; padding: 3px 11px 3px 7px; border-radius: 999px; font-weight: 600; font-size: 0.9rem; border: 1.5px solid currentColor; white-space: normal; }
+.vchip svg { flex: none; }
+.vchip-sure { color: var(--v-sure); background: var(--v-sure-bg); }
+.vchip-maybe { color: var(--v-maybe); background: var(--v-maybe-bg); }
+.vchip-too_soon { color: var(--v-soon); background: var(--v-soon-bg); border-color: transparent; }
+.vchip-cant_tell { color: var(--v-cant); background: transparent; border-style: dashed; }

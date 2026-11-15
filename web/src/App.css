@@ -1,0 +1,3 @@
+/* App shell additions: header nav and footer link */
+.topnav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.topnav a, .footer a { color: var(--accent); }
