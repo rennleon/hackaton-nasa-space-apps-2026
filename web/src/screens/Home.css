@@ -14,7 +14,8 @@
 .tone-green { background: var(--v-sure-bg); color: var(--v-sure); }
 .tone-warm { background: var(--trend-soft); color: var(--trend); }
 
-.start-wizard { padding: 0; scroll-margin-top: 80px; }
+.card.start-wizard { padding: 0; scroll-margin-top: 80px; }
+.start-wizard > .start-progress { border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; }
 
 /* progress: done (tick, teal), current (filled), upcoming (outline), joined by bars */
 .start-progress { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--hairline); background: var(--bg); border-radius: var(--radius) var(--radius) 0 0; }
