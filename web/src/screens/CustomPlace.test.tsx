@@ -46,11 +46,11 @@ describe('custom place', () => {
     expect(await screen.findByText(/We can't reach NASA's live data right now/)).toBeInTheDocument()
   })
 
-  it('chooser: typing a too-big box is refused, a good box goes to the theme picker', async () => {
+  it('chooser: typing a too-big box is refused, a good box shows the questions and opens the shortlist', async () => {
     const user = userEvent.setup()
     open('#/')
     await user.click(await screen.findByRole('button', { name: 'Draw a box' }))
-    const side = (name: string, kind: 'Number' | 'Which') => screen.getByLabelText(new RegExp(`${name} side.*: ${kind}`))
+    const side = (name: string, kind: 'Number' | 'Which') => screen.getByLabelText(new RegExp(`${name} edge.*: ${kind}`))
     // Kids type sizes and pick a side: -80 is 80 West, -20 is 20 South, -70 is 70 West, -5 is 5 South.
     const fill = async (name: string, size: string, option: string) => {
       await user.clear(side(name, 'Number'))
@@ -62,9 +62,11 @@ describe('custom place', () => {
     await fill('East', '70', 'West')
     await fill('North', '5', 'South')
     expect(screen.getByRole('alert')).toHaveTextContent('That area is too big. Pick a smaller one.')
-    expect(screen.getByRole('button', { name: 'Use this place' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Use these numbers' })).toBeDisabled()
     await fill('South', '12', 'South')
-    await user.click(screen.getByRole('button', { name: 'Use this place' }))
-    await waitFor(() => expect(window.location.hash).toBe('#/theme?place=box:-80,-12,-70,-5'))
+    await user.click(screen.getByRole('button', { name: 'Use these numbers' }))
+    expect(screen.getByText(/Your box is about/)).toBeInTheDocument()
+    await user.click(await screen.findByRole('button', { name: /Water/ }))
+    await waitFor(() => expect(window.location.hash).toBe('#/shortlist?place=box:-80,-12,-70,-5&theme=water'))
   })
 })

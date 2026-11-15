@@ -1,6 +1,7 @@
 // A user-chosen place (NASA POWER point or box): parsing, formatting, validation, and a synthetic region card
 // so the existing screens can treat it like a pre-loaded region.
 import type { RegionCard } from '../types/catalog'
+import { recallPlaceName } from './placeNames'
 
 export type Place = { kind: 'point'; lat: number; lon: number } | { kind: 'box'; w: number; s: number; e: number; n: number }
 
@@ -54,10 +55,12 @@ export function placeScientificName(p: Place): string {
 /** A RegionCard for a custom place, so screens can reuse their region code paths. */
 export function placeRegion(p: Place): RegionCard {
   const sci = placeScientificName(p)
+  const key = formatPlace(p)
+  const named = recallPlaceName(key) // a searched or ready-made place keeps its real name
   return {
-    id: `custom_${formatPlace(p).replace(/[^0-9a-z.-]+/gi, '_')}`,
-    name: { simple: 'Your place', scientific: sci },
-    description: { simple: 'The place you picked on the map.', scientific: `${sci} (NASA POWER, MERRA-2-based).` },
+    id: `custom_${key.replace(/[^0-9a-z.-]+/gi, '_')}`,
+    name: { simple: named ?? 'Your place', scientific: named ? `${named} (${sci})` : sci },
+    description: { simple: 'The place you picked.', scientific: `${sci} (NASA POWER, MERRA-2-based).` },
     regime: '',
     geometry: { kind: 'bbox', bbox: placeBbox(p) },
     comparison_region: null,

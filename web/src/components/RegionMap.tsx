@@ -13,11 +13,13 @@ const toBounds = (r: RegionCard): [[number, number], [number, number]] => {
   ]
 }
 
-function Fit({ bounds }: { bounds: LatLngBoundsExpression }) {
+function Fit({ bounds, enabled }: { bounds: LatLngBoundsExpression; enabled: boolean }) {
   const map = useMap()
+  // refit only when the bounds really change, so a click or re-render never resets the child's zoom and pan
+  const key = JSON.stringify(bounds)
   useEffect(() => {
-    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 9 })
-  }, [map, bounds])
+    if (enabled) map.fitBounds(JSON.parse(key) as LatLngBoundsExpression, { padding: [30, 30], maxZoom: 9 })
+  }, [map, key, enabled])
   return null
 }
 
@@ -39,10 +41,12 @@ interface Props {
   draft?: { bbox: [number, number, number, number]; isPoint: boolean; center?: [number, number] } | null
   /** first corner of a box, waiting for the second click */
   pending?: [number, number] | null
+  /** false keeps the view where the child left it (default true) */
+  autoFit?: boolean
 }
 
 /** Leaflet map with each region drawn as a rectangle. Region lists next to it give the keyboard route. */
-export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending }: Props) {
+export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending, autoFit }: Props) {
   const { t } = useView()
   const shown = visibleIds ? regions.filter((r) => visibleIds.includes(r.id)) : regions
   const fitSet = selectedId ? shown.filter((r) => r.id === selectedId) : shown
@@ -52,7 +56,7 @@ export function RegionMap({ regions, selectedId, onSelect, visibleIds, className
     <div className={className ?? 'map'}>
       <MapContainer bounds={bounds} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }} aria-label="Map of regions">
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Fit bounds={bounds} />
+        <Fit bounds={bounds} enabled={autoFit !== false} />
         {onMapClick && <Clicks onClick={onMapClick} />}
         {draft && !draft.isPoint && <Rectangle bounds={[[draft.bbox[1], draft.bbox[0]], [draft.bbox[3], draft.bbox[2]]]} pathOptions={{ color: '#d9480f', weight: 3, fillOpacity: 0.25 }} />}
         {draft?.center && <CircleMarker center={draft.center} radius={9} pathOptions={{ color: '#d9480f', fillColor: '#d9480f', fillOpacity: 0.8 }} />}
