@@ -4,7 +4,7 @@
 .src-intro h1 { margin: 0; }
 .src-intro .lead { margin: 0; max-width: 760px; color: var(--text-2); font-size: 1.2rem; }
 .src-words { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 0.75rem; }
-.src-word { display: flex; flex-direction: column; gap: 0.25rem; padding: 1.1rem; box-shadow: none; min-width: 0; }
+.card.src-word { display: flex; flex-direction: column; gap: 0.25rem; padding: 1.1rem; box-shadow: none; min-width: 0; }
 .src-word .eyebrow { color: var(--accent); }
 
 .src-section { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -21,7 +21,7 @@
 .src-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--v-sure); flex: none; }
 
 .src-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 1rem; }
-.src-card { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; padding: 1.5rem; scroll-margin-top: 4.5rem; }
+.card.src-card { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; padding: 1.5rem; scroll-margin-top: 4.5rem; }
 .src-card.src-off { background: transparent; border-style: dashed; box-shadow: none; }
 .src-card.src-wanted { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); }
 .src-top { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -48,5 +48,5 @@
 @media (max-width: 720px) {
   .sources { gap: 2.25rem; padding-top: 1.5rem; }
   .src-grid { grid-template-columns: 1fr; }
-  .src-card { padding: 1.2rem; }
+  .card.src-card { padding: 1.2rem; }
 }

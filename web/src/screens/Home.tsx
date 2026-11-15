@@ -55,6 +55,20 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
     if (c) setPicked(c)
   }, [fromRoute])
   const demoStepTab = route?.demo ? demoTab() : null
+  // "Use this spot" only takes a pin or box tapped on the map, never an earlier pick from another tab
+  const mapPick = picked?.kind === 'place' && picked.viaMap ? picked : null
+  const demoRow = (credit: boolean) => (
+    <div className="start-demo">
+      <span className="start-demo-label">{s('start.demo.notSure', 'Not sure? Watch a demo')}</span>
+      {DEMOS.map((d) => (
+        <button key={d.id} type="button" className="chip chip-btn" onClick={() => go(demoStart(d))}>
+          <Icon name="play" size={14} />
+          {s(`demo.${d.id}.label`, d.label.simple, d.label.scientific)}
+        </button>
+      ))}
+      {credit && <span className="start-credit">{s('start.search.credit', 'Place search uses Open-Meteo.')}</span>}
+    </div>
+  )
   useEffect(() => {
     if (demoStepTab) setTab(demoStepTab)
   }, [demoStepTab, route?.step])
@@ -169,26 +183,21 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
                     onLocate={(lat, lon) => choose(namedPoint(lat, lon, s('start.place.here', 'Where you are', 'Your location')))}
                   />
                   {liveOff && <p className="muted">{s('start.search.off', 'Searching for any place needs our live service. Try a ready-made place.', 'Place search requires the API (VITE_API_URL not set).')}</p>}
-                  <div className="start-demo">
-                    <span className="start-demo-label">{s('start.demo.notSure', 'Not sure? Watch a demo')}</span>
-                    {DEMOS.map((d) => (
-                      <button key={d.id} type="button" className="chip chip-btn" onClick={() => go(demoStart(d))}>
-                        <Icon name="play" size={14} />
-                        {s(`demo.${d.id}.label`, d.label.simple, d.label.scientific)}
-                      </button>
-                    ))}
-                    <span className="start-credit">{s('start.search.credit', 'Place search uses Open-Meteo.')}</span>
-                  </div>
+                  {demoRow(true)}
                 </>
               )}
               {tab === 'places' && (
-                <ReadyPlaces
-                  regions={listed}
-                  liveOff={liveOff && !client.staticExamples}
-                  selectedId={picked?.kind === 'region' ? picked.region.id : undefined}
-                  onRegion={(r) => choose({ kind: 'region', region: r })}
-                  onExample={(e: ExamplePlace) => choose(namedPoint(e.lat, e.lon, s(`start.example.${e.id}.name`, e.name)))}
-                />
+                <>
+                  <ReadyPlaces
+                    regions={listed}
+                    liveOff={liveOff && !client.staticExamples}
+                    selectedId={picked?.kind === 'region' ? picked.region.id : undefined}
+                    onRegion={(r) => choose({ kind: 'region', region: r })}
+                    onExample={(e: ExamplePlace) => choose(namedPoint(e.lat, e.lon, s(`start.example.${e.id}.name`, e.name)))}
+                  />
+                  {/* without the live service the Search tab is off, so the offline demos show here too */}
+                  {liveOff && demoRow(false)}
+                </>
               )}
               {tab === 'map' && (
                 <PlaceChooser
@@ -197,7 +206,7 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
                   disabled={liveOff}
                   onPlace={(place) => setPicked({ kind: 'place', place, name: null, viaMap: true })}
                   action={
-                    <button type="button" className="btn btn-primary" disabled={liveOff || !picked} onClick={() => picked && choose(picked)}>
+                    <button type="button" className="btn btn-primary" disabled={liveOff || !mapPick} onClick={() => mapPick && choose(mapPick)}>
                       {s('start.map.use', 'Use this spot')}
                     </button>
                   }
