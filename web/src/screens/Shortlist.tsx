@@ -3,7 +3,6 @@ import { useData, useView } from '../context'
 import { tx } from '../i18n'
 import { useAsync } from '../lib/useAsync'
 import { Timeline } from '../components/Timeline'
-import { certaintyOf } from '../components/CertaintyMeter'
 import { SourceTag } from '../components/SourceTag'
 import { Term } from '../components/Term'
 import { VerdictChip } from '../components/VerdictChip'
@@ -11,7 +10,7 @@ import { Sparkline, TrendArrow } from '../components/Sparkline'
 import { classifyLiveError, LiveNotice } from '../components/LiveNotice'
 import { parsePlace, placeRegion } from '../lib/place'
 import { formatSlope, plainNum } from '../lib/text'
-import { availabilityOf, cleanPlaceName, directionOf, splitEntries, summarize, variableRefFromEntry } from '../lib/findings'
+import { availabilityOf, certaintyOfEntry, cleanPlaceName, directionOf, splitEntries, summarize, variableRefFromEntry } from '../lib/findings'
 import { useL, type FKey } from '../lib/findingsCopy'
 import { instrumentById } from '../lib/instruments'
 import { instrumentHref, manySatellites, shortName, useS } from '../lib/sourceLabels'
@@ -316,9 +315,13 @@ function SecondOpinion({ c, own }: { c: Comparison; own: string | null }) {
 export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: VariableCard; onOpen: () => void }) {
   const { view } = useView()
   const l = useL()
-  const certainty = certaintyOf(e.verdict_label)
+  const certainty = certaintyOfEntry(e)
   const dir = directionOf(e.slope_per_decade)
   const years = e.yearly_series && e.yearly_series.length > 1 ? e.yearly_series : null
+  // the years this card's verdict used (the scan's shared window), so it can be told apart from the result page's full record
+  const used = years ? years.filter((y) => y.in_window).map((y) => y.year) : []
+  const usedFrom = used.length > 1 ? Math.min(...used) : null
+  const usedTo = used.length > 1 ? Math.max(...used) : null
   const name = tx(e.name, view)
   const sure = certainty === 'sure'
   const dec = e.units.decimals
@@ -337,6 +340,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
           {dir && <TrendArrow direction={dir} sure={sure} label={l(`findings.heading.${dir}` as FKey)} />}
         </div>
       )}
+      {usedFrom != null && usedTo != null && <p className="fcard-years muted small">{l('findings.cardYears', { from: usedFrom, to: usedTo })}</p>}
       <div className="fcard-verdict">
         <VerdictChip certainty={certainty} />
         {e.worth_investigating ? (

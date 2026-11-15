@@ -21,7 +21,7 @@ export interface ExamplePlace {
   lon: number
 }
 
-/** User-approved example points. They use live NASA POWER data, nothing is pre-loaded. */
+/** User-approved example points. Their results are precomputed from NASA POWER data (static files in `public/data/results/ex_<id>/`). */
 export const EXAMPLE_PLACES: ExamplePlace[] = [
   {
     id: 'delhi',

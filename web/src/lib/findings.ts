@@ -36,9 +36,26 @@ export interface Summary {
   strongest: ScanEntry | null
 }
 
-/** "Clear change" means the verdict chip says sure (both tests agree), the same signal the chip shows. */
+/**
+ * The scan card's "how sure": from `shortlist_label`, which applies the Benjamini-Hochberg correction across the
+ * scan (changing = significant AND adjusted p below alpha). The variable page keeps its own single-variable verdict.
+ */
+export function certaintyOfEntry(e: ScanEntry): Certainty {
+  switch (e.shortlist_label) {
+    case 'changing':
+      return 'sure'
+    case 'possibly_changing':
+      return 'maybe'
+    case 'cant_tell':
+      return 'cant_tell'
+    default:
+      return 'too_soon'
+  }
+}
+
+/** "Clear change" means the card chip says sure (corrected for looking at many variables), the same signal the chip shows. */
 export function summarize(available: ScanEntry[]): Summary {
-  const sure = available.filter((e) => certaintyOf(e.verdict_label) === 'sure')
+  const sure = available.filter((e) => certaintyOfEntry(e) === 'sure')
   return { total: available.length, clear: sure.length, strongest: sure[0] ?? null }
 }
 
