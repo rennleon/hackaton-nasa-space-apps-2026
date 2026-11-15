@@ -235,14 +235,15 @@ describe('Where our data comes from', () => {
     expect(links).toHaveLength(2) // header and footer
     await user.click(links[0])
     expect(await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })).toBeInTheDocument()
-    const airs = screen.getByRole('heading', { level: 2, name: 'Instrument: AIRS' }).closest('li')!
+    const airs = screen.getByRole('heading', { level: 3, name: 'AIRS' }).closest('li')!
     expect(within(airs).getByText('Satellite: Aqua')).toBeInTheDocument()
-    expect(within(airs).getByText('Variables from this instrument:')).toBeInTheDocument()
+    expect(within(airs).getByText(/^Variables · \d+$/)).toBeInTheDocument()
     expect(within(airs).getByRole('link', { name: 'Afternoon humidity' })).toHaveAttribute('href', expect.stringMatching(/^#\/variable\?.*variable=airs_rh_surf_day/))
     expect(within(airs).getByText(/Rides on Aqua|Since 2002/)).toBeInTheDocument()
     expect(within(airs).getByText('Fresh from NASA when you ask')).toBeInTheDocument()
-    expect(screen.getByText(/NASA POWER is a delivery service/)).toBeInTheDocument()
-    expect(screen.getByText(/is a tool that measures/)).toBeInTheDocument()
+    expect(screen.getByText(/A delivery service\. It hands us numbers/)).toBeInTheDocument()
+    expect(screen.getByText('A tool that measures.')).toBeInTheDocument()
+    expect(within(airs).getByRole('link', { name: /NASA page about AIRS/ })).toHaveAttribute('target', '_blank')
     expect(bannedIn(document.querySelector('.sources')!.textContent ?? '')).toEqual([])
   })
 
@@ -255,14 +256,17 @@ describe('Where our data comes from', () => {
       const owners = sections.filter((sec) => sec.querySelector(`a[href*="variable=${v.id}"]`))
       expect(owners.map((o) => o.id), v.id).toEqual([`inst-${v.source.instrument_id}`])
     }
-    // an instrument is a section heading, never a variable link
-    expect(screen.getByRole('heading', { level: 2, name: 'Not used yet' })).toBeInTheDocument()
-    for (const name of ['Instrument: MODIS', 'Instrument: MOPITT']) {
+    // an instrument is a card heading, never a variable link
+    const off = screen.getByRole('heading', { level: 2, name: 'Not used yet' }).closest('section')!
+    expect(within(off).getByText(/cannot fetch it live/)).toBeInTheDocument()
+    for (const name of ['MODIS', 'MOPITT']) {
       const card = screen.getByRole('heading', { level: 3, name }).closest('li')!
+      expect(off).toContainElement(card)
       expect(card.querySelector('.src-vars')).toBeNull()
-      expect(within(card).getByText(/cannot fetch it live/)).toBeInTheDocument()
     }
-    expect(screen.getByRole('heading', { level: 2, name: 'Instrument: MERRA-2' }).closest('li')).toHaveTextContent('Computer model')
+    expect(screen.getByRole('heading', { level: 2, name: 'Satellite instruments' })).toBeInTheDocument()
+    const models = screen.getByRole('heading', { level: 2, name: 'Computer models' }).closest('section')!
+    expect(within(models).getByRole('heading', { level: 3, name: 'MERRA-2' }).closest('li')).toHaveTextContent('Computer model')
   })
 
   it('Scientific keeps the hierarchy', async () => {
@@ -270,7 +274,7 @@ describe('Where our data comes from', () => {
     open('#/sources')
     await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })
     await user.click(screen.getByRole('button', { name: 'Scientific' }))
-    const airs = screen.getByRole('heading', { level: 2, name: 'Instrument: AIRS' }).closest('li')!
+    const airs = screen.getByRole('heading', { level: 3, name: 'AIRS' }).closest('li')!
     expect(within(airs).getByRole('link', { name: /Surface relative humidity \(daytime/ })).toBeInTheDocument()
   })
 })

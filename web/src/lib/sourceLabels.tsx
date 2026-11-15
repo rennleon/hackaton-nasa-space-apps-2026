@@ -52,19 +52,18 @@ export const S = {
   'legend.model': p('{name} (computer model)'),
   'legend.same': p('Same thing, measured by a different instrument: {name}'),
   // sources page
-  'sp.intro': p(
-    'An {instrument} is a tool that measures. A {variable} is one thing it measures. For example, how warm the air is.',
-    'An {instrument} is a sensor on a satellite, or a computer model, that produces data. A {variable} is one measured quantity in it, and it is what we trend.',
-  ),
-  'sp.inst': p('Instrument: {name}'),
   'sp.platform.sat': p('Satellite: {platform}'),
   'sp.platform.satMany': p('Satellites: {platform}'),
   'sp.platform.model': p('Computer model'),
-  'sp.vars': p('Variables from this instrument:'),
-  'sp.flowLabel': p('{name} and the variables it gives us', '{name} and the variables it produces'),
   'sp.notUsedTitle': p('Not used yet'),
   'sp.notUsedWhy': p("NASA's online tool does not have it, so we cannot fetch it live.", 'Not offered by the Giovanni cloud service; saved export only.'),
-  'sp.notUsedNone': p('No variable in the app comes from it yet.'),
+  'sp.word.instrument': p('A tool that measures.', 'A satellite sensor or a computer model that produces a data product.'),
+  'sp.word.variable': p('One thing it measures, like how warm the air is.', 'One measured quantity in a data product. It is what we trend.'),
+  'sp.word.power': p('A delivery service. It hands us numbers from NASA products.', 'A delivery service, not an instrument. It hands us MERRA-2 and CERES SYN1deg values.'),
+  'sp.satTitle': p('Satellite instruments'),
+  'sp.modelTitle': p('Computer models', 'Models and reanalyses'),
+  'sp.varsCount': p('Variables · {n}'),
+  'sp.nasaPageOf': p('NASA page about {name}', 'Mission page: {name}'),
 } as const satisfies Record<string, Pair>
 
 export type SKey = keyof typeof S
