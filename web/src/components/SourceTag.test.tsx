@@ -38,11 +38,12 @@ const text = (p: Element) => [...p.querySelectorAll('.source-k, .source-v')].map
 })
 
 describe('SourceTag: satellite instrument', () => {
-  it('Simple: names the variable and the instrument on its own labelled lines', () => {
+  it('Simple: only the instrument line (the variable is the page title)', () => {
     const { container } = show(airs, 'simple')
     const rows = [...container.querySelectorAll('.source-line')].map(text)
-    expect(rows[0]).toEqual(['What we measure', 'Afternoon humidity'])
-    expect(rows[1]).toEqual(['Measured by', 'AIRS, an instrument on the Aqua satellite'])
+    // the page title already names the variable, so Simple keeps only the instrument line
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toEqual(['Measured by', 'AIRS, an instrument on the Aqua satellite'])
     expect(container.querySelector('a')).toHaveAttribute('href', '#/sources?instrument=airs')
     expect(bannedIn(container.textContent ?? '')).toEqual([])
   })
@@ -65,8 +66,7 @@ describe('SourceTag: computer model delivered by NASA POWER', () => {
   it('Simple: "Worked out by", a computer model, via NASA POWER, and never a satellite', () => {
     const { container } = show(viaPower, 'simple')
     const rows = [...container.querySelectorAll('.source-line')].map(text)
-    expect(rows[0]).toEqual(['What we measure', 'Air temperature'])
-    expect(rows[1]).toEqual(['Worked out by', 'MERRA-2, a computer model (via NASA POWER)'])
+    expect(rows[0]).toEqual(['Worked out by', 'MERRA-2, a computer model (via NASA POWER)'])
     expect(container.querySelector('.source-note')?.textContent).toMatch(/^This is a computer model estimate/)
     expect(container.textContent).not.toMatch(/satellite/i)
   })
@@ -84,7 +84,7 @@ describe('SourceTag: computer model delivered by NASA POWER', () => {
 describe('SourceTag: computer model fetched directly (no NASA POWER)', () => {
   it('Simple and Scientific', () => {
     const s = show(direct, 'simple')
-    expect([...s.container.querySelectorAll('.source-line')].map(text)[1]).toEqual(['Worked out by', 'GLDAS, a computer model'])
+    expect([...s.container.querySelectorAll('.source-line')].map(text)[0]).toEqual(['Worked out by', 'GLDAS, a computer model'])
     expect(s.container.textContent).not.toMatch(/POWER/)
     const sci = show(direct, 'scientific')
     const rows = [...sci.container.querySelectorAll('.source-line')].map(text)

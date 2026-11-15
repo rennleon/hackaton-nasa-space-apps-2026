@@ -11,6 +11,7 @@ import type { GeoResult } from '../lib/geocode'
 import { formatPlace } from '../lib/place'
 import { namedPoint, routeFor, type Chosen, type ExamplePlace } from '../lib/places'
 import type { Route } from '../lib/route'
+import { Icon } from '../components/ResultIcons'
 import { useStartT } from '../lib/startT'
 import './Home.css'
 
@@ -68,7 +69,7 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
         />
         {liveOff && <p className="muted">{s('start.search.off', 'Searching for any place needs our live service. Try a ready-made place.', 'Place search requires the API (VITE_API_URL not set).')}</p>}
         <p className="start-demo">
-          <span aria-hidden="true">▶</span> {s('start.demo.watch', 'Watch a demo')}:{' '}
+          <Icon name="play" size={16} /> {s('start.demo.watch', 'Watch a demo')}:{' '}
           {DEMOS.map((d) => (
             <button key={d.id} type="button" className="link" onClick={() => go(demoStart(d))}>
               {s(`demo.${d.id}.label`, d.label.simple, d.label.scientific)}

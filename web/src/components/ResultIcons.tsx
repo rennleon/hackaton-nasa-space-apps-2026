@@ -16,6 +16,7 @@ export type IconName =
   | 'record'
   | 'pair'
   | 'book'
+  | 'play'
 
 const PATHS: Record<IconName, ReactNode> = {
   soon: (
@@ -91,6 +92,7 @@ const PATHS: Record<IconName, ReactNode> = {
       <circle cx="15" cy="12" r="5" />
     </>
   ),
+  play: <path d="M8 5.5v13l11-6.5z" fill="currentColor" />,
   book: <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11" />,
 }
 

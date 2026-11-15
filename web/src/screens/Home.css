@@ -7,6 +7,7 @@
 .start-steps li { counter-increment: step; display: inline-flex; align-items: center; gap: 0.5rem; }
 .start-steps li::before { content: counter(step); display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--trend); color: var(--bg); font-size: 0.85rem; font-weight: 700; }
 .start-demo { margin: 1rem 0 0; color: var(--muted); }
+.start-demo .icon { vertical-align: -3px; }
 .start-demo .link { margin-left: 0.2rem; }
 .start-map h2 { margin-bottom: 0.8rem; }
 

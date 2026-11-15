@@ -22,7 +22,14 @@
 .meter-icon { vertical-align: -0.2em; }
 
 /* "Can we trust this?" */
-.trust { margin-top: 1.2rem; }
+.trust { margin-top: 1.2rem; overflow-wrap: anywhere; }
+.trust-details > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+.trust-details > summary::-webkit-details-marker { display: none; }
+.trust-details > summary::before { content: ''; flex: none; width: 0.55rem; height: 0.55rem; border-right: 3px solid currentColor; border-bottom: 3px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s; }
+.trust-details[open] > summary::before { transform: rotate(45deg); }
+.trust-details > summary h3 { margin: 0; }
+.trust-details > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.trust-details > .trust-head { margin-top: 0.6rem; }
 .trust-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .trust-head h3 { margin: 0; }
 .trust-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 11px; border-radius: var(--radius-pill); font-size: 0.85rem; font-weight: 700; }

@@ -1,11 +1,21 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { demoById, prepareDemo } from '../lib/demos'
-import { placeTip, SPOT_PAD, type Box } from '../lib/demoPlacement'
+import { clampSpot, NARROW, placeTip, SPOT_PAD, type Box } from '../lib/demoPlacement'
 import { useResultCopy } from '../lib/resultCopy'
 import './DemoOverlay.css'
 
 const reducedMotion = () => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
-const TOPBAR = 72
+
+/** Size of the screen the page can really use (innerWidth can grow past it when a page overflows sideways). */
+const viewport = () => ({
+  width: Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth),
+  height: window.innerHeight,
+})
+/** Bottom edge of the sticky top bar: spotlights and notes stay below it. */
+const headerBottom = () => {
+  const bar = document.querySelector<HTMLElement>('.topbar')
+  return bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0
+}
 
 const toBox = (r: DOMRect): Box => ({ top: Math.round(r.top), left: Math.round(r.left), width: Math.round(r.width), height: Math.round(r.height) })
 const sameBox = (a: Box | null, b: Box | null) => a === b || (a !== null && b !== null && a.top === b.top && a.left === b.left && a.width === b.width && a.height === b.height)
@@ -28,7 +38,8 @@ export function DemoOverlay({ demoId, step, onStep, onExit }: { demoId: string; 
   const nextRef = useRef<HTMLButtonElement>(null)
   const [rect, setRect] = useState<Box | null>(null)
   const [tip, setTip] = useState({ width: 360, height: 220 })
-  const [vp, setVp] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }))
+  const [vp, setVp] = useState(viewport)
+  const [inset, setInset] = useState(0)
   const [auto, setAuto] = useState(false)
   const caption = demo && current ? c(`demo.${demo.id}.step${at}`, current.caption) : ''
 
@@ -37,16 +48,22 @@ export function DemoOverlay({ demoId, step, onStep, onExit }: { demoId: string; 
   // Find the target (it may appear later, once data loads), scroll it into view once per step, then keep it measured.
   const scrolled = useRef(-1)
   const measure = useCallback(() => {
-    setVp((v) => (v.width === window.innerWidth && v.height === window.innerHeight ? v : { width: window.innerWidth, height: window.innerHeight }))
+    const size = viewport()
+    setVp((v) => (v.width === size.width && v.height === size.height ? v : size))
+    const top = headerBottom()
+    setInset((n) => (n === top ? n : top))
     const name = current?.target
     const el = name ? document.querySelector<HTMLElement>(`[data-demo="${name}"]`) : null
     if (!el) return setRect((p) => (p === null ? p : null))
+    // a target inside a closed "Tell me more" disclosure has no size until it is opened
+    const closed = el.closest('details')
+    if (closed && !closed.open) closed.open = true
     let r = el.getBoundingClientRect()
     if (scrolled.current !== at) {
       scrolled.current = at
       const room = tipRef.current?.getBoundingClientRect().height ?? 220
-      if (r.top < TOPBAR || r.bottom > window.innerHeight - room - 30) {
-        window.scrollTo?.({ top: Math.max(0, window.scrollY + r.top - TOPBAR - SPOT_PAD), behavior: reducedMotion() ? 'auto' : 'smooth' })
+      if (r.top < top + SPOT_PAD || r.bottom > size.height - room - 30) {
+        window.scrollTo?.({ top: Math.max(0, window.scrollY + r.top - top - SPOT_PAD - 8), behavior: reducedMotion() ? 'auto' : 'smooth' })
         r = el.getBoundingClientRect()
       }
     }
@@ -114,9 +131,10 @@ export function DemoOverlay({ demoId, step, onStep, onExit }: { demoId: string; 
   }, [auto, last, at, caption, onStep])
 
   if (!demo || !current) return null
-  const width = Math.min(380, vp.width - 24)
-  const place = placeTip(rect, { width, height: tip.height }, vp)
-  const spot = rect ? { top: rect.top - SPOT_PAD, left: rect.left - SPOT_PAD, width: rect.width + 2 * SPOT_PAD, height: rect.height + 2 * SPOT_PAD } : null
+  const narrow = vp.width < NARROW
+  const width = narrow ? vp.width - 24 : Math.min(380, vp.width - 24)
+  const place = placeTip(rect, { width, height: tip.height }, vp, 14, 12, inset)
+  const spot = rect ? clampSpot(rect, vp, inset) : null
 
   return (
     <div className="demo-root">
@@ -125,7 +143,7 @@ export function DemoOverlay({ demoId, step, onStep, onExit }: { demoId: string; 
       <div
         ref={tipRef}
         className={`demo-tip demo-${place.side}`}
-        style={{ top: place.top, left: place.left, width }}
+        style={{ top: place.top, left: place.left, width, maxHeight: Math.max(160, vp.height - inset - 24) }}
         role="dialog"
         aria-label={s('demo.aria', 'Demo walkthrough')}
         data-side={place.side}

@@ -25,3 +25,12 @@ button.where-body:hover { border-color: var(--accent); }
 @media (max-width: 480px) {
   .where-row { grid-template-columns: 1fr; }
 }
+/* Phone: the table stacks, one block per place, so no column is cut off. */
+@media (max-width: 600px) {
+  .where-scroll { overflow-x: visible; }
+  .where-table, .where-table tbody, .where-table tr, .where-table th, .where-table td { display: block; }
+  .where-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .where-table tr { margin-bottom: 0.7rem; padding: 0.4rem 0.7rem; border: 1px solid var(--border); border-radius: 10px; }
+  .where-table th, .where-table td { border-bottom: 0; padding: 3px 0; overflow-wrap: anywhere; }
+  .where-table td::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+}

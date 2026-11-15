@@ -2,6 +2,7 @@
 // so the existing screens can treat it like a pre-loaded region.
 import type { RegionCard } from '../types/catalog'
 import { recallPlaceName } from './placeNames'
+import { exampleAt, exampleName } from './examples'
 
 export type Place = { kind: 'point'; lat: number; lon: number } | { kind: 'box'; w: number; s: number; e: number; n: number }
 
@@ -56,7 +57,9 @@ export function placeScientificName(p: Place): string {
 export function placeRegion(p: Place): RegionCard {
   const sci = placeScientificName(p)
   const key = formatPlace(p)
-  const named = recallPlaceName(key) // a searched or ready-made place keeps its real name
+  // a ready-made example always has its own name (EN/ES); a searched place keeps the name it was remembered under
+  const ex = exampleAt(p)
+  const named = ex ? exampleName(ex) : recallPlaceName(key)
   return {
     id: `custom_${key.replace(/[^0-9a-z.-]+/gi, '_')}`,
     name: { simple: named ?? 'Your place', scientific: named ? `${named} (${sci})` : sci },

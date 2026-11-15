@@ -27,7 +27,7 @@ function KindIcon({ kind }: { kind: SourceInfo['kind'] }) {
 /**
  * Which is the variable and which is the instrument, on every card and result.
  * Full form (result page): two labelled lines.
- *   Simple:     "What we measure: Afternoon humidity" / "Measured by: AIRS, an instrument on the Aqua satellite"
+ *   Simple:     "Measured by: AIRS, an instrument on the Aqua satellite" (the page title already names the variable)
  *   Scientific: "Variable: Surface relative humidity (AIRS3STM v7.0 · RelHumSurf_A)" / "Instrument: AIRS · Aqua satellite · since 2002 · 1° grid"
  * Compact form (cards): icon + "Measured by AIRS (Aqua satellite)".
  * A variable is the quantity we trend. An instrument is a sensor on a satellite or a computer model.
@@ -83,10 +83,15 @@ export function SourceTag({ variable, compact = false }: { variable: VariableRef
 
   return (
     <div className={`source-block source-${info.kind}`} data-demo="source">
-      <p className="source-line">
-        <span className="source-k">{view === 'simple' ? s('src.label.what') : <Term id="variable">{s('src.label.what')}</Term>}</span>
-        <span className="source-v">{varText}</span>
-      </p>
+      {/* Simple: the page title already says what we measure, so only the instrument line is shown */}
+      {view !== 'simple' && (
+        <p className="source-line">
+          <span className="source-k">
+            <Term id="variable">{s('src.label.what')}</Term>
+          </span>
+          <span className="source-v">{varText}</span>
+        </p>
+      )}
       <p className="source-line">
         <span className="source-k">{view === 'simple' ? byLabel : <Term id="instrument">{byLabel}</Term>}</span>
         <span className="source-v">

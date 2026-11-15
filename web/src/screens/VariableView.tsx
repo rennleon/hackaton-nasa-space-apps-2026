@@ -9,7 +9,7 @@ import { cleanInternal, fmt, useResultCopy } from '../lib/resultCopy'
 import { Term } from '../components/Term'
 import { TermText } from '../components/TermText'
 import type { Route } from '../lib/route'
-import { parseYm } from '../lib/text'
+import { capFirst, parseYm } from '../lib/text'
 import { COPY } from '../lib/copy'
 import { LiveNotice } from '../components/LiveNotice'
 import { WhereElse } from '../components/WhereElse'
@@ -84,7 +84,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
           </button>
           {seasons.map((sn) => (
             <button key={sn.id} role="tab" type="button" aria-selected={route.season === sn.id} onClick={() => go({ ...route, season: sn.id })}>
-              {bx(sn.name)}
+              {capFirst(bx(sn.name))}
             </button>
           ))}
         </div>

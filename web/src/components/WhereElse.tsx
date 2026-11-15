@@ -72,6 +72,14 @@ function range(p: WherePlace): string {
   return `${sign(p.slope_per_decade)}${ci} ${p.units.display}`
 }
 
+/** Why a place has no result, in the active language (one literal key per code, so the key-coverage test sees them). */
+function whyNone(code: string, t: ReturnType<typeof useT>): string {
+  if (code === 'no_data_here') return t('where.avail.no_data_here', 'No data here')
+  if (code === 'too_many_gaps') return t('where.avail.too_many_gaps', 'Too many gaps in the record')
+  if (code === 'too_short') return t('where.avail.too_short', 'Record too short')
+  return t('where.avail.other', 'Not available')
+}
+
 const years = (p: WherePlace) => (p.window_start && p.window_end ? `${p.window_start.slice(0, 4)}–${p.window_end.slice(0, 4)}` : '—')
 
 function Arrow({ direction }: { direction: 'up' | 'down' }) {
@@ -198,9 +206,9 @@ export function WhereElse({ variableId, route, go }: { variableId: string; route
                         )}
                         {current && <span className="where-here"> {t('where.here', 'You are here')}</span>}
                       </th>
-                      <td>{ok ? years(p) : '—'}</td>
-                      <td>{ok ? range(p) : p.availability.replace(/_/g, ' ')}</td>
-                      <td>{ok ? <VerdictChip certainty={p.certainty} /> : '—'}</td>
+                      <td data-label={t('where.col.window', 'Window')}>{ok ? years(p) : '—'}</td>
+                      <td data-label={t('where.col.slope', 'Sen slope per decade (95% range)')}>{ok ? range(p) : whyNone(p.availability, t)}</td>
+                      <td data-label={t('where.col.verdict', 'Verdict')}>{ok ? <VerdictChip certainty={p.certainty} /> : '—'}</td>
                     </tr>
                   )
                 })}

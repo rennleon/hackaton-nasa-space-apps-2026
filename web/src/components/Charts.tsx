@@ -93,7 +93,7 @@ function FullCharts({ result }: { result: AnalysisResult }) {
                 '{anomaly} series ({seasonal_cycle} removed) with the {trend} and the {confidence_range}.',
               )}
               terms={{
-                anomaly: <Term id="anomaly" />,
+                anomaly: <Term id="anomaly" cap={!simple} />,
                 seasonal_cycle: <Term id="seasonal_cycle" />,
                 trend: <Term id="trend" />,
                 confidence_range: <Term id="confidence_range" />,

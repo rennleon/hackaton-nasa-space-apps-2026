@@ -9,7 +9,7 @@ import { VerdictChip } from '../components/VerdictChip'
 import { Sparkline, TrendArrow } from '../components/Sparkline'
 import { classifyLiveError, LiveNotice } from '../components/LiveNotice'
 import { parsePlace, placeRegion } from '../lib/place'
-import { formatSlope, plainNum } from '../lib/text'
+import { capFirst, formatSlope, plainNum } from '../lib/text'
 import { availabilityOf, certaintyOfEntry, cleanPlaceName, directionOf, splitEntries, summarize, variableRefFromEntry } from '../lib/findings'
 import { useL, type FKey } from '../lib/findingsCopy'
 import { instrumentById } from '../lib/instruments'
@@ -62,7 +62,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
         <h1 id="res-h">{placeName}</h1>
         {theme && <p className="findings-q">{tx(theme.question, view)}</p>}
         {placeText && <p className="muted place-text">{placeText}</p>}
-        <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} />
+        <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
       </header>
 
       <section aria-labelledby="res-h" aria-busy={scan.loading}>
@@ -101,7 +101,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
   )
 }
 
-function EditBar({ route, region, custom, themeId, set, go }: { route: Route; region: RegionCard; custom: boolean; themeId?: string; set: (p: Partial<Route>) => void; go: (r: Route) => void }) {
+function EditBar({ route, region, custom, themeId, set, go, years }: { route: Route; region: RegionCard; custom: boolean; themeId?: string; set: (p: Partial<Route>) => void; go: (r: Route) => void; years: { start: string; end: string } | null }) {
   const { catalog } = useData()
   const { view } = useView()
   const l = useL()
@@ -142,9 +142,9 @@ function EditBar({ route, region, custom, themeId, set, go }: { route: Route; re
       </label>
       <span className="chip" role="group" aria-label={l('findings.chip.years')}>
         <span className="chip-k">{l('findings.chip.years')}</span>
-        <input type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.from')} placeholder={l('findings.anyYear')} value={route.start ?? ''} onChange={(e) => set({ start: e.target.value || undefined })} />
+        <input type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.from')} placeholder={years?.start ?? l('findings.anyYear')} value={route.start ?? ''} onChange={(e) => set({ start: e.target.value || undefined })} />
         <span aria-hidden="true">–</span>
-        <input type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.to')} placeholder={l('findings.anyYear')} value={route.end ?? ''} onChange={(e) => set({ end: e.target.value || undefined })} />
+        <input type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.to')} placeholder={years?.end ?? l('findings.anyYear')} value={route.end ?? ''} onChange={(e) => set({ end: e.target.value || undefined })} />
       </span>
       {!custom && seasons.length > 0 && (
         <label className="chip">
@@ -153,7 +153,7 @@ function EditBar({ route, region, custom, themeId, set, go }: { route: Route; re
             <option value="">{l('findings.allMonths')}</option>
             {seasons.map((s) => (
               <option key={s.id} value={s.id}>
-                {tx(s.name, view)}
+                {capFirst(tx(s.name, view))}
               </option>
             ))}
           </select>
@@ -343,11 +343,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
       {usedFrom != null && usedTo != null && <p className="fcard-years muted small">{l('findings.cardYears', { from: usedFrom, to: usedTo })}</p>}
       <div className="fcard-verdict">
         <VerdictChip certainty={certainty} />
-        {e.worth_investigating ? (
-          <span className="fcard-rec small">{l('findings.recommended')}</span>
-        ) : (
-          !sure && <span className="fcard-rec small muted">{l('findings.hardToSpot')}</span>
-        )}
+        {!e.worth_investigating && !sure && <span className="fcard-rec small muted">{l('findings.hardToSpot')}</span>}
       </div>
       {e.cross_check && <SecondOpinion c={e.cross_check} own={e.instrument_id ?? (card?.source as { instrument_id?: string | null } | undefined)?.instrument_id ?? null} />}
       {view === 'scientific' && (
