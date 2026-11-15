@@ -48,6 +48,7 @@ from .prepare import (
 from .robustness import leave_one_year_out
 from .selection import stage1
 from .sources import SourceChain
+from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
 from .sources.power import PowerSource
 from .stats import TrendTests, seasonal_mk, trend_tests, years_to_detect
@@ -82,6 +83,7 @@ class EngineContext:
         sources = SourceChain([
             GiovanniCsvSource(root / "data" / "raw"),
             PowerSource(cache_dir=root / "data" / "cache" / "power"),
+            GiovanniApiSource(cache_dir=root / "data" / "cache" / "giovanni"),
         ])
         return cls(Catalog.load(root / "catalog"), sources)
 

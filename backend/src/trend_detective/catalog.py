@@ -91,7 +91,7 @@ class VariableCard(Card):
     record_start: str
     record_end: str | None = None
     coverage: Literal["global"] | list[float] = "global"  # or [W, S, E, N]
-    cadence: Literal["monthly", "daily"] = "monthly"  # daily is averaged to months by the source
+    cadence: Literal["monthly", "daily", "hourly"] = "monthly"  # daily/hourly are averaged to months by the source
     min_valid_days: int | None = None  # daily only: a month counts only with at least this many valid days
     domain: Literal["any", "land", "ocean"] = "any"
     listed: bool = True  # false hides the card from every list (e.g. offline-only with no data)
