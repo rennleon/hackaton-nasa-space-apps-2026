@@ -339,6 +339,7 @@ class GiovanniApiSource:
         self.end_year = end_year
         self._lock = threading.Lock()
         self._quota_checked = 0.0
+        self._all_fill: set[str] = set()  # series paths whose every cell and month was a fill value
 
     @property
     def offline(self) -> bool:
@@ -555,7 +556,14 @@ class GiovanniApiSource:
         raw = self._fetch_cells(variable, region, gid, end_year, meta)
         if raw is not None and meta:
             self._write_series(path, variable, raw, end_year, meta)
+        with self._lock:
+            (self._all_fill.add if raw is None and meta.get("all_fill") else self._all_fill.discard)(str(path))
         return raw
+
+    def all_fill(self, variable: VariableCard, region: RegionCard) -> bool:
+        """The last fetch of this series got an answer for every cell, and all of it was fill (undef)."""
+        with self._lock:
+            return str(self.series_path(variable, region)) in self._all_fill
 
     def _fetch_cells(
         self, variable: VariableCard, region: RegionCard, gid: str, end_year: int, meta: dict
@@ -627,6 +635,8 @@ class GiovanniApiSource:
                 seen.add(key)
                 unique.append(c)
         if not any(c.parsed is not None and np.isfinite(c.values).any() for c in unique):
+            # every cell answered, none had a value: fill only (not the same as a cell that was never fetched)
+            meta["all_fill"] = bool(unique) and all(c.parsed is not None for c in unique)
             return None
         months = sorted({m for c in unique for m in c.months})
         index = {m: i for i, m in enumerate(months)}

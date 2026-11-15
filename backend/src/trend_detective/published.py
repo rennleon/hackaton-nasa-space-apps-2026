@@ -86,7 +86,8 @@ def statement_text(entry: PublishedExpectation) -> Text:
 
 
 def expectation_check(entry: PublishedExpectation) -> SelectionCheck:
-    """Stage-1 check (b) from an AR6 entry. `unclear` is a caution with the honest text, never a pass."""
+    """Stage-1 check (b) from an AR6 entry. `unclear` is a caution with the honest text, never a pass;
+    `either` (no direction) is a caution too."""
     text = statement_text(entry)
     if entry.direction == "unclear":
         return SelectionCheck(
@@ -98,8 +99,9 @@ def expectation_check(entry: PublishedExpectation) -> SelectionCheck:
                 scientific_es=f"{text.scientific_es} Fuente: {entry.source}",
             ),
         )
+    # "either" says change is possible in both directions: a statement without a direction is not a reason to expect change.
     return SelectionCheck(
-        code="expectation", status="pass",
+        code="expectation", status="caution" if entry.direction == "either" else "pass",
         detail=Text(
             simple=text.simple,
             scientific=f"{text.scientific} Source: {entry.source}",

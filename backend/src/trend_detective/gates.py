@@ -23,14 +23,27 @@ BOUND_MARGIN = 5.0
 BOUNDED_DISPLAY_UNITS = ("%RH", "%")
 
 
-def no_data() -> GateCheck:
+def no_data(all_fill: bool = False) -> GateCheck:
+    """`all_fill`: the source answered, but every cell and month was a fill value (nothing measured here,
+    e.g. a land-only product over the sea). Otherwise the series simply is not saved for this place."""
+    if all_fill:
+        return GateCheck(
+            code="all_fill",
+            passed=False,
+            detail=Text(
+                simple="This measurement has no values for this place.",
+                scientific="The source answered with fill (undefined) values for every cell and month.",
+                simple_es="Esta medición no tiene valores para este lugar.",
+                scientific_es="La fuente respondió con valores de relleno (indefinidos) en todas las celdas y meses.",
+            ),
+        )
     return GateCheck(
         code="no_data",
         passed=False,
         detail=Text(
-            simple="We don't have this data for this place yet.",
+            simple="We don't have this data saved for this place yet.",
             scientific="No series loaded for this variable and region.",
-            simple_es="Aún no tenemos estos datos para este lugar.",
+            simple_es="Aún no tenemos estos datos guardados para este lugar.",
             scientific_es="No se cargó ninguna serie para esta variable y región.",
         ),
     )
@@ -194,12 +207,14 @@ def near_bound_chip(p: Prepared, variable: VariableCard, months: list[int] | Non
 
 
 def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> Chip | None:
-    """Rule 3: the box we get should be the box we asked for. Giovanni's 'Data Bounding
-    Box' is interpreted as grid-cell centres (assumption), so edges are centres ± grid/2."""
+    """Rule 3: the box we get should be the box we asked for. Giovanni CSV 'Data Bounding
+    Box' is interpreted as grid-cell centres (assumption), so edges are centres ± grid/2; the Giovanni API
+    source stores the cell edges already."""
     if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox" or prov.source_kind not in ("giovanni_csv", "giovanni_api"):
         return None
     w, s, e, n = prov.data_bbox
-    h = grid_deg / 2
+    # Giovanni CSV 'Data Bounding Box' is cell centres; the API source already stores cell EDGES.
+    h = 0.0 if prov.source_kind == "giovanni_api" else grid_deg / 2
     edges = [w - h, s - h, e + h, n + h]
     if max(abs(a - b) for a, b in zip(edges, region.geometry.bbox)) <= grid_deg / 4:
         return None
