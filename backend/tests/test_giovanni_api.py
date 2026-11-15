@@ -645,3 +645,21 @@ def test_area_mean_is_not_biased_by_a_cell_dropping_out():
     _, out = area_mean([(0.0, months, dry), (0.0, months, wet)], 2, 0.5)
     assert np.allclose(plain_like, 1.0)
     assert np.allclose(out, 5.0)  # both halves read as the two-cell climate: no false drop to 1.0
+
+
+def test_area_mean_keeps_a_real_trend_when_cells_drop_out_late():
+    """True trend 0.3/decade in every cell; two of four cells stop halfway. The box trend must stay 0.3."""
+    from trend_detective.sources.base import area_mean
+
+    months = [f"{y}-{m:02d}" for y in range(2000, 2022) for m in range(1, 13)]
+    t = np.arange(len(months)) / 12
+    season = np.tile(np.sin(np.arange(12) / 12 * 2 * np.pi) * 5, 22)
+    cells = []
+    for k, base in enumerate([10.0, 12.0, 20.0, 25.0]):
+        v = base + season + 0.03 * t
+        if k >= 2:
+            v[len(months) // 2:] = np.nan
+        cells.append((0.0, months, v))
+    _, out = area_mean(cells, 4, 0.5)
+    slope = np.polyfit(t, out - season, 1)[0]
+    assert slope == pytest.approx(0.03, abs=1e-6)

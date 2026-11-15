@@ -46,7 +46,8 @@ def check_unit(source: str, card_id: str, card_native: str, reported: str) -> No
             f"unit '{card_native}'; fix the card before using it")
 
 
-MIN_CELLS_PER_CALENDAR_MONTH = 3  # a cell's seasonal cycle needs at least this many values per calendar month
+OFFSET_ITERATIONS = 50  # alternating fit below; converges in a few steps, the cap only bounds the work
+OFFSET_TOL = 1e-10
 
 
 def area_mean(
@@ -58,13 +59,15 @@ def area_mean(
     the ones that returned nothing (they count as missing). A month is kept when at least
     max(1, min_share * n_total) cells have a value.
 
-    Plain averaging is biased when cells drop in and out: if a wet cell is missing in later years, the
-    box looks drier although nothing changed. So each cell's own monthly seasonal cycle is removed, the
-    cell departures are averaged over the cells present that month, and the box's seasonal cycle
-    (weighted mean of the cells' cycles) is added back. With every cell present this equals the plain
-    weighted mean exactly; with gaps it compares each cell only with itself (the standard
-    climate-anomaly method). A cell whose seasonal cycle cannot be estimated for a calendar month is left
-    out for that calendar month; if no cell can, the plain weighted mean is used for that month."""
+    A plain mean is biased when cells drop in and out: if a wet cell stops reporting, the box looks
+    drier although nothing changed. So each cell is modelled as the box series plus its own fixed offset
+    for each calendar month, value[c, t] = box[t] + offset[c, month(t)], and the two are fitted in turn
+    (weighted least squares, offsets centred so their weighted mean is zero in every calendar month).
+    Offsets are estimated against the box over the months a cell shares with it, so a real trend is
+    not absorbed into the offset of a cell that only reports early or late (the reference-station
+    idea behind gridded climate records). With every cell present in a month, box[t] is exactly the
+    cos(latitude)-weighted mean of that month. A cell with no value in some calendar month uses its
+    mean offset over the other months."""
     if not cells:
         return [], np.array([])
     months = sorted({m for _, ms, _ in cells for m in ms})
@@ -72,27 +75,34 @@ def area_mean(
     V = np.full((len(cells), len(months)), np.nan)
     for r, (_, ms, vs) in enumerate(cells):
         V[r, [col[m] for m in ms]] = np.asarray(vs, dtype=np.float64)
-    w = np.array([math.cos(math.radians(lat)) for lat, _, _ in cells])[:, None]
-    cal = np.array([int(m[5:7]) for m in months])
-    valid = np.isfinite(V)
-    need = max(1.0, min_share * n_total)
-    ok = valid.sum(axis=0) >= need
+    keep = np.isfinite(V).any(axis=1)  # a cell with no value at all carries no information
+    V = V[keep]
+    w = np.array([math.cos(math.radians(lat)) for (lat, _, _), k in zip(cells, keep) if k])[:, None]
+    ok = np.isfinite(V).sum(axis=0) >= max(1.0, min_share * n_total)
+    if V.shape[0] <= 1:
+        return months, np.where(ok, _wmean(V, w), np.nan)
 
-    plain = _wmean(V, w)
-    if len(cells) == 1:
-        return months, np.where(ok, plain, np.nan)
-    clim = np.full((len(cells), 13), np.nan)
-    for m in range(1, 13):
-        sub = V[:, cal == m]
-        fin = np.isfinite(sub)
-        cnt = fin.sum(axis=1)
-        total = np.where(fin, sub, 0.0).sum(axis=1)
-        clim[:, m] = np.where(cnt >= MIN_CELLS_PER_CALENDAR_MONTH, total / np.maximum(cnt, 1), np.nan)
-    C = clim[:, cal]  # each cell's cycle at each month
-    box_clim = _wmean(C, w)
-    out = box_clim + _wmean(V - C, w)
-    out = np.where(np.isfinite(out), out, plain)
-    return months, np.where(ok, out, np.nan)
+    cal = np.array([int(m[5:7]) for m in months]) - 1
+    valid = np.isfinite(V)
+    offset = np.zeros((V.shape[0], 12))
+    box = _wmean(V, w)
+    for _ in range(OFFSET_ITERATIONS):
+        resid = np.where(valid, V - box[None, :], np.nan)
+        new = np.full_like(offset, np.nan)
+        for m in range(12):
+            sub = resid[:, cal == m]
+            cnt = np.isfinite(sub).sum(axis=1)
+            new[:, m] = np.where(cnt > 0, np.where(np.isfinite(sub), sub, 0.0).sum(axis=1) / np.maximum(cnt, 1),
+                                 np.nan)
+        cell_mean = np.array([np.nanmean(r) if np.isfinite(r).any() else 0.0 for r in new])
+        new = np.where(np.isfinite(new), new, cell_mean[:, None])
+        new -= (w * new).sum(axis=0) / w.sum()  # identifiability: weighted mean offset is zero per month
+        box_new = _wmean(V - new[:, cal], w)
+        done = np.nanmax(np.abs(box_new - box)) < OFFSET_TOL if np.isfinite(box_new).any() else True
+        offset, box = new, box_new
+        if done:
+            break
+    return months, np.where(ok, box, np.nan)
 
 
 def _wmean(X: np.ndarray, w: np.ndarray) -> np.ndarray:

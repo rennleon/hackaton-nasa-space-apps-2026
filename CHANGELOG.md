@@ -10,16 +10,20 @@ for how to release and how to roll back.
 ### Added
 - "How it works" page (`#/how`): the whole data pipeline as a step-by-step flow, in both views and
   both languages.
-- Seasonal homogeneity check (van Belle & Hughes 1984), context only: an info chip in the Scientific
-  view when the trend differs between calendar months, naming the months that rise or fall.
+- "The change is bigger in some months than in others": an info chip (context only, never changes the
+  verdict) from a Welch test on the 12 per-month slopes, naming the months with the smallest and largest
+  change. It compares trend sizes, so months with more noise do not make equal changes look unequal.
 
 ### Fixed
-- Box means no longer drift when grid cells drop in and out: each cell's departure from its own
-  seasonal cycle is averaged and the box cycle added back (identical to the plain mean when every cell
-  reports). Shared by the Giovanni API and NASA POWER sources.
+- Box means no longer depend on which grid cells happen to report: each cell is fitted as the box
+  series plus its own monthly offset, estimated over the months it shares with the box, so a cell that
+  drops out can neither create a trend nor shrink a real one (exactly the cos(latitude)-weighted mean
+  when every cell reports). Shared by the Giovanni API and NASA POWER sources. The saved AIRS boxes were
+  rebuilt (only Wisconsin night humidity changed, by at most 0.09); the other saved boxes have no
+  missing months or fail the completeness gate (OMI), and pick up the method when next fetched.
 - NASA POWER box means are now cos(latitude)-weighted, like the Giovanni API source.
-- NASA POWER units are checked against the catalog card; a mismatch stops the run instead of
-  mislabelling the data.
+- NASA POWER units are checked against the catalog card. A unit mismatch from any source now shows as
+  its own "units are not what we expected" result instead of "NASA is unreachable".
 
 ## [2.0.0] - 2026-11-15
 

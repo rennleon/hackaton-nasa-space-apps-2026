@@ -56,8 +56,8 @@ def test_fill_values_become_nan():
     s = FakeSource(doc).fetch(CAT.variables["power_t2m"], region())
     assert math.isnan(s.values[1])  # every point missing
     ok = [f["properties"]["parameter"]["T2M"]["200103"] for f in doc["features"][1:]]
-    w = [np.cos(np.radians(f["geometry"]["coordinates"][1])) for f in doc["features"][1:]]
-    assert s.values[2] == pytest.approx(np.average(ok, weights=w))  # one missing point is ignored
+    # one missing point: the month is kept, estimated from the others plus their usual offsets
+    assert math.isfinite(s.values[2]) and min(ok) - 1 <= s.values[2] <= max(ok) + 1
 
 
 def test_point_endpoint_for_point_and_small_box():

@@ -669,7 +669,7 @@ const es: Record<string, string> = {
   'how.s2.title.scientific': 'Obtener los datos de la NASA',
   'how.s2.text.simple': 'Le pedimos los números a la NASA. Las copias guardadas funcionan sin internet.',
   'how.s2.text.scientific':
-    'Cadena de fuentes, la primera que responde: CSV de Giovanni ya preparado, luego la API de series de tiempo de NASA Giovanni (primero la copia guardada, después en vivo, con un token de Earthdata en el servidor) y luego NASA POWER (basado en MERRA-2). Las copias guardadas hacen que la demo funcione sin conexión.',
+    'Cadena de fuentes, la primera que responde: CSV de Giovanni ya preparado (promedio de área del propio Giovanni), luego NASA POWER (basado en MERRA-2; solo sus propias variables) y luego la API de series de tiempo de NASA Giovanni (primero la copia guardada, después en vivo, con un token de Earthdata en el servidor). Las copias guardadas hacen que la demo funcione sin conexión.',
   'how.s3.title': 'Limpiamos los números',
   'how.s3.text.simple': 'Tiramos los números dañados. También quitamos los cuadros fuera de tu lugar.',
   'how.s3.text.scientific':
@@ -683,7 +683,7 @@ const es: Record<string, string> = {
   'how.s5.title.scientific': 'Promediar las celdas de la rejilla',
   'how.s5.text.simple': 'Promediamos todos los cuadros del mapa dentro de tu lugar. Los cuadros más grandes cuentan más.',
   'how.s5.text.scientific':
-    'Las celdas fijas propias del producto dentro del cuadro (MERRA-2 y POWER 0,5°×0,625°; AIRS, MODIS y aerosoles de OMI 1°; GLDAS y NO₂ de OMI 0,25°; GPM 0,1°), combinadas con una media ponderada por cos(latitud). El ciclo estacional de cada celda se quita antes de promediar y se devuelve el del cuadro, así que una celda que falta en algunos meses no puede crear una tendencia falsa. Un mes necesita al menos la mitad de las celdas.',
+    'Las celdas fijas propias del producto dentro del cuadro (MERRA-2 y POWER 0,5°×0,625°; AIRS, MODIS y aerosoles de OMI 1°; GLDAS y NO₂ de OMI 0,25°; GPM 0,1°), combinadas con una media ponderada por cos(latitud). Cada celda se ajusta como la serie del cuadro más su propio desfase fijo por mes del año, estimado en los meses que comparte con el cuadro; así una celda que deja de informar no puede crear una tendencia ni achicar una real. Con todas las celdas presentes es exactamente la media ponderada. Un mes necesita al menos la mitad de las celdas. (Los CSV de Giovanni ya llegan promediados por Giovanni.)',
   'how.s6.title.simple': 'Usamos unidades de todos los días',
   'how.s6.title.scientific': 'Convertir a unidades de estudiante',
   'how.s6.text.simple': 'Pasamos a unidades que conoces, como grados y milímetros de lluvia al día.',
@@ -722,7 +722,7 @@ const es: Record<string, string> = {
   'how.s13.title.scientific': 'Dos contrastes deben coincidir',
   'how.s13.text.simple': 'Hacemos dos revisiones distintas. Decimos "seguro" solo si las dos coinciden.',
   'how.s13.text.scientific':
-    'Contraste A: Mann–Kendall con corrección de Hamed–Rao. Contraste B: prueba t de MCO con tamaño de muestra efectivo (Santer et al. 2000). "Seguro" solo si ambos dan p < 0,05. Solo como contexto: Mann–Kendall estacional y una prueba de homogeneidad estacional (van Belle y Hughes 1984) que avisa cuando el cambio difiere entre estaciones.',
+    'Contraste A: Mann–Kendall con corrección de Hamed–Rao. Contraste B: prueba t de MCO con tamaño de muestra efectivo (Santer et al. 2000). "Seguro" solo si ambos dan p < 0,05. Solo como contexto: Mann–Kendall estacional y una prueba de Welch sobre las 12 pendientes mensuales (Welch 1951) que indica cuando el cambio es mayor en algunos meses que en otros.',
   'how.s14.title.simple': 'Intentamos romper la respuesta',
   'how.s14.title.scientific': 'Revisiones de robustez',
   'how.s14.text.simple': 'Intentamos demostrar que nos equivocamos. Quitamos años y probamos otros datos.',

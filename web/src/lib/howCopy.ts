@@ -70,7 +70,7 @@ export const HOW = {
   'how.s2.title': p('Ask NASA for the numbers', 'Fetch NASA data'),
   'how.s2.text': p(
     'We ask NASA for the numbers. Saved copies work with no internet.',
-    'Source chain, first that answers: pre-loaded Giovanni CSV, then the NASA Giovanni time-series API (saved copy first, then live, with a server-side Earthdata token), then NASA POWER (MERRA-2 based). Saved copies make the demo work offline.',
+    'Source chain, first that answers: a pre-loaded Giovanni CSV (Giovanni\'s own area average), then NASA POWER (MERRA-2 based; serves only its own variables), then the NASA Giovanni time-series API (saved copy first, then live, with a server-side Earthdata token). Saved copies make the demo work offline.',
   ),
   'how.s3.title': p('Clean the numbers'),
   'how.s3.text': p(
@@ -85,7 +85,7 @@ export const HOW = {
   'how.s5.title': p('Average the map squares', 'Average the grid cells'),
   'how.s5.text': p(
     'We average all the map squares inside your place. Bigger squares count more.',
-    "The product's own fixed grid cells inside the box (MERRA-2 and POWER 0.5°×0.625°, AIRS, MODIS and OMI aerosol 1°, GLDAS and OMI NO₂ 0.25°, GPM 0.1°), combined as a cos(latitude)-weighted mean. Each cell's own seasonal cycle is removed before averaging and the box's cycle added back, so a cell missing in some months cannot create a false trend. A month needs at least half the cells.",
+    "The product's own fixed grid cells inside the box (MERRA-2 and POWER 0.5°×0.625°, AIRS, MODIS and OMI aerosol 1°, GLDAS and OMI NO₂ 0.25°, GPM 0.1°), combined as a cos(latitude)-weighted mean. Each cell is fitted as the box series plus its own fixed offset per calendar month, estimated over the months it shares with the box, so a cell that stops reporting can neither create a trend nor shrink a real one; with every cell present this is exactly the weighted mean. A month needs at least half the cells. (Pre-loaded Giovanni CSVs arrive already averaged by Giovanni.)",
   ),
   'how.s6.title': p('Use everyday units', 'Convert to student units'),
   'how.s6.text': p(
@@ -125,7 +125,7 @@ export const HOW = {
   'how.s13.title': p('Two checks must agree', 'Two tests must agree'),
   'how.s13.text': p(
     'We run two different checks. We say "sure" only if both agree.',
-    'Test A: Mann–Kendall with Hamed–Rao correction. Test B: OLS t-test with effective sample size (Santer et al. 2000). "Sure" only if both give p < 0.05. Context only: seasonal Mann–Kendall, and a seasonal homogeneity test (van Belle & Hughes 1984) that warns when the change differs between seasons.',
+    'Test A: Mann–Kendall with Hamed–Rao correction. Test B: OLS t-test with effective sample size (Santer et al. 2000). "Sure" only if both give p < 0.05. Context only: seasonal Mann–Kendall, and a Welch test on the 12 per-month slopes (Welch 1951) that notes when the change is bigger in some months than in others.',
   ),
   'how.s14.title': p('Try to break the answer', 'Robustness checks'),
   'how.s14.text': p(

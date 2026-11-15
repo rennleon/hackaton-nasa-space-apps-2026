@@ -133,14 +133,17 @@ def test_persistence_correction_inflates_p() -> None:
     assert all(ratios)
 
 
-def test_seasonal_homogeneity_flags_opposite_seasons_only() -> None:
-    from trend_detective.stats import seasonal_homogeneity
+def test_season_slopes_equal_slopes_unequal_noise_not_flagged() -> None:
+    """Equal slopes with winter noise 5x summer noise must not look unequal (the van Belle-Hughes trap)."""
+    from trend_detective.stats import seasonal_slope_homogeneity
 
     rng = np.random.default_rng(3)
-    years = 25
-    t = np.repeat(np.arange(years), 12).astype(float)
-    same = t * 0.1 + rng.normal(0, 0.3, years * 12)  # every month rises alike
-    sign = np.tile([1.0] * 6 + [-1.0] * 6, years)  # half the months rise, half fall
-    differ = sign * t * 0.1 + rng.normal(0, 0.3, years * 12)
-    assert seasonal_homogeneity(same)[1] > 0.05
-    assert seasonal_homogeneity(differ)[1] < 0.001
+    years = 22
+    t = np.repeat(np.arange(years), 12).astype(float) + np.tile(np.arange(12) / 12, years)
+    cal = np.tile(np.arange(1, 13), years)
+    sd = np.where((cal <= 3) | (cal >= 10), 1.0, 0.2)
+    flagged = [seasonal_slope_homogeneity(t, 0.05 * t + rng.normal(0, 1, t.size) * sd, cal).p < 0.05
+               for _ in range(300)]
+    assert np.mean(flagged) < 0.10  # nominal 5%
+    differ = np.where(cal <= 6, 0.1, 0.0) * t + rng.normal(0, 1, t.size) * sd
+    assert seasonal_slope_homogeneity(t, differ, cal).p < 0.001

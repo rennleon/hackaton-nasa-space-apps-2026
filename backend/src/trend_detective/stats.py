@@ -157,40 +157,59 @@ def seasonal_mk(values: np.ndarray, period: int = 12) -> tuple[float, float]:
     return float(res.p), float(res.z)
 
 
-def _mk_s_var(x: np.ndarray) -> tuple[float, float]:
-    """Mann-Kendall S and its variance with the tie correction (NaN skipped, order kept)."""
-    v = x[np.isfinite(x)]
-    n = len(v)
-    if n < 3:
-        return 0.0, 0.0
-    i, j = np.triu_indices(n, k=1)
-    s = float(np.sign(v[j] - v[i]).sum())
-    _, counts = np.unique(v, return_counts=True)
-    ties = counts[counts > 1]
-    var = (n * (n - 1) * (2 * n + 5) - float(np.sum(ties * (ties - 1) * (2 * ties + 5)))) / 18.0
-    return s, var
+@dataclass
+class SeasonSlopes:
+    """Per-calendar-month trend sizes and a test that they are equal (context only)."""
+
+    f: float
+    p: float
+    slope_per_year: dict[int, float]  # calendar month -> OLS slope of that month's anomalies
 
 
-def seasonal_homogeneity(values: np.ndarray, period: int = 12) -> tuple[float, float, list[float]] | None:
-    """van Belle & Hughes (1984) test that the trend is the same in every season; context only.
+def seasonal_slope_homogeneity(
+    t: np.ndarray, y: np.ndarray, cal: np.ndarray, min_years: int = 8
+) -> SeasonSlopes | None:
+    """Is the trend the same SIZE in every calendar month? Context only; never decides a verdict.
 
-    values: a contiguous monthly series (position mod `period` = season; NaN kept in place).
-    Z_i = S_i / sqrt(Var S_i) per season; chi2_homog = sum(Z_i^2) - K * mean(Z)^2 with K - 1 degrees of
-    freedom. A small p means the seasons trend differently, so one yearly rate averages unlike changes.
-    Like the seasonal Mann-Kendall test it ignores serial correlation, which is why it never decides.
-    Source: van Belle, G. & Hughes, J.P. (1984) "Nonparametric tests for trend in water quality",
-    Water Resources Research 20(1):127-136. Returns (chi2_homog, p, Z per season) or None if too short.
+    One OLS slope per calendar month (that month's anomalies against time) with its standard error,
+    then Welch's heteroscedastic test of equal means (Welch, B.L. 1951, "On the comparison of several
+    mean values: an alternative approach", Biometrika 38:330-336) applied to the 12 slopes, so months
+    with more noise count less without making equal slopes look unequal. (A test on Mann-Kendall
+    scores, such as van Belle & Hughes, compares strength of evidence instead, and flags equal slopes
+    whenever noise differs between seasons.) Calibration checked by simulation: about 5% false alarms
+    with equal slopes, unequal seasonal noise or month-to-month persistence (tests/test_stats.py).
+    Returns None when a month has fewer than `min_years` values.
     """
-    x = np.asarray(values, dtype=float)
-    zs: list[float] = []
-    for k in range(period):
-        s_k, var_k = _mk_s_var(x[k::period])
-        if var_k <= 0:
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    cal = np.asarray(cal)
+    b, var, nu, months = [], [], [], []
+    for m in range(1, 13):
+        sel = (cal == m) & np.isfinite(t) & np.isfinite(y)
+        n = int(sel.sum())
+        if n < min_years:
             return None
-        zs.append(s_k / np.sqrt(var_k))
-    z = np.array(zs)
-    chi2 = float(np.sum(z**2) - period * z.mean() ** 2)
-    return chi2, float(sps.chi2.sf(chi2, df=period - 1)), [float(v) for v in z]
+        tt, yy = t[sel], y[sel]
+        tc = tt - tt.mean()
+        sxx = float(np.sum(tc**2))
+        if sxx <= 0:
+            return None
+        bk = float(np.sum(tc * (yy - yy.mean())) / sxx)
+        s2 = float(np.sum((yy - yy.mean() - bk * tc) ** 2) / (n - 2))
+        if s2 <= 0:
+            return None
+        b.append(bk)
+        var.append(s2 / sxx)
+        nu.append(n - 2)
+        months.append(m)
+    k = len(b)
+    bb, w, nu_a = np.array(b), 1.0 / np.array(var), np.array(nu, dtype=float)
+    big_w = w.sum()
+    mean_w = float(np.sum(w * bb) / big_w)
+    lam = float(np.sum((1 - w / big_w) ** 2 / nu_a))
+    f = float(np.sum(w * (bb - mean_w) ** 2) / (k - 1) / (1 + 2 * (k - 2) / (k * k - 1) * lam))
+    p = float(sps.f.sf(f, k - 1, (k * k - 1) / (3 * lam)))
+    return SeasonSlopes(f=f, p=p, slope_per_year=dict(zip(months, b)))
 
 
 def years_to_detect(
