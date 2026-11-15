@@ -52,35 +52,40 @@ def availability_of(r: AnalysisResult) -> Availability:
     """B1: can this place answer with this variable? Read off the gates, never off the trend."""
     if _failed(r, "fetch_failed"):
         return "fetch_failed"
-    if _failed(r, "no_data") or _failed(r, "coverage"):
+    if _failed(r, "box_too_large"):
+        return "box_too_large"
+    if _failed(r, "no_data") or _failed(r, "all_fill") or _failed(r, "coverage"):
         return "no_data_here"
     if _failed(r, "record_length"):
         return "too_short"
-    if _failed(r, "completeness") or (r.gates.passed and r.trend is None):
+    if _failed(r, "completeness"):
         return "too_many_gaps"
-    return "available"
+    return "available"  # includes "the checks could not run": a cant_tell verdict with its own reason
 
 
 def _availability_reason(avail: Availability, r: AnalysisResult, var: VariableCard) -> Text:
     """Kid-friendly reason a variable has no result for this place (Scientific keeps the gate detail)."""
     failed = {c.code: c.detail for c in r.gates.checks if not c.passed}
-    if avail == "fetch_failed":
-        return failed["fetch_failed"]
+    if avail in ("fetch_failed", "box_too_large"):
+        return failed[avail]
     if avail == "no_data_here":
-        g = failed.get("no_data") or failed["coverage"]
+        g = failed.get("no_data") or failed.get("all_fill") or failed["coverage"]
         sci, sci_es = g.scientific, g.scientific_es or g.scientific
-        if var.domain == "land":
+        if "all_fill" in failed and var.domain == "land":  # only when the source really answered with fill values
             simple = "No data for this spot. This measurement only covers land."
             simple_es = "No hay datos para este lugar. Esta medición solo cubre la tierra."
-        elif var.domain == "ocean":
+        elif "all_fill" in failed and var.domain == "ocean":
             simple = "No data for this spot. This measurement only covers the ocean."
             simple_es = "No hay datos para este lugar. Esta medición solo cubre el océano."
-        elif "coverage" in failed and "no_data" not in failed:
-            simple = "No data for this spot. This measurement does not reach this far."
-            simple_es = "No hay datos para este lugar. Esta medición no llega hasta aquí."
-        else:
+        elif "all_fill" in failed:
             simple = "No data for this spot."
             simple_es = "No hay datos para este lugar."
+        elif "no_data" in failed:  # never fetched or not saved: say that, not that the place is out of range
+            simple = "We don't have this data saved for this place yet."
+            simple_es = "Aún no tenemos estos datos guardados para este lugar."
+        else:  # coverage gate
+            simple = "No data for this spot. This measurement does not reach this far."
+            simple_es = "No hay datos para este lugar. Esta medición no llega hasta aquí."
         return Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es)
     if avail == "too_short":
         rl = failed["record_length"]
@@ -88,7 +93,7 @@ def _availability_reason(avail: Availability, r: AnalysisResult, var: VariableCa
                     scientific=rl.scientific,
                     simple_es="Este lugar tiene muy pocos años de datos para esta medición. " + (rl.simple_es or rl.simple),
                     scientific_es=rl.scientific_es or rl.scientific)
-    gap = failed.get("completeness")
+    gap = failed.get("completeness")  # avail == "too_many_gaps"
     return Text(simple="Too many months are missing here to tell." + (f" {gap.simple}" if gap else ""),
                 scientific=gap.scientific if gap else r.verdict.sentence.scientific,
                 simple_es="Faltan demasiados meses aquí para saberlo." + (f" {gap.simple_es or gap.simple}" if gap else ""),
@@ -186,6 +191,8 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
         avail = availability_of(r)
         if avail != "available":
             why = reason = _availability_reason(avail, r, var)
+        elif label == "cant_tell" and r.trend is None and reason is not None:
+            why = reason  # the gates passed but the tests could not run: say so (never "missing months")
         entries.append(ScanEntry(
             variable_id=var.id, name=var.name, role=role, source_type=var.source.type,
             shortlist_label=short, verdict_label=label,

@@ -232,7 +232,7 @@ class Verdict(Model):
     notes: list[Text] = Field(default_factory=list)
 
 
-Availability = Literal["available", "no_data_here", "too_short", "too_many_gaps", "fetch_failed"]
+Availability = Literal["available", "no_data_here", "too_short", "too_many_gaps", "fetch_failed", "box_too_large"]
 
 
 class PublishedFinding(Model):

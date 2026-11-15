@@ -366,7 +366,7 @@ export interface ScanEntry {
   mdt_per_decade: number | null;
   why: Text;
   reason: Text | null;
-  availability: "available" | "no_data_here" | "too_short" | "too_many_gaps" | "fetch_failed";
+  availability: "available" | "no_data_here" | "too_short" | "too_many_gaps" | "fetch_failed" | "box_too_large";
   instrument_id: string | null;
   yearly_series: YearPoint[] | null;
   cross_check: Comparison | null;

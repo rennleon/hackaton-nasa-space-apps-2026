@@ -51,3 +51,8 @@ class SourceChain:
             if series is not None:
                 return series
         return None
+
+    def all_fill(self, variable: VariableCard, region: RegionCard) -> bool:
+        """True when a source answered for this variable and region with fill values only (it has the
+        place, but nothing measured there), as opposed to 'not fetched / not saved'."""
+        return any(getattr(src, "all_fill", lambda *_: False)(variable, region) for src in self.sources)

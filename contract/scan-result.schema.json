@@ -360,7 +360,8 @@
             "no_data_here",
             "too_short",
             "too_many_gaps",
-            "fetch_failed"
+            "fetch_failed",
+            "box_too_large"
           ],
           "title": "Availability",
           "type": "string"

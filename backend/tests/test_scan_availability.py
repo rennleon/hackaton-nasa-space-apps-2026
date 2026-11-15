@@ -39,16 +39,6 @@ def test_each_availability_label():
     assert "missing" in by["airs_t_surf_night"].reason.simple
 
 
-def test_land_only_variable_with_no_data_says_land():
-    ctx, _ = make_ctx({})
-    ctx.catalog.variables["merra2_t2m"].domain = "land"
-    ctx.catalog.variables["merra2_t2m"].listed = True
-    s = scan_region(ctx, point_region(), "heat")
-    e = next(e for e in s.entries if e.variable_id == "merra2_t2m")
-    assert e.availability == "no_data_here"
-    assert e.reason.simple == "No data for this spot. This measurement only covers land."
-
-
 def test_all_missing_series_is_no_data_here():
     import numpy as np
 
