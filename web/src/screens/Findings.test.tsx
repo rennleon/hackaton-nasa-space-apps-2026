@@ -116,11 +116,45 @@ describe('Findings screen', () => {
 
   it('empty state when nothing is available, with the reasons open', async () => {
     const user = userEvent.setup()
-    open('#/shortlist?region=wisconsin&theme=air')
+    // a scan where no variable has a usable series here: the empty state follows the data
+    const none = (): ScanResult => {
+      const s = scanFile('wisconsin', 'air')
+      return { ...s, entries: s.entries.map((e) => ({ ...e, availability: 'no_data_here' as const, slope_per_decade: null, shortlist_label: 'cant_tell' as const, verdict_label: 'cant_tell' as const })) }
+    }
+    open('#/shortlist?region=wisconsin&theme=air', { ...base, scan: async () => none() })
     expect(await screen.findByText('NASA has no data for this place and question yet.')).toBeInTheDocument()
-    expect(screen.getByText(/Not available for this place \(6\)/).closest('details')).toHaveAttribute('open')
+    expect(screen.getByText(`Not available for this place (${none().entries.length})`).closest('details')).toHaveAttribute('open')
     await user.click(screen.getByRole('button', { name: 'Heat' }))
     await waitFor(() => expect(window.location.hash).toContain('theme=heat'))
+  })
+
+  it('Wisconsin air follows the saved data: what is available shows as cards, the rest is collapsed', async () => {
+    const { available, unavailable } = splitEntries(scanFile('wisconsin', 'air').entries)
+    open('#/shortlist?region=wisconsin&theme=air')
+    if (available.length === 0) {
+      expect(await screen.findByText('NASA has no data for this place and question yet.')).toBeInTheDocument()
+    } else {
+      expect(await screen.findByRole('button', { name: `Open ${available[0].name.simple}` })).toBeInTheDocument()
+      expect(screen.queryByText('NASA has no data for this place and question yet.')).toBeNull()
+    }
+    if (unavailable.length > 0) expect(screen.getByText(`Not available for this place (${unavailable.length})`)).toBeInTheDocument()
+  })
+
+  it('the card follows the corrected shortlist label, not the single-variable verdict, and shows its years', async () => {
+    const s = v2Scan()
+    const target = s.entries.find((e) => e.variable_id === 'airs_rh_surf_day')!
+    // significant on its own, but not after correcting for the many variables scanned
+    const scan: ScanResult = {
+      ...s,
+      entries: s.entries.map((e) => (e === target ? { ...e, verdict_label: 'significant' as const, shortlist_label: 'possibly_changing' as const } : { ...e, shortlist_label: 'no_detectable_change' as const, verdict_label: 'no_detectable_change' as const })),
+    }
+    const total = splitEntries(scan.entries).available.length
+    open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => scan })
+    const card = (await screen.findByRole('button', { name: 'Open Afternoon humidity' })).closest('li')!
+    expect(within(card).getByText('Maybe, not sure yet')).toBeInTheDocument()
+    expect(within(card).queryByText("Sure it's real")).toBeNull()
+    expect(within(card).getByText('Years used here: 2003 to 2014')).toBeInTheDocument()
+    expect(screen.getByText(`We can't see a clear change yet. We looked at ${total} measurements.`)).toBeInTheDocument()
   })
 
   it('Scientific keeps the numbers and the full source tag', async () => {

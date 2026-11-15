@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { availabilityOf, cleanPlaceName, directionOf, sourceParts, splitEntries, summarize } from './findings'
+import { availabilityOf, certaintyOfEntry, cleanPlaceName, directionOf, sourceParts, splitEntries, summarize } from './findings'
 import { FC } from './findingsCopy'
 import { bannedIn } from './copy.test'
 import type { ScanEntry, VariableRef } from '../types/contract'
@@ -35,6 +35,13 @@ describe('availability, sort and collapse', () => {
     const s = summarize(available)
     expect(s).toMatchObject({ total: 3, clear: 1 })
     expect(s.strongest?.variable_id).toBe('sure')
+  })
+  it('uses the Benjamini-Hochberg label, not the single-variable verdict', () => {
+    const cut = entry('cut', 'possibly_changing', 'significant', 0.04)
+    expect(certaintyOfEntry(cut)).toBe('maybe')
+    expect(summarize([cut, entry('sure', 'changing', 'significant', 0.001)])).toMatchObject({ total: 2, clear: 1 })
+    expect(certaintyOfEntry(entry('x', 'cant_tell', 'cant_tell', null))).toBe('cant_tell')
+    expect(certaintyOfEntry(entry('y', 'no_detectable_change', 'borderline', 0.2))).toBe('too_soon')
   })
   it('direction from the slope sign', () => {
     expect([directionOf(2), directionOf(-1), directionOf(0), directionOf(null)]).toEqual(['up', 'down', 'flat', null])
