@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { useGeocodeSearch, type GeoResult } from '../lib/geocode'
 import { useStartT } from '../lib/startT'
+import { PlaceIcon } from './PlaceIcons'
 import './PlaceSearch.css'
 
 interface Props {
@@ -70,6 +71,9 @@ export function PlaceSearch({ disabled, onChoose, onLocate }: Props) {
       </label>
       <div className="place-search-row">
         <div className="place-search-box">
+          <span className="place-search-icon">
+            <PlaceIcon name="search" />
+          </span>
           <input
             id={`${listId}-in`}
             type="search"
@@ -110,6 +114,7 @@ export function PlaceSearch({ disabled, onChoose, onLocate }: Props) {
           </ul>
         </div>
         <button type="button" className="btn" onClick={findMe} disabled={disabled || locate === 'finding'}>
+          <PlaceIcon name="locate" />
           {locate === 'finding' ? s('start.locate.finding', 'Finding you…') : s('start.locate.button', 'Use my location')}
         </button>
       </div>
@@ -131,7 +136,6 @@ export function PlaceSearch({ disabled, onChoose, onLocate }: Props) {
           </p>
         )}
       </div>
-      <p className="muted small">{s('start.search.credit', 'Place search uses Open-Meteo.')}</p>
     </div>
   )
 }

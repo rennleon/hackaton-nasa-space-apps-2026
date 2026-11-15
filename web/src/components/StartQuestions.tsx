@@ -4,8 +4,12 @@ import { chosenBbox, chosenName, sizeParts, type Chosen } from '../lib/places'
 import { useStartT } from '../lib/startT'
 import { topLevel } from '../lib/themes'
 import { SubTopicRow } from './SubTopicRow'
+import { PlaceIcon } from './PlaceIcons'
 import { ThemeIcon } from './ThemeIcon'
 import './StartQuestions.css'
+
+/** Tile colour per question (never the only signal: the icon and the name come with it). */
+const TONE: Record<string, string> = { heat: 'tone-warm', water: 'tone-blue', air: 'tone-gray' }
 
 interface Props {
   chosen: Chosen
@@ -13,8 +17,8 @@ interface Props {
   onChange: () => void
 }
 
-/** Step 2 on the start page: the chosen place with its size, then the three main questions, each with its narrower ones. */
-export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuestions({ chosen, onAsk, onChange }, ref) {
+/** Step 2 of the start card: the chosen place with its size, then the three main questions, each with its narrower ones. The ref goes to the place heading, which takes focus when a place is chosen. */
+export const StartQuestions = forwardRef<HTMLHeadingElement, Props>(function StartQuestions({ chosen, onAsk, onChange }, ref) {
   const { catalog } = useData()
   const { s, tx } = useStartT()
   const name = chosenName(chosen, chosen.kind === 'region' ? tx(chosen.region.name) : '', s('start.place.yours', 'Your place', 'Custom place'))
@@ -25,17 +29,20 @@ export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuest
       : s('start.area.size', 'This area is about {w} × {h} km.', 'Area: about {w} × {h} km.', size)
   const detail = chosen.kind === 'place' && chosen.name && chosen.place.kind === 'point' ? `${chosen.place.lat}, ${chosen.place.lon}` : null
   return (
-    <section ref={ref} tabIndex={-1} className="start-questions card" aria-labelledby="sq-h" aria-live="polite">
+    <div className="start-questions">
       <div className="sq-head">
         <div>
-          <p className="sq-eyebrow">{s('start.place.eyebrow', 'Your place', 'Selected place')}</p>
-          <h2 id="sq-h">{name}</h2>
+          <p className="eyebrow">{s('start.place.eyebrow', 'Your place', 'Selected place')}</p>
+          <h2 ref={ref} tabIndex={-1} id="sq-h" className="sq-place">
+            {name}
+          </h2>
           <p className="muted small">
             {sizeLine}
             {detail && <span className="sq-coords"> {detail}</span>}
           </p>
         </div>
-        <button type="button" className="link" onClick={onChange}>
+        <button type="button" className="btn" onClick={onChange}>
+          <PlaceIcon name="back" size={16} />
           {s('start.place.change', 'Pick a different place', 'Change place')}
         </button>
       </div>
@@ -44,8 +51,8 @@ export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuest
         {topLevel(catalog.themes).map((th) => (
           <li key={th.id}>
             <button type="button" className="sq-card" data-demo={`question-${th.id}`} onClick={() => onAsk(th.id)}>
-              <span className="sq-icon">
-                <ThemeIcon id={th.id} />
+              <span className={`tile ${TONE[th.id] ?? 'tone-gray'}`}>
+                <ThemeIcon id={th.id} size={22} />
               </span>
               <span className="sq-name">{tx(th.name)}</span>
               <span className="sq-q">{tx(th.question)}</span>
@@ -54,6 +61,6 @@ export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuest
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   )
 })

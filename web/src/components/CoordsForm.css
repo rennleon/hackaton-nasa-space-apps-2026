@@ -1,0 +1,15 @@
+.coords { display: grid; gap: 1rem; }
+.coords-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem; }
+.coords-help { margin: 0; }
+.coords-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); gap: 1rem; }
+.coords-field { display: grid; gap: 0.3rem; }
+.coords-label { font-size: 0.875rem; font-weight: 600; color: var(--text-2); }
+.coords-inputs { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem; gap: 0.5rem; }
+.coords-inputs input, .coords-inputs select { font: inherit; min-height: 3rem; padding: 0 0.85rem; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); min-width: 0; }
+.coords-inputs input { font-family: var(--font-mono); }
+.coords-inputs input:focus-visible, .coords-inputs select:focus-visible { border-color: var(--accent); }
+.coords .error { margin: 0; }
+
+@media (max-width: 720px) {
+  .coords-inputs { grid-template-columns: minmax(0, 1fr) 6.5rem; }
+}
