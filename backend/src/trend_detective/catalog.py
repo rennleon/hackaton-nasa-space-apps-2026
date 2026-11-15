@@ -121,6 +121,13 @@ class VariableCard(Card):
     kid_units: KidUnits
     themes: dict[str, Role]
 
+    def units_info(self) -> UnitsInfo:
+        """Display units plus the Simple view's kid scale, so the front end never pairs a kid label with a
+        display-unit number (0.031 AOD is 3 points on the haze scale, not 'under 1 point')."""
+        return self.units.info().model_copy(update={
+            "kid_scale": self.kid_units.scale, "kid_label": self.kid_units.label,
+            "kid_label_es": self.kid_units.label_es})
+
     def ref(self) -> VariableRef:
         return VariableRef(
             id=self.id,
@@ -129,7 +136,7 @@ class VariableCard(Card):
             definition=self.definition,
             source_type=self.source.type,
             instrument=self.source.instrument,
-            units=self.units.info(),
+            units=self.units_info(),
             instrument_id=self.source.instrument_id,
             platform=self.source.platform,
             delivered_by=self.source.delivered_by,

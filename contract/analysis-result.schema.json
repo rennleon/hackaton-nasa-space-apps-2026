@@ -1010,12 +1010,44 @@
         "decimals": {
           "title": "Decimals",
           "type": "integer"
+        },
+        "kid_scale": {
+          "default": 1.0,
+          "title": "Kid Scale",
+          "type": "number"
+        },
+        "kid_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kid Label"
+        },
+        "kid_label_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kid Label Es"
         }
       },
       "required": [
         "display",
         "simple",
-        "decimals"
+        "decimals",
+        "kid_scale",
+        "kid_label",
+        "kid_label_es"
       ],
       "title": "UnitsInfo",
       "type": "object"

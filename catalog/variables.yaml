@@ -383,10 +383,20 @@
   cadence: hourly
   grid_deg: 0.5
   record_start: 1980-01
-  artifacts: []
+  artifacts:
+    # frozen inputs, not a jump: any trend after this date cannot follow real emission changes (user decision Nov 15)
+    - kind: frozen_emissions
+      start: 2009-01
+      action: flag
+      note:
+        simple: After 2008 the model stopped updating pollution from fuel. It also skips eruptions after 2010.
+        scientific: "MERRA-2 persists anthropogenic SO₂ emissions (EDGAR v4.2) at their 2008 values and anthropogenic SO₄ (AeroCom HCA0 v1) at 2006 values; volcanic eruptions are not included after 2010 (only a repeating degassing cycle). Only total 550 nm AOD is assimilated, so later sulfate changes reflect meteorology and AOD increments, not emission changes. Randles et al. 2017, J. Climate 30, 6823-6850, doi:10.1175/JCLI-D-16-0609.1, Table 1 ('For time-varying emissions, the final year of emissions is persisted')."
+        simple_es: "Después de 2008 el modelo dejó de actualizar la contaminación por combustible. Tampoco incluye erupciones después de 2010."
+        scientific_es: "MERRA-2 mantiene las emisiones antropogénicas de SO₂ (EDGAR v4.2) en sus valores de 2008 y las de SO₄ (AeroCom HCA0 v1) en los de 2006; no incluye erupciones volcánicas después de 2010 (solo un ciclo repetido de desgasificación). Solo se asimila la AOD total a 550 nm, así que los cambios posteriores del sulfato reflejan la meteorología y los incrementos de AOD, no cambios de emisiones. Randles et al. 2017, J. Climate 30, 6823-6850, doi:10.1175/JCLI-D-16-0609.1, tabla 1 («For time-varying emissions, the final year of emissions is persisted»)."
   cross_check: null
-  words: { subject: "pollution from factories and power plants", verb: is, up: "going up", down: "going down" }
-  words_es: { subject: "la contaminación de las fábricas", up: "está aumentando", down: "está disminuyendo", changing: "está cambiando" }
+  # names what the model computes, not a source: MERRA-2 sulfate also comes from volcanoes and the ocean
+  words: { subject: "sulfate particles in the air", verb: are, up: "going up", down: "going down" }
+  words_es: { subject: "las partículas de sulfato en el aire", up: "están aumentando", down: "están disminuyendo", changing: "están cambiando" }
   kid_units: { scale: 10, label: "on our sulfate scale", label_es: "en nuestra escala de sulfato" }  # relative scale: the model's surface concentration (µg/m³) x 10 so whole numbers move
   themes: { air: driver, burning_fuel: driver }
 
@@ -406,7 +416,16 @@
   cadence: hourly
   grid_deg: 0.5
   record_start: 1980-01
-  artifacts: []
+  artifacts:
+    # frozen inputs plus an inventory switch (user decision Nov 15)
+    - kind: frozen_emissions
+      start: 2007-01
+      action: flag
+      note:
+        simple: After 2006 the model stopped updating pollution from fuel. Its fire data changed in 2010.
+        scientific: "MERRA-2 persists anthropogenic organic-carbon and black-carbon emissions (AeroCom HCA0 v1) at their 2006 values; biomass-burning emissions switch from GFED v3.1 (1997-2009) to QFED 2.4 (2010 on). Only total 550 nm AOD is assimilated. Randles et al. 2017, J. Climate 30, 6823-6850, doi:10.1175/JCLI-D-16-0609.1, Table 1 ('For time-varying emissions, the final year of emissions is persisted')."
+        simple_es: "Después de 2006 el modelo dejó de actualizar la contaminación por combustible. Sus datos de incendios cambiaron en 2010."
+        scientific_es: "MERRA-2 mantiene las emisiones antropogénicas de carbono orgánico y negro (AeroCom HCA0 v1) en sus valores de 2006; las emisiones de quema de biomasa pasan de GFED v3.1 (1997-2009) a QFED 2.4 (desde 2010). Solo se asimila la AOD total a 550 nm. Randles et al. 2017, J. Climate 30, 6823-6850, doi:10.1175/JCLI-D-16-0609.1, tabla 1 («For time-varying emissions, the final year of emissions is persisted»)."
   cross_check: null
   words: { subject: "carbon in the air", verb: is, up: "going up", down: "going down" }
   words_es: { subject: "el carbono en el aire", up: "está aumentando", down: "está disminuyendo", changing: "está cambiando" }
@@ -577,7 +596,7 @@
   source: { instrument: CERES SYN1deg, platform: null, type: model, instrument_id: ceres_syn1deg, delivered_by: NASA POWER }
   kind: haze  # which published assessments speak about it (expectations.yaml)
   units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3, simple_es: "puntos en la escala de bruma" }
-  grid_deg: 0.5
+  grid_deg: 1.0  # verified: POWER AOD_55 cell centres are 1 degree apart (cached regional response, Nov 2026); SYN1deg is 1 x 1 degree
   record_start: 2001-01  # verified: POWER monthly AOD_55 is fill (-999) through 2000, first valid month 2001-01 (two points, Nov 2026)
   floor: 0.0
   artifacts: []

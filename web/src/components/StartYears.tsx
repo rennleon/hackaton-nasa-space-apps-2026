@@ -100,11 +100,20 @@ export function StartYears({ result }: { result: AnalysisResult }) {
       </p>
       <p className="muted sy-count">
         {simple
-          ? s('startyears.count', 'In {same} of {n} tries, the change points the same way. We are sure in {sure}.', '', {
-              same: sy.n_same_sign,
-              n: sy.n_starts,
-              sure: sy.n_significant,
-            })
+          ? // "We are sure in 0" read as nonsense: zero sure tries gets its own sentence
+            sy.n_significant === 0
+            ? cls === 'unclear'
+              ? // the headline already says "None of them is sure."
+                s('startyears.countOnly', 'In {same} of {n} tries, the change points the same way.', '', { same: sy.n_same_sign, n: sy.n_starts })
+              : s('startyears.countNone', 'In {same} of {n} tries, the change points the same way. None of them is sure yet.', '', {
+                same: sy.n_same_sign,
+                n: sy.n_starts,
+              })
+            : s('startyears.count', 'In {same} of {n} tries, the change points the same way. We are sure in {sure} of them.', '', {
+                same: sy.n_same_sign,
+                n: sy.n_starts,
+                sure: sy.n_significant,
+              })
           : s('startyears.count', '', '{same} of {n} start years ({first} to {last}) have the same sign as the declared window; {sig} are significant (both tests agree, α = 0.05).', {
               same: sy.n_same_sign,
               n: sy.n_starts,

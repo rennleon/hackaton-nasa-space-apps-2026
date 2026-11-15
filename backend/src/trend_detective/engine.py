@@ -74,6 +74,10 @@ from .verdict import VerdictInputs, build_verdict, cant_tell, decide
 ROBUSTNESS_CODES = {
     "rests_on_few_years", "drift_changes_verdict", "drift_years_included", "cross_check_disagrees", "spatial_disagrees",
 }
+# Known breaks (action 'flag') that make a result "not robust" when the window crosses them. Only frozen model
+# inputs so far (user decision Nov 15): a trend over persisted emissions can't follow real emission changes.
+# Other flagged breaks (input changes, row anomaly) stay as warnings without changing the label.
+ROBUSTNESS_ARTIFACT_KINDS = {"frozen_emissions"}
 MIN_COMPARISON_YEARS = 10.0
 
 
@@ -433,15 +437,33 @@ def _contrast_text(
     return Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es)
 
 
-def _only_one(other: VariableCard, detail: str, detail_es: str | None = None) -> Comparison:
+# Why the second source can't be compared, in kid words. Each says what happened, never "only one
+# instrument has data" when the other one does have data that failed our checks. "Source", not "instrument":
+# the partner can be a model (MERRA-2).
+_ONLY_ONE_WHY: dict[str, tuple[str, str]] = {
+    "unreachable": ("We couldn't reach the other source, {i}, right now.",
+                    "No pudimos conectar con la otra fuente, {i}, en este momento."),
+    "no_data": ("The other source, {i}, has no data for this place.",
+                "La otra fuente, {i}, no tiene datos para este lugar."),
+    "short": ("The other source, {i}, shares too few years with this one.",
+              "La otra fuente, {i}, comparte muy pocos años con esta."),
+    "quality": ("The other source, {i}, has data here, but it failed our checks.",
+                "La otra fuente, {i}, tiene datos aquí, pero no pasó nuestras revisiones."),
+    "error": ("We couldn't compare with the other source, {i}.",
+              "No pudimos comparar con la otra fuente, {i}."),
+}
+
+
+def _only_one(other: VariableCard, detail: str, detail_es: str | None = None, why: str = "error") -> Comparison:
     """No second opinion available. The numeric fields are placeholders; `outcome` says so."""
+    en, es = (w.format(i=other.source.instrument) for w in _ONLY_ONE_WHY[why])
     return Comparison(
         against=other.id, slope_per_decade=0.0, same_sign=False, significant=False,
         outcome="only_one", against_instrument=other.source.instrument,
-        text=Text(simple="Only one instrument has data for this place.",
+        text=Text(simple=en,
                   scientific=f"No usable {other.name.scientific} series ({other.source.instrument}) to compare with: "
                              f"{detail}",
-                  simple_es="Solo un instrumento tiene datos para este lugar.",
+                  simple_es=es,
                   scientific_es=f"No hay una serie utilizable de {other.name.scientific_es or other.name.scientific} "
                                 f"({other.source.instrument}) con la cual comparar: {detail_es or detail}"),
     )
@@ -466,9 +488,9 @@ def contrast_instruments(
     except LiveSourceUnavailable as exc:  # detail path: a partner outage never fails the whole page
         s2, err = None, exc
     if err is not None:
-        return _only_one(other, *_unavailable_detail(err))
+        return _only_one(other, *_unavailable_detail(err), why="unreachable")
     if s2 is None or not np.isfinite(s2.values).any():
-        return _only_one(other, "no data for this place.", "no hay datos para este lugar.")
+        return _only_one(other, "no data for this place.", "no hay datos para este lugar.", why="no_data")
     try:
         w2 = resolve_window(s2, other)
         start = max(window.start, w2.start, key=month_index)
@@ -476,13 +498,14 @@ def contrast_instruments(
         years = window_years(start, end) if month_index(end) >= month_index(start) else 0.0
         if years < MIN_COMPARISON_YEARS:
             return _only_one(other, f"the two series share only {years:.1f} years (minimum {MIN_COMPARISON_YEARS:.0f}).",
-                             f"las dos series comparten solo {years:.1f} años (mínimo {MIN_COMPARISON_YEARS:.0f}).")
+                             f"las dos series comparten solo {years:.1f} años (mínimo {MIN_COMPARISON_YEARS:.0f}).",
+                             why="short")
         win = Window(start=start, end=end, reason="user", years=round(years, 2))
         p1, p2 = prepare(series, win), prepare(s2, win)
         months = season.months if season else None
         bad = [c.detail for c in quality(p2, other, months) if not c.passed]
         if bad:
-            return _only_one(other, bad[0].scientific, bad[0].scientific_es)
+            return _only_one(other, bad[0].scientific, bad[0].scientific_es, why="quality")
         c1, c2 = _core(p1, season), _core(p2, season)
     except ValueError as exc:
         return _only_one(other, f"{exc}.", f"{exc}.")
@@ -769,7 +792,8 @@ def analyze_region(
         chips.append(hc)
 
     then_now = _then_now(p, core, var, season)
-    warn = [c for c in chips if c.code in ROBUSTNESS_CODES]
+    lowering = {f"known_artifact_{a.kind}_{a.start}" for a in flagged if a.kind in ROBUSTNESS_ARTIFACT_KINDS}
+    warn = [c for c in chips if c.code in ROBUSTNESS_CODES or c.code in lowering]
     label = decide(tt.p_mk_hr, tt.p_ols, not warn, core.years_available, core.years_needed, ctx.alpha)
     verdict = build_verdict(label, VerdictInputs(
         variable=var, region=region, window=window, season=season,

@@ -9,7 +9,16 @@ import './VariableView.css'
 
 const PlotlyChart = lazy(() => import('./Plot'))
 
-export function Charts({ result }: { result: AnalysisResult }) {
+/** Why some years are grey rings (Simple view): every left-out year gets a reason a child can follow. */
+function outWhy(result: AnalysisResult, fromList: boolean, s: ReturnType<typeof useResultCopy>['s']): string | null {
+  if (!yearlyPoints(result).some((p) => !p.in_window)) return null
+  if (result.window?.reason === 'drift_cut') return s('result.chart.outWhy.drift', 'Grey rings are years we left out. The satellite started passing over at a different time.')
+  if (fromList || result.window?.reason === 'common') return s('result.chart.outWhy.list', 'Grey rings are years we left out. The list uses the same years for every measure.')
+  if (result.window?.reason === 'user') return s('result.chart.outWhy.picked', 'Grey rings are years outside the years you chose.')
+  return s('result.chart.outWhy.other', 'Grey rings were left out.')
+}
+
+export function Charts({ result, fromList = false }: { result: AnalysisResult; fromList?: boolean }) {
   const { c, s, view } = useResultCopy()
   if (!(result.series ?? []).length) return null
   const summary = chartSummary(result, view)
@@ -28,7 +37,7 @@ export function Charts({ result }: { result: AnalysisResult }) {
             <h3>{season ? s('result.chart.titleSeason', 'One dot for every {season}', 'Yearly means, {season}', { season }) : c('result.chart.title', COPY.chartTitle)}</h3>
             <p className="muted">
               {view === 'simple'
-                ? c('result.chart.caption', COPY.chartCaption)
+                ? [c('result.chart.caption', COPY.chartCaption), outWhy(result, fromList, s)].filter(Boolean).join(' ')
                 : s('result.chart.captionYearly', '', 'Yearly means of the de-seasonalised values with the Sen trend line and the 95% band. Open circles are outside the window.')}
             </p>
           </figcaption>

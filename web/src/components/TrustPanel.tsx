@@ -66,7 +66,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     same_direction_one_unsure: { simple: 'Both point the same way. One is not sure yet.', scientific: 'Same direction; only one instrument is significant.' },
     disagree: { simple: 'The two instruments disagree.', scientific: 'The two instruments disagree on the direction.' },
     both_unsure: { simple: 'Neither instrument is sure yet.', scientific: 'Neither instrument shows a significant trend.' },
-    only_one: { simple: 'Only one instrument sees this place.', scientific: 'Only one instrument covers this place.' },
+    only_one: { simple: 'We could not compare with a second source here.', scientific: 'No usable second-source series to compare with here.' },
   }
   const second: Row[] =
     cc && ccOutcome

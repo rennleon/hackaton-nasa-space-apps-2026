@@ -123,17 +123,21 @@ export const DEMOS: Demo[] = [
         ),
       },
       {
+        // MERRA-2 persists its emissions after 2008 (Randles et al. 2017), so this series is never "sure" across it
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'merra2_sulfate' },
-        target: 'where',
+        target: 'verdict',
         caption: tx(
-          'Now tiny sulfate particles, from a computer model. They go up in Delhi and down in the Sahara.',
-          'Surface sulfate (MERRA-2): significant increase in Delhi, significant decrease near Tamanrasset, each with its own record.',
+          'Now tiny sulfate particles, from a computer model. Here it says "Maybe, not sure yet".',
+          'Surface sulfate (MERRA-2), Delhi: significant but not robust, because the window crosses a known break in the model inputs.',
         ),
       },
       {
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'merra2_sulfate' },
-        target: 'where-both',
-        caption: tx('Look at this sentence. Different places can change in different ways.', 'Opposite directions in two places, each with both tests agreeing.'),
+        target: 'where',
+        caption: tx(
+          'Why? After 2008 the model stopped updating pollution. Good detectives check how data is made.',
+          'MERRA-2 persists anthropogenic emissions after 2008 (Randles et al. 2017, Table 1), so no place gets a robust result for this series.',
+        ),
       },
     ],
   },

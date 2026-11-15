@@ -47,6 +47,11 @@ class UnitsInfo(Model):
     display: str
     simple: str
     decimals: int
+    # The Simple view's scale: kid value = display value * kid_scale, read with kid_label ("on the haze scale").
+    # `simple` names the DISPLAY unit, so a Simple-view amount must use these, never `simple` with a kid number.
+    kid_scale: float = 1.0
+    kid_label: str | None = None
+    kid_label_es: str | None = None
 
 
 class VariableRef(Model):
@@ -261,7 +266,7 @@ class Verdict(Model):
     label: Label
     certainty: Certainty  # the three-step "how sure are we" meter (+ can't tell)
     answer: Text  # one-sentence answer, shown first
-    how_much: Text  # simple: then vs now in whole numbers, or "watch for about N more years"
+    how_much: Text  # simple: then vs now in whole numbers, or "if it keeps going like this, we'd know in about N years"
     headline: Text
     sentence: Text
     notes: list[Text] = Field(default_factory=list)

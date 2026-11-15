@@ -46,7 +46,7 @@ def test_one_sure_other_opposite_and_unsure_is_not_agreement():
 def test_partner_without_data_is_only_one_and_no_false_chip():
     r = run(make_raw(*POWER_RANGE, seed=1, **STRONG), None)
     cc = r.robustness.cross_check
-    assert cc.outcome == "only_one" and "one instrument" in cc.text.simple
+    assert cc.outcome == "only_one" and "has no data for this place" in cc.text.simple
     assert not any(c.code == "cross_check_disagrees" for c in r.chips)
 
 

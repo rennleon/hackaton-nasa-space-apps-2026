@@ -29,3 +29,13 @@ def test_errors():
 def test_scan():
     s = client.get("/regions/cajamarca_west/scan", params={"theme": "water"}).json()
     assert s["method"] == "benjamini_hochberg" and s["entries"]
+
+
+def test_frozen_model_emissions_make_a_sure_trend_not_robust():
+    # MERRA-2 persists emissions after 2008 (Randles et al. 2017): a window across it is never "Sure it's real"
+    r = client.get("/regions/cajamarca_highlands/variables/merra2_sulfate").json()
+    assert r["verdict"]["certainty"] != "sure"
+    assert any(c["code"] == "known_artifact_frozen_emissions_2009-01" for c in r["chips"])
+    late = client.get("/regions/cajamarca_highlands/variables/merra2_sulfate/analyze",
+                      params={"start": "1980-01", "end": "2008-12"}).json()  # before the freeze: no flag
+    assert not any(c["code"].startswith("known_artifact_frozen") for c in late["chips"])

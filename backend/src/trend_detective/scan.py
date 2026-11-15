@@ -199,7 +199,7 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
             variable_id=var.id, name=var.name, role=role, source_type=var.source.type,
             shortlist_label=short, verdict_label=label,
             slope_per_decade=r.trend.slope_per_decade if r.trend else None,
-            units=var.units.info(), p_decisive=ps[i], p_adjusted=p_adj,
+            units=var.units_info(), p_decisive=ps[i], p_adjusted=p_adj,
             worth_investigating=bool(sel and sel.worth_investigating),
             mdt_per_decade=sel.mdt_per_decade if sel else None,
             why=why,

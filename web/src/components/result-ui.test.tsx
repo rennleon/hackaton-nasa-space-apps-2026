@@ -82,3 +82,27 @@ describe('TrustPanel', () => {
     expect(container.querySelectorAll('.trust-row svg').length).toBe(container.querySelectorAll('.trust-row').length)
   })
 })
+
+describe('Charts caption: why grey rings were left out', () => {
+  // Plotly is lazy-loaded; the caption renders without it.
+  const caption = () => document.querySelector('.chart-main figcaption p')?.textContent ?? ''
+  it('names satellite drift for a drift cut', async () => {
+    const { Charts } = await import('./Charts')
+    wrap(<Charts result={base} />)
+    expect(caption()).toContain('The satellite started passing over at a different time.')
+  })
+  it('names the shared list years when opened from the list', async () => {
+    const { Charts } = await import('./Charts')
+    wrap(<Charts result={{ ...base, window: { ...base.window!, reason: 'user' } }} fromList />)
+    expect(caption()).toContain('The list uses the same years for every measure.')
+  })
+  it('names the chosen years for a user period, and says nothing when no year is left out', async () => {
+    const { Charts } = await import('./Charts')
+    const { unmount } = wrap(<Charts result={{ ...base, window: { ...base.window!, reason: 'user' } }} />)
+    expect(caption()).toContain('Grey rings are years outside the years you chose.')
+    unmount()
+    const all = { ...base, yearly_series: (base.yearly_series ?? []).map((p) => ({ ...p, in_window: true })) }
+    wrap(<Charts result={all} />)
+    expect(caption()).not.toContain('Grey rings')
+  })
+})

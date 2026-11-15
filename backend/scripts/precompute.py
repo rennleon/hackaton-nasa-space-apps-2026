@@ -65,7 +65,7 @@ def where_entry(region, kind: str, res, var) -> dict:
         "slope_per_decade": tr.slope_per_decade if tr else None,
         "ci_low": tr.ci_low if tr else None,
         "ci_high": tr.ci_high if tr else None,
-        "units": var.units.info().model_dump(mode="json"),
+        "units": var.units_info().model_dump(mode="json"),
         "window_start": res.window.start if res.window else None,
         "window_end": res.window.end if res.window else None,
         "availability": availability_of(res),

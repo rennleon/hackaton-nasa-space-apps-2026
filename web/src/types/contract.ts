@@ -77,6 +77,9 @@ export interface UnitsInfo {
   display: string;
   simple: string;
   decimals: number;
+  kid_scale: number;
+  kid_label: string | null;
+  kid_label_es: string | null;
 }
 /**
  * Where the series came from. Live sources fill the same fields.

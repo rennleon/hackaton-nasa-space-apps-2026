@@ -43,7 +43,7 @@ describe('WhereElse (Simple)', () => {
     mockFetch(fixture)
     wrap({ region: 'wisconsin', variable: 'power_t2m' })
     expect(await screen.findByRole('heading', { name: 'Where else?' })).toBeInTheDocument()
-    expect(screen.getByText('The same measurement in other places.')).toBeInTheDocument()
+    expect(screen.getByText('The same measurement in other places. Each one uses its own years.')).toBeInTheDocument()
     for (const n of ['Cajamarca highlands', 'Wisconsin', 'Delhi, India', 'Manaus, Brazil', 'Tamanrasset, Algeria']) {
       expect(screen.getByText(n)).toBeInTheDocument()
     }

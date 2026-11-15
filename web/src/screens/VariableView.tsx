@@ -178,7 +178,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
               <TrustPanel result={res.data} />
               <StartYears result={res.data} />
             </div>
-            <Charts result={res.data} />
+            <Charts result={res.data} fromList={fromList && !(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable} />
           </div>
           <WhereElse variableId={card.id} route={route} go={go} />
         </>

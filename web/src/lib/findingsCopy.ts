@@ -67,7 +67,7 @@ export const FC = {
   'findings.second.same_direction_one_unsure': p('Same direction, one not sure yet', 'Same direction, only one significant'),
   'findings.second.disagree': p('They disagree', 'Opposite directions, both significant'),
   'findings.second.both_unsure': p("They don't tell the same story yet", 'No agreement: neither significant, or only one significant with opposite sign'),
-  'findings.second.only_one': p('Only one instrument here'),
+  'findings.second.only_one': p('No second source to compare'),
   'findings.heading.up': p('Heading up', 'Trend up'),
   'findings.heading.down': p('Heading down', 'Trend down'),
   'findings.heading.flat': p('Staying level', 'Flat'),

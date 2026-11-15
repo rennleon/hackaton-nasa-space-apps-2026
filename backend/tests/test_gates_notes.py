@@ -126,3 +126,84 @@ def test_short_record_note_only_when_it_applies(cat):
     assert short_record_note("significant", _inputs(cat, 0.5, None)) == []
     assert short_record_note("borderline", _inputs(cat, 0.5, _selection("fail"))) == []
     assert short_record_note("significant", _inputs(cat, 0.1, _selection("fail"))) == []  # not bigger than typical
+
+
+# --- Simple-view amounts use the kid scale (regression: 0.031 AOD/decade was shown as "under 1 point on the
+# haze scale" beside "we'd know in about 21 years"; the haze scale is AOD x 100, so it is about 3 points)
+
+
+def test_detectability_amount_on_the_kid_scale():
+    assert detect_sentences(3.1, None, "on the haze scale")[0] == (
+        "We can see changes from about 3 points on the haze scale. That is per 10 years.")
+    assert detect_sentences(0.4, None, "on the haze scale")[0] == (
+        "We can see changes under 1 point on the haze scale. That is per 10 years.")
+
+
+def test_stage1_detectability_scales_display_units_to_kid_units(cat):
+    from trend_detective.selection import stage1
+
+    aod = cat.variables["power_aod"]
+    rng = np.random.default_rng(0)
+    t = np.arange(252) / 12.0
+    y = rng.normal(0, 0.03, 252)  # AOD-sized noise: MDT of a few hundredths per decade
+    sel = stage1(aod, next(iter(cat.regions.values())), None, [], [], t, y, 21.0, 12)
+    det = next(c for c in sel.checks if c.code == "detectability")
+    kid = sel.mdt_per_decade * aod.kid_units.scale
+    assert kid >= 1, "fixture should give a kid-scale MDT of at least 1 point"
+    assert f"about {round(kid)} point" in det.detail.simple and "under 1" not in det.detail.simple
+    assert "puntos en la escala de bruma" in det.detail.simple_es or "punto en la escala de bruma" in det.detail.simple_es
+
+
+def test_tell_me_more_amount_is_on_the_kid_scale_without_decimals(cat):
+    from trend_detective.verdict import build_verdict
+
+    x = _inputs(cat, -0.011, None)
+    x.variable = cat.variables["power_aod"]
+    v = build_verdict("possibly_changing", x)
+    assert "about 1 point on the haze scale every 10 years" in v.sentence.simple
+    assert not re.search(r"\d\.\d", v.sentence.simple) and not re.search(r"\d,\d", v.sentence.simple_es)
+
+
+def test_small_change_across_a_rounding_edge_is_less_than_one_not_about_one(cat):
+    # regression: 13.4 -> 13.7 degrees rounds to 13 -> 14, but the change is 0.3, never "about 1 degree"
+    from trend_detective.contract import ThenNow
+    from trend_detective.verdict import build_verdict
+
+    x = _inputs(cat, 0.15, None)
+    x.variable = cat.variables["airs_t_surf_night"]
+    x.then_now = ThenNow(year_then=2002, year_now=2021, value_then=13.4, value_now=13.7,
+                         kid_scale=1, kid_label="degrees", kid_label_es="grados")
+    v = build_verdict("significant", x)
+    assert v.how_much.simple == "Since 2002 it went up by less than 1 degree."
+    assert v.how_much.simple_es == "Desde 2002 subió menos de 1 grado."
+
+
+@pytest.mark.parametrize("why,en,es", [
+    ("unreachable", "couldn't reach the other source, OMI", "No pudimos conectar con la otra fuente, OMI"),
+    ("no_data", "The other source, OMI, has no data", "La otra fuente, OMI, no tiene datos"),
+    ("short", "shares too few years", "comparte muy pocos años"),
+    ("quality", "has data here, but it failed our checks", "tiene datos aquí, pero no pasó nuestras revisiones"),
+    ("error", "couldn't compare with the other source, OMI", "No pudimos comparar con la otra fuente, OMI"),
+])
+def test_second_source_message_says_why(cat, why, en, es):
+    from trend_detective.engine import _only_one
+
+    c = _only_one(cat.variables["omi_aod"], "detail.", "detalle.", why=why)
+    assert c.outcome == "only_one" and en in c.text.simple and es in c.text.simple_es
+    assert "Only one instrument" not in c.text.simple and _words(c.text.simple) <= 14
+
+
+def test_spanish_about_one_is_never_unos_1():
+    from trend_detective.verdict import about_es
+
+    assert about_es(1, "en la escala de humedad (0 a 100)") == "alrededor de 1 punto en la escala de humedad (0 a 100)"
+    assert about_es(1, "grados") == "alrededor de 1 grado"
+    assert about_es(3, "grados") == "unos 3 grados"
+
+
+def test_merra2_aerosol_cards_flag_frozen_emissions(cat):
+    # Randles et al. 2017 Table 1: final emission year persisted; flagged so a window across it is never "sure"
+    for vid, start in (("merra2_sulfate", "2009-01"), ("merra2_oc", "2007-01")):
+        arts = cat.variables[vid].artifacts
+        assert [(a.kind, a.start, a.action) for a in arts] == [("frozen_emissions", start, "flag")]
+        assert "doi:10.1175/JCLI-D-16-0609.1" in arts[0].note.scientific and arts[0].note.simple_es

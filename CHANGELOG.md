@@ -43,6 +43,32 @@ for how to release and how to roll back.
   ready-made places keep it working offline.
 
 ### Fixed
+- MERRA-2 sulfate and carbon particles now carry a known break ("frozen_emissions"): MERRA-2 persists its
+  anthropogenic emissions after 2008 (SO₂) / 2006 (SO₄, OC, BC), drops volcanic eruptions after 2010 and switches
+  fire inventories in 2010 (Randles et al. 2017, Table 1). A window across the date gets a warning chip, so a
+  "Sure it's real" there becomes "Maybe, not sure yet" (user decision).
+  Only `frozen_emissions` lowers the label; other flagged breaks stay warnings. The Delhi demo's sulfate steps
+  now explain the "Maybe" instead of showing opposite sure trends.
+- "Since 2002 it went up by about 1 degree" for a 0.3-degree change: any change under 1 unit now reads "less than
+  1", the same threshold as every other Simple amount. Spanish says "alrededor de 1 punto", never "unos 1 punto".
+- NASA POWER haze (`power_aod`) grid is 1° (SYN1deg), not 0.5°; "Where else?" units carry the kid scale.
+- Simple-view amounts on scaled units were off by the kid scale: "We can see changes under 1 point on the haze
+  scale" was 0.031 AOD read as points, while the haze scale is AOD × 100 (about 3 points). Detectability,
+  "Tell me more" ("about 1 point on the haze scale every 10 years", no decimals), the details list and the Simple
+  charts now all use the kid scale and label (haze ×100, sulfate/carbon/NO₂ ×10). `UnitsInfo` carries
+  `kid_scale`, `kid_label`, `kid_label_es`. Labels and slopes are unchanged.
+- "We need to watch for about N more years" is now "If it keeps going like this, we'd know in about N more
+  years": Weatherhead's n* assumes the observed slope and noise persist, so it is not a forecast.
+- The second-instrument row no longer says "Only one instrument has data for this place" when the partner has
+  data that failed our checks (e.g. OMI over the Andes, 22% complete); it says why, and calls it a "source"
+  (the partner can be a model).
+- "No known instrument or input changes" is now "Our list has no changes to how this was measured in these
+  years": it reports what we checked, not that no change exists.
+- Sulfate headline no longer says "pollution from factories and power plants": MERRA-2 sulfate also comes from
+  volcanoes and the ocean. It now reads "sulfate particles in the air".
+- The Simple chart caption says why grey rings were left out (the list's shared years, satellite drift, or
+  the years you chose), and "Where else?" says each place uses all its years.
+- Start-year panel: "We are sure in 0" is now "None of them is sure yet" (and "sure in N of them").
 - Facts audit: every claim on screen checked against NASA data or an opened source. Haze (POWER AOD_55) is
   CERES SYN1deg, not MERRA-2; unsourced claims removed (Wisconsin wildfire smoke, sulfate from coal and oil,
   organic carbon "mostly fires"); "watch N more years" only while N is plausible; "rainiest months" instead of

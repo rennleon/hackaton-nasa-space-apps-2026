@@ -177,7 +177,7 @@ export function dynamicUses(): KeyUse[] {
   trust('result.trust.cross.same_direction_one_unsure', 'Both point the same way. One is not sure yet.', 'Same direction; only one instrument is significant.')
   trust('result.trust.cross.disagree', 'The two instruments disagree.', 'The two instruments disagree on the direction.')
   trust('result.trust.cross.both_unsure', 'Neither instrument is sure yet.', 'Neither instrument shows a significant trend.')
-  trust('result.trust.cross.only_one', 'Only one instrument sees this place.', 'Only one instrument covers this place.')
+  trust('result.trust.cross.only_one', 'We could not compare with a second source here.', 'No usable second-source series to compare with here.')
   trust('result.trust.agreement.agrees', 'This matches what scientists found.', 'Agrees with the published assessment.')
   trust('result.trust.agreement.differs', 'This is different from what scientists found.', 'Differs from the published assessment.')
   trust('result.trust.agreement.too_soon', 'Our record is too short to compare with the scientists yet.', 'Record too short to compare with the published assessment.')

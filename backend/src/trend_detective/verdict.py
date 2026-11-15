@@ -169,6 +169,11 @@ def amount_es(n: int, label: str) -> str:
     return f"{n} {label}"
 
 
+def about_es(n: int, label: str) -> str:
+    """Spanish 'about <n> <unit>': 'alrededor de 1 punto ...' for 1 (never 'unos 1 punto'), else 'unos 3 puntos ...'."""
+    return f"alrededor de {amount_es(1, label)}" if n == 1 else f"{_unos_es(label)} {amount_es(n, label)}"
+
+
 def less_than_one_es(label: str) -> str:
     """Spanish 'menos de 1 <unidad>' with singular agreement ('grado', 'unidad ...')."""
     if label.startswith("en "):
@@ -224,7 +229,6 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     up = x.slope_per_decade > 0
     phrase = w.up if up else w.down
     direction = "increase" if up else "decrease"
-    amount = f"{abs(x.slope_per_decade):.{d}f}"
     y0, y1 = x.window.start[:4], x.window.end[:4]
     region_s, region_sc = _place(x.region), x.region.name.scientific
     subj = _subject(x)
@@ -243,7 +247,6 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         subj_es = _subject_es(x)
         season_sc_es = f", medias de {x.season.name.scientific_es or x.season.name.scientific}" if x.season else ""
         name_sc_es = v.name.scientific_es or v.name.scientific
-        u_es = v.units.simple_es
 
     # --- one-sentence answer
     if certainty == "sure":
@@ -292,7 +295,8 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         change = (tn.value_now - tn.value_then) * tn.kid_scale
         up = change > 0
         size = max(1, round(abs(change)))
-        if a_n == b_n:
+        small = a_n == b_n or abs(change) < 1  # under 1 unit is "less than 1" everywhere, never rounded to "about 1"
+        if small:
             how_s = f"Since {tn.year_then} it went {'up' if up else 'down'} by {less_than_one(tn.kid_label)}."
         elif abs((b_n - a_n) - change) > 0.5:
             how_s = f"Since {tn.year_then} it went {'up' if up else 'down'} by about {amount_en(size, tn.kid_label)}."
@@ -302,10 +306,10 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         if es:
             lab = v.kid_units.label_es
             verb_es = "subió" if up else "bajó"
-            if a_n == b_n:
+            if small:
                 how_es = f"Desde {tn.year_then} {verb_es} {less_than_one_es(lab)}."
             elif abs((b_n - a_n) - change) > 0.5:
-                how_es = f"Desde {tn.year_then} {verb_es} {_unos_es(lab)} {amount_es(size, lab)}."
+                how_es = f"Desde {tn.year_then} {verb_es} {about_es(size, lab)}."
             else:
                 how_es = (f"En {tn.year_then}: {_unos_es(lab)} {kid_value_es(tn.value_then, tn.kid_scale, lab)}. "
                           f"En {tn.year_now}: {_unos_es(lab)} {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
@@ -316,13 +320,16 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         # plausible -- at most as many more years as we already have, and at most MAX_MORE_YEARS.
         more = math.ceil(x.years_needed - x.years_available) if x.years_needed is not None else None
         if more is not None and 0 < more <= min(MAX_MORE_YEARS, x.years_available):
-            how_s = f"We need to watch for about {more} more years."
+            # n* assumes the change keeps its observed speed: say so, never promise a date
+            how_s = f"If it keeps going like this, we'd know in about {more} more years."
             how_sc = (f"{slope_sc}. Years to detection ≈ {x.years_needed:.0f} vs {x.years_available:.0f} "
-                      "available (Weatherhead et al. 1998), evaluated at the observed slope.")
+                      "available (Weatherhead et al. 1998: 90% chance of detection at α = 0.05), assuming the observed "
+                      "slope and noise persist; not a forecast.")
             if es:
-                how_es = f"Necesitamos mirar unos {more} años más."
+                how_es = f"Si sigue así, lo sabríamos en unos {more} años más."
                 how_sc_es = (f"{slope_sc_es}. Años hasta la detección ≈ {x.years_needed:.0f} frente a "
-                             f"{x.years_available:.0f} disponibles (Weatherhead et al. 1998), con la pendiente observada.")
+                             f"{x.years_available:.0f} disponibles (Weatherhead et al. 1998: 90 % de probabilidad de detección "
+                             "con α = 0,05), suponiendo que la pendiente y el ruido observados se mantienen; no es un pronóstico.")
         elif more is not None and more > 0:
             how_s = "This change is too small to see in these years."
             how_sc = (f"{slope_sc}. Not significant at α = {x.alpha}; at the observed slope, detection would need far "
@@ -351,7 +358,10 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     )
     chip_reasons_s = " ".join(c.text.simple for c in x.warning_chips)
     chip_reasons_sc = " ".join(c.text.scientific for c in x.warning_chips)
-    per10 = f"about {amount} {v.units.simple} every 10 years"
+    # kid units, like the then/now line: "0.011 AOD" is "about 1 point on the haze scale", no decimals (R5)
+    k10 = abs(x.slope_per_decade) * v.kid_units.scale
+    per10 = (less_than_one(v.kid_units.label) if k10 < 1
+             else f"about {amount_en(round(k10), v.kid_units.label)}") + " every 10 years"
     if es:
         sci_core_es = (
             f"{name_sc_es}, {region_sc_es}, {x.window.start} a {x.window.end}{season_sc_es}: {slope_sc_es}. "
@@ -360,27 +370,28 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         )
         chip_reasons_es = " ".join(c.text.simple_es or c.text.simple for c in x.warning_chips)
         chip_reasons_sc_es = " ".join(c.text.scientific_es or c.text.scientific for c in x.warning_chips)
-        per10_es = f"unos {amount} {u_es} cada 10 años"
+        lab10 = v.kid_units.label_es
+        per10_es = (less_than_one_es(lab10) if k10 < 1 else about_es(round(k10), lab10)) + " cada 10 años"
         ran_es = ""
         if x.checks_run:
             names = ", ".join(CHECK_NAMES_ES.get(c, c) for c in x.checks_run)
             ran_es = f" Comprobaciones de robustez hechas ({names}): ninguna contradice la tendencia."
     if label == "significant":
-        more_s = f"From {y0} to {y1} it changed by {per10}. It is very unlikely this is luck."
+        more_s = f"It changed by {per10}. It is very unlikely this is luck."
         ran = f" Robustness checks run ({', '.join(x.checks_run)}): none contradicts the trend." if x.checks_run else ""
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}.{ran}"
         headline_sc = f"Significant {direction}"
         if es:
-            more_es = (f"De {y0} a {y1} cambió {per10_es}. "
+            more_es = (f"Cambió {per10_es}. "
                        "Es muy poco probable que esto sea pura suerte.")
             more_sc_es = f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con α = {x.alpha}.{ran_es}"
             headline_sc_es = f"{direction_es.capitalize()} {adj_es}"
     elif label == "significant_fragile":
-        more_s = f"From {y0} to {y1} it changed by {per10}. But be careful. {chip_reasons_s}"
+        more_s = f"It changed by {per10}. But be careful. {chip_reasons_s}"
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}, but: {chip_reasons_sc}"
         headline_sc = f"Significant {direction}, not robust"
         if es:
-            more_es = f"De {y0} a {y1} cambió {per10_es}. Pero hay que tener cuidado. {chip_reasons_es}"
+            more_es = f"Cambió {per10_es}. Pero hay que tener cuidado. {chip_reasons_es}"
             more_sc_es = (f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con "
                           f"α = {x.alpha}, pero: {chip_reasons_sc_es}")
             headline_sc_es = f"{direction_es.capitalize()} {adj_es}, no robust{'o' if up else 'a'}"

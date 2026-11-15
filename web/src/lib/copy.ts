@@ -34,7 +34,7 @@ export const COPY = {
   yearsOfData: (n: number): Text => tx(`We looked at ${n} years of data.`, `${n} years of data in the window.`),
   chartTitle: tx('One dot for every year', 'Yearly means and trend'),
   chartCaption: tx(
-    'Each dot is one year. The orange line shows where things are heading. Grey rings were left out.',
+    'Each dot is one year. The orange line shows where things are heading.',
     'Yearly means of the de-seasonalised values with the Sen trend line. Open circles are outside the window.',
   ),
   chartDotsIn: tx('Used in the answer', 'In window'),

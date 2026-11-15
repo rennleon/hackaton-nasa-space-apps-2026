@@ -46,7 +46,7 @@ describe('Variable view, Simple', () => {
 
   it('too soon: shows the years-to-watch sentence', async () => {
     const { container } = open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&season=dry')
-    expect(await screen.findByText('We need to watch for about 30 more years.')).toBeInTheDocument()
+    expect(await screen.findByText("If it keeps going like this, we'd know in about 30 more years.")).toBeInTheDocument()
     expect(screen.getByText('Too soon to tell').closest('li')).toHaveAttribute('aria-current', 'step')
     expect(bannedIn(container.textContent ?? '')).toEqual([])
   })
