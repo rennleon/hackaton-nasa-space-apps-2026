@@ -42,11 +42,11 @@ if (!cl.includes(`## [${next}]`)) {
   writeFileSync(clPath, cl)
 }
 
-// Static results carry engine_version: regenerate them offline (NASA POWER from the on-disk cache).
+// Static results carry engine_version: regenerate them offline (NASA POWER and Giovanni from the committed cache).
 execFileSync('uv', ['run', 'python', 'scripts/precompute.py'], {
   cwd: path.join(ROOT, 'backend'),
   stdio: 'inherit',
-  env: { ...process.env, TD_POWER_OFFLINE: '1' },
+  env: { ...process.env, TD_POWER_OFFLINE: '1', TD_GIOVANNI_OFFLINE: '1' },
 })
 
 git('add', '-A')
