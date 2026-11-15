@@ -1,6 +1,8 @@
-import pytest
+from typing import ClassVar
 
+import pytest
 from test_api_custom import client  # noqa: F401  (fixture: API on fixture data)
+
 from trend_detective import ratelimit
 from trend_detective.ratelimit import Buckets, RateLimited
 
@@ -42,7 +44,7 @@ def test_zero_disables():
 def test_client_ip_proxy(monkeypatch):
     class Req:
         client = type("C", (), {"host": "1.1.1.1"})()
-        headers = {"x-forwarded-for": "9.9.9.9, 2.2.2.2"}
+        headers: ClassVar[dict[str, str]] = {"x-forwarded-for": "9.9.9.9, 2.2.2.2"}
 
     monkeypatch.delenv("TD_TRUST_PROXY", raising=False)
     assert ratelimit.client_ip(Req()) == "1.1.1.1"

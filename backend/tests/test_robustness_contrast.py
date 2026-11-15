@@ -11,8 +11,8 @@ POWER_RANGE = ("1990-01", "2021-12")
 AIRS_RANGE = ("2002-09", "2021-12")
 BANNED = re.compile(r"p-value|\bsignifican|\bdecade|\banomal|statistically|mann.kendall|\bols\b|hamed", re.IGNORECASE)
 
-STRONG = dict(slope_per_decade=0.8, sd=1.0)
-FLAT = dict(slope_per_decade=0.0, sd=1.0)
+STRONG = {"slope_per_decade": 0.8, "sd": 1.0}
+FLAT = {"slope_per_decade": 0.0, "sd": 1.0}
 
 
 def run(power, airs, var="power_t2m"):
@@ -22,8 +22,8 @@ def run(power, airs, var="power_t2m"):
 
 @pytest.mark.parametrize("p_kw,a_kw,seed_a,outcome,seed_p", [
     (STRONG, STRONG, 2, "agree", 1),
-    (STRONG, dict(slope_per_decade=-0.8, sd=1.0), 2, "disagree", 1),
-    (STRONG, dict(slope_per_decade=0.1, sd=1.5), 3, "same_direction_one_unsure", 1),
+    (STRONG, {"slope_per_decade": -0.8, "sd": 1.0}, 2, "disagree", 1),
+    (STRONG, {"slope_per_decade": 0.1, "sd": 1.5}, 3, "same_direction_one_unsure", 1),
     (FLAT, FLAT, 4, "both_unsure", 5),
 ])
 def test_outcomes(p_kw, a_kw, seed_a, outcome, seed_p):

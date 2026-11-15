@@ -8,7 +8,7 @@ from trend_detective import scan as scan_mod
 from trend_detective.engine import analyze_region
 from trend_detective.scan import scan_region
 
-GOOD = dict(slope_per_decade=0.8, sd=1.0)
+GOOD = {"slope_per_decade": 0.8, "sd": 1.0}
 
 
 def entries(data, **kw):
@@ -20,7 +20,7 @@ def entries(data, **kw):
 
 
 def test_each_availability_label():
-    ctx, _, s, by = entries({
+    _ctx, _, _s, by = entries({
         "power_t2m": make_raw("1981-01", "2021-12", seed=1, **GOOD),
         "airs_t_surf_day": make_raw("2002-09", "2008-12", seed=2, **GOOD),  # 6 years: too short
         "airs_t_surf_night": make_raw("2002-09", "2021-12", seed=3, nan_share=0.5, **GOOD),  # half the months missing
@@ -53,7 +53,7 @@ def test_all_missing_series_is_no_data_here():
 
 
 def test_live_outage_is_recorded_not_raised_and_others_survive():
-    _, _, s, by = entries({
+    _, _, _s, by = entries({
         "power_t2m": make_raw("1981-01", "2021-12", seed=1, **GOOD),
         "airs_t_surf_day": LIVE_DOWN,
     })

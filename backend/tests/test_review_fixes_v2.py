@@ -16,7 +16,7 @@ from trend_detective.gates import bbox_chip
 from trend_detective.scan import scan_region
 from trend_detective.sources import GiovanniBoxTooLarge, RawSeries, SourceChain
 
-STRONG = dict(slope_per_decade=0.8, sd=1.0)
+STRONG = {"slope_per_decade": 0.8, "sd": 1.0}
 BANNED = re.compile(r"p-value|\bsignifican|\bdecade|\banomal|statistically|mann.kendall|\bols\b|hamed", re.IGNORECASE)
 
 

@@ -6,7 +6,7 @@ from synthetic import LIVE_DOWN, make_ctx, make_raw
 
 from trend_detective import api
 
-GOOD = dict(slope_per_decade=0.8, sd=1.0)
+GOOD = {"slope_per_decade": 0.8, "sd": 1.0}
 PLACE = {"theme": "heat", "lat": -7.16, "lon": -78.51}
 
 
@@ -19,7 +19,7 @@ def client_for(monkeypatch, data):
 
 
 def test_partial_outage_is_200_with_fetch_failed_and_is_not_cached(monkeypatch):
-    c, ctx, src = client_for(monkeypatch, {
+    c, _ctx, src = client_for(monkeypatch, {
         "power_t2m": make_raw("1981-01", "2021-12", seed=1, **GOOD),
         "airs_t_surf_day": LIVE_DOWN,
     })
