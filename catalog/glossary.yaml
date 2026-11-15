@@ -111,9 +111,9 @@
   term: { simple: satellite drift, scientific: orbit drift, simple_es: "desvío del satélite", scientific_es: "deriva orbital" }
   definition:
     simple: The satellite slowly started passing over later in the day, which can fake a change.
-    scientific: Aqua stopped orbit maintenance in 2022; its equator-crossing time drifted later, biasing diurnal sampling.
+    scientific: Aqua made its last drag make-up manoeuvre in Dec 2021; since then its equator-crossing time has drifted later, biasing diurnal sampling.
     simple_es: "El satélite empezó a pasar poco a poco más tarde en el día, y eso puede fingir un cambio."
-    scientific_es: "Aqua dejó de mantener su órbita en 2022; su hora de cruce del ecuador se retrasó y sesgó el muestreo diurno."
+    scientific_es: "Aqua hizo su última maniobra de compensación de arrastre en diciembre de 2021; desde entonces su hora de cruce del ecuador se retrasa y sesga el muestreo diurno."
 - id: grid_cell
   term: { simple: map square, scientific: grid cell, simple_es: "cuadrado del mapa", scientific_es: "celda de la rejilla" }
   definition:

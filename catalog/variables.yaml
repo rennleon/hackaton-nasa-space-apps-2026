@@ -35,9 +35,9 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua made its last drag make-up manoeuvre in Dec 2021 and has drifted since; the later overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua hizo su última maniobra de compensación de arrastre en diciembre de 2021 y deriva desde entonces; la hora de paso más tardía sesga el muestreo diurno."
   cross_check: power_rh2m
   words: { subject: "afternoons", verb: are, up: "getting more humid", down: "getting less humid" }
   words_es: { subject: "las tardes", up: "se vuelven más húmedas", down: "se vuelven menos húmedas", changing: "están cambiando" }
@@ -63,9 +63,9 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua made its last drag make-up manoeuvre in Dec 2021 and has drifted since; the later overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua hizo su última maniobra de compensación de arrastre en diciembre de 2021 y deriva desde entonces; la hora de paso más tardía sesga el muestreo diurno."
   cross_check: power_rh2m
   words: { subject: "nights", verb: are, up: "getting more humid", down: "getting less humid" }
   words_es: { subject: "las noches", up: "se vuelven más húmedas", down: "se vuelven menos húmedas", changing: "están cambiando" }
@@ -91,15 +91,15 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua made its last drag make-up manoeuvre in Dec 2021 and has drifted since; the later overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua hizo su última maniobra de compensación de arrastre en diciembre de 2021 y deriva desde entonces; la hora de paso más tardía sesga el muestreo diurno."
   cross_check: power_t2m
   words: { subject: "afternoons", verb: are, up: "getting warmer", down: "getting cooler" }
   words_es: { subject: "las tardes", up: "se vuelven más cálidas", down: "se vuelven más frías", changing: "están cambiando" }
   kid_units: { scale: 1, label: "degrees", label_es: "grados" }
   reference_trend_per_decade: 0.2
-  reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
+  reference_source: "≈0.15–0.2 °C per decade (our arithmetic): global temperature rose a little more than 1 °C since 1880, two-thirds of it since 1975 (NASA Earth Observatory, World of Change: Global Temperatures, science.nasa.gov/earth/earth-observatory/world-of-change/global-temperatures)"
   themes: { heat: cross_check, hot_afternoons: target }
 
 - id: airs_t_surf_night
@@ -121,15 +121,15 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua made its last drag make-up manoeuvre in Dec 2021 and has drifted since; the later overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua hizo su última maniobra de compensación de arrastre en diciembre de 2021 y deriva desde entonces; la hora de paso más tardía sesga el muestreo diurno."
   cross_check: power_t2m
   words: { subject: "nights", verb: are, up: "getting warmer", down: "getting cooler" }
   words_es: { subject: "las noches", up: "se vuelven más cálidas", down: "se vuelven más frías", changing: "están cambiando" }
   kid_units: { scale: 1, label: "degrees", label_es: "grados" }
   reference_trend_per_decade: 0.2
-  reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
+  reference_source: "≈0.15–0.2 °C per decade (our arithmetic): global temperature rose a little more than 1 °C since 1880, two-thirds of it since 1975 (NASA Earth Observatory, World of Change: Global Temperatures, science.nasa.gov/earth/earth-observatory/world-of-change/global-temperatures)"
   themes: { heat: cross_check, warm_nights: target }
 
 - id: merra2_t2m
@@ -153,7 +153,7 @@
   words_es: { subject: "el aire", up: "se calienta", down: "se enfría", changing: "está cambiando" }
   kid_units: { scale: 1, label: "degrees", label_es: "grados" }
   reference_trend_per_decade: 0.2
-  reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
+  reference_source: "≈0.15–0.2 °C per decade (our arithmetic): global temperature rose a little more than 1 °C since 1880, two-thirds of it since 1975 (NASA Earth Observatory, World of Change: Global Temperatures, science.nasa.gov/earth/earth-observatory/world-of-change/global-temperatures)"
   themes: { heat: target }
 
 - id: gpm_precip
@@ -306,9 +306,9 @@
       action: flag
       note:
         simple: Since 2022 the satellite flies over later in the day. Take those years with care.
-        scientific: Aqua ceased orbit maintenance in Jan 2022 (later overpass). AOD is kept (measured Aqua–Terra offset after 2022 ≈ 0.009); flagged, not cut.
+        scientific: Aqua made its last drag make-up manoeuvre in Dec 2021 and has drifted since (later overpass; NASA Aqua mission page). AOD is kept; flagged, not cut.
         simple_es: "Desde 2022 el satélite pasa más tarde en el día. Toma esos años con cuidado."
-        scientific_es: "Aqua dejó de mantener su órbita en enero de 2022 (paso más tardío). Se conserva el AOD (desfase medido Aqua–Terra después de 2022 ≈ 0.009); se marca, no se corta."
+        scientific_es: "Aqua hizo su última maniobra de compensación de arrastre en diciembre de 2021 y deriva desde entonces (paso más tardío; página de la misión Aqua de la NASA). Se conserva el AOD; se marca, no se corta."
   cross_check: modis_terra_aod
   words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
   words_es: { subject: "el aire", up: "se llena de más bruma", down: "se vuelve más despejado", changing: "está cambiando" }
@@ -516,7 +516,7 @@
   artifacts: []
   cross_check: airs_t_surf_day  # different instrument; compare direction only (snapshot vs daily mean)
   reference_trend_per_decade: 0.2
-  reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
+  reference_source: "≈0.15–0.2 °C per decade (our arithmetic): global temperature rose a little more than 1 °C since 1880, two-thirds of it since 1975 (NASA Earth Observatory, World of Change: Global Temperatures, science.nasa.gov/earth/earth-observatory/world-of-change/global-temperatures)"
   words: { subject: "the air", verb: is, up: "getting warmer", down: "getting cooler" }
   words_es: { subject: "el aire", up: "se calienta", down: "se enfría", changing: "está cambiando" }
   kid_units: { scale: 1, label: "degrees", label_es: "grados" }
