@@ -11,6 +11,7 @@ import type { Route } from '../lib/route'
 import { parseYm } from '../lib/text'
 import { COPY } from '../lib/copy'
 import { LiveNotice } from '../components/LiveNotice'
+import { WhereElse } from '../components/WhereElse'
 import { parsePlace, placeRegion } from '../lib/place'
 
 export function VariableView({ route, go }: { route: Route; go: (r: Route) => void }) {
@@ -150,6 +151,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
             </div>
             <Charts result={res.data} />
           </div>
+          <WhereElse variableId={card.id} route={route} go={go} />
         </>
       )}
     </div>
