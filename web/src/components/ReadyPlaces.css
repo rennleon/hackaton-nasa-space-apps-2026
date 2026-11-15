@@ -1,15 +1,11 @@
-.ready h2 { margin-bottom: 0.6rem; }
-.ready-row { list-style: none; margin: 0; padding: 0 0 4px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(13rem, 1fr); gap: 0.8rem; overflow-x: auto; }
+.ready h2 { margin-bottom: 0.8rem; }
+.ready-row { list-style: none; margin: 0; padding: 4px 4px 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: 1rem; }
 .ready-card { display: flex; }
-.ready-card > button { flex: 1; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 0.8rem 0.9rem; cursor: pointer; display: grid; gap: 0.3rem; align-content: start; }
-.ready-card > button:hover:not(:disabled) { border-color: var(--accent); }
+.ready-card > button { flex: 1; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 0; border-radius: var(--radius); padding: 1rem 1.1rem; cursor: pointer; display: grid; gap: 0.35rem; align-content: start; box-shadow: var(--shadow), 0 0 0 1px var(--hairline); transition: box-shadow 0.15s, transform 0.15s; }
+.ready-card > button:hover:not(:disabled) { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); transform: translateY(-2px); }
 .ready-card > button:disabled { opacity: 0.55; cursor: not-allowed; }
-.ready-card.is-selected > button { border-color: var(--accent); box-shadow: inset 0 -4px 0 var(--accent); }
-.ready-tag { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); }
-.ready-name { font-size: 1.05rem; font-weight: 700; line-height: 1.25; }
+.ready-card.is-selected > button { box-shadow: var(--shadow), 0 0 0 3px var(--accent); }
+.ready-tag { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.ready-name { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; line-height: 1.25; }
 .ready-caption { font-size: 0.9rem; color: var(--muted); }
 
-/* phone: the cards stack */
-@media (max-width: 720px) {
-  .ready-row { grid-auto-flow: row; grid-auto-columns: auto; overflow-x: visible; }
-}
