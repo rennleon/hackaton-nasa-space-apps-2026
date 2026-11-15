@@ -23,11 +23,11 @@ export interface Step {
 export const BANDS: Band[] = ['get', 'clean', 'trend', 'check']
 
 export const STEPS: Step[] = [
-  { n: 1, band: 'get', modules: ['engine.py'] },
+  { n: 1, band: 'get', modules: ['api.py', 'catalog.py'] },
   { n: 2, band: 'get', modules: ['sources/giovanni_csv.py', 'sources/giovanni_api.py', 'sources/power.py'] },
-  { n: 3, band: 'clean', modules: ['ingest.py'] },
-  { n: 4, band: 'clean', modules: ['ingest.py'] },
-  { n: 5, band: 'clean', modules: ['ingest.py'] },
+  { n: 3, band: 'clean', modules: ['sources/base.py', 'sources/giovanni_api.py', 'sources/power.py'] },
+  { n: 4, band: 'clean', modules: ['sources/giovanni_api.py'] },
+  { n: 5, band: 'clean', modules: ['sources/base.py'] },
   { n: 6, band: 'clean', modules: ['ingest.py'] },
   { n: 7, band: 'clean', modules: ['prepare.py'] },
   { n: 8, band: 'clean', modules: ['gates.py'] },
@@ -36,7 +36,7 @@ export const STEPS: Step[] = [
   { n: 11, band: 'trend', modules: ['stats.py'] },
   { n: 12, band: 'trend', modules: ['stats.py'] },
   { n: 13, band: 'trend', modules: ['stats.py'] },
-  { n: 14, band: 'check', modules: ['robustness.py'] },
+  { n: 14, band: 'check', modules: ['robustness.py', 'engine.py', 'gates.py'] },
   { n: 15, band: 'check', modules: ['scan.py'] },
   { n: 16, band: 'check', modules: ['verdict.py', 'engine.py'] },
 ]
