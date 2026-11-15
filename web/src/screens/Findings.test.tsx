@@ -241,7 +241,7 @@ describe('Where our data comes from', () => {
     expect(within(airs).getByRole('link', { name: 'Afternoon humidity' })).toHaveAttribute('href', expect.stringMatching(/^#\/variable\?.*variable=airs_rh_surf_day/))
     expect(within(airs).getByText(/Rides on Aqua|Since 2002/)).toBeInTheDocument()
     expect(within(airs).getByText('Fresh from NASA when you ask')).toBeInTheDocument()
-    expect(screen.getByText(/A delivery service\. It hands us numbers/)).toBeInTheDocument()
+    expect(screen.getByText(/A delivery service\. It gives us numbers/)).toBeInTheDocument()
     expect(screen.getByText('A tool that measures.')).toBeInTheDocument()
     expect(within(airs).getByRole('link', { name: /NASA page about AIRS/ })).toHaveAttribute('target', '_blank')
     expect(bannedIn(document.querySelector('.sources')!.textContent ?? '')).toEqual([])
@@ -258,7 +258,7 @@ describe('Where our data comes from', () => {
     }
     // an instrument is a card heading, never a variable link
     const off = screen.getByRole('heading', { level: 2, name: 'Not used yet' }).closest('section')!
-    expect(within(off).getByText(/cannot fetch it live/)).toBeInTheDocument()
+    expect(within(off).getByText(/cannot ask for it online yet/)).toBeInTheDocument()
     for (const name of ['MODIS', 'MOPITT']) {
       const card = screen.getByRole('heading', { level: 3, name }).closest('li')!
       expect(off).toContainElement(card)

@@ -7,6 +7,17 @@ for how to release and how to roll back.
 
 ## [Unreleased]
 
+### Changed
+- New look (v3 design): warm light theme by default and a green-black dark theme (follows the system, or the
+  switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
+  page links and segmented Simple/Scientific and EN/ES switches.
+- Start page is one card: a three-step progress bar, then tabs to pick a place (Search, Ready-made places, On
+  the map, Coordinates), then the questions in the same card.
+- Results page: labelled "Change what you see" form, summary with a count per "how sure" level, cleaner
+  finding cards, "Years of data" shown open, and a "How we worked this out" strip with the four stages linking
+  into "How it works" (also on the variable page).
+- Data sources page grouped into satellite instruments, computer models and "Not used yet".
+
 ### Added
 - "How it works" reads as one process: a bar with the four stages on top (sticks under the top bar on wide
   screens, marks the stage you are reading, click to jump there; two rows of boxes on phones), then one line down

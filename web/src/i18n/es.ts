@@ -325,7 +325,7 @@ const es: Record<string, string> = {
   'sources.intro.simple': 'Todos los números de esta app vienen de la NASA. Unos vienen de satélites. Otros, de modelos de computadora.',
   'sources.intro.scientific':
     'Todas las series son productos de la NASA: mediciones satelitales (Giovanni, GES DISC) y reanálisis de modelos (MERRA-2, GLDAS), más NASA POWER como servicio de entrega.',
-  'sources.powerNote.simple': 'NASA POWER es un servicio de entrega. Nos da números de productos de la NASA.',
+  'sources.powerNote.simple': 'NASA POWER es un servicio de entrega. Nos da números de datos de la NASA.',
   'sources.powerNote.scientific': 'NASA POWER es un servicio de entrega, no un instrumento: temperatura, lluvia y humedad son valores del reanálisis MERRA-2; la bruma (AOD_55) es de CERES SYN1deg.',
   'sources.measures.simple': 'Qué mide',
   'sources.measures.scientific': 'Mide',
@@ -354,8 +354,8 @@ const es: Record<string, string> = {
   'sp.word.instrument.simple': 'Una herramienta que mide.',
   'sp.word.instrument.scientific': 'Un sensor de satélite o un modelo de computadora que produce un producto de datos.',
   'sp.word.variable.simple': 'Una cosa que mide, como qué tan caliente está el aire.',
-  'sp.word.variable.scientific': 'Una magnitud medida en un producto de datos. Es la que analizamos.',
-  'sp.word.power.simple': 'Un servicio de entrega. Nos da números de productos de la NASA.',
+  'sp.word.variable.scientific': 'Una magnitud medida en un producto de datos. Es la que probamos para ver si hay tendencia.',
+  'sp.word.power.simple': 'Un servicio de entrega. Nos da números de datos de la NASA.',
   'sp.word.power.scientific': 'Un servicio de entrega, no un instrumento. Nos da valores de MERRA-2 y CERES SYN1deg.',
   'sp.satTitle.simple': 'Instrumentos de satélite',
   'sp.satTitle.scientific': 'Instrumentos de satélite',
@@ -364,7 +364,7 @@ const es: Record<string, string> = {
   'sp.varsCount.simple': 'Variables · {n}',
   'sp.varsCount.scientific': 'Variables · {n}',
   'sp.nasaPageOf.simple': 'Página de la NASA sobre {name}',
-  'sp.nasaPageOf.scientific': 'Página de la misión: {name}',
+  'sp.nasaPageOf.scientific': 'Página del proyecto: {name}',
 
   // ---------- labels (badges)
   'label.shortlist.changing': 'Está cambiando',
@@ -658,7 +658,7 @@ const es: Record<string, string> = {
   'sp.platform.model.scientific': 'Modelo de computadora',
   'sp.notUsedTitle.simple': 'Aún no se usa',
   'sp.notUsedTitle.scientific': 'Aún no se usa',
-  'sp.notUsedWhy.simple': 'La herramienta de la NASA no lo tiene. No podemos pedirlo en vivo.',
+  'sp.notUsedWhy.simple': 'La herramienta de la NASA no lo tiene. Todavía no podemos pedirlo en línea.',
   'sp.notUsedWhy.scientific': 'No lo ofrece el servicio en la nube de Giovanni; solo exportación guardada.',
 
   // ---------- "How it works" page (lib/howCopy.ts)

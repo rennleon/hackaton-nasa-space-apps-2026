@@ -56,14 +56,14 @@ export const S = {
   'sp.platform.satMany': p('Satellites: {platform}'),
   'sp.platform.model': p('Computer model'),
   'sp.notUsedTitle': p('Not used yet'),
-  'sp.notUsedWhy': p("NASA's online tool does not have it, so we cannot fetch it live.", 'Not offered by the Giovanni cloud service; saved export only.'),
+  'sp.notUsedWhy': p("NASA's online tool does not have it. We cannot ask for it online yet.", 'Not offered by the Giovanni cloud service; saved export only.'),
   'sp.word.instrument': p('A tool that measures.', 'A satellite sensor or a computer model that produces a data product.'),
-  'sp.word.variable': p('One thing it measures, like how warm the air is.', 'One measured quantity in a data product. It is what we trend.'),
-  'sp.word.power': p('A delivery service. It hands us numbers from NASA products.', 'A delivery service, not an instrument. It hands us MERRA-2 and CERES SYN1deg values.'),
+  'sp.word.variable': p('One thing it measures, like how warm the air is.', 'One measured quantity in a data product. It is what we test for a trend.'),
+  'sp.word.power': p('A delivery service. It gives us numbers from NASA data.', 'A delivery service, not an instrument. It hands us MERRA-2 and CERES SYN1deg values.'),
   'sp.satTitle': p('Satellite instruments'),
   'sp.modelTitle': p('Computer models', 'Models and reanalyses'),
   'sp.varsCount': p('Variables · {n}'),
-  'sp.nasaPageOf': p('NASA page about {name}', 'Mission page: {name}'),
+  'sp.nasaPageOf': p('NASA page about {name}', 'Project page: {name}'),
 } as const satisfies Record<string, Pair>
 
 export type SKey = keyof typeof S
