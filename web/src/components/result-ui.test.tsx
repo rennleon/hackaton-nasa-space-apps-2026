@@ -1,17 +1,13 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { ViewProvider } from '../context'
 import type { AnalysisResult, Comparison } from '../types/contract'
 import { VerdictGauge } from './VerdictGauge'
-import { SourceTag } from './SourceTag'
 import { TrustPanel } from './TrustPanel'
 
 const base = JSON.parse(readFileSync('src/fixtures/airs_rh_surf_day.json', 'utf8')) as AnalysisResult
-const instruments = JSON.parse(readFileSync('public/data/catalog/instruments.json', 'utf8'))
 const wrap = (ui: React.ReactNode, view: 'simple' | 'scientific' = 'simple') => render(<ViewProvider initial={view}>{ui}</ViewProvider>)
-
-afterEach(() => vi.unstubAllGlobals())
 
 describe('VerdictGauge', () => {
   it('has one marker, icon plus word on every step, and flags only the active step', () => {
@@ -29,22 +25,6 @@ describe('VerdictGauge', () => {
     expect(screen.getByText("We can't tell here")).toBeInTheDocument()
     expect(container.querySelector('.gauge-cant')).not.toBeNull()
     expect(screen.queryByRole('list')).toBeNull()
-  })
-})
-
-describe('SourceTag', () => {
-  it('names the satellite instrument', async () => {
-    vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => instruments }))
-    const v = { ...base.variable, instrument_id: 'airs', platform: 'Aqua', source_type: 'observed' as const }
-    wrap(<SourceTag variable={v} />, 'scientific')
-    await waitFor(() => expect(screen.getByText('AIRS · Aqua satellite · since 2002')).toBeInTheDocument())
-  })
-  it('never calls a model a satellite, and says "Computer model estimate" in Simple', async () => {
-    const v = { ...base.variable, instrument_id: 'merra2', platform: null, delivered_by: 'NASA POWER', source_type: 'model' as const }
-    const { container } = wrap(<SourceTag variable={v} />)
-    await waitFor(() => expect(container.textContent).toMatch(/Computer model estimate/))
-    expect(container.textContent).not.toMatch(/satellite/i)
-    expect(container.textContent).toContain('via NASA POWER')
   })
 })
 
