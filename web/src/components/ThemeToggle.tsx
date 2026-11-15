@@ -4,7 +4,7 @@ export type ThemeName = 'dark' | 'light'
 const KEY = 'td-theme'
 
 function systemTheme(): ThemeName {
-  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 function stored(): ThemeName | null {
@@ -28,11 +28,11 @@ export function currentTheme(): ThemeName {
   return t === 'dark' || t === 'light' ? t : systemTheme()
 }
 
-/** A small light/dark switch. Lives outside App.tsx (rendered from main.tsx); remembers the choice in this browser only. */
+/** A small light/dark switch in the top bar; remembers the choice in this browser only. */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<ThemeName>(() => currentTheme())
   useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-color-scheme: light)')
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)')
     if (!mq) return
     const on = () => setTheme(currentTheme())
     mq.addEventListener('change', on)

@@ -13,6 +13,7 @@ const es: Record<string, string> = {
   'app.view.label': 'Nivel de lectura',
   'app.view.simple': 'Simple',
   'app.view.scientific': 'Científico',
+  'app.nav.label': 'Principal',
   'map.aria': 'Mapa de regiones',
   'common.footer':
     'Datos del mapa © colaboradores de OpenStreetMap. Datos: satélites y modelos de la NASA, vía Giovanni (GES DISC) y NASA POWER. Resultados calculados por nuestro motor de análisis.',
