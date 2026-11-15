@@ -9,13 +9,18 @@ the detail view still uses each variable's full record.
 
 from __future__ import annotations
 
-from .catalog import RegionCard
-from .contract import AnalysisResult, ScanEntry, ScanResult, ShortlistLabel, Text
+from concurrent.futures import ThreadPoolExecutor
+
+from .catalog import RegionCard, VariableCard
+from .contract import AnalysisResult, Availability, ScanEntry, ScanResult, ShortlistLabel, Text
 from .engine import ENGINE_VERSION, EngineContext, analyze_region
 from .gates import MIN_YEARS
 from .prepare import resolve_window, window_years
+from .sources import LiveSourceUnavailable
 from .stats import benjamini_hochberg
 from .timeutil import month_index
+
+MAX_PREFETCH_WORKERS = 8
 
 ORDER: dict[str, int] = {"changing": 0, "possibly_changing": 1, "no_detectable_change": 2, "cant_tell": 3}
 
@@ -39,11 +44,76 @@ def _why(r: AnalysisResult, var) -> Text:
     return by["detectability"].detail if "detectability" in by else var.definition
 
 
+def _failed(r: AnalysisResult, code: str) -> bool:
+    return any(c.code == code and not c.passed for c in r.gates.checks)
+
+
+def availability_of(r: AnalysisResult) -> Availability:
+    """B1: can this place answer with this variable? Read off the gates, never off the trend."""
+    if _failed(r, "fetch_failed"):
+        return "fetch_failed"
+    if _failed(r, "no_data") or _failed(r, "coverage"):
+        return "no_data_here"
+    if _failed(r, "record_length"):
+        return "too_short"
+    if _failed(r, "completeness") or (r.gates.passed and r.trend is None):
+        return "too_many_gaps"
+    return "available"
+
+
+def _availability_reason(avail: Availability, r: AnalysisResult, var: VariableCard) -> Text:
+    """Kid-friendly reason a variable has no result for this place (Scientific keeps the gate detail)."""
+    failed = {c.code: c.detail for c in r.gates.checks if not c.passed}
+    if avail == "fetch_failed":
+        return failed["fetch_failed"]
+    if avail == "no_data_here":
+        sci = (failed.get("no_data") or failed["coverage"]).scientific
+        if var.domain == "land":
+            simple = "No data for this spot. This measurement only covers land."
+        elif var.domain == "ocean":
+            simple = "No data for this spot. This measurement only covers the ocean."
+        elif "coverage" in failed and "no_data" not in failed:
+            simple = "No data for this spot. This measurement does not reach this far."
+        else:
+            simple = "No data for this spot."
+        return Text(simple=simple, scientific=sci)
+    if avail == "too_short":
+        return Text(simple="This spot has too few years of data for this measurement. " + failed["record_length"].simple,
+                    scientific=failed["record_length"].scientific)
+    gap = failed.get("completeness")
+    return Text(simple="Too many months are missing here to tell." + (f" {gap.simple}" if gap else ""),
+                scientific=gap.scientific if gap else r.verdict.sentence.scientific)
+
+
+def prefetch_series(ctx: EngineContext, region: RegionCard, variable_ids: list[str]) -> dict[str, Exception]:
+    """Fetch every needed series at once (live sources take seconds each) so the analysis loop
+    hits the context's cache. Returns the live-source failures; they are never cached as 'no data'.
+    Results are identical to fetching one by one: each series is keyed by variable and region."""
+    ids = list(dict.fromkeys(variable_ids))
+    failures: dict[str, Exception] = {}
+
+    def one(vid: str) -> None:
+        try:
+            ctx.series(vid, region)
+        except LiveSourceUnavailable as exc:
+            failures[vid] = exc
+
+    if len(ids) > 1:
+        with ThreadPoolExecutor(max_workers=min(MAX_PREFETCH_WORKERS, len(ids))) as pool:
+            list(pool.map(one, ids))
+    elif ids:
+        one(ids[0])
+    return failures
+
+
 def common_window(ctx: EngineContext, region: RegionCard, variable_ids: list[str]) -> tuple[str, str] | None:
     """Overlap of the variables' default windows (drift cuts included), if >= MIN_YEARS long."""
     starts, ends = [], []
     for vid in variable_ids:
-        s = ctx.series(vid, region)
+        try:
+            s = ctx.series(vid, region)
+        except LiveSourceUnavailable:
+            continue  # recorded as fetch_failed by the analysis; it just does not shape the window
         if s is None:
             continue
         try:
@@ -63,14 +133,20 @@ def common_window(ctx: EngineContext, region: RegionCard, variable_ids: list[str
 def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanResult:
     if theme_id not in ctx.catalog.themes:
         raise KeyError(f"unknown theme {theme_id}")
-    members = ctx.catalog.theme_members(theme_id)
-    cw = common_window(ctx, region, [v.id for v, _ in members])
+    members = [(v, role) for v, role in ctx.catalog.theme_members(theme_id) if v.listed]
+    # Members and their cross-check partners, fetched concurrently; failures are reported, not cached.
+    wanted = [v.id for v, _ in members] + [
+        v.cross_check for v, _ in members if v.cross_check and ctx.catalog.variables[v.cross_check].listed
+    ]
+    failed = prefetch_series(ctx, region, wanted)
+    cw = common_window(ctx, region, [v.id for v, _ in members if v.id not in failed])
     results = []
     for var, role in members:
         if cw:
-            r = analyze_region(ctx, region, var.id, start=cw[0], end=cw[1], theme_id=theme_id, window_reason="common")
+            r = analyze_region(ctx, region, var.id, start=cw[0], end=cw[1], theme_id=theme_id,
+                               window_reason="common", failed_fetches=failed)
         else:
-            r = analyze_region(ctx, region, var.id, theme_id=theme_id)
+            r = analyze_region(ctx, region, var.id, theme_id=theme_id, failed_fetches=failed)
         results.append((var, role, r))
 
     ps = [_p_decisive(r) for _, _, r in results]
@@ -96,6 +172,9 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
             reason = failed[0] if failed else r.verdict.sentence
         sel = r.selection
         why = _why(r, var)
+        avail = availability_of(r)
+        if avail != "available":
+            why = reason = _availability_reason(avail, r, var)
         entries.append(ScanEntry(
             variable_id=var.id, name=var.name, role=role, source_type=var.source.type,
             shortlist_label=short, verdict_label=label,
@@ -105,9 +184,13 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
             mdt_per_decade=sel.mdt_per_decade if sel else None,
             why=why,
             reason=reason,
+            availability=avail,
+            instrument_id=var.source.instrument_id,
+            yearly_series=r.yearly_series,
+            cross_check=r.robustness.cross_check,
         ))
 
-    has_xcheck = {v.id: v.cross_check is not None for v, _ in members}
+    has_xcheck = {v.id: v.cross_check is not None for v, _ in members}  # card has a partner
     entries.sort(key=lambda e: (
         ORDER[e.shortlist_label],
         not e.worth_investigating,

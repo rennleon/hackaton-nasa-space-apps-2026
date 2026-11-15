@@ -168,9 +168,23 @@ def custom_region(kind: str, c: tuple[float, ...]) -> RegionCard:
     return RegionCard(id=rid, name=name, description=desc, regime="user-defined", geometry=geom, listed=False)
 
 
+class _NotCacheable(Exception):
+    """Raised inside an lru_cache'd function so the value is returned but never stored
+    (lru_cache does not cache exceptions)."""
+
+    def __init__(self, value):
+        self.value = value
+
+
 @lru_cache(maxsize=256)
 def _custom_scan_cached(kind: str, c: tuple[float, ...], theme: str) -> ScanResult:
-    return scan_region(ctx(), custom_region(kind, c), theme)
+    result = scan_region(ctx(), custom_region(kind, c), theme)
+    down = [e for e in result.entries if e.availability == "fetch_failed"]
+    if down and len(down) == len(result.entries):
+        raise LiveSourceUnavailable("no data source answered")  # handled as HTTP 503; never cached
+    if down:
+        raise _NotCacheable(result)  # some live source was down: answer, but do not remember it
+    return result
 
 
 @lru_cache(maxsize=512)
@@ -189,6 +203,8 @@ def custom_scan(
         raise HTTPException(404, f"unknown theme {theme}")
     try:
         return _custom_scan_cached(kind, c, theme)
+    except _NotCacheable as partial:
+        return partial.value
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
 
