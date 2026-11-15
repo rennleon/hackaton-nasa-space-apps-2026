@@ -2,6 +2,8 @@ import { forwardRef } from 'react'
 import { useData } from '../context'
 import { chosenBbox, chosenName, sizeParts, type Chosen } from '../lib/places'
 import { useStartT } from '../lib/startT'
+import { topLevel } from '../lib/themes'
+import { SubTopicRow } from './SubTopicRow'
 import { ThemeIcon } from './ThemeIcon'
 import './StartQuestions.css'
 
@@ -11,7 +13,7 @@ interface Props {
   onChange: () => void
 }
 
-/** Step 2 on the start page: the chosen place with its size, then the three questions. */
+/** Step 2 on the start page: the chosen place with its size, then the three main questions, each with its narrower ones. */
 export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuestions({ chosen, onAsk, onChange }, ref) {
   const { catalog } = useData()
   const { s, tx } = useStartT()
@@ -39,15 +41,16 @@ export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuest
       </div>
       <h3 className="sq-ask">{s('start.question.title', 'What do you want to know?', 'Choose a question')}</h3>
       <ul className="sq-grid">
-        {catalog.themes.map((th) => (
-          <li key={th.id} data-demo={`question-${th.id}`}>
-            <button type="button" className="sq-card" onClick={() => onAsk(th.id)}>
+        {topLevel(catalog.themes).map((th) => (
+          <li key={th.id}>
+            <button type="button" className="sq-card" data-demo={`question-${th.id}`} onClick={() => onAsk(th.id)}>
               <span className="sq-icon">
                 <ThemeIcon id={th.id} />
               </span>
               <span className="sq-name">{tx(th.name)}</span>
               <span className="sq-q">{tx(th.question)}</span>
             </button>
+            <SubTopicRow parentId={th.id} onPick={onAsk} />
           </li>
         ))}
       </ul>

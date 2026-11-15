@@ -32,6 +32,7 @@ export interface ThemeCard {
   id: string
   name: Text
   question: Text
+  parent?: string | null // a sub-topic names its main question
 }
 
 export interface VariableArtifact {

@@ -6,8 +6,13 @@
 .sq-head p { margin: 0; }
 .sq-ask { margin: 1.1rem 0 0.6rem; }
 .sq-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr)); gap: 1rem; }
-.sq-card { width: 100%; height: 100%; text-align: left; font: inherit; background: var(--surface-2); color: var(--text); border: 0; border-radius: var(--radius); padding: 1rem 1.2rem; cursor: pointer; display: grid; gap: 0.25rem; align-content: start; transition: box-shadow 0.15s, transform 0.15s; }
-.sq-card:hover { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); transform: translateY(-2px); }
+/* the card is the <li>: the main button and the sub-topic row sit side by side inside it (no nested buttons) */
+.sq-grid > li { display: flex; flex-direction: column; background: var(--surface-2); border-radius: var(--radius); padding-bottom: 0.9rem; transition: box-shadow 0.15s, transform 0.15s; }
+.sq-grid > li:hover, .sq-grid > li:focus-within { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); }
+.sq-grid > li:hover { transform: translateY(-2px); }
+.sq-grid > li .subtopics { padding: 0.4rem 1.2rem 0; }
+.sq-card { width: 100%; flex: 1; text-align: left; font: inherit; background: transparent; color: var(--text); border: 0; border-radius: var(--radius); padding: 1rem 1.2rem 0.4rem; cursor: pointer; display: grid; gap: 0.25rem; align-content: start; }
+.sq-card:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .sq-icon { color: var(--trend); display: inline-flex; }
 .sq-name { font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; }
 .sq-q { color: var(--muted); }

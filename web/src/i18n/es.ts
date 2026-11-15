@@ -91,6 +91,8 @@ const es: Record<string, string> = {
   'start.place.change.scientific': 'Cambiar lugar',
   'start.question.title.simple': '¿Qué quieres saber?',
   'start.question.title.scientific': 'Elige una pregunta',
+  'start.subtopics.simple': 'O pregunta sobre:',
+  'start.subtopics.scientific': 'Preguntas más concretas:',
   'start.area.pinShort.simple': 'Miramos un cuadrado de unos {w} × {h} km alrededor.',
   'start.area.pinShort.scientific': 'Una celda de la cuadrícula de NASA POWER, dibujada como unos {w} × {h} km.',
   'start.area.size.simple': 'Esta zona mide unos {w} × {h} km.',

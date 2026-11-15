@@ -2,8 +2,9 @@ import { useData, useView } from '../context'
 import type { Route } from '../lib/route'
 import { parsePlace, placeRegion } from '../lib/place'
 import { useStartT } from '../lib/startT'
-
-const ICONS: Record<string, string> = { heat: '🌡', water: '💧', air: '🌫' }
+import { topLevel } from '../lib/themes'
+import { SubTopicRow } from '../components/SubTopicRow'
+import { ThemeIcon } from '../components/ThemeIcon'
 
 export function ThemePicker({ route, go }: { route: Route; go: (r: Route) => void }) {
   const { catalog } = useData()
@@ -11,6 +12,7 @@ export function ThemePicker({ route, go }: { route: Route; go: (r: Route) => voi
   const { s } = useStartT()
   const place = parsePlace(route.place)
   const region = place ? placeRegion(place) : catalog.regions.find((r) => r.id === route.region)
+  const ask = (theme: string) => go({ screen: 'shortlist', region: place ? undefined : region?.id, place: route.place, theme })
   return (
     <div className="page">
       <nav aria-label={s('theme.breadcrumb', 'Breadcrumb')}>
@@ -26,15 +28,16 @@ export function ThemePicker({ route, go }: { route: Route; go: (r: Route) => voi
         </button>
       ) : (
         <ul className="theme-grid">
-          {catalog.themes.map((th) => (
-            <li key={th.id}>
-              <button type="button" className="theme-card" onClick={() => go({ screen: 'shortlist', region: place ? undefined : region.id, place: route.place, theme: th.id })}>
+          {topLevel(catalog.themes).map((th) => (
+            <li key={th.id} className="theme-item">
+              <button type="button" className="theme-card" onClick={() => ask(th.id)}>
                 <span aria-hidden="true" className="theme-icon">
-                  {ICONS[th.id] ?? '•'}
+                  <ThemeIcon id={th.id} />
                 </span>
                 <span className="theme-name">{t(th.name)}</span>
                 <span className="theme-q">{t(th.question)}</span>
               </button>
+              <SubTopicRow parentId={th.id} onPick={ask} />
             </li>
           ))}
         </ul>

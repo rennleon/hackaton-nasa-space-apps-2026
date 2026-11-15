@@ -8,6 +8,13 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Added
+- Finer questions: seven sub-topics under the three main ones (heat: hot afternoons, warm nights; water: rain,
+  damp air, wet ground; air: smoke and haze, burning fuel). A sub-topic is a theme with a `parent`; its members
+  are declared on the variable cards before any result and must also belong to the parent. Each is scanned on
+  its own shared window with Benjamini–Hochberg inside it, so a variable's label can differ from the same
+  variable's label in the parent question. The start page and the question picker show the sub-topics as
+  buttons beside each main card, the question menu on the shortlist groups them, and the shortlist header
+  shows "Water › Rain". The "helps answer the … question" check now uses the theme's own kid name (EN and ES).
 - "Your years" box on the result page: typed-in years are labelled as the user's choice and the declared
   window's answer is shown beside it, so a period picked after looking cannot pass as the main finding.
 - "What if we start in another year?" panel on the result page: the same trend tests re-run for start years

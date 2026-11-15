@@ -17,6 +17,7 @@ import { instrumentById } from '../lib/instruments'
 import { instrumentHref, manySatellites, shortName, useS } from '../lib/sourceLabels'
 import type { Route } from '../lib/route'
 import type { Comparison, ScanEntry, ScanResult } from '../types/contract'
+import { childrenOf, relatedThemes, topLevel } from '../lib/themes'
 import type { RegionCard, VariableCard } from '../types/catalog'
 import './Findings.css'
 
@@ -30,6 +31,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
   const region = place ? placeRegion(place) : catalog.regions.find((r) => r.id === route.region)
   const themeId = route.theme ?? catalog.themes[0]?.id
   const theme = catalog.themes.find((x) => x.id === themeId)
+  const parentTheme = theme?.parent ? catalog.themes.find((x) => x.id === theme.parent) : undefined
   const scan = useAsync(() => {
     if (!region || !themeId) return Promise.reject(new Error('no region'))
     return place ? client.customScan(place, themeId) : client.scan(region.id, themeId)
@@ -71,6 +73,11 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
       <header className="findings-head">
         <p className="eyebrow">{l('findings.eyebrow')}</p>
         <h1 id="res-h">{placeName}</h1>
+        {parentTheme && theme && (
+          <p className="muted small findings-crumb">
+            {tx(parentTheme.name, view)} › {tx(theme.name, view)}
+          </p>
+        )}
         {theme && <p className="findings-q">{tx(theme.question, view)}</p>}
         {placeText && <p className="muted place-text">{placeText}</p>}
         <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} canTry={client.customPlaces !== false} />
@@ -145,10 +152,14 @@ function EditBar({ route, region, custom, themeId, set, go, years }: { route: Ro
       <label className="chip">
         <span className="chip-k">{l('findings.chip.question')}</span>
         <select value={themeId} onChange={(e) => set({ theme: e.target.value })}>
-          {catalog.themes.map((th) => (
-            <option key={th.id} value={th.id}>
-              {tx(th.name, view)}
-            </option>
+          {topLevel(catalog.themes).map((top) => (
+            <optgroup key={top.id} label={tx(top.name, view)}>
+              {[top, ...childrenOf(catalog.themes, top.id)].map((th) => (
+                <option key={th.id} value={th.id}>
+                  {tx(th.name, view)}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </label>
@@ -289,15 +300,13 @@ function EmptyState({ themeId, set }: { themeId?: string; set: (p: Partial<Route
       <p className="state-title">{l('findings.empty.title')}</p>
       <p>{l('findings.empty.help')}</p>
       <ul className="inline-list" aria-label={l('findings.otherQuestions')}>
-        {catalog.themes
-          .filter((th) => th.id !== themeId)
-          .map((th) => (
-            <li key={th.id}>
-              <button type="button" className="btn" onClick={() => set({ theme: th.id })}>
-                {tx(th.name, view)}
-              </button>
-            </li>
-          ))}
+        {relatedThemes(catalog.themes, themeId).map((th) => (
+          <li key={th.id}>
+            <button type="button" className="btn" onClick={() => set({ theme: th.id })}>
+              {tx(th.name, view)}
+            </button>
+          </li>
+        ))}
       </ul>
     </div>
   )

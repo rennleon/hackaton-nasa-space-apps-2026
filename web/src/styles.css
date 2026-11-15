@@ -164,9 +164,14 @@ figcaption p { margin: 0; }
 
 /* ===== start: theme picker ===== */
 .theme-grid { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
-.theme-card { width: 100%; text-align: left; font: inherit; background: var(--surface); color: var(--text); border: 0; border-radius: var(--radius); padding: 1.4rem; cursor: pointer; display: grid; gap: 0.4rem; box-shadow: var(--shadow), 0 0 0 1px var(--hairline); transition: box-shadow 0.15s, transform 0.15s; }
-.theme-card:hover { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); transform: translateY(-2px); }
-.theme-icon { font-size: 2rem; } .theme-name { font-family: var(--font-head); font-size: 1.35rem; font-weight: 700; } .theme-q { color: var(--muted); }
+/* the card is the <li>: the main button and the sub-topic row are siblings inside it (no nested buttons) */
+.theme-item { display: flex; flex-direction: column; background: var(--surface); border-radius: var(--radius); padding-bottom: 1.1rem; box-shadow: var(--shadow), 0 0 0 1px var(--hairline); transition: box-shadow 0.15s, transform 0.15s; }
+.theme-item:hover, .theme-item:focus-within { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); }
+.theme-item:hover { transform: translateY(-2px); }
+.theme-item .subtopics { padding: 0.4rem 1.4rem 0; }
+.theme-card { width: 100%; flex: 1; text-align: left; font: inherit; background: transparent; color: var(--text); border: 0; border-radius: var(--radius); padding: 1.4rem 1.4rem 0.4rem; cursor: pointer; display: grid; gap: 0.4rem; align-content: start; }
+.theme-card:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.theme-icon { color: var(--trend); display: inline-flex; } .theme-name { font-family: var(--font-head); font-size: 1.35rem; font-weight: 700; } .theme-q { color: var(--muted); }
 
 /* ===== coverage timeline ===== */
 .timeline { background: var(--surface); border-radius: var(--radius); padding: 1rem 1.2rem; box-shadow: var(--shadow), 0 0 0 1px var(--hairline); }

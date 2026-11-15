@@ -1,0 +1,6 @@
+.subtopics { display: grid; gap: 0.4rem; padding: 0.6rem 0.2rem 0; }
+.subtopics-label { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+.subtopics-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.subtopic-btn { display: inline-flex; align-items: center; gap: 0.4rem; max-width: 100%; font: inherit; font-size: 0.95rem; font-weight: 600; color: var(--text); background: var(--surface-2); border: 1px solid var(--hairline); border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; text-align: left; transition: box-shadow 0.15s; }
+.subtopic-btn:hover { box-shadow: 0 0 0 2px var(--accent); }
+.subtopic-btn svg { flex: none; color: var(--trend); }
