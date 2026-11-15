@@ -67,22 +67,33 @@ def _availability_reason(avail: Availability, r: AnalysisResult, var: VariableCa
     if avail == "fetch_failed":
         return failed["fetch_failed"]
     if avail == "no_data_here":
-        sci = (failed.get("no_data") or failed["coverage"]).scientific
+        g = failed.get("no_data") or failed["coverage"]
+        sci, sci_es = g.scientific, g.scientific_es or g.scientific
         if var.domain == "land":
             simple = "No data for this spot. This measurement only covers land."
+            simple_es = "No hay datos para este lugar. Esta medición solo cubre la tierra."
         elif var.domain == "ocean":
             simple = "No data for this spot. This measurement only covers the ocean."
+            simple_es = "No hay datos para este lugar. Esta medición solo cubre el océano."
         elif "coverage" in failed and "no_data" not in failed:
             simple = "No data for this spot. This measurement does not reach this far."
+            simple_es = "No hay datos para este lugar. Esta medición no llega hasta aquí."
         else:
             simple = "No data for this spot."
-        return Text(simple=simple, scientific=sci)
+            simple_es = "No hay datos para este lugar."
+        return Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es)
     if avail == "too_short":
-        return Text(simple="This spot has too few years of data for this measurement. " + failed["record_length"].simple,
-                    scientific=failed["record_length"].scientific)
+        rl = failed["record_length"]
+        return Text(simple="This spot has too few years of data for this measurement. " + rl.simple,
+                    scientific=rl.scientific,
+                    simple_es="Este lugar tiene muy pocos años de datos para esta medición. " + (rl.simple_es or rl.simple),
+                    scientific_es=rl.scientific_es or rl.scientific)
     gap = failed.get("completeness")
     return Text(simple="Too many months are missing here to tell." + (f" {gap.simple}" if gap else ""),
-                scientific=gap.scientific if gap else r.verdict.sentence.scientific)
+                scientific=gap.scientific if gap else r.verdict.sentence.scientific,
+                simple_es="Faltan demasiados meses aquí para saberlo." + (f" {gap.simple_es or gap.simple}" if gap else ""),
+                scientific_es=(gap.scientific_es or gap.scientific) if gap
+                else (r.verdict.sentence.scientific_es or r.verdict.sentence.scientific))
 
 
 def prefetch_series(ctx: EngineContext, region: RegionCard, variable_ids: list[str]) -> dict[str, Exception]:

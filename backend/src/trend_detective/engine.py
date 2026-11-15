@@ -226,6 +226,8 @@ def _fetch_failed_gate(exc: Exception) -> GateCheck:
         detail=Text(
             simple="We could not reach NASA's data service just now. Try again in a minute.",
             scientific=f"Live data source unavailable: {exc}",
+            simple_es="No pudimos conectar con el servicio de datos de la NASA ahora. Prueba otra vez en un minuto.",
+            scientific_es=f"Fuente de datos en vivo no disponible: {exc}",
         ),
     )
 
@@ -254,6 +256,10 @@ def _dir_word(slope: float) -> str:
     return "up" if slope > 0 else "down"
 
 
+def _dir_word_es(slope: float) -> str:
+    return "subiendo" if slope > 0 else "bajando"
+
+
 def _contrast_text(
     outcome: str, var: VariableCard, other: VariableCard, c1: Core, c2: Core, sig1: bool, sig2: bool,
     start: str, end: str,
@@ -265,6 +271,13 @@ def _contrast_text(
         "disagree": f"The two instruments disagree. One sees it going {_dir_word(s1)}, the other {_dir_word(s2)}.",
         "both_unsure": "The two instruments do not tell the same story yet."
         if np.sign(s1) != np.sign(s2) else "Neither instrument is sure yet.",
+    }[outcome]
+    simple_es = {
+        "agree": f"Dos instrumentos coinciden: los dos ven que va {_dir_word_es(s1)}.",
+        "same_direction_one_unsure": "Otro instrumento ve lo mismo, pero aún no está seguro.",
+        "disagree": f"Los dos instrumentos no coinciden. Uno ve que va {_dir_word_es(s1)}, el otro {_dir_word_es(s2)}.",
+        "both_unsure": "Los dos instrumentos aún no cuentan la misma historia."
+        if np.sign(s1) != np.sign(s2) else "Ningún instrumento está seguro aún.",
     }[outcome]
     verdicts = {
         "agree": "Both are significant at 0.05 with the same sign: the instruments agree.",
@@ -279,23 +292,44 @@ def _contrast_text(
         f"{other.source.instrument} ({other.name.scientific}): {s2:+.3g} {other.units.display} per decade, "
         f"p = {_p_weak(c2.tt):.3g} (p is the weaker of the two decisive tests). {verdicts[outcome]}"
     )
+    verdicts_es = {
+        "agree": "Ambos son significativos a 0,05 con el mismo signo: los instrumentos coinciden.",
+        "same_direction_one_unsure": "Mismo signo, pero solo uno es significativo a 0,05.",
+        "disagree": "Signos opuestos y ambos significativos a 0,05: los instrumentos no coinciden.",
+        "both_unsure": "Ninguno es significativo a 0,05 con el mismo signo, así que no hay contraste que informar.",
+    }
+    name_es = lambda v: v.name.scientific_es or v.name.scientific
+    sci_es = (
+        f"Ventana común {start} a {end}, mismo lugar, cada serie sin ciclo estacional sobre esa ventana. "
+        f"{var.source.instrument} ({name_es(var)}): {s1:+.3g} {var.units.display} por década, "
+        f"p = {_p_weak(c1.tt):.3g}. "
+        f"{other.source.instrument} ({name_es(other)}): {s2:+.3g} {other.units.display} por década, "
+        f"p = {_p_weak(c2.tt):.3g} (p es la más débil de las dos pruebas decisivas). {verdicts_es[outcome]}"
+    )
     ids = {var.source.instrument_id, other.source.instrument_id}
     if "airs" in ids and len(ids) == 2:
         sci += (" AIRS is a snapshot at about 1:30 (day or night pass), the other series is a daily mean: "
                 "compare the direction only, not the size.")
+        sci_es += (" AIRS es una instantánea hacia la 1:30 (pasada de día o de noche), la otra serie es un promedio "
+                   "diario: compare solo la dirección, no el tamaño.")
     if var.grid_deg != other.grid_deg:
         sci += f" The grid cells differ ({var.grid_deg}° vs {other.grid_deg}°), so the footprints differ."
-    return Text(simple=simple, scientific=sci)
+        sci_es += (f" Las celdas de la rejilla difieren ({var.grid_deg}° frente a {other.grid_deg}°), "
+                   "así que las huellas difieren.")
+    return Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es)
 
 
-def _only_one(other: VariableCard, detail: str) -> Comparison:
+def _only_one(other: VariableCard, detail: str, detail_es: str | None = None) -> Comparison:
     """No second opinion available. The numeric fields are placeholders; `outcome` says so."""
     return Comparison(
         against=other.id, slope_per_decade=0.0, same_sign=False, significant=False,
         outcome="only_one", against_instrument=other.source.instrument,
         text=Text(simple="Only one instrument has data for this place.",
                   scientific=f"No usable {other.name.scientific} series ({other.source.instrument}) to compare with: "
-                             f"{detail}"),
+                             f"{detail}",
+                  simple_es="Solo un instrumento tiene datos para este lugar.",
+                  scientific_es=f"No hay una serie utilizable de {other.name.scientific_es or other.name.scientific} "
+                                f"({other.source.instrument}) con la cual comparar: {detail_es or detail}"),
     )
 
 
@@ -307,25 +341,27 @@ def contrast_instruments(
     Both series are re-tested on that overlap only; they are never merged into one number."""
     s2, err = _fetch(ctx, other.id, region, failed) if other.listed else (None, None)
     if err is not None:
-        return _only_one(other, f"the live source could not be reached ({err}).")
+        return _only_one(other, f"the live source could not be reached ({err}).",
+                         f"no se pudo conectar con la fuente en vivo ({err}).")
     if s2 is None or not np.isfinite(s2.values).any():
-        return _only_one(other, "no data for this place.")
+        return _only_one(other, "no data for this place.", "no hay datos para este lugar.")
     try:
         w2 = resolve_window(s2, other)
         start = max(window.start, w2.start, key=month_index)
         end = min(window.end, w2.end, key=month_index)
         years = window_years(start, end) if month_index(end) >= month_index(start) else 0.0
         if years < MIN_COMPARISON_YEARS:
-            return _only_one(other, f"the two series share only {years:.1f} years (minimum {MIN_COMPARISON_YEARS:.0f}).")
+            return _only_one(other, f"the two series share only {years:.1f} years (minimum {MIN_COMPARISON_YEARS:.0f}).",
+                             f"las dos series comparten solo {years:.1f} años (mínimo {MIN_COMPARISON_YEARS:.0f}).")
         win = Window(start=start, end=end, reason="user", years=round(years, 2))
         p1, p2 = prepare(series, win), prepare(s2, win)
         months = season.months if season else None
-        bad = [c.detail.scientific for c in quality(p2, other, months) if not c.passed]
+        bad = [c.detail for c in quality(p2, other, months) if not c.passed]
         if bad:
-            return _only_one(other, bad[0])
+            return _only_one(other, bad[0].scientific, bad[0].scientific_es)
         c1, c2 = _core(p1, season), _core(p2, season)
     except ValueError as exc:
-        return _only_one(other, f"{exc}.")
+        return _only_one(other, f"{exc}.", f"{exc}.")
     sig1, sig2 = _sig(c1.tt, ctx.alpha), _sig(c2.tt, ctx.alpha)
     same = bool(np.sign(c1.tt.slope_per_year) == np.sign(c2.tt.slope_per_year))
     if sig1 and sig2:
