@@ -102,7 +102,10 @@ def test_rule_thresholds():
     assert evaluate([cell(elev=0), cell(elev=1000)]).kind == "one_kind"
     assert [r.code for r in evaluate([cell(elev=0), cell(elev=1001)]).reasons] == ["elevation"]
     assert evaluate([cell(t=10), cell(t=15)]).kind == "one_kind"
-    assert [r.code for r in evaluate([cell(t=10), cell(t=15.1)]).reasons] == ["temperature"]
+    # (d) is supporting only: a temperature range alone (one climate group, like Wisconsin) is still one kind
+    assert evaluate([cell(t=10), cell(t=15.1)]).kind == "one_kind"
+    both = evaluate([cell(t=10, elev=0), cell(t=15.1, elev=1500)])
+    assert both.kind == "mixed" and [r.code for r in both.reasons] == ["elevation", "temperature"]
     # (a) two Koppen main groups each with at least 20% of the cells; a 10% sliver does not count
     assert [r.code for r in evaluate([cell(group="C")] * 4 + [cell(group="B")]).reasons] == ["climate_groups"]
     assert evaluate([cell(group="C")] * 9 + [cell(group="B")]).kind == "one_kind"

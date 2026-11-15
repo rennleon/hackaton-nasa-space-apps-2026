@@ -47,7 +47,12 @@ GROUP_SHARE = 0.20  # (a) two or more Koppen main groups each with at least this
 ELEV_RANGE_M = 1000.0  # (b) model elevation range above this
 PRECIP_RATIO = 2.0  # (c) wettest / driest annual precipitation above this ...
 PRECIP_DIFF = 0.5  # ... and the difference above this (mm/day)
-T2M_RANGE_C = 5.0  # (d) annual T2M range above this
+T2M_RANGE_C = 5.0  # (d) annual T2M range above this: SUPPORTING only, never "mixed" on its own (see _mixing)
+# Why (d) is supporting only: box means average each cell's departure from its OWN seasonal cycle
+# (sources/base.py area_mean), so a steady warm/cool offset between cells cannot cancel a trend. What can cancel
+# trends is mixing regimes (different processes): Koppen group, high vs low ground, wet vs dry -- rules (a)-(c).
+# A smooth temperature gradient inside one climate group (e.g. 4-5 degrees of latitude) is not a regime change.
+SUPPORTING_ONLY = {"temperature"}
 SUGGEST_MIN_CELLS = 4
 SUGGEST_MAX = 3
 HEURISTIC_EN = "Rules are project heuristics (concept after Hosking & Wallis 1993), not literature thresholds."
@@ -215,6 +220,11 @@ def _reasons(cells: list[Cell]) -> list[HomogeneityReason]:
     return out
 
 
+def _mixing(reasons: list[HomogeneityReason]) -> bool:
+    """Mixed when at least one regime rule (a)-(c) applies; (d) alone does not make a box mixed."""
+    return any(r.code not in SUPPORTING_ONLY for r in reasons)
+
+
 def _round_all(x: float | None, d: int) -> float | None:
     return None if x is None else round(float(x), d)
 
@@ -262,7 +272,7 @@ def suggest_parts(cells: list[Cell], bound: list[float] | None = None) -> list[H
         if bound is not None:
             w, s, e, n = max(w, bound[0]), max(s, bound[1]), min(e, bound[2]), min(n, bound[3])
         inside = [c for c in cells if w <= c.lon <= e and s <= c.lat <= n]
-        if len(inside) < SUGGEST_MIN_CELLS or _reasons(inside):
+        if len(inside) < SUGGEST_MIN_CELLS or _mixing(_reasons(inside)):
             continue
         mean_t = float(np.mean([c.t2m for c in members]))
         found.append((len(inside), [round(w, 2), round(s, 2), round(e, 2), round(n, 2)],
@@ -316,12 +326,14 @@ def evaluate(cells: list[Cell], bound: list[float] | None = None) -> Homogeneity
             scientific_es=f"Una sola celda, así que no hay mezcla dentro del cuadro ({sci_es}).",
         ))
     reasons = _reasons(cells)
-    if not reasons:
+    if not _mixing(reasons):
+        warm = " The temperature range rule applies, but alone it is not a regime change." if reasons else ""
+        warm_es = " Se cumple la regla del rango de temperatura, pero sola no es un cambio de régimen." if reasons else ""
         return Homogeneity(kind="one_kind", **common, text=Text(
             simple="This box is one kind of place.",
-            scientific=f"One kind of place: none of the four mixing rules applies ({sci_en}). {HEURISTIC_EN}",
+            scientific=f"One kind of place: none of the regime rules (climate group, elevation, rain) applies ({sci_en}).{warm} {HEURISTIC_EN}",
             simple_es="Este cuadro es un solo tipo de lugar.",
-            scientific_es=f"Un solo tipo de lugar: no se cumple ninguna de las cuatro reglas de mezcla ({sci_es}). {HEURISTIC_ES}",
+            scientific_es=f"Un solo tipo de lugar: no se cumple ninguna regla de régimen (grupo climático, elevación, lluvia) ({sci_es}).{warm_es} {HEURISTIC_ES}",
         ))
     suggestions = suggest_parts(cells, bound)
     codes = ", ".join(r.code for r in reasons)
