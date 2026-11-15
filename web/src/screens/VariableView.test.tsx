@@ -38,7 +38,8 @@ describe('Variable view, Simple', () => {
     expect(screen.getByRole('list', { name: 'How sure are we?' })).toBeInTheDocument()
     expect(screen.getByText("Sure it's real").closest('li')).toHaveAttribute('aria-current', 'step')
     expect(screen.getByText(/In 2002: about 65/)).toBeInTheDocument()
-    expect(screen.getByText('Why we looked at this')).toBeInTheDocument()
+    expect(screen.getByText('Can we trust this?')).toBeInTheDocument()
+    expect(container.textContent).not.toMatch(/test box|stage 1/i)
     const text = container.textContent ?? ''
     expect(bannedIn(text)).toEqual([])
   })
@@ -62,7 +63,7 @@ describe('Variable view, Simple', () => {
     await screen.findByRole('heading', { level: 2 })
     await user.click(screen.getByRole('button', { name: 'Scientific' }))
     await waitFor(() => expect(screen.getAllByText(/Sen's slope \+1\.48 %RH per decade/).length).toBeGreaterThan(0))
-    expect(screen.getByText('Selection checks (stage 1)')).toBeInTheDocument()
+    expect(screen.getByText('Can we trust this? Evidence checks')).toBeInTheDocument()
     expect(screen.getByText(/Lag-1 autocorrelation/)).toBeInTheDocument()
     expect(screen.getAllByText(/MDT/).length).toBeGreaterThan(0)
   })
@@ -72,7 +73,7 @@ describe('Shortlist, Simple', () => {
   it('shows definition, why line, compact meter and the common window', async () => {
     const { container } = open('#/shortlist?region=cajamarca_west&theme=water')
     expect(await screen.findByText('We compare every measurement over the same years: 2002 to 2021.')).toBeInTheDocument()
-    expect(screen.getAllByText(/Worth a closer look/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Recommended/).length).toBeGreaterThan(0)
     expect(container.textContent).not.toMatch(/AIRS3STM|p = /)
   })
 })

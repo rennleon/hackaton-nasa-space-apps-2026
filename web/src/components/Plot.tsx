@@ -28,7 +28,7 @@ export default function PlotlyChart({ data, layout, height = 320 }: { data: Data
     margin: { l: 56, r: 16, t: 16, b: 44 },
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { color: fg, size: 12 },
+    font: { color: fg, size: 13 },
     xaxis: { gridcolor: grid, ...(layout.xaxis ?? {}) },
     yaxis: { gridcolor: grid, zerolinecolor: grid, ...(layout.yaxis ?? {}) },
     legend: { orientation: 'h', y: -0.2 },
