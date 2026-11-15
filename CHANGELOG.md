@@ -7,6 +7,8 @@ for how to release and how to roll back.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-15
+
 ### Added
 - Live NASA data for any place: the Giovanni cloud API (server-side Earthdata token, never in the
   browser) alongside NASA POWER, for points and boxes (latitude-weighted cell mean, at least half the
