@@ -60,7 +60,17 @@ describe('Findings screen', () => {
     expect(screen.getAllByText("Sure it's real").length).toBeGreaterThan(0)
     expect(screen.getByText('Two instruments agree')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /One dot for each year, 2003 to 2014/ })).toBeInTheDocument()
-    expect(screen.getAllByText('Satellite · AIRS').length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/^Measured by/).length).toBeGreaterThan(0)
+    expect(container.textContent).toContain('Measured by AIRS (Aqua satellite)')
+    // the legend names each instrument once, with its kind, and links to the sources page
+    const legend = container.querySelector('.legend')!
+    expect(legend.querySelector('.legend-label')?.textContent).toMatch(/^Instruments.* in this list:$/)
+    const names = [...legend.querySelectorAll('li')].map((li) => li.textContent)
+    expect(names).toContain('AIRS (satellite)')
+    expect(new Set(names).size).toBe(names.length)
+    legend.querySelectorAll('li a').forEach((a) => expect(a.getAttribute('href')).toMatch(/^#\/sources\?instrument=/))
+    // the second opinion says it is the same thing seen by a different instrument
+    expect(screen.getByText('Same thing, measured by a different instrument: MERRA-2')).toBeInTheDocument()
     // unavailable ones sit in one collapsed row
     const row = screen.getByText('Not available for this place (6)').closest('details')!
     expect(row).not.toHaveAttribute('open')
@@ -112,25 +122,55 @@ describe('Findings screen', () => {
     open('#/shortlist?region=cajamarca_west&theme=water')
     await screen.findByText(/shows? a clear change/)
     await user.click(screen.getByRole('button', { name: 'Scientific' }))
-    expect(await screen.findAllByText('AIRS · Aqua satellite · since 2002')).not.toHaveLength(0)
-    expect(screen.getAllByText('MERRA-2 computer model · via NASA POWER').length).toBeGreaterThan(0)
+    await waitFor(() => expect(document.querySelector('.source-compact')?.textContent).toBe('Instrument: AIRS (Aqua satellite)'))
     expect(screen.getAllByText(/adj\. p = /).length).toBeGreaterThan(0)
   })
 })
 
 describe('Where our data comes from', () => {
-  it('lists every instrument with the variables that use it, linked from the header', async () => {
+  it('shows each instrument with its variables, linked from the header', async () => {
     const user = userEvent.setup()
     open('#/')
     const links = await screen.findAllByRole('link', { name: 'Where our data comes from' })
     expect(links).toHaveLength(2) // header and footer
     await user.click(links[0])
     expect(await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })).toBeInTheDocument()
-    const airs = screen.getByRole('heading', { level: 2, name: 'AIRS' }).closest('li')!
-    expect(within(airs).getByText('Afternoon humidity')).toBeInTheDocument()
-    expect(within(airs).getByText(/Rides on Aqua/)).toBeInTheDocument()
+    const airs = screen.getByRole('heading', { level: 2, name: 'Instrument: AIRS' }).closest('li')!
+    expect(within(airs).getByText('Satellite: Aqua')).toBeInTheDocument()
+    expect(within(airs).getByText('Variables from this instrument:')).toBeInTheDocument()
+    expect(within(airs).getByRole('link', { name: 'Afternoon humidity' })).toHaveAttribute('href', expect.stringMatching(/^#\/variable\?.*variable=airs_rh_surf_day/))
+    expect(within(airs).getByText(/Rides on Aqua|Since 2002/)).toBeInTheDocument()
     expect(within(airs).getByText('Fresh from NASA when you ask')).toBeInTheDocument()
     expect(screen.getByText(/NASA POWER is a delivery service/)).toBeInTheDocument()
+    expect(screen.getByText(/is a tool that measures/)).toBeInTheDocument()
     expect(bannedIn(document.querySelector('.sources')!.textContent ?? '')).toEqual([])
+  })
+
+  it('puts every listed variable under exactly one instrument, and offline instruments under "Not used yet"', async () => {
+    open('#/sources')
+    await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })
+    const variables = cat('variables') as { id: string; name: { simple: string }; listed?: boolean; source: { instrument_id: string } }[]
+    const sections = [...document.querySelectorAll<HTMLElement>('.src-card')]
+    for (const v of variables.filter((x) => x.listed !== false)) {
+      const owners = sections.filter((sec) => sec.querySelector(`a[href*="variable=${v.id}"]`))
+      expect(owners.map((o) => o.id), v.id).toEqual([`inst-${v.source.instrument_id}`])
+    }
+    // an instrument is a section heading, never a variable link
+    expect(screen.getByRole('heading', { level: 2, name: 'Not used yet' })).toBeInTheDocument()
+    for (const name of ['Instrument: MODIS', 'Instrument: MOPITT']) {
+      const card = screen.getByRole('heading', { level: 3, name }).closest('li')!
+      expect(card.querySelector('.src-vars')).toBeNull()
+      expect(within(card).getByText(/cannot fetch it live/)).toBeInTheDocument()
+    }
+    expect(screen.getByRole('heading', { level: 2, name: 'Instrument: MERRA-2' }).closest('li')).toHaveTextContent('Computer model')
+  })
+
+  it('Scientific keeps the hierarchy', async () => {
+    const user = userEvent.setup()
+    open('#/sources')
+    await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })
+    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    const airs = screen.getByRole('heading', { level: 2, name: 'Instrument: AIRS' }).closest('li')!
+    expect(within(airs).getByRole('link', { name: /Surface relative humidity \(daytime/ })).toBeInTheDocument()
   })
 })

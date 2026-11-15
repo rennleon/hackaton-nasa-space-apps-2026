@@ -133,10 +133,25 @@
     simple: A gas made when engines, power plants and factories burn fuel. A lot of it makes city air dirty.
     scientific: Tropospheric NO₂ vertical column density (molecules/cm²), a marker of combustion emissions; short-lived, so it stays near its sources.
 - id: instrument
-  term: { simple: space camera, scientific: instrument }
+  term: { simple: instrument, scientific: instrument }
   definition:
-    simple: A tool on a satellite that measures one kind of thing, like heat, rain or haze.
-    scientific: A sensor on a satellite platform (e.g. AIRS on Aqua, OMI on Aura) that produces a data product.
+    simple: A tool that measures. Some sit on satellites and look down at the Earth.
+    scientific: A sensor on a satellite platform (e.g. AIRS on Aqua, OMI on Aura), or a computer model (MERRA-2, GLDAS), that produces a data product holding many variables.
+- id: variable
+  term: { simple: variable, scientific: variable }
+  definition:
+    simple: One thing an instrument measures, like how warm the air is or how much rain falls.
+    scientific: One measured quantity inside a data product (e.g. surface air temperature). It is what we test for a trend.
+- id: satellite
+  term: { simple: satellite, scientific: satellite }
+  definition:
+    simple: A machine that circles the Earth high up in space. It carries instruments.
+    scientific: A spacecraft in orbit that carries one or more instruments (e.g. Aqua, Terra, Aura).
+- id: computer_model
+  term: { simple: computer model, scientific: computer model (reanalysis) }
+  definition:
+    simple: A computer program that works out past weather from many real measurements.
+    scientific: A numerical model that assimilates many observations into gridded fields (e.g. MERRA-2, GLDAS). It is not itself a sensor.
 - id: second_opinion
   term: { simple: second opinion, scientific: instrument cross-check }
   definition:

@@ -1,15 +1,29 @@
 .sources h1 { margin-bottom: 0.4rem; }
+.src-not-used { margin: 1.6rem 0 0; }
 .src-grid { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
-.src-card { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; border-radius: 12px; }
+.src-card { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; border-radius: 12px; scroll-margin-top: 4.5rem; }
 .src-card.src-model { border-style: dashed; }
+.src-card.src-wanted { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 .src-head { display: flex; justify-content: space-between; align-items: start; gap: 0.5rem; }
-.src-head h2 { margin: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
+.src-head h2, .src-head h3 { margin: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
 .src-kind { flex: none; font-size: 0.78rem; border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; color: var(--muted); }
-.src-meta, .src-live { margin: 0; }
+.src-meta, .src-live, .src-why { margin: 0; }
+.src-why { color: var(--muted); font-style: italic; }
 .src-live-offline { color: var(--v-maybe); font-weight: 600; }
 .src-live-giovanni, .src-live-power { color: var(--v-sure); font-weight: 600; }
 .src-card dl { margin: 0.4rem 0; display: grid; gap: 2px; }
 .src-card dt { font-weight: 700; font-size: 0.85rem; margin-top: 0.4rem; }
 .src-card dd { margin: 0; overflow-wrap: anywhere; }
-.src-vars { margin: 0; padding-left: 1.1rem; }
-@media (max-width: 720px) { .src-grid { grid-template-columns: 1fr; } }
+/* Instrument -> its variables */
+.src-vars-title { margin: 0.4rem 0 0.2rem; font-weight: 700; font-size: 0.85rem; }
+.src-flow { display: flex; align-items: center; gap: 0.5rem; }
+.src-node { flex: none; font-weight: 700; padding: 4px 10px; border: 2px solid var(--accent); border-radius: 8px; color: var(--accent); background: var(--surface); }
+.src-card.src-model .src-node { border-style: dashed; }
+.src-arrow { flex: none; color: var(--muted); }
+.src-vars { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.src-vars li { padding: 3px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .src-grid { grid-template-columns: 1fr; }
+  .src-flow { flex-direction: column; align-items: flex-start; }
+  .src-arrow { transform: rotate(90deg); margin-left: 1rem; }
+}
