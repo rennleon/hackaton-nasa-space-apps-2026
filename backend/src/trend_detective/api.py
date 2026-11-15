@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -16,6 +16,7 @@ from . import ENGINE_VERSION
 from .catalog import Geometry, RegionCard
 from .contract import AnalysisResult, ScanResult, Text
 from .engine import EngineContext, analyze
+from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
 from .sources.power import validate_geometry
@@ -33,6 +34,15 @@ app.add_middleware(
 async def live_source_down(_request: Request, exc: LiveSourceUnavailable) -> JSONResponse:
     """A live source (NASA POWER) is unreachable: 503, never a cached 'no data' answer."""
     return JSONResponse(status_code=503, content={"detail": f"Live data source unavailable: {exc}"})
+
+
+@app.exception_handler(RateLimited)
+async def rate_limited(_request: Request, exc: RateLimited) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"detail": MESSAGE, "detail_es": MESSAGE_ES},
+        headers={"Retry-After": str(exc.retry_after)},
+    )
 
 
 @lru_cache(maxsize=1)
@@ -184,6 +194,7 @@ class _NotCacheable(Exception):
 
 
 @lru_cache(maxsize=256)
+@counts_as_live
 def _custom_scan_cached(kind: str, c: tuple[float, ...], theme: str) -> ScanResult:
     result = scan_region(ctx(), custom_region(kind, c), theme)
     down = [e for e in result.entries if e.availability == "fetch_failed"]
@@ -195,13 +206,14 @@ def _custom_scan_cached(kind: str, c: tuple[float, ...], theme: str) -> ScanResu
 
 
 @lru_cache(maxsize=512)
+@counts_as_live
 def _custom_analyze_cached(kind: str, c: tuple[float, ...], variable: str, start: str | None, end: str | None):
     from .engine import analyze_region
 
     return analyze_region(ctx(), custom_region(kind, c), variable, start=start, end=end)
 
 
-@app.get("/custom/scan", response_model=ScanResult)
+@app.get("/custom/scan", response_model=ScanResult, dependencies=[Depends(limit_client)])
 def custom_scan(
     theme: str = Query(...), bbox: str | None = None, lat: float | None = None, lon: float | None = None
 ) -> ScanResult:
@@ -216,7 +228,7 @@ def custom_scan(
         raise HTTPException(422, str(exc)) from exc
 
 
-@app.get("/custom/variables/{variable}", response_model=AnalysisResult)
+@app.get("/custom/variables/{variable}", response_model=AnalysisResult, dependencies=[Depends(limit_client)])
 def custom_result(
     variable: str,
     bbox: str | None = None,
