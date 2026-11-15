@@ -39,7 +39,7 @@ describe('TrustPanel', () => {
   }
   it('groups the checks and shows second opinion, published science and the notes', () => {
     wrap(<TrustPanel result={full} />)
-    expect(screen.getByRole('heading', { name: 'Can we trust this?' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tell me more: can we trust this?' })).toBeInTheDocument()
     expect(screen.getByText('Is the data good?')).toBeInTheDocument()
     expect(screen.getByText('Is the record long enough?')).toBeInTheDocument()
     expect(screen.getByText(/Two instruments agree on the direction/)).toBeInTheDocument()
@@ -54,9 +54,31 @@ describe('TrustPanel', () => {
     expect(screen.queryByText('Does another instrument agree?')).toBeNull()
   })
   it('uses the new wording instead of "Not a good fit here"', () => {
-    const sel = { ...base.selection!, worth_investigating: false }
+    const checks = [...base.selection!.checks.filter((q) => q.code !== 'detectability'), { code: 'detectability' as const, status: 'fail' as const, detail: t('This record can only spot big changes.') }]
+    const sel = { ...base.selection!, worth_investigating: false, checks }
     const { container } = wrap(<TrustPanel result={{ ...base, selection: sel }} />)
     expect(container.textContent).toContain('Hard to spot with this record')
     expect(container.textContent).not.toMatch(/Not a good fit|stage 1/)
+  })
+  it('shows no "Recommended" tag, and no "Hard to spot" tag when detectability passed', () => {
+    const { container } = wrap(<TrustPanel result={{ ...base, selection: { ...base.selection!, worth_investigating: true } }} />)
+    expect(container.textContent).not.toMatch(/Recommended|Hard to spot/)
+  })
+  it('Simple: collapsed behind "Tell me more"; Scientific: open', () => {
+    const a = wrap(<TrustPanel result={base} />)
+    expect(a.container.querySelector('details')).not.toHaveAttribute('open')
+    a.unmount()
+    const b = wrap(<TrustPanel result={base} />, 'scientific')
+    expect(b.container.querySelector('details')).toHaveAttribute('open')
+  })
+  it('Simple: a failed detectability check reads as a note, a failed gate keeps the red cross', () => {
+    const checks = [...base.selection!.checks.filter((q) => q.code !== 'detectability'), { code: 'detectability' as const, status: 'fail' as const, detail: t('Detect check text.') }]
+    const gates = { ...base.gates, checks: [...base.gates.checks, { code: 'custom_gate', passed: false, detail: t('Gate failed text.') }] }
+    const { container } = wrap(<TrustPanel result={{ ...base, selection: { ...base.selection!, checks }, gates }} />)
+    const row = (txt: string) => screen.getByText(txt).closest('li')!
+    expect(row('Detect check text.')).toHaveClass('trust-info')
+    expect(row('Detect check text.').textContent).toMatch(/Note:/)
+    expect(row('Gate failed text.')).toHaveClass('trust-fail')
+    expect(container.querySelectorAll('.trust-row svg').length).toBe(container.querySelectorAll('.trust-row').length)
   })
 })

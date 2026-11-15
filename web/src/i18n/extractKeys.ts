@@ -179,7 +179,7 @@ export function dynamicUses(): KeyUse[] {
   trust('result.trust.agreement.agrees', 'This matches what scientists found.', 'Agrees with the published assessment.')
   trust('result.trust.agreement.differs', 'This is different from what scientists found.', 'Differs from the published assessment.')
   trust('result.trust.agreement.too_soon', 'Our record is too short to compare with the scientists yet.', 'Record too short to compare with the published assessment.')
-  trust('result.trust.title', 'Can we trust this?', 'Can we trust this? Evidence checks')
+  trust('result.trust.title', 'Tell me more: can we trust this?', 'Can we trust this? Evidence checks')
   for (const [d, en] of [['upward', 'upward'], ['downward', 'downward'], ['flat', 'flat']]) out.push({ key: `result.chart.dir.${d}.simple`, en, file: 'lib/charts.ts' }, { key: `result.chart.dir.${d}.sci`, en, file: 'lib/charts.ts' })
   return out
 }

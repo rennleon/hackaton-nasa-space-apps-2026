@@ -49,3 +49,8 @@ export function formatYm(s: string): string {
   const { y, m } = parseYm(s)
   return `${MONTHS[getLang()][m - 1]} ${y}`
 }
+
+/** First letter in capitals ("rainy season" -> "Rainy season") for names shown on their own (tabs, options, chips). */
+export function capFirst(s: string): string {
+  return s ? s.charAt(0).toLocaleUpperCase() + s.slice(1) : s
+}

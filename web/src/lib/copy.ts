@@ -22,8 +22,6 @@ export const COPY = {
   modelTag: tx('computer model estimate', 'model / reanalysis'),
   observedTag: tx('satellite measurement', 'observation'),
   whyLooked: tx('Can we trust this?', 'Can we trust this? Evidence checks'),
-  worthYes: tx('Recommended', 'Recommended'),
-  worthNo: tx('Hard to spot with this record', 'Hard to detect with this record'),
   checkPass: tx('OK', 'Pass'),
   checkCaution: tx('Careful', 'Caution'),
   checkFail: tx('No', 'Fail'),

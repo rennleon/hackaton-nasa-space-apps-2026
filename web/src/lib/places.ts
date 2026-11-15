@@ -5,55 +5,14 @@ import { rememberPlaceName } from './placeNames'
 import type { Route } from './route'
 import type { RegionCard } from '../types/catalog'
 import { numberLocale } from './startT'
+import { exampleAt, exampleName } from './examples'
 
 export type Chosen =
   | { kind: 'region'; region: RegionCard }
   /** `name` is null for a pin or box the child placed on the map ("Your place"). `viaMap` keeps the map view still. */
   | { kind: 'place'; place: Place; name: string | null; viaMap: boolean }
 
-export interface ExamplePlace {
-  id: string
-  name: string
-  /** English defaults; screens pass them through the translation helper under `start.example.<id>.*` */
-  tag: { simple: string; scientific: string }
-  caption: { simple: string; scientific: string }
-  lat: number
-  lon: number
-}
-
-/** User-approved example points. Their results are precomputed from NASA POWER data (static files in `public/data/results/ex_<id>/`). */
-export const EXAMPLE_PLACES: ExamplePlace[] = [
-  {
-    id: 'delhi',
-    name: 'Delhi, India',
-    tag: { simple: 'Big city', scientific: 'Megacity' },
-    caption: { simple: 'A huge city, full of people and buildings.', scientific: 'Dense urban area, northern India.' },
-    lat: 28.61,
-    lon: 77.21,
-  },
-  {
-    id: 'manaus',
-    name: 'Amazon rainforest near Manaus, Brazil',
-    tag: { simple: 'Rainforest', scientific: 'Tropical rainforest' },
-    caption: { simple: 'Thick green forest. Warm and rainy all year.', scientific: 'Equatorial rainforest, central Amazon basin.' },
-    lat: -3.1,
-    lon: -60.02,
-  },
-  {
-    id: 'tamanrasset',
-    name: 'Sahara desert near Tamanrasset, Algeria',
-    tag: { simple: 'Desert', scientific: 'Hot desert' },
-    caption: { simple: 'A huge hot desert where it hardly ever rains.', scientific: 'Hyper-arid Saharan highland, southern Algeria.' },
-    lat: 22.79,
-    lon: 5.52,
-  },
-]
-
-/** The ready-made example at (about) this point, if any: its precomputed files live under `results/ex_<id>/`. */
-export function exampleAt(place: Place): ExamplePlace | undefined {
-  if (place.kind !== 'point') return undefined
-  return EXAMPLE_PLACES.find((e) => Math.abs(e.lat - place.lat) < 0.05 && Math.abs(e.lon - place.lon) < 0.05)
-}
+export { EXAMPLE_PLACES, exampleAt, exampleName, type ExamplePlace } from './examples'
 
 /** A named live point: remembers its name so the next screens can show it. */
 export function namedPoint(lat: number, lon: number, name: string): Chosen {
@@ -90,7 +49,9 @@ export function chosenBbox(c: Chosen): [number, number, number, number] {
 /** Name to show: the region's name (passed in), a remembered real name, or the fallback ("Your place"). */
 export function chosenName(c: Chosen, regionName: string, fallback: string): string {
   if (c.kind === 'region') return regionName
-  return c.name ?? fallback
+  // a point that is one of the ready-made examples always carries the example's own name, however it was opened
+  const ex = exampleAt(c.place)
+  return ex ? exampleName(ex) : (c.name ?? fallback)
 }
 
 /** Where a question leads: the existing findings route, for a region or a place. */

@@ -118,7 +118,7 @@ describe('WhereElse (Scientific)', () => {
     expect(within(table).getAllByRole('row')).toHaveLength(6)
     expect(within(table).getByText('+0.31 [+0.18, +0.44] °C')).toBeInTheDocument()
     expect(within(table).getAllByText('1984–2025').length).toBeGreaterThan(0)
-    expect(within(table).getByText('no data here')).toBeInTheDocument()
+    expect(within(table).getByText('No data here')).toBeInTheDocument()
     expect(screen.getByText('Each place uses its own full record; windows differ.')).toBeInTheDocument()
   })
 })

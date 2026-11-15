@@ -42,10 +42,12 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
   const statusWord = (st: Status) =>
     st === 'pass' ? s('result.trust.pass', 'Good', 'Pass') : st === 'caution' ? s('result.trust.caution', 'Careful', 'Caution') : st === 'fail' ? s('result.trust.fail', 'Problem', 'Fail') : s('result.trust.info', 'Note', 'Note')
 
+  // A failed gate blocks the verdict (red cross). A failed stage-1 check only says how hard this is to see, so a child
+  // reads it as a note, not as a contradiction under "Sure it's real". Scientific keeps the plain pass/caution/fail.
   const gateRow = (g: AnalysisResult['gates']['checks'][number]): Row => ({ key: `gate-${g.code}`, status: g.passed ? 'pass' : 'fail', text: bx(g.detail) })
   const selRow = (k: 'fitness' | 'known_breaks' | 'detectability'): Row[] => {
     const x = sel?.checks.find((q) => q.code === k)
-    return x ? [{ key: `sel-${k}`, status: x.status, text: bx(x.detail) }] : []
+    return x ? [{ key: `sel-${k}`, status: simple && x.status === 'fail' ? 'info' : x.status, text: bx(x.detail) }] : []
   }
 
   const quality: Row[] = [
@@ -98,77 +100,86 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     { id: 'second', icon: 'pair', title: s('result.trust.second', 'Does another instrument agree?', 'Second opinion'), rows: second },
   ] as Group[]).filter((g) => g.rows.length > 0 || g.id === 'record')
 
+  const na = s('result.trust.na', '', 'n/a')
   const notes = result.verdict.notes ?? []
   const worth = sel ? sel.worth_investigating : null
 
+  // "Hard to spot" only when the stage-1 detectability check failed; a recommended variable needs no tag
+  const detect = sel?.checks.find((q) => q.code === 'detectability')
+  const hard = sel != null && (detect ? detect.status === 'fail' : !worth)
+
   return (
     <section className="card trust" aria-labelledby="trust-h" data-demo="trust">
-      <div className="trust-head">
-        <h3 id="trust-h">{c('result.trust.title', { simple: 'Can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
-        {worth != null && (
-          <span className={`trust-tag ${worth ? 'trust-tag-good' : 'trust-tag-hard'}`}>
-            <Icon name={worth ? 'check' : 'caution'} size={16} />
-            {worth ? s('result.trust.recommended', 'Recommended', 'Recommended') : s('result.trust.hard', 'Hard to spot with this record', 'Hard to detect with this record')}
-          </span>
+      <details key={view} className="trust-details" open={!simple}>
+        <summary>
+          <h3 id="trust-h">{c('result.trust.title', { simple: 'Tell me more: can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
+        </summary>
+        {hard && (
+          <div className="trust-head">
+            <span className="trust-tag trust-tag-hard">
+              <Icon name="caution" size={16} />
+              {s('result.trust.hard', 'Hard to spot with this record', 'Hard to detect with this record')}
+            </span>
+          </div>
         )}
-      </div>
-      {groups.map((g) => (
-        <div key={g.id} className="trust-group" data-demo={`trust-${g.id}`}>
-          <h4>
-            <Icon name={g.icon} size={18} /> {g.title}
-          </h4>
-          <ul className="trust-rows">
-            {g.rows.map((row) => (
-              <li key={row.key} className={`trust-row trust-${row.status}`}>
-                <Icon name={STATUS_ICON[row.status]} size={20} />
-                <span>
-                  <span className="visually-hidden">{statusWord(row.status)}: </span>
-                  {row.text}
-                  {row.extra && <> {row.extra}</>}
-                </span>
-              </li>
+        {groups.map((g) => (
+          <div key={g.id} className="trust-group" data-demo={`trust-${g.id}`}>
+            <h4>
+              <Icon name={g.icon} size={18} /> {g.title}
+            </h4>
+            <ul className="trust-rows">
+              {g.rows.map((row) => (
+                <li key={row.key} className={`trust-row trust-${row.status}`}>
+                  <Icon name={STATUS_ICON[row.status]} size={20} />
+                  <span>
+                    <span className="visually-hidden">{statusWord(row.status)}: </span>
+                    {row.text}
+                    {row.extra && <> {row.extra}</>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {g.id === 'record' && notes.map((n, i) => (
+              <p key={i} className="trust-note">
+                {bx(n)}
+              </p>
             ))}
-          </ul>
-          {g.id === 'record' && notes.map((n, i) => (
-            <p key={i} className="trust-note">
-              {bx(n)}
+            {g.id === 'record' && !simple && <Detectability result={result} />}
+          </div>
+        ))}
+        {pub && (
+          <div className="trust-group">
+            <h4>
+              <Icon name="book" size={18} /> {s('result.trust.published', 'What scientists found here', 'Matches published science')}
+            </h4>
+            <blockquote className="trust-quote">{bx(pub.statement)}</blockquote>
+            <ul className="trust-rows">
+              {pub.agreement && (
+                <li className={`trust-row trust-${agreeText[pub.agreement].st}`}>
+                  <Icon name={STATUS_ICON[agreeText[pub.agreement].st]} size={20} />
+                  <span>
+                    <span className="visually-hidden">{statusWord(agreeText[pub.agreement].st)}: </span>
+                    {c(`result.trust.agreement.${pub.agreement}`, agreeText[pub.agreement].text)}
+                  </span>
+                </li>
+              )}
+            </ul>
+            <p className="muted small">
+              {s('result.trust.source', 'Source: {source}.', 'Source: {source}.', { source: pub.source })}
+              {pub.confidence && ' ' + s('result.trust.confidence', 'How sure the scientists are: {level}.', 'Assessment confidence: {level}.', { level: pub.confidence })}
             </p>
-          ))}
-          {g.id === 'record' && !simple && <Detectability result={result} />}
-        </div>
-      ))}
-      {pub && (
-        <div className="trust-group">
-          <h4>
-            <Icon name="book" size={18} /> {s('result.trust.published', 'What scientists found here', 'Matches published science')}
-          </h4>
-          <blockquote className="trust-quote">{bx(pub.statement)}</blockquote>
-          <ul className="trust-rows">
-            {pub.agreement && (
-              <li className={`trust-row trust-${agreeText[pub.agreement].st}`}>
-                <Icon name={STATUS_ICON[agreeText[pub.agreement].st]} size={20} />
-                <span>
-                  <span className="visually-hidden">{statusWord(agreeText[pub.agreement].st)}: </span>
-                  {c(`result.trust.agreement.${pub.agreement}`, agreeText[pub.agreement].text)}
-                </span>
-              </li>
-            )}
-          </ul>
+          </div>
+        )}
+        {!simple && sel && (
           <p className="muted small">
-            {s('result.trust.source', 'Source: {source}.', 'Source: {source}.', { source: pub.source })}
-            {pub.confidence && ' ' + s('result.trust.confidence', 'How sure the scientists are: {level}.', 'Assessment confidence: {level}.', { level: pub.confidence })}
+            {s('result.trust.mdt', '', 'MDT {mdt} {unit}/decade · expected {exp} {unit}/decade', {
+              mdt: sel.mdt_per_decade == null ? na : fmt(sel.mdt_per_decade, result.variable.units.decimals),
+              exp: sel.expected_per_decade == null ? na : fmt(sel.expected_per_decade, 2),
+              unit: result.variable.units.display,
+            })}
           </p>
-        </div>
-      )}
-      {!simple && sel && (
-        <p className="muted small">
-          {s('result.trust.mdt', '', 'MDT {mdt} {unit}/decade · expected {exp} {unit}/decade', {
-            mdt: sel.mdt_per_decade == null ? 'n/a' : fmt(sel.mdt_per_decade, result.variable.units.decimals),
-            exp: sel.expected_per_decade == null ? 'n/a' : fmt(sel.expected_per_decade, 2),
-            unit: result.variable.units.display,
-          })}
-        </p>
-      )}
+        )}
+      </details>
     </section>
   )
 }
@@ -183,7 +194,7 @@ function Detectability({ result }: { result: AnalysisResult }) {
   const have = s('result.trust.yr', '', '{n} yr', { n: fmt(d.years_available, 1) })
   return (
     <p className="muted small">
-      <Term id="years_to_detect" />:{' '}
+      <Term id="years_to_detect" cap />:{' '}
       {detected
         ? s('result.trust.detectDone', '', '{needed} needed vs {have} available (90% power design target; this trend is already significant at α = 0.05).', { needed, have })
         : s('result.trust.detect', '', '{needed} needed vs {have} available.', { needed, have })}

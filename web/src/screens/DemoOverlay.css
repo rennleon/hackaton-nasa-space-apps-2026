@@ -34,6 +34,15 @@
 .demo-auto { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; cursor: pointer; }
 .demo-auto input { width: 1.1rem; height: 1.1rem; }
 
+/* Phone: the note is a bottom sheet, kept short so the lit-up part of the page stays visible above it. */
+@media (max-width: 599px) {
+  .demo-tip { padding: 0.7rem 0.9rem 0.6rem; }
+  .demo-text { font-size: 1rem; line-height: 1.4; }
+  .demo-tip p { margin-bottom: 0.4rem; }
+  .demo-count { display: none; }
+  .demo-auto { margin-top: 0.4rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .demo-spot, .demo-tip { transition: none; }
   .demo-dots li.is-on { transform: none; }
