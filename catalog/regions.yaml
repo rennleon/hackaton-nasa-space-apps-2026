@@ -74,6 +74,68 @@
     - { variable: merra2_oc, id: dry, name: { simple: dry season, scientific: Jun–Aug, simple_es: "temporada seca", scientific_es: "jun–ago" }, months: [6, 7, 8] }
     - { variable: mopitt_co, id: dry, name: { simple: dry season, scientific: Jun–Aug, simple_es: "temporada seca", scientific_es: "jun–ago" }, months: [6, 7, 8] }
 
+- id: cajamarca_high_only
+  name:
+    simple: Cajamarca (only the high mountains)
+    scientific: Northern Peruvian Andes, high-elevation core of the Cajamarca box (highland-only twin)
+    simple_es: "Cajamarca (solo las montañas altas)"
+    scientific_es: "Andes del norte del Perú, núcleo de gran altura de la caja de Cajamarca (gemela solo de altura)"
+  description:
+    simple: The high part of the Cajamarca box. We picked it so all its map squares are alike.
+    scientific: "Sub-box of cajamarca_highlands (79.0–77.3°W, 7.3–6.3°S) chosen from NASA POWER climatology so that every MERRA-2 cell in it has model elevation 2348–2771 m (range 423 m), annual rain 1.06–1.67 mm/day (max/min 1.6) and annual T2M 14.3–15.8 °C (range 1.5 °C); the larger box mixes cells from 147 to 3378 m. Too small for the 1° AIRS cells, so AIRS variables report that gate."
+    simple_es: "La parte alta de la caja de Cajamarca. La elegimos para que todos sus cuadrados del mapa sean parecidos."
+    scientific_es: "Subcaja de cajamarca_highlands (79,0–77,3°O, 7,3–6,3°S) elegida con la climatología de NASA POWER para que cada celda de MERRA-2 tenga elevación del modelo de 2348–2771 m (rango 423 m), lluvia anual de 1,06–1,67 mm/día (máx/mín 1,6) y T2M anual de 14,3–15,8 °C (rango 1,5 °C); la caja mayor mezcla celdas de 147 a 3378 m. Es demasiado pequeña para las celdas de 1° de AIRS, así que las variables de AIRS informan esa puerta."
+  regime: Andean highland
+  geometry:
+    kind: bbox
+    bbox: [-79.0, -7.3, -77.3, -6.3]
+  comparison_region: null  # twin of cajamarca_highlands: compare the two regions' verdicts by hand
+  expectations:
+    - variable: merra2_t2m
+      direction: up
+      expected_per_decade: null
+      reason:
+        simple: "Air in the Andes mountains has been getting warmer for many years."
+        scientific: "Mean annual temperature in the tropical Andes rose by 0.10-0.11 °C per decade over 1939-1998 and faster (0.32-0.34 °C per decade) over the last 25 years of that series; significant at 95% even at the highest elevations. This is a surface-station record for 1939-1998, so it motivates the sign, not the 2002+ rate."
+        simple_es: "El aire de los Andes se ha ido calentando por muchos años."
+        scientific_es: "La temperatura media anual en los Andes tropicales aumentó 0.10–0.11 °C por década en 1939–1998 y más rápido (0.32–0.34 °C por década) en los últimos 25 años de esa serie; significativo al 95 % incluso a las mayores elevaciones. Es un registro de estaciones de superficie de 1939–1998, así que motiva el signo, no la tasa de 2002 en adelante."
+      source: "Vuille, M. and Bradley, R. S., Mean annual temperature trends and their vertical structure in the tropical Andes, Geophysical Research Letters 27(23), 2000. https://doi.org/10.1029/2000GL011871"
+    - variable: airs_t_surf_day
+      direction: up
+      expected_per_decade: null
+      reason:
+        simple: "Air in the Andes mountains has been getting warmer for many years."
+        scientific: "Mean annual temperature in the tropical Andes rose by 0.10-0.11 °C per decade over 1939-1998 and faster (0.32-0.34 °C per decade) over the last 25 years of that series; significant at 95% even at the highest elevations. This is a surface-station record for 1939-1998, so it motivates the sign, not the 2002+ rate."
+        simple_es: "El aire de los Andes se ha ido calentando por muchos años."
+        scientific_es: "La temperatura media anual en los Andes tropicales aumentó 0.10–0.11 °C por década en 1939–1998 y más rápido (0.32–0.34 °C por década) en los últimos 25 años de esa serie; significativo al 95 % incluso a las mayores elevaciones. Es un registro de estaciones de superficie de 1939–1998, así que motiva el signo, no la tasa de 2002 en adelante."
+      source: "Vuille, M. and Bradley, R. S., Mean annual temperature trends and their vertical structure in the tropical Andes, Geophysical Research Letters 27(23), 2000. https://doi.org/10.1029/2000GL011871"
+    - variable: airs_t_surf_night
+      direction: up
+      expected_per_decade: null
+      reason:
+        simple: "Air in the Andes mountains has been getting warmer for many years."
+        scientific: "Mean annual temperature in the tropical Andes rose by 0.10-0.11 °C per decade over 1939-1998 and faster (0.32-0.34 °C per decade) over the last 25 years of that series; significant at 95% even at the highest elevations. This is a surface-station record for 1939-1998, so it motivates the sign, not the 2002+ rate."
+        simple_es: "El aire de los Andes se ha ido calentando por muchos años."
+        scientific_es: "La temperatura media anual en los Andes tropicales aumentó 0.10–0.11 °C por década en 1939–1998 y más rápido (0.32–0.34 °C por década) en los últimos 25 años de esa serie; significativo al 95 % incluso a las mayores elevaciones. Es un registro de estaciones de superficie de 1939–1998, así que motiva el signo, no la tasa de 2002 en adelante."
+      source: "Vuille, M. and Bradley, R. S., Mean annual temperature trends and their vertical structure in the tropical Andes, Geophysical Research Letters 27(23), 2000. https://doi.org/10.1029/2000GL011871"
+    - variable: power_t2m
+      direction: up
+      expected_per_decade: null
+      reason:
+        simple: "Air in the Andes mountains has been getting warmer for many years."
+        scientific: "Mean annual temperature in the tropical Andes rose by 0.10-0.11 °C per decade over 1939-1998 and faster (0.32-0.34 °C per decade) over the last 25 years of that series; significant at 95% even at the highest elevations. This is a surface-station record for 1939-1998, so it motivates the sign, not the 2002+ rate."
+        simple_es: "El aire de los Andes se ha ido calentando por muchos años."
+        scientific_es: "La temperatura media anual en los Andes tropicales aumentó 0.10–0.11 °C por década en 1939–1998 y más rápido (0.32–0.34 °C por década) en los últimos 25 años de esa serie; significativo al 95 % incluso a las mayores elevaciones. Es un registro de estaciones de superficie de 1939–1998, así que motiva el signo, no la tasa de 2002 en adelante."
+      source: "Vuille, M. and Bradley, R. S., Mean annual temperature trends and their vertical structure in the tropical Andes, Geophysical Research Letters 27(23), 2000. https://doi.org/10.1029/2000GL011871"
+  declared_seasons:
+    - { variable: airs_rh_surf_day, id: wet, name: { simple: rainy season, scientific: Jan–Apr, simple_es: "temporada de lluvias", scientific_es: "ene–abr" }, months: [1, 2, 3, 4] }
+    - { variable: airs_rh_surf_day, id: dry, name: { simple: dry season, scientific: Jun–Aug, simple_es: "temporada seca", scientific_es: "jun–ago" }, months: [6, 7, 8] }
+    - { variable: airs_rh_surf_night, id: wet, name: { simple: rainy season, scientific: Jan–Apr, simple_es: "temporada de lluvias", scientific_es: "ene–abr" }, months: [1, 2, 3, 4] }
+    - { variable: airs_rh_surf_night, id: dry, name: { simple: dry season, scientific: Jun–Aug, simple_es: "temporada seca", scientific_es: "jun–ago" }, months: [6, 7, 8] }
+    - { variable: gpm_precip, id: wet, name: { simple: rainy season, scientific: Jan–Apr, simple_es: "temporada de lluvias", scientific_es: "ene–abr" }, months: [1, 2, 3, 4] }
+    - { variable: merra2_oc, id: dry, name: { simple: dry season, scientific: Jun–Aug, simple_es: "temporada seca", scientific_es: "jun–ago" }, months: [6, 7, 8] }
+    - { variable: mopitt_co, id: dry, name: { simple: dry season, scientific: Jun–Aug, simple_es: "temporada seca", scientific_es: "jun–ago" }, months: [6, 7, 8] }
+
 - id: cajamarca_west
   name:
     simple: Cajamarca (test box)

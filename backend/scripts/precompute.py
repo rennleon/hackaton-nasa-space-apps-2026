@@ -28,7 +28,7 @@ EXAMPLES = [
      "Sahara near Tamanrasset, Algeria (point 22.79, 5.52)",
      "Sahara cerca de Tamanrasset, Argelia", "Sahara cerca de Tamanrasset, Argelia (punto 22,79; 5,52)"),
 ]
-WHERE_REGIONS = ["cajamarca_highlands", "wisconsin"]
+WHERE_REGIONS = ["cajamarca_highlands", "cajamarca_high_only", "wisconsin"]
 
 
 def example_regions():

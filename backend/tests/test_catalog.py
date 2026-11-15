@@ -85,6 +85,14 @@ def test_region_rules(cat):
     assert hl.geometry.cells(1.0) >= 4  # rule 2
 
 
+def test_highland_twin_sits_inside_the_highlands_box(cat):
+    hl, tw = cat.regions["cajamarca_highlands"], cat.regions["cajamarca_high_only"]
+    (w, s, e, n), (hw, hs, he, hn) = tw.geometry.bbox, hl.geometry.bbox
+    assert hw <= w < e <= he and hs <= s < n <= hn
+    assert tw.listed is not False and tw.regime == hl.regime
+    assert tw.geometry.cells(0.5) >= 4  # MERRA-2 cells (heat) fit; AIRS (1 degree) honestly does not
+
+
 def test_unknown_keys_are_rejected(cat):
     data = cat.variables["gpm_precip"].model_dump()
     data["unexpected"] = 1
