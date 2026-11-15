@@ -167,7 +167,7 @@ def near_bound_chip(p: Prepared, variable: VariableCard, months: list[int] | Non
 def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> Chip | None:
     """Rule 3: the box we get should be the box we asked for. Giovanni's 'Data Bounding
     Box' is interpreted as grid-cell centres (assumption), so edges are centres ± grid/2."""
-    if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox" or prov.source_kind != "giovanni_csv":
+    if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox" or prov.source_kind not in ("giovanni_csv", "giovanni_api"):
         return None
     w, s, e, n = prov.data_bbox
     h = grid_deg / 2

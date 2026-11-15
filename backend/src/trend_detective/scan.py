@@ -202,7 +202,18 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
         engine_version=ENGINE_VERSION, region=region.ref(), theme_id=theme_id, alpha=ctx.alpha,
         window_start=cw[0] if cw else None, window_end=cw[1] if cw else None, common_window=cw is not None,
         entries=entries,
+        place=_place(ctx, region),
     )
+
+
+def _place(ctx: EngineContext, region: RegionCard):
+    """Place profile from facts known before any trend (AR6 region, climate group, wet/dry months)."""
+    from .place import profile_place
+
+    try:
+        return profile_place(ctx, region)
+    except Exception:  # the profile is context only; never let it break a scan
+        return None
 
 
 def scan(ctx: EngineContext, region_id: str, theme_id: str, cache: dict | None = None) -> ScanResult:
