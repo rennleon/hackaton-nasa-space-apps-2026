@@ -47,14 +47,14 @@ select.input option, select.input optgroup { background: var(--surface); color: 
 .summary-main { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem); line-height: 1.15; }
 .summary-sub { font-size: 1.1rem; color: var(--text-2); }
 .summary-tiles { flex: 1 1 260px; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.tile { flex: 1 1 7rem; min-width: 0; padding: 0.9rem 1rem; border-radius: var(--radius-md); }
-.tile-n { display: block; font-family: var(--font-head); font-weight: 700; font-size: 2.25rem; line-height: 1; }
-.tile-w { display: flex; align-items: flex-start; gap: 6px; margin-top: 0.45rem; font-size: 0.9rem; font-weight: 600; line-height: 1.25; }
-.tile-w svg { flex: none; margin-top: 1px; }
-.tile-sure { color: var(--v-sure); background: var(--v-sure-bg); }
-.tile-maybe { color: var(--v-maybe); background: var(--v-maybe-bg); }
-.tile-too_soon { color: var(--v-soon); background: var(--v-soon-bg); }
-.tile-cant_tell { color: var(--v-cant); background: transparent; border: 2px dashed currentColor; }
+.count-tile { flex: 1 1 7rem; min-width: 0; padding: 0.9rem 1rem; border-radius: var(--radius-md); }
+.count-tile-n { display: block; font-family: var(--font-head); font-weight: 700; font-size: 2.25rem; line-height: 1; }
+.count-tile-w { display: flex; align-items: flex-start; gap: 6px; margin-top: 0.45rem; font-size: 0.9rem; font-weight: 600; line-height: 1.25; }
+.count-tile-w svg { flex: none; margin-top: 1px; }
+.count-tile-sure { color: var(--v-sure); background: var(--v-sure-bg); }
+.count-tile-maybe { color: var(--v-maybe); background: var(--v-maybe-bg); }
+.count-tile-too_soon { color: var(--v-soon); background: var(--v-soon-bg); }
+.count-tile-cant_tell { color: var(--v-cant); background: transparent; border: 2px dashed currentColor; }
 
 /* instruments in this list: one chip each */
 .findings .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.8rem; margin: 0; }

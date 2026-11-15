@@ -8,7 +8,7 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Changed
-- New look (v3 design): warm light theme by default; a neutral dark grey theme with no colour tint (follows the system, or the
+- New look (v3 design): warm light theme by default; the dark theme keeps the deep-space navy palette (follows the system, or the
   switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
   page links and segmented Simple/Scientific and EN/ES switches.
 - Start page is one card: a three-step progress bar, then tabs to pick a place (Search, Ready-made places, On
