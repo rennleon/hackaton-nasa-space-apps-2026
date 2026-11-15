@@ -194,7 +194,7 @@ def stage1(
             code="detectability", status="caution",
             detail=Text(simple="We couldn't work out how big a change this record can detect.",
                         scientific="MDT not computable (insufficient data).",
-                        simple_es="No pudimos calcular qué tan grande debe ser un cambio para verlo con este registro.",
+                        simple_es="No pudimos calcular qué cambio puede ver este registro.",
                         scientific_es="MDT no calculable (datos insuficientes)."),
         ))
     elif expected is None:

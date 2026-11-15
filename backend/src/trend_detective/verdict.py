@@ -137,7 +137,8 @@ def has_es(v: VariableCard) -> bool:
 
 def _subject(x: VerdictInputs) -> str:
     s = x.variable.words.subject
-    return f"{s} in the {x.season.name.simple}" if x.season else s
+    # "dry-season afternoons" keeps the answer within the R5 sentence length
+    return f"{x.season.name.simple.replace(' season', '-season')} {s}" if x.season else s
 
 
 def short_record_note(label: Label, x: VerdictInputs) -> list[Text]:

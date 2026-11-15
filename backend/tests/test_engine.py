@@ -63,7 +63,8 @@ def test_short_user_window_fails_record_length_gate(ctx):
 
 
 def test_missing_data_is_cant_tell(ctx):
-    r = analyze(ctx, "cajamarca_highlands", "gpm_precip")
+    # MOPITT is offline-only (no CSV committed, not served by Giovanni cloud), so it has no series anywhere.
+    r = analyze(ctx, "cajamarca_highlands", "mopitt_co")
     assert r.verdict.label == "cant_tell" and r.gates.checks[0].code == "no_data"
 
 
@@ -77,10 +78,11 @@ def test_scan_water_theme(ctx):
     ids = [e.variable_id for e in s.entries]
     assert "airs_rh_surf_day" in ids and "gpm_precip" in ids
     by = {e.variable_id: e for e in s.entries}
-    assert by["gpm_precip"].shortlist_label == "cant_tell"
     assert by["airs_rh_surf_day"].p_adjusted is not None
-    # cant_tell entries sort last
-    assert s.entries[-1].shortlist_label == "cant_tell"
+    # cant_tell entries (if any) sort after every entry that has a result
+    labels = [e.shortlist_label for e in s.entries]
+    if "cant_tell" in labels:
+        assert all(lbl == "cant_tell" for lbl in labels[labels.index("cant_tell"):])
 
 
 @pytest.mark.parametrize(

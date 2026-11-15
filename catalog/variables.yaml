@@ -241,7 +241,7 @@
     - kind: input_change
       start: 2025-06
       action: flag
-      note: { simple: "The computer model switched to a new input source in June 2025.", scientific: "The AGRMET cloud input (WWMCA) ended and radiation switched to GALWEM on 9 Jun 2025. Source: Rui and Beaudoing, GLDAS Version 2 README, GES DISC, rev. 13 Aug 2025, Section 1.2.3 (pp. 8-9).", simple_es: "El modelo de computadora pasó a una nueva fuente de datos en junio de 2025.", scientific_es: "La entrada de nubes de AGRMET (WWMCA) terminó y la radiación pasó a GALWEM el 9 de junio de 2025. Fuente: Rui y Beaudoing, README de GLDAS versión 2, GES DISC, rev. 13 ago 2025, Sección 1.2.3 (pp. 8-9)." }
+      note: { simple: "The computer model switched to a new input source in June 2025.", scientific: "The AGRMET cloud input (WWMCA) ended and radiation switched to GALWEM on 9 Jun 2025. Source: Rui and Beaudoing, GLDAS Version 2 README, GES DISC, rev. 13 Aug 2025, Section 1.2.3 (pp. 8-9).", simple_es: "El modelo cambió de fuente de datos en junio de 2025.", scientific_es: "La entrada de nubes de AGRMET (WWMCA) terminó y la radiación pasó a GALWEM el 9 de junio de 2025. Fuente: Rui y Beaudoing, README de GLDAS versión 2, GES DISC, rev. 13 ago 2025, Sección 1.2.3 (pp. 8-9)." }
   cross_check: null
   words: { subject: "the topsoil", verb: is, up: "getting wetter", down: "getting drier" }
   words_es: { subject: "el suelo", up: "se vuelve más húmedo", down: "se vuelve más seco", changing: "está cambiando" }
@@ -278,7 +278,7 @@
     - kind: input_change
       start: 2025-06
       action: flag
-      note: { simple: "The computer model switched to a new input source in June 2025.", scientific: "The AGRMET cloud input (WWMCA) ended and radiation switched to GALWEM on 9 Jun 2025. Source: Rui and Beaudoing, GLDAS Version 2 README, GES DISC, rev. 13 Aug 2025, Section 1.2.3 (pp. 8-9).", simple_es: "El modelo de computadora pasó a una nueva fuente de datos en junio de 2025.", scientific_es: "La entrada de nubes de AGRMET (WWMCA) terminó y la radiación pasó a GALWEM el 9 de junio de 2025. Fuente: Rui y Beaudoing, README de GLDAS versión 2, GES DISC, rev. 13 ago 2025, Sección 1.2.3 (pp. 8-9)." }
+      note: { simple: "The computer model switched to a new input source in June 2025.", scientific: "The AGRMET cloud input (WWMCA) ended and radiation switched to GALWEM on 9 Jun 2025. Source: Rui and Beaudoing, GLDAS Version 2 README, GES DISC, rev. 13 Aug 2025, Section 1.2.3 (pp. 8-9).", simple_es: "El modelo cambió de fuente de datos en junio de 2025.", scientific_es: "La entrada de nubes de AGRMET (WWMCA) terminó y la radiación pasó a GALWEM el 9 de junio de 2025. Fuente: Rui y Beaudoing, README de GLDAS versión 2, GES DISC, rev. 13 ago 2025, Sección 1.2.3 (pp. 8-9)." }
   cross_check: null
   words: { subject: "the land", verb: is, up: "losing more water to the air", down: "losing less water to the air" }
   words_es: { subject: "la tierra", up: "suelta más agua al aire", down: "suelta menos agua al aire", changing: "está cambiando cuánta agua suelta" }

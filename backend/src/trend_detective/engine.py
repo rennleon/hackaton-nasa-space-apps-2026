@@ -50,6 +50,7 @@ from .published import for_result as published_for_result
 from .published import match as published_match
 from .robustness import leave_one_year_out
 from .selection import stage1
+from .independence import independence_note
 from .sources import LiveSourceUnavailable, SourceChain
 from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
@@ -375,7 +376,20 @@ def contrast_instruments(
     return Comparison(
         against=other.id, slope_per_decade=_r(c2.tt.slope_per_year * 10, 6), same_sign=same, significant=sig2,
         outcome=outcome, against_instrument=other.source.instrument, window_start=start, window_end=end,
-        text=_contrast_text(outcome, var, other, c1, c2, sig1, sig2, start, end),
+        text=_with_independence(_contrast_text(outcome, var, other, c1, c2, sig1, sig2, start, end),
+                                independence_note(var, other, ctx.catalog)),
+    )
+
+
+def _with_independence(text: Text, note: Text | None) -> Text:
+    """Append the 'partly share data' note (e.g. MERRA-2 assimilates AIRS) so a second opinion is never oversold."""
+    if note is None:
+        return text
+    def join(a: str | None, b: str | None) -> str | None:
+        return f"{a} {b}" if a and b else (a or b)
+    return Text(
+        simple=join(text.simple, note.simple) or "", scientific=join(text.scientific, note.scientific) or "",
+        simple_es=join(text.simple_es, note.simple_es), scientific_es=join(text.scientific_es, note.scientific_es),
     )
 
 
