@@ -1,8 +1,8 @@
 """C2/C3: AR6 expectations (stage-1 check b for any place), the published finding, instrument caveats, independence."""
 
 import re
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from synthetic import make_ctx, make_raw
