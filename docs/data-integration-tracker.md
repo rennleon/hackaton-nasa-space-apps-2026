@@ -143,46 +143,48 @@ Feature freeze: **16:00 Peru, Sun Nov 15**. After that, only R5 fixes, deploy an
 ### Track 1: data and engine (backend)
 | ID | Task | Serves | Status |
 |---|---|---|---|
-| A1 | `sources/giovanni_api.py`: point fetch, header check, fill → NaN, disk cache, offline mode, token from env, timeout → fallback | R2 R3 | ⬜ |
-| A2 | Boxes: cos(lat)-weighted mean of cell centres, valid-cell share; Harmony test for fine grids (30 min max), else cap cells | R2 R3 | ⬜ |
-| A3 | Catalog: drop `merra2_t2m`/`merra2_precip` as candidates; hide offline-only cards with no CSV; add `omi_aod`, `omi_no2`; remove drivers from Water; card fields `cadence`, `min_valid_days`, `domain`, `instrument_id` | R1 | ⬜ |
-| A4 | Treatments from section 5 marked ⬜ (daily → monthly, zero-rain gate, bounded chip) with tests | R3 R4 | ⬜ |
-| A5 | Instrument contrast (section 6) into `robustness.cross_check` | R4 | ⬜ |
-| A6 | Precompute both pre-loaded regions into the cache and commit (offline demo) | R2 R3 R6 | ⬜ |
-| B1 | Availability probe for a picked place, with kid reasons | R1 R2 | ⬜ |
+| A1 | `sources/giovanni_api.py`: point fetch, header check, fill → NaN, disk cache, offline mode, token from env, timeout → fallback | R2 R3 | ✅ |
+| A2 | Boxes: cos(lat)-weighted mean of cell centres, valid-cell share; Harmony test for fine grids (30 min max), else cap cells | R2 R3 | ✅ (cell averaging; Harmony not needed) |
+| A3 | Catalog: drop `merra2_t2m`/`merra2_precip` as candidates; hide offline-only cards with no CSV; add `omi_aod`, `omi_no2`; remove drivers from Water; card fields `cadence`, `min_valid_days`, `domain`, `instrument_id` | R1 | ✅ |
+| A4 | Treatments from section 5 marked ⬜ (daily → monthly, zero-rain gate, bounded chip) with tests | R3 R4 | ✅ |
+| A5 | Instrument contrast (section 6) into `robustness.cross_check` | R4 | ✅ |
+| A6 | Precompute both pre-loaded regions into the cache and commit (offline demo) | R2 R3 R6 | 🟡 cache warm running (Wisconsin GPM last) |
+| B1 | Availability probe for a picked place, with kid reasons | R1 R2 | ✅ |
 
 ### Track 2: interface (frontend)
 | ID | Task | Serves | Status |
 |---|---|---|---|
-| U1 | Remove internal labels; "Can we trust this?" panel (#5, #6); renames | R1 R5 | ⬜ |
-| U2 | Verdict gauge with one marker; one icon set, no emoji | R5 | ⬜ |
-| U3 | Charts: y-axis with units, visible band, "left out" annotation; season chart bug (#8) | R3 | ⬜ |
-| U4 | Findings: results first, verdict chip + sparkline, "Not available here (N)" collapsed row, summary line | R1 | ⬜ |
-| U5 | Source tag with instrument on every card; "Where our data comes from" page from `catalog/instruments.yaml` | R1 R6 | ⬜ |
-| U6 | Start: question inline after place, area size shown, "use my location", offline city search | R2 | ⬜ |
-| U7 | Loading / empty / error states for live fetches | R2 | ⬜ |
-| U8 | Demo: narration matches screen, spotlight, ends on a real result (#3, #4) | R5 | ⬜ |
-| U9 | Visual refresh (contrast AA, fewer borders, self-hosted fonts); 390 px check | R5 | ⬜ if time |
-| L0 | Every UI string through `web/src/i18n` (`t()`, `tx()` for backend Text) in U1–U7 | R5 | 🟡 in the UI agents |
-| L1 | Spanish for backend text: optional `simple_es` / `scientific_es` on `Text`; Spanish in catalog YAML (names, definitions, glossary, themes, instruments, regions) and engine sentence templates (verdict, selection, gates, contrast, place) | R5 | ⬜ after Track 1 merge |
-| L2 | Spanish UI: fill `web/src/i18n/es.ts`, EN/ES toggle in the header (English default, remembered per browser), Spanish dates/numbers, R5 kid rules applied in Spanish | R5 | ⬜ after Track 2 merge |
+| U1 | Remove internal labels; "Can we trust this?" panel (#5, #6); renames | R1 R5 | ✅ |
+| U2 | Verdict gauge with one marker; one icon set, no emoji | R5 | ✅ |
+| U3 | Charts: y-axis with units, visible band, "left out" annotation; season chart bug (#8) | R3 | ✅ |
+| U4 | Findings: results first, verdict chip + sparkline, "Not available here (N)" collapsed row, summary line | R1 | ✅ |
+| U5 | Source tag with instrument on every card; "Where our data comes from" page from `catalog/instruments.yaml` | R1 R6 | ✅ |
+| U6 | Start: question inline after place, area size shown, "use my location", offline city search | R2 | ✅ |
+| U7 | Loading / empty / error states for live fetches | R2 | ✅ |
+| U8 | Demo: narration matches screen, spotlight, ends on a real result (#3, #4) | R5 | ⬜ after A6 stage 1 |
+| U9 | Visual refresh (contrast AA, fewer borders, self-hosted fonts); 390 px check | R5 | ✅ |
+| L0 | Every UI string through `web/src/i18n` (`t()`, `tx()` for backend Text) in U1–U7 | R5 | ✅ |
+| L1 | Spanish for backend text: optional `simple_es` / `scientific_es` on `Text`; Spanish in catalog YAML (names, definitions, glossary, themes, instruments, regions) and engine sentence templates (verdict, selection, gates, contrast, place) | R5 | 🟡 last strings (contrast, availability, custom place) |
+| W1 | "Where else?" strip: same variable across the 5 ready-made places (user approved) | R4 R5 | ✅ UI; data from A6 |
+| LB | Variable vs instrument labels on cards, result header, sources page, legend, glossary | R1 R5 | ✅ |
+| L2 | Spanish UI: fill `web/src/i18n/es.ts`, EN/ES toggle in the header (English default, remembered per browser), Spanish dates/numbers, R5 kid rules applied in Spanish | R5 | ✅ |
 
 ### Track 3: people (sources, no code)
 | ID | Task | Serves | Status |
 |---|---|---|---|
-| H1 | Check AR6 regional statements for the demo questions; record table/page + confidence | R1 R4 | ⬜ |
-| H2 | Check Köppen thresholds (Beck et al. 2018) | R1 | ⬜ |
-| H3 | Find citations: OMI row anomaly; GLDAS-2.1 forcing change | R3 | ⬜ |
+| H1 | Check AR6 regional statements for the demo questions; record table/page + confidence | R1 R4 | 🟡 sources-research running |
+| H2 | Check Köppen thresholds (Beck et al. 2018) | R1 | ✅ (place-profile agent, Beck 2018 Table 2) |
+| H3 | Find citations: OMI row anomaly; GLDAS-2.1 forcing change | R3 | 🟡 sources-research running |
 
 ### After Track 1
 | ID | Task | Serves | Status |
 |---|---|---|---|
-| C1 | Place profile: AR6 region, climate group, "high up" | R1 R5 | ⬜ |
-| C2 | `catalog/expectations.yaml` from H1/H2 | R1 | ⬜ |
-| C3 | "What scientists found here" line (agrees / differs / too soon) | R4 R5 | ⬜ cut first |
-| C4 | Declared seasons for picked places from climatology | R3 | ⬜ cut second |
+| C1 | Place profile: AR6 region, climate group, "high up" | R1 R5 | ✅ wired into scans |
+| C2 | `catalog/expectations.yaml` from H1/H2 | R1 | 🟡 waiting on H1 |
+| C3 | "What scientists found here" line (agrees / differs / too soon) | R4 R5 | ⬜ |
+| C4 | Declared seasons for picked places from climatology | R3 | 🟡 wet/dry months computed, not yet used as seasons |
 | D1 | R5 read-aloud pass on every Simple screen | R5 | ⬜ |
-| E1 | Deploy (needs the user's OK + hosting choice); token as server secret | R6 | ⬜ |
+| E1 | Deploy (needs the user's OK + hosting choice); token as server secret | R6 | ⬜ needs user OK + hosting |
 | E2 | Video or ≤ 7 slides, references, AI disclosure, logged-out check | R6 | ⬜ |
 
 ## 9. Log
