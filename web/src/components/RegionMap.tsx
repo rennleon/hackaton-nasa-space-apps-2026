@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { CircleMarker, MapContainer, Rectangle, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import type { LatLngBoundsExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { RegionCard } from '../types/catalog'
 import { useView } from '../context'
 import { useT } from '../i18n'
+import type { Bbox } from '../lib/climate'
 
 const toBounds = (r: RegionCard): [[number, number], [number, number]] => {
   const [w, s, e, n] = r.geometry.bbox
@@ -29,6 +30,19 @@ function Clicks({ onClick }: { onClick: (lat: number, lon: number) => void }) {
   return null
 }
 
+/** Reports what part of the world the map shows [W,S,E,N], once at the start and after every pan or zoom. */
+function ViewWatcher({ onChange }: { onChange: (view: Bbox) => void }) {
+  const map = useMap()
+  const report = () => {
+    const b = map.getBounds()
+    onChange([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()])
+  }
+  useMapEvents({ moveend: report })
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on mount: later changes arrive through moveend
+  useEffect(report, [map])
+  return null
+}
+
 interface Props {
   regions: RegionCard[]
   selectedId?: string
@@ -44,10 +58,14 @@ interface Props {
   pending?: [number, number] | null
   /** false keeps the view where the child left it (default true) */
   autoFit?: boolean
+  /** called with the visible [W,S,E,N] on load and after every pan or zoom */
+  onViewChange?: (view: Bbox) => void
+  /** extra map layers (drawn under the chosen place and the regions) */
+  children?: ReactNode
 }
 
 /** Leaflet map with each region drawn as a rectangle. Region lists next to it give the keyboard route. */
-export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending, autoFit }: Props) {
+export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending, autoFit, onViewChange, children }: Props) {
   const { t } = useView()
   const tt = useT()
   const shown = visibleIds ? regions.filter((r) => visibleIds.includes(r.id)) : regions
@@ -60,6 +78,8 @@ export function RegionMap({ regions, selectedId, onSelect, visibleIds, className
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Fit bounds={bounds} enabled={autoFit !== false} />
         {onMapClick && <Clicks onClick={onMapClick} />}
+        {onViewChange && <ViewWatcher onChange={onViewChange} />}
+        {children}
         {draft && !draft.isPoint && <Rectangle bounds={[[draft.bbox[1], draft.bbox[0]], [draft.bbox[3], draft.bbox[2]]]} pathOptions={{ color: '#d9480f', weight: 3, fillOpacity: 0.25 }} />}
         {draft?.center && <CircleMarker center={draft.center} radius={9} pathOptions={{ color: '#d9480f', fillColor: '#d9480f', fillOpacity: 0.8 }} />}
         {pending && <CircleMarker center={pending} radius={6} pathOptions={{ color: '#d9480f', fillOpacity: 0.8 }} />}

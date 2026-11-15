@@ -20,8 +20,13 @@ for how to release and how to roll back.
 - "Is this one kind of place?" check on the shortlist page (R1/R2/R5): before any trend, the box's NASA POWER
   climatology (one value per 0.5 x 0.625 degree cell) is checked for mixing. Four project-heuristic rules (more
   than one Koppen main group with 20% or more of the cells; model elevation range over 1000 m; wettest cell more
-  than 2x the driest and over 0.5 mm/day apart; annual T2M range over 5 C). A mixed box says so, in kid words,
+  than 2x the driest and over 0.5 mm/day apart; an annual T2M range over 5 C is listed as a supporting reason but never
+  makes a box mixed on its own, because box means use each cell's departure from its own seasonal cycle). A mixed box says so, in kid words,
   and offers up to three smaller parts that are each one kind of place. Long-term means only, never a trend.
+- "Where does it happen?" map layers on the place chooser: shade the map by the long-term average of
+  temperature, rain or haze (NASA POWER climatology, `GET /climatology/grid`) so a spot can be picked
+  inside one colour instead of a box that mixes very different places. Precomputed windows around the
+  ready-made places keep it working offline.
 
 ### Fixed
 - Box means no longer depend on which grid cells happen to report: each cell is fitted as the box

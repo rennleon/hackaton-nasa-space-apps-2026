@@ -275,3 +275,10 @@
     scientific: The first year of the analysis window. Trends over a few decades can change with the start or end year (Liebmann et al. 2010).
     simple_es: "El primer año que contamos. Podemos probar empezando en un año más temprano o más tardío."
     scientific_es: "El primer año de la ventana de análisis. Las tendencias de pocas décadas pueden cambiar con el año de inicio o de fin (Liebmann et al. 2010)."
+- id: long_term_average
+  term: { simple: long-term average, scientific: climatological mean, simple_es: "promedio de muchos años", scientific_es: "media climatológica" }
+  definition:
+    simple: What a place is usually like, worked out from about 25 years of weather.
+    scientific: Annual mean over the NASA POWER climatology period (2001 to 2025). It describes the typical state, not a trend.
+    simple_es: "Cómo suele ser un lugar, calculado con unos 25 años de clima."
+    scientific_es: "Media anual del periodo climatológico de NASA POWER (2001 a 2025). Describe el estado típico, no una tendencia."
