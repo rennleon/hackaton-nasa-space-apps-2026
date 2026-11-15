@@ -58,6 +58,7 @@ from .sources.base import UnitMismatch
 from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
 from .sources.power import PowerSource
+from .startyears import start_year_sensitivity
 from .stats import (
     SeasonSlopes,
     TrendTests,
@@ -525,12 +526,14 @@ def analyze(
     with_robustness: bool = True,
     theme_id: str | None = None,
     window_reason: str = "user",
+    with_start_years: bool = True,
 ) -> AnalysisResult:
     """Analyse a catalog region. See analyze_region for ad-hoc regions (e.g. drawn on the map)."""
     if region_id not in ctx.catalog.regions:
         raise KeyError(f"unknown region {region_id}")
     return analyze_region(ctx, ctx.catalog.regions[region_id], variable_id, start, end, season_id,
-                          with_robustness, theme_id, window_reason)
+                          with_robustness, theme_id, window_reason,
+                          with_start_years=with_start_years)
 
 
 def analyze_region(
@@ -544,8 +547,10 @@ def analyze_region(
     theme_id: str | None = None,
     window_reason: str = "user",
     failed_fetches: dict[str, Exception] | None = None,
+    with_start_years: bool = True,
 ) -> AnalysisResult:
-    """`failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
+    """`with_start_years=False`: skip the start-year sensitivity panel (the scan runs many variables and does not show it).
+    `failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
     `fetch_failed` gate instead of raising `LiveSourceUnavailable`; the dict maps variable id to the error."""
     cat = ctx.catalog
     if variable_id not in cat.variables:
@@ -782,4 +787,6 @@ def analyze_region(
         chips=chips,
         verdict=verdict,
         then_now=then_now,
+        # context only (the verdict above stays on the declared window); not for declared seasons
+        start_years=start_year_sensitivity(p, tt.slope_per_year, ctx.alpha) if with_start_years and not season else None,
     )

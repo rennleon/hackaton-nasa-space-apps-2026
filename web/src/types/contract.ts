@@ -22,6 +22,7 @@ export interface AnalysisResult {
   detectability: Detectability | null;
   robustness: Robustness;
   chips: Chip[];
+  start_years: StartYearSensitivity | null;
   published: PublishedFinding | null;
   published_context: PublishedFinding[];
   verdict: Verdict;
@@ -298,6 +299,36 @@ export interface Chip {
   code: string;
   severity: "info" | "warning";
   text: Text;
+}
+/**
+ * Does the answer hold if the window starts in a different year? Context only: the headline
+ * verdict stays on the declared window (Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1).
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "StartYearSensitivity".
+ */
+
+export interface StartYearSensitivity {
+  points: StartYearPoint[];
+  n_starts: number;
+  n_same_sign: number;
+  n_significant: number;
+  classification: "holds" | "mostly" | "depends";
+}
+/**
+ * The same trend machinery re-run with the window starting in January of `start`'s year.
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "StartYearPoint".
+ */
+
+export interface StartYearPoint {
+  start: string;
+  years: number;
+  slope_per_decade: number;
+  ci_low: number;
+  ci_high: number;
+  significant: boolean;
 }
 /**
  * A checked statement from published science (e.g. IPCC AR6 regional assessment) for this place.

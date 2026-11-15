@@ -188,6 +188,28 @@ class Comparison(Model):
     text: Text | None = None  # one plain sentence for each view
 
 
+class StartYearPoint(Model):
+    """The same trend machinery re-run with the window starting in January of `start`'s year."""
+
+    start: str  # YYYY-MM
+    years: float  # length of the shortened window
+    slope_per_decade: float
+    ci_low: float
+    ci_high: float
+    significant: bool  # both persistence-aware tests agree at alpha
+
+
+class StartYearSensitivity(Model):
+    """Does the answer hold if the window starts in a different year? Context only: the headline
+    verdict stays on the declared window (Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1)."""
+
+    points: list[StartYearPoint]
+    n_starts: int
+    n_same_sign: int  # starts whose slope has the same sign as the declared window's slope
+    n_significant: int
+    classification: Literal["holds", "mostly", "depends"]
+
+
 class Robustness(Model):
     leave_one_year_out: LeaveOneYearOut | None = None
     drift_label_with_late_years: str | None = None
@@ -286,6 +308,7 @@ class AnalysisResult(Model):
     detectability: Detectability | None = None
     robustness: Robustness = Field(default_factory=Robustness)
     chips: list[Chip] = Field(default_factory=list)
+    start_years: StartYearSensitivity | None = None  # context only; None for seasons and when no trend was computed
     published: PublishedFinding | None = None  # what scientists found here, for the MEAN we tested
     published_context: list[PublishedFinding] = Field(default_factory=list)  # extremes, Scientific view only
     verdict: Verdict

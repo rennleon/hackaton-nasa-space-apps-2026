@@ -160,9 +160,10 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
     for var, role in members:
         if cw:
             r = analyze_region(ctx, region, var.id, start=cw[0], end=cw[1], theme_id=theme_id,
-                               window_reason="common", failed_fetches=failed)
+                               window_reason="common", failed_fetches=failed, with_start_years=False)
         else:
-            r = analyze_region(ctx, region, var.id, theme_id=theme_id, failed_fetches=failed)
+            r = analyze_region(ctx, region, var.id, theme_id=theme_id, failed_fetches=failed,
+                               with_start_years=False)
         results.append((var, role, r))
 
     ps = [_p_decisive(r) for _, _, r in results]
