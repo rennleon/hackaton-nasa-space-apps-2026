@@ -150,19 +150,26 @@ def custom_region(kind: str, c: tuple[float, ...]) -> RegionCard:
     if kind == "point":
         lon, lat = c
         rid = f"custom_pt_{_num(lat)}_{_num(lon)}"
-        name = Text(simple="Your place", scientific=f"Point {lat:.2f}, {lon:.2f}")
+        name = Text(simple="Your place", scientific=f"Point {lat:.2f}, {lon:.2f}",
+                    simple_es="Tu lugar", scientific_es=f"Punto {lat:.2f}, {lon:.2f}")
         desc = Text(
             simple="A spot you picked on the map.",
             scientific=f"User-chosen point at latitude {lat:.2f}, longitude {lon:.2f} (NASA POWER grid cell).",
+            simple_es="Un lugar que elegiste en el mapa.",
+            scientific_es=f"Punto elegido por el usuario en latitud {lat:.2f}, longitud {lon:.2f} (celda de la rejilla de NASA POWER).",
         )
         geom = Geometry(kind="point", bbox=[lon, lat, lon, lat])
     else:
         w, s, e, n = c
         rid = "custom_" + "_".join(_num(x) for x in (w, s, e, n))
-        name = Text(simple="Your place", scientific=f"Custom box {w:.2f} to {e:.2f} E, {s:.2f} to {n:.2f} N")
+        name = Text(simple="Your place", scientific=f"Custom box {w:.2f} to {e:.2f} E, {s:.2f} to {n:.2f} N",
+                    simple_es="Tu lugar", scientific_es=f"Caja personalizada {w:.2f} a {e:.2f} E, {s:.2f} a {n:.2f} N")
         desc = Text(
             simple="A box you picked on the map.",
             scientific=f"User-chosen box, west {w:.2f}, south {s:.2f}, east {e:.2f}, north {n:.2f}; area mean of NASA POWER grid points.",
+            simple_es="Una zona que elegiste en el mapa.",
+            scientific_es=f"Caja elegida por el usuario: oeste {w:.2f}, sur {s:.2f}, este {e:.2f}, norte {n:.2f}; "
+                          "media de área de los puntos de la rejilla de NASA POWER.",
         )
         geom = Geometry(kind="bbox", bbox=list(c))
     return RegionCard(id=rid, name=name, description=desc, regime="user-defined", geometry=geom, listed=False)
