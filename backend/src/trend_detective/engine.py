@@ -33,7 +33,7 @@ from .contract import (
     Window,
     YearPoint,
 )
-from .gates import bbox_chip, fitness, no_data, quality, step_month
+from .gates import bbox_chip, fitness, near_bound_chip, no_data, quality, step_month
 from .ingest import MonthlySeries, to_monthly
 from .prepare import (
     Prepared,
@@ -287,6 +287,9 @@ def analyze_region(
     bc = bbox_chip(series.provenance, region, var.grid_deg)
     if bc:
         chips.append(bc)
+    nb = near_bound_chip(p, var, season.months if season else None)
+    if nb:
+        chips.append(nb)
     if series.provenance and series.provenance.source_kind == "nasa_power" and region.geometry.kind == "shape":
         chips.append(Chip(
             code="area_is_bounding_box", severity="info",
@@ -407,7 +410,7 @@ def analyze_region(
         slope_per_decade=tt.slope_per_year * 10, ci_low=tt.ci_low_per_year * 10, ci_high=tt.ci_high_per_year * 10,
         p_a=tt.p_mk_hr, p_b=tt.p_ols, p_c=core.p_c, r1=tt.r1, n_eff=tt.n_eff,
         years_needed=core.years_needed, years_available=core.years_available, alpha=ctx.alpha, warning_chips=warn,
-        checks_run=checks_run, then_now=then_now,
+        checks_run=checks_run, then_now=then_now, selection=selection,
     ))
     tests = [
         SignificanceTest(name="mk_hamed_rao", p=float(tt.p_mk_hr), statistic=_r(tt.z_mk_hr), decisive=True),
