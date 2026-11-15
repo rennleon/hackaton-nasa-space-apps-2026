@@ -1,5 +1,5 @@
 /* Verdict chip. Colours come from the one verdict palette in styles.css; every state also has an icon and a word. */
-.vchip { display: inline-flex; align-items: center; gap: 0.4em; padding: 3px 12px 3px 8px; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.9rem; white-space: normal; }
+.vchip { display: inline-flex; align-items: center; gap: 0.4em; padding: 3px 12px 3px 8px; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.875rem; white-space: normal; }
 .vchip svg { flex: none; }
 .vchip-sure { color: var(--v-sure); background: var(--v-sure-bg); }
 .vchip-maybe { color: var(--v-maybe); background: var(--v-maybe-bg); }
