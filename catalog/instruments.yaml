@@ -4,97 +4,125 @@
 # live: giovanni (Giovanni cloud API) | power (NASA POWER API) | offline (only a manual export)
 
 - id: airs
-  name: { simple: AIRS, scientific: "AIRS (Atmospheric Infrared Sounder)" }
+  name: { simple: AIRS, scientific: "AIRS (Atmospheric Infrared Sounder)", simple_es: "AIRS", scientific_es: "AIRS (Atmospheric Infrared Sounder, sondeador atmosférico de infrarrojos)" }
   kind: satellite
   platform: Aqua
   since: 2002
   measures:
     simple: How warm and how damp the air is near the ground, by day and by night.
     scientific: Surface air temperature, surface relative humidity and many profile fields, twice daily (≈13:30 and ≈01:30 local overpass), Level-3 monthly 1° grid.
+    simple_es: "Qué tan cálido y qué tan húmedo está el aire cerca del suelo, de día y de noche."
+    scientific_es: "Temperatura del aire en superficie, humedad relativa en superficie y muchos campos de perfil, dos veces al día (pasadas de ≈13:30 y ≈01:30 hora local), rejilla mensual de nivel 3 a 1°."
   how:
     simple: It reads the heat glow of the air from space, twice a day.
     scientific: Hyperspectral infrared sounder (2378 channels); retrievals from cloud-cleared radiances.
+    simple_es: "Lee el brillo de calor del aire desde el espacio, dos veces al día."
+    scientific_es: "Sondeador hiperespectral de infrarrojos (2378 canales); recuperaciones a partir de radiancias sin nubes."
   live: giovanni
   link: https://airs.jpl.nasa.gov/
 
 - id: gpm_imerg
-  name: { simple: GPM rain satellites, scientific: "GPM IMERG (Integrated Multi-satellitE Retrievals for GPM)" }
+  name: { simple: GPM rain satellites, scientific: "GPM IMERG (Integrated Multi-satellitE Retrievals for GPM)", simple_es: "Satélites de lluvia GPM", scientific_es: "GPM IMERG (Integrated Multi-satellitE Retrievals for GPM, recuperaciones integradas multisatélite)" }
   kind: satellite
   platform: GPM Core Observatory and partner satellites
   since: 2000
   measures:
     simple: How much rain and snow falls.
     scientific: Merged multi-satellite precipitation, gauge-adjusted (Final Run), monthly 0.1° grid; TRMM era before 2014, GPM era after.
+    simple_es: "Cuánta lluvia y nieve cae."
+    scientific_es: "Precipitación multisatélite combinada, ajustada con pluviómetros (corrida final), rejilla mensual de 0.1°; era TRMM antes de 2014, era GPM después."
   how:
     simple: Many satellites watch clouds and rain, and rain gauges on the ground check them.
     scientific: Passive-microwave and infrared estimates intercalibrated to the GPM core radar/radiometer, bias-adjusted with GPCC gauges.
+    simple_es: "Muchos satélites vigilan las nubes y la lluvia, y pluviómetros en el suelo los revisan."
+    scientific_es: "Estimaciones de microondas pasivas e infrarrojas intercalibradas con el radar/radiómetro del núcleo de GPM y ajustadas con pluviómetros de GPCC."
   live: giovanni
   link: https://gpm.nasa.gov/data/imerg
 
 - id: omi
-  name: { simple: OMI, scientific: "OMI (Ozone Monitoring Instrument)" }
+  name: { simple: OMI, scientific: "OMI (Ozone Monitoring Instrument)", simple_es: "OMI", scientific_es: "OMI (Ozone Monitoring Instrument, instrumento de monitoreo de ozono)" }
   kind: satellite
   platform: Aura
   since: 2004
   measures:
     simple: How hazy the air is, and how much of some polluting gases it holds.
     scientific: Aerosol optical depth (OMAERUV), tropospheric NO₂ (OMNO2d), SO₂, ozone; daily Level-3 grids (OMNO2d 0.25°, OMAERUVd 1°).
+    simple_es: "Qué tan brumoso está el aire y cuánto hay de algunos gases contaminantes."
+    scientific_es: "Profundidad óptica de aerosoles (OMAERUV), NO₂ troposférico (OMNO2d), SO₂, ozono; rejillas diarias de nivel 3 (OMNO2d 0.25°, OMAERUVd 1°)."
   how:
     simple: It looks at sunlight bouncing back from the air and sees what the air holds.
     scientific: UV-visible imaging spectrometer measuring backscattered solar radiance.
+    simple_es: "Mira la luz del sol que rebota en el aire y ve lo que el aire contiene."
+    scientific_es: "Espectrómetro de imágenes ultravioleta-visible que mide la radiancia solar retrodispersada."
   live: giovanni
   link: https://aura.gsfc.nasa.gov/omi.html
 
 - id: merra2
-  name: { simple: MERRA-2 computer model, scientific: "MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, Version 2)" }
+  name: { simple: MERRA-2 computer model, scientific: "MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, Version 2)", simple_es: "Modelo de computadora MERRA-2", scientific_es: "MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, versión 2)" }
   kind: model
   since: 1980
   measures:
     simple: Past weather everywhere on Earth, like temperature, rain, damp air and haze.
     scientific: Global atmospheric reanalysis (0.5° × 0.625°), assimilating satellite, station, balloon and aircraft observations, incl. aerosol optical depth.
+    simple_es: "El tiempo del pasado en toda la Tierra, como la temperatura, la lluvia, el aire húmedo y la bruma."
+    scientific_es: "Reanálisis atmosférico global (0.5° × 0.625°) que asimila observaciones de satélite, estaciones, globos y aviones, incluida la profundidad óptica de aerosoles."
   how:
     simple: A computer rebuilds past weather from millions of real measurements.
     scientific: GEOS-5 model with 3D-Var assimilation; observing-system changes over time can shift long-term values.
+    simple_es: "Una computadora reconstruye el tiempo del pasado con millones de mediciones reales."
+    scientific_es: "Modelo GEOS-5 con asimilación 3D-Var; los cambios del sistema de observación a lo largo del tiempo pueden desplazar los valores de largo plazo."
   live: power
   link: https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/
 
 - id: gldas
-  name: { simple: GLDAS land computer model, scientific: "GLDAS (Global Land Data Assimilation System)" }
+  name: { simple: GLDAS land computer model, scientific: "GLDAS (Global Land Data Assimilation System)", simple_es: "Modelo de computadora de la tierra GLDAS", scientific_es: "GLDAS (Global Land Data Assimilation System, sistema global de asimilación de datos de superficie terrestre)" }
   kind: model
   since: 2000
   measures:
     simple: How wet the ground is, how much water goes back into the air, and snow.
     scientific: Noah land-surface model v2.1, monthly 0.25° grid; soil moisture, evapotranspiration, snow water equivalent, runoff. Land only.
+    simple_es: "Qué tan mojado está el suelo, cuánta agua vuelve al aire y cuánta nieve hay."
+    scientific_es: "Modelo de superficie terrestre Noah v2.1, rejilla mensual de 0.25°; humedad del suelo, evapotranspiración, equivalente en agua de la nieve, escorrentía. Solo tierra."
   how:
     simple: A computer works out how wet the ground is from rain, sun and weather.
     scientific: Offline land-surface model forced by observation-based meteorology and precipitation.
+    simple_es: "Una computadora calcula qué tan mojado está el suelo con la lluvia, el sol y el tiempo."
+    scientific_es: "Modelo de superficie terrestre sin acoplar, forzado con meteorología y precipitación basadas en observaciones."
   live: giovanni
   link: https://ldas.gsfc.nasa.gov/gldas
 
 - id: modis
-  name: { simple: MODIS, scientific: "MODIS (Moderate Resolution Imaging Spectroradiometer)" }
+  name: { simple: MODIS, scientific: "MODIS (Moderate Resolution Imaging Spectroradiometer)", simple_es: "MODIS", scientific_es: "MODIS (Moderate Resolution Imaging Spectroradiometer, espectrorradiómetro de imágenes de resolución moderada)" }
   kind: satellite
   platform: Terra and Aqua
   since: 2000
   measures:
     simple: How hazy the air is.
     scientific: Aerosol optical depth at 550 nm (Dark Target / Deep Blue combined), Level-3 monthly 1° grid.
+    simple_es: "Qué tan brumoso está el aire."
+    scientific_es: "Profundidad óptica de aerosoles a 550 nm (Dark Target / Deep Blue combinados), rejilla mensual de nivel 3 a 1°."
   how:
     simple: A camera in space sees how much the haze dims the ground below.
     scientific: 36-band imaging radiometer; aerosol retrieval over dark and bright surfaces.
+    simple_es: "Una cámara en el espacio ve cuánto la bruma oscurece el suelo de abajo."
+    scientific_es: "Radiómetro de imágenes de 36 bandas; recuperación de aerosoles sobre superficies oscuras y brillantes."
   live: offline
   link: https://modis.gsfc.nasa.gov/
 
 - id: mopitt
-  name: { simple: MOPITT, scientific: "MOPITT (Measurements Of Pollution In The Troposphere)" }
+  name: { simple: MOPITT, scientific: "MOPITT (Measurements Of Pollution In The Troposphere)", simple_es: "MOPITT", scientific_es: "MOPITT (Measurements Of Pollution In The Troposphere, mediciones de contaminación en la troposfera)" }
   kind: satellite
   platform: Terra
   since: 2000
   measures:
     simple: How much carbon monoxide, a smoky gas, the air holds.
     scientific: Total-column carbon monoxide, Level-3 monthly 1° grid.
+    simple_es: "Cuánto monóxido de carbono, un gas del humo, tiene el aire."
+    scientific_es: "Columna total de monóxido de carbono, rejilla mensual de nivel 3 a 1°."
   how:
     simple: It looks at heat and sunlight from below and spots the smoky gas.
     scientific: Gas-correlation radiometer in thermal and near infrared.
+    simple_es: "Mira el calor y la luz del sol desde abajo y detecta el gas del humo."
+    scientific_es: "Radiómetro de correlación de gas en el infrarrojo térmico y cercano."
   live: offline
   link: https://www2.acom.ucar.edu/mopitt

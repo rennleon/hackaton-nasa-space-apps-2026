@@ -26,6 +26,7 @@ class Units(Card):
     scale: float = 1.0
     offset: float = 0.0
     decimals: int = 2
+    simple_es: str | None = None  # Spanish kid unit, e.g. "puntos de humedad"
 
     def to_display(self, native_value: float) -> float:
         return native_value * self.scale + self.offset
@@ -72,11 +73,22 @@ class Words(Card):
     down: str
 
 
+class WordsEs(Card):
+    """Spanish counterpart of Words. Whole phrases, because Spanish needs gender and number agreement:
+    'Si, {subject} {up} en {region}.' / 'Es muy pronto para saber si {subject} {changing} en {region}.'"""
+
+    subject: str  # with article, e.g. "las tardes", "el aire"
+    up: str  # predicate, e.g. "se vuelven más húmedas"
+    down: str
+    changing: str  # agrees with the subject, e.g. "están cambiando"
+
+
 class KidUnits(Card):
     """Whole-number 'then vs now' for the simple view: display value * scale, then label."""
 
     scale: float = 1.0
     label: str
+    label_es: str | None = None
 
 
 class VariableCard(Card):
@@ -101,6 +113,7 @@ class VariableCard(Card):
     reference_trend_per_decade: float | None = None  # published typical trend size (stage-1 detectability)
     reference_source: str | None = None
     words: Words
+    words_es: WordsEs | None = None
     kid_units: KidUnits
     themes: dict[str, Role]
 

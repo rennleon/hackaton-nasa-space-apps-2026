@@ -429,6 +429,7 @@
     },
     "Text": {
       "additionalProperties": false,
+      "description": "One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English\nwhen they are missing, so they stay optional in the schema (existing consumers keep compiling).",
       "properties": {
         "simple": {
           "title": "Simple",
@@ -437,6 +438,30 @@
         "scientific": {
           "title": "Scientific",
           "type": "string"
+        },
+        "simple_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Simple Es"
+        },
+        "scientific_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scientific Es"
         }
       },
       "required": [

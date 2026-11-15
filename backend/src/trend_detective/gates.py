@@ -30,6 +30,8 @@ def no_data() -> GateCheck:
         detail=Text(
             simple="We don't have this data for this place yet.",
             scientific="No series loaded for this variable and region.",
+            simple_es="Aún no tenemos estos datos para este lugar.",
+            scientific_es="No se cargó ninguna serie para esta variable y región.",
         ),
     )
 
@@ -52,6 +54,11 @@ def fitness(
                     if inside
                     else "This data does not cover this place.",
                     scientific=f"Variable coverage {variable.coverage} vs region bbox {region.geometry.bbox}.",
+                    simple_es="Estos datos cubren este lugar."
+                    if inside
+                    else "Estos datos no cubren este lugar.",
+                    scientific_es=f"Cobertura de la variable {variable.coverage} frente a la caja de la región "
+                                  f"{region.geometry.bbox}.",
                 ),
             )
         )
@@ -68,6 +75,11 @@ def fitness(
                     else "One place: we use the map square around it.",
                     scientific=f"Single {variable.grid_deg}° grid cell"
                     + (" at the box centre (box below the source's regional minimum)." if small_box else "."),
+                    simple_es="Tu caja es pequeña, así que usamos el cuadrado del mapa en su centro."
+                    if small_box
+                    else "Un solo lugar: usamos el cuadrado del mapa que lo rodea.",
+                    scientific_es=f"Una sola celda de {variable.grid_deg}°"
+                    + (" en el centro de la caja (caja menor que el mínimo regional de la fuente)." if small_box else "."),
                 ),
             )
         )
@@ -80,6 +92,8 @@ def fitness(
                 detail=Text(
                     simple=f"About {cells:.0f} map squares cover this place (we need at least {MIN_CELLS:.0f}).",
                     scientific=f"≈{cells:.1f} grid cells at {variable.grid_deg}° (minimum {MIN_CELLS:.0f}).",
+                    simple_es=f"Unos {cells:.0f} cuadrados del mapa cubren este lugar (necesitamos al menos {MIN_CELLS:.0f}).",
+                    scientific_es=f"≈{cells:.1f} celdas de {variable.grid_deg}° (mínimo {MIN_CELLS:.0f}).",
                 ),
             )
         )
@@ -90,6 +104,9 @@ def fitness(
             detail=Text(
                 simple=f"{years:.0f} years of data (we need at least {MIN_YEARS:.0f}).",
                 scientific=f"{years:.1f} {unit} in the analysis window (minimum {MIN_YEARS:.0f}).",
+                simple_es=f"{years:.0f} años de datos (necesitamos al menos {MIN_YEARS:.0f}).",
+                scientific_es=f"{years:.1f} {'años-de-temporada' if unit == 'season-years' else 'años'} en la ventana "
+                              f"de análisis (mínimo {MIN_YEARS:.0f}).",
             ),
         )
     )
@@ -110,6 +127,8 @@ def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None
             detail=Text(
                 simple=f"{completeness * 100:.0f} of every 100 months have data (we need {MIN_COMPLETENESS * 100:.0f}).",
                 scientific=f"Completeness {completeness:.1%} within the window (minimum {MIN_COMPLETENESS:.0%}).",
+                simple_es=f"{completeness * 100:.0f} de cada 100 meses tienen datos (necesitamos {MIN_COMPLETENESS * 100:.0f}).",
+                scientific_es=f"Completitud de {completeness:.1%} en la ventana (mínimo {MIN_COMPLETENESS:.0%}).",
             ),
         )
     ]
@@ -133,6 +152,12 @@ def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None
                 else "The values are not stuck at zero.",
                 scientific=f"{frac:.1%} of months in the window are at or below {zero_level:g} "
                 f"(maximum {MAX_ZERO_MONTH_SHARE:.0%}; ties make Mann–Kendall and Sen's slope degenerate).",
+                simple_es="Aquí casi nunca llueve. Los números mensuales no pueden mostrar un cambio."
+                if frac > MAX_ZERO_MONTH_SHARE
+                else "Los valores no se quedan pegados en cero.",
+                scientific_es=f"{frac:.1%} de los meses de la ventana están en o por debajo de {zero_level:g} "
+                f"(máximo {MAX_ZERO_MONTH_SHARE:.0%}; los empates vuelven degeneradas la prueba de Mann–Kendall "
+                "y la pendiente de Sen).",
             ),
         )
     )
@@ -160,6 +185,10 @@ def near_bound_chip(p: Prepared, variable: VariableCard, months: list[int] | Non
             simple="This is close to its top or bottom limit, so changes can look smaller.",
             scientific=f"Window mean {mean:.1f} {variable.units.display} is within {BOUND_MARGIN:g} of the 0–100 "
             "bound; a trend near a bound can flatten (saturation), so the slope may understate the change.",
+            simple_es="Está cerca de su límite máximo o mínimo. Por eso los cambios se ven menores.",
+            scientific_es=f"La media de la ventana, {mean:.1f} {variable.units.display}, está a menos de {BOUND_MARGIN:g} del "
+            "límite de la escala 0–100; una tendencia cerca de un límite puede aplanarse (saturación), así que la "
+            "pendiente puede subestimar el cambio.",
         ),
     )
 
@@ -182,6 +211,9 @@ def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> C
             simple="The satellite data covers a slightly different area than the box we asked for.",
             scientific=f"Returned grid cells span {ew:g}…{ee:g}°E, {es:g}…{en:g}°N (data bounding box read as "
             f"cell centres) vs requested {region.geometry.bbox}.",
+            simple_es="El satélite cubre un área algo distinta de la que pedimos.",
+            scientific_es=f"Las celdas devueltas abarcan {ew:g}…{ee:g}°E, {es:g}…{en:g}°N (caja de datos leída como "
+            f"centros de celda) frente a {region.geometry.bbox} solicitado.",
         ),
     )
 

@@ -35,6 +35,9 @@ export interface RegionRef {
   name: Text;
 }
 /**
+ * One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English
+ * when they are missing, so they stay optional in the schema (existing consumers keep compiling).
+ *
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
  * via the `definition` "Text".
  */
@@ -42,6 +45,8 @@ export interface RegionRef {
 export interface Text {
   simple: string;
   scientific: string;
+  simple_es?: string | null;
+  scientific_es?: string | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
