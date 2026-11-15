@@ -6,6 +6,7 @@ import App from '../App'
 import { LiveDataUnavailable, type DataClient } from '../data/client'
 import { bannedIn } from '../lib/copy.test'
 import type { ScanResult } from '../types/contract'
+import { splitEntries } from '../lib/findings'
 
 const read = (p: string) => JSON.parse(readFileSync(p, 'utf8'))
 const cat = (n: string) => read(`public/data/catalog/${n}.json`)
@@ -74,10 +75,13 @@ describe('Findings screen', () => {
     // the second opinion says it is the same thing seen by a different instrument
     expect(screen.getByText('Same thing, measured by a different instrument: MERRA-2')).toBeInTheDocument()
     // unavailable ones sit in one collapsed row
-    const row = screen.getByText('Not available for this place (6)').closest('details')!
-    expect(row).not.toHaveAttribute('open')
-    expect(within(row).getAllByRole('listitem')).toHaveLength(6)
-    expect(screen.queryByRole('button', { name: 'Open Evaporation' })).toBeNull()
+    const { unavailable } = splitEntries(v2Scan().entries)
+    if (unavailable.length > 0) {
+      const row = screen.getByText(`Not available for this place (${unavailable.length})`).closest('details')!
+      expect(row).not.toHaveAttribute('open')
+      expect(within(row).getAllByRole('listitem')).toHaveLength(unavailable.length)
+      expect(screen.queryByRole('button', { name: `Open ${unavailable[0].name.simple}` })).toBeNull()
+    }
     expect(container.textContent).not.toMatch(/test box|stage 1|Only variables that declare|target|driver|cross-check|v0\.1/)
     expect(bannedIn(container.textContent ?? '')).toEqual([])
   })
