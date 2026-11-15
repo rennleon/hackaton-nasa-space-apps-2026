@@ -217,6 +217,20 @@ class Verdict(Model):
     notes: list[Text] = Field(default_factory=list)
 
 
+class PlaceProfile(Model):
+    """What kind of place this is, from facts known before any trend (long-term means, elevation, maps)."""
+
+    ar6_region_code: str | None = None  # IPCC AR6 WGI reference region, e.g. "NWS"
+    ar6_region_name: str | None = None
+    climate_group: Literal["tropical", "dry", "temperate", "cold", "polar"] | None = None
+    climate_code: str | None = None  # Koppen-Geiger main code from POWER climatology, e.g. "Cfb"
+    high_up: bool | None = None
+    elevation_m_model: float | None = None  # model-grid elevation (NASA POWER); not a precise height
+    wet_months: list[int] = Field(default_factory=list)
+    dry_months: list[int] = Field(default_factory=list)
+    text: Text | None = None  # "Your place is dry and hot, high in the mountains."
+
+
 class AnalysisResult(Model):
     schema_version: str = SCHEMA_VERSION
     engine_version: str
