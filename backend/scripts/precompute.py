@@ -20,22 +20,27 @@ from trend_detective.scan import availability_of, scan, scan_region
 # Ready-made example places for the start page: point regions built like api.custom_region, with fixed ids
 # and names (not in regions.yaml). Order matters: "where" files list the pre-loaded regions, then these.
 EXAMPLES = [
-    ("ex_delhi", 28.61, 77.21, "Delhi, India", "Delhi, India (point 28.61, 77.21)"),
-    ("ex_manaus", -3.10, -60.02, "Amazon near Manaus, Brazil", "Amazon near Manaus, Brazil (point -3.10, -60.02)"),
+    ("ex_delhi", 28.61, 77.21, "Delhi, India", "Delhi, India (point 28.61, 77.21)",
+     "Delhi, India", "Delhi, India (punto 28,61; 77,21)"),
+    ("ex_manaus", -3.10, -60.02, "Amazon near Manaus, Brazil", "Amazon near Manaus, Brazil (point -3.10, -60.02)",
+     "Amazonía cerca de Manaos, Brasil", "Amazonía cerca de Manaos, Brasil (punto -3,10; -60,02)"),
     ("ex_tamanrasset", 22.79, 5.52, "Sahara near Tamanrasset, Algeria",
-     "Sahara near Tamanrasset, Algeria (point 22.79, 5.52)"),
+     "Sahara near Tamanrasset, Algeria (point 22.79, 5.52)",
+     "Sahara cerca de Tamanrasset, Argelia", "Sahara cerca de Tamanrasset, Argelia (punto 22,79; 5,52)"),
 ]
 WHERE_REGIONS = ["cajamarca_highlands", "wisconsin"]
 
 
 def example_regions():
     out = []
-    for rid, lat, lon, simple, sci in EXAMPLES:
+    for rid, lat, lon, simple, sci, simple_es, sci_es in EXAMPLES:
         base = custom_region("point", (lon, lat))
         out.append(base.model_copy(update={
-            "id": rid, "name": Text(simple=simple, scientific=sci),
+            "id": rid, "name": Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es),
             "description": Text(simple=f"{simple}: a spot on the map.",
-                                scientific=f"{sci}; NASA POWER and Giovanni grid cells."),
+                                scientific=f"{sci}; NASA POWER and Giovanni grid cells.",
+                                simple_es=f"{simple_es}: un punto en el mapa.",
+                                scientific_es=f"{sci_es}; celdas de NASA POWER y Giovanni."),
         }))
     return out
 

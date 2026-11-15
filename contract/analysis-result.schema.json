@@ -800,6 +800,18 @@
         "kid_label": {
           "title": "Kid Label",
           "type": "string"
+        },
+        "kid_label_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kid Label Es"
         }
       },
       "required": [
@@ -808,7 +820,8 @@
         "year_now",
         "value_now",
         "kid_scale",
-        "kid_label"
+        "kid_label",
+        "kid_label_es"
       ],
       "title": "ThenNow",
       "type": "object"

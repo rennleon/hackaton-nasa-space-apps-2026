@@ -29,9 +29,9 @@ def ctx() -> EngineContext:
     return EngineContext(Catalog.load(ROOT / "catalog"), SourceChain([power]))
 
 
-def point(lon: float, lat: float) -> RegionCard:
+def point(lon: float, lat: float, rid: str = "custom_t") -> RegionCard:
     t = Text(simple="x", scientific="x")
-    return RegionCard(id="t", name=t, description=t, regime="user-defined", listed=False,
+    return RegionCard(id=rid, name=t, description=t, regime="user-defined", listed=False,
                       geometry=Geometry(kind="point", bbox=[lon, lat, lon, lat]))
 
 
@@ -150,6 +150,8 @@ def test_text_follows_plain_language_rules(ctx):
         assert "Beck et al. 2018" in p.text.scientific and p.ar6_region_code in p.text.scientific
     t = profile_place(ctx, point(5.52, 22.79)).text
     assert t.simple.startswith("Your place is very dry and hot.") and "high up" in t.simple
+    ready = profile_place(ctx, point(5.52, 22.79, rid="ex_tamanrasset")).text
+    assert ready.simple.startswith("This place is very dry and hot.") and ready.simple_es.startswith("Este lugar es muy seco")
     assert "Köppen–Geiger BWh" in t.scientific and "IPCC AR6 region SAH (Sahara)" in t.scientific
 
 
