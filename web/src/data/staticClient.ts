@@ -1,10 +1,13 @@
 import type { AnalysisResult, ScanResult } from '../types/contract'
 import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types/catalog'
+import type { Place } from '../lib/place'
+import { exampleAt } from '../lib/places'
 import { getJson, LiveDataUnavailable, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
 
 /** Reads the precomputed JSON files under `<base>/data/`. */
 export class StaticClient implements DataClient {
   readonly customPlaces = false
+  readonly staticExamples = true
   private base: string
   constructor(base: string = import.meta.env.BASE_URL ?? '/') {
     this.base = base.endsWith('/') ? base : base + '/'
@@ -36,10 +39,16 @@ export class StaticClient implements DataClient {
     const res = await this.result(regionId, variableId, opts.seasonId)
     return opts.start || opts.end ? { ...res, customPeriodUnavailable: true } : res
   }
-  customScan(): Promise<ScanResult> {
-    return Promise.reject(new LiveDataUnavailable('No live API configured'))
+  /** The three ready-made example points are precomputed; any other place needs the live API. */
+  customScan(place: Place, themeId: string): Promise<ScanResult> {
+    const ex = exampleAt(place)
+    if (!ex) return Promise.reject(new LiveDataUnavailable('No live API configured'))
+    return getJson<ScanResult>(this.url(`results/ex_${ex.id}/scan_${themeId}.json`))
   }
-  customResult(): Promise<AnalysisResult> {
-    return Promise.reject(new LiveDataUnavailable('No live API configured'))
+  async customResult(place: Place, variableId: string, opts: { start?: string; end?: string }): Promise<AnalysisOutcome> {
+    const ex = exampleAt(place)
+    if (!ex) throw new LiveDataUnavailable('No live API configured')
+    const res = await getJson<AnalysisResult>(this.url(`results/ex_${ex.id}/${variableId}.json`))
+    return opts.start || opts.end ? { ...res, customPeriodUnavailable: true } : res
   }
 }

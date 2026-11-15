@@ -20,7 +20,7 @@ export function VerdictGauge({ certainty }: { certainty: Certainty }) {
   }
   const at = CERTAINTY_STEPS.findIndex((s) => s.id === certainty)
   return (
-    <div className="gauge" data-step={certainty}>
+    <div className="gauge" data-step={certainty} data-demo="gauge">
       <div className="gauge-track" aria-hidden="true">
         {CERTAINTY_STEPS.map((s, i) => (
           <span key={s.id} className={`gauge-seg gauge-${s.id}${i === at ? ' on' : ''}`} />

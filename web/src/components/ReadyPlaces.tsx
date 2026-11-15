@@ -21,7 +21,7 @@ export function ReadyPlaces({ regions, liveOff, selectedId, onRegion, onExample 
       <h2 id="ready-h">{s('start.ready.title', 'Or try a ready-made place', 'Ready-made places')}</h2>
       <ul className="ready-row">
         {regions.map((r) => (
-          <li key={r.id} className={selectedId === r.id ? 'ready-card is-selected' : 'ready-card'}>
+          <li key={r.id} className={selectedId === r.id ? 'ready-card is-selected' : 'ready-card'} data-demo={`ready-${r.id}`}>
             <button type="button" onClick={() => onRegion(r)} aria-pressed={selectedId === r.id}>
               <span className="ready-tag">{view === 'simple' ? s('start.ready.saved', 'Ready to go') : r.regime}</span>
               <span className="ready-name">{tx(r.name)}</span>
@@ -30,7 +30,7 @@ export function ReadyPlaces({ regions, liveOff, selectedId, onRegion, onExample 
           </li>
         ))}
         {EXAMPLE_PLACES.map((e) => (
-          <li key={e.id} className="ready-card">
+          <li key={e.id} className="ready-card" data-demo={`ready-${e.id}`}>
             <button type="button" onClick={() => onExample(e)} disabled={liveOff}>
               <span className="ready-tag">{s(`start.example.${e.id}.tag`, e.tag.simple, e.tag.scientific)}</span>
               <span className="ready-name">{s(`start.example.${e.id}.name`, e.name)}</span>

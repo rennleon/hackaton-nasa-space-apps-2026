@@ -111,7 +111,7 @@ export function WhereElse({ variableId, route, go }: { variableId: string; route
       go({ screen: 'variable', place: key, variable: variableId, theme: route.theme })
     }
   }
-  const canOpen = (p: WherePlace) => (p.kind === 'region' ? Boolean(p.region_id) : Boolean(client.customPlaces) && p.lat !== null && p.lon !== null)
+  const canOpen = (p: WherePlace) => (p.kind === 'region' ? Boolean(p.region_id) : Boolean(client.customPlaces || client.staticExamples) && p.lat !== null && p.lon !== null)
   const both = goesBothWays(data.places)
   const bothText = both
     ? view === 'simple'
@@ -120,7 +120,7 @@ export function WhereElse({ variableId, route, go }: { variableId: string; route
     : ''
 
   return (
-    <section className="card where" aria-labelledby="where-h">
+    <section className="card where" aria-labelledby="where-h" data-demo="where">
       <h3 id="where-h">{t('where.title', 'Where else?')}</h3>
       <p className="muted">
         {view === 'simple'
@@ -128,7 +128,7 @@ export function WhereElse({ variableId, route, go }: { variableId: string; route
           : t('where.lead.scientific', 'The same variable analysed separately in the ready-made places.')}
       </p>
       {both && (
-        <p className="where-both" role="status">
+        <p className="where-both" role="status" data-demo="where-both">
           {bothText}
         </p>
       )}

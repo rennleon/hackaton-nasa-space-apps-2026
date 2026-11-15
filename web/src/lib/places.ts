@@ -49,6 +49,12 @@ export const EXAMPLE_PLACES: ExamplePlace[] = [
   },
 ]
 
+/** The ready-made example at (about) this point, if any: its precomputed files live under `results/ex_<id>/`. */
+export function exampleAt(place: Place): ExamplePlace | undefined {
+  if (place.kind !== 'point') return undefined
+  return EXAMPLE_PLACES.find((e) => Math.abs(e.lat - place.lat) < 0.05 && Math.abs(e.lon - place.lon) < 0.05)
+}
+
 /** A named live point: remembers its name so the next screens can show it. */
 export function namedPoint(lat: number, lon: number, name: string): Chosen {
   const place: Place = { kind: 'point', lat, lon }

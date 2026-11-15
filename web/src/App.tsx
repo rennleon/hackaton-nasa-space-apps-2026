@@ -8,7 +8,7 @@ import { Sources } from './screens/Sources'
 import './App.css'
 import { parseHash, toHash, type Route } from './lib/route'
 import { useAsync } from './lib/useAsync'
-import { demoById } from './lib/demos'
+import { demoById, prepareDemo } from './lib/demos'
 import type { Catalog } from './types/catalog'
 import { ViewToggle } from './components/ViewToggle'
 import { LangToggle } from './components/LangToggle'
@@ -44,6 +44,7 @@ export default function App({ client: injected }: { client?: DataClient }) {
   const cat = useAsync(() => loadCatalog(client), [client])
   const [route, go] = useRoute()
   const t = useT()
+  if (route.demo) prepareDemo(route.demo) // an example place shows its real name from the first screen
 
   return (
     <ViewProvider>
@@ -123,6 +124,6 @@ function Screen({ route, go }: { route: Route; go: (r: Route) => void }) {
     case 'sources':
       return <Sources />
     default:
-      return <Home go={go} />
+      return <Home go={go} route={route} />
   }
 }

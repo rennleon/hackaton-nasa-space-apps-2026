@@ -102,7 +102,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
   const worth = sel ? sel.worth_investigating : null
 
   return (
-    <section className="card trust" aria-labelledby="trust-h">
+    <section className="card trust" aria-labelledby="trust-h" data-demo="trust">
       <div className="trust-head">
         <h3 id="trust-h">{c('result.trust.title', { simple: 'Can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
         {worth != null && (
@@ -113,7 +113,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
         )}
       </div>
       {groups.map((g) => (
-        <div key={g.id} className="trust-group">
+        <div key={g.id} className="trust-group" data-demo={`trust-${g.id}`}>
           <h4>
             <Icon name={g.icon} size={18} /> {g.title}
           </h4>

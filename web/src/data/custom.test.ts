@@ -48,7 +48,33 @@ describe('live data errors', () => {
     expect(err).toBeInstanceOf(HttpError)
     expect(err.detail).toBe('box too large')
   })
-  it('StaticClient cannot serve custom places', async () => {
-    await expect(new StaticClient('/').customScan()).rejects.toBeInstanceOf(LiveDataUnavailable)
+  it('StaticClient cannot serve other custom places', async () => {
+    await expect(new StaticClient('/').customScan(place, 'heat')).rejects.toBeInstanceOf(LiveDataUnavailable)
+    await expect(new StaticClient('/').customResult(place, 'power_t2m', {})).rejects.toBeInstanceOf(LiveDataUnavailable)
+  })
+  const delhi = { kind: 'point', lat: 28.61, lon: 77.21 } as const
+  it('StaticClient serves the ready-made example points from results/ex_<id>/', async () => {
+    const f = stub(ok)
+    const c = new StaticClient('/')
+    expect(c.staticExamples).toBe(true)
+    await c.customScan(delhi, 'air')
+    await c.customResult({ kind: 'point', lat: 28.6, lon: 77.2 }, 'power_aod', {})
+    const out = await c.customResult(delhi, 'power_aod', { start: '2010-01' })
+    expect(f.mock.calls.map((x) => x[0])).toEqual(['/data/results/ex_delhi/scan_air.json', '/data/results/ex_delhi/power_aod.json', '/data/results/ex_delhi/power_aod.json'])
+    expect(out.customPeriodUnavailable).toBe(true)
+  })
+  it('FallbackClient answers an example point from the static files first, and asks the API only for a custom period', async () => {
+    const f = stub(ok)
+    const c = new FallbackClient(new ApiClient('/api'), new StaticClient('/'))
+    await c.customScan(delhi, 'air')
+    await c.customResult(delhi, 'power_aod', {})
+    expect(f.mock.calls.map((x) => x[0])).toEqual(['/data/results/ex_delhi/scan_air.json', '/data/results/ex_delhi/power_aod.json'])
+    await c.customResult(delhi, 'power_aod', { start: '2010-01' })
+    expect(f.mock.calls.at(-1)?.[0]).toContain('/api/custom/variables/power_aod')
+  })
+  it('FallbackClient keeps other places live-only', async () => {
+    stub((url) => (url.startsWith('/api') ? Promise.reject(new TypeError('network')) : ok()))
+    const c = new FallbackClient(new ApiClient('/api'), new StaticClient('/'))
+    await expect(c.customScan(place, 'heat')).rejects.toBeInstanceOf(LiveDataUnavailable)
   })
 })

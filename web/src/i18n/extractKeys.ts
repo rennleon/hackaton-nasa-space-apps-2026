@@ -158,6 +158,7 @@ export function dynamicUses(): KeyUse[] {
   rc('result.live.period', COPY.periodRejected, 'lib/copy.ts')
   rc('result.live.readyMade', COPY.readyMade, 'lib/copy.ts')
   for (const d of DEMOS) {
+    out.push(...both(`demo.${d.id}.label`, d.label as Pair, ['simple', 'scientific'], 'lib/demos.ts'))
     rc(`demo.${d.id}.title`, d.title as Pair, 'lib/demos.ts')
     d.steps.forEach((st, i) => rc(`demo.${d.id}.step${i}`, st.caption as Pair, 'lib/demos.ts'))
   }
