@@ -38,7 +38,7 @@ const ONE: Homogeneity = {
 }
 const SPOT: Homogeneity = {
   kind: 'single_spot', n_cells: 1, reasons: [], suggestions: [], climate_groups: {}, precip_min: null, precip_max: null, t2m_min: null, t2m_max: null, elev_min: null, elev_max: null,
-  text: t('This is one small spot. Nothing is mixed.', 'Single grid cell, so no mixing inside the box is possible.', 'Este es un solo punto pequeño. No hay nada mezclado.'),
+  text: t('This is one map square. We can\'t see differences inside it.', 'Single grid cell, so no mixing inside the box is possible.', 'Esto es un solo cuadrado del mapa. No vemos diferencias dentro de él.'),
 }
 
 const terms = [
@@ -98,8 +98,8 @@ describe('HomogeneityPanel (Simple view)', () => {
 
   it('single spot', () => {
     show(SPOT)
-    expect(screen.getByText('One small spot')).toBeInTheDocument()
-    expect(screen.getByText('This is one small spot. Nothing is mixed.')).toBeInTheDocument()
+    expect(screen.getByText('One map square')).toBeInTheDocument()
+    expect(screen.getByText('This is one map square. We can\'t see differences inside it.')).toBeInTheDocument()
   })
 
   it('shows nothing when the check could not be made', () => {

@@ -703,7 +703,8 @@ def analyze_region(
         if other is not None and not same_source:
             rob.cross_check = contrast_instruments(ctx, var, other, region, window, series, season, tt, failed_fetches)
             cc = rob.cross_check
-            if cc.outcome != "only_one":
+            # listed as a check that supports the trend only when the partner points the same way
+            if cc.outcome != "only_one" and cc.same_sign:
                 checks_run.append("cross-check source")
             # the partner is sure over its overlap and points the other way from the HEADLINE (not overlap vs overlap)
             if cc.outcome == "disagree" and base_sig:
@@ -755,10 +756,10 @@ def analyze_region(
             if sm2:
                 chips.append(Chip(
                     code="excluded_years_unusual", severity="info",
-                    text=Text(simple=f"The left-out years look unusual from {sm2[:4]}, which fits the satellite drift.",
+                    text=Text(simple=f"The left-out years look unusual from {sm2[:4]}, which may fit the satellite drift.",
                               scientific=f"Post-window anomalies depart from the fitted trend from {sm2} "
                                          "(consistent with the documented artifact).",
-                              simple_es=f"Los años que dejamos fuera se ven raros desde {sm2[:4]}. Encaja con el desvío del satélite.",
+                              simple_es=f"Los años que dejamos fuera se ven raros desde {sm2[:4]}. Puede encajar con el desvío del satélite.",
                               scientific_es=f"Las anomalías posteriores a la ventana se apartan de la tendencia ajustada "
                                             f"desde {sm2} (coherente con el artefacto documentado)."),
                 ))
@@ -784,7 +785,8 @@ def analyze_region(
     if core.p_c is not None:
         tests.append(SignificanceTest(name="seasonal_mk", p=float(core.p_c), statistic=_r(core.z_c), decisive=False))
     # C3: the same AR6 entry stage 1 used, now compared with our verdict (never causal wording).
-    pub_final, _ = published_for_result(cat, region, var, verdict.label, tt.slope_per_year * 10, m=pub)
+    pub_final, _ = published_for_result(cat, region, var, verdict.label, tt.slope_per_year * 10, m=pub,
+                                        window=(int(window.start[:4]), int(window.end[:4])))
     return AnalysisResult(
         **{**common, "published": pub_final},
         season_series=[YearPoint(year=int(y), anomaly=_r(a)) for y, a in zip(core.years, core.y)] if season else None,

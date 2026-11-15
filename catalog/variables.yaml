@@ -387,16 +387,16 @@
   cross_check: null
   words: { subject: "pollution from factories and power plants", verb: is, up: "going up", down: "going down" }
   words_es: { subject: "la contaminación de las fábricas", up: "está aumentando", down: "está disminuyendo", changing: "está cambiando" }
-  kid_units: { scale: 10, label: "on an air-particles scale", label_es: "en una escala de partículas en el aire" }  # relative scale: the model's surface concentration (µg/m³) x 10 so whole numbers move
+  kid_units: { scale: 10, label: "on our sulfate scale", label_es: "en nuestra escala de sulfato" }  # relative scale: the model's surface concentration (µg/m³) x 10 so whole numbers move
   themes: { air: driver, burning_fuel: driver }
 
 - id: merra2_oc
   giovanni_id: M2T1NXAER_5_12_4_OCSMASS
-  name: { simple: Smoke particles (computer model), scientific: Surface organic carbon mass concentration (MERRA-2), simple_es: "Partículas de humo (modelo de computadora)", scientific_es: "Concentración másica de carbono orgánico en superficie (MERRA-2)" }
+  name: { simple: Carbon particles in the air (computer model), scientific: Surface organic carbon mass concentration (MERRA-2), simple_es: "Partículas de carbono en el aire (modelo de computadora)", scientific_es: "Concentración másica de carbono orgánico en superficie (MERRA-2)" }
   definition:
-    simple: Tiny particles that come mostly from fires and smoke, worked out by a computer model.
+    simple: Tiny particles made of carbon compounds, in the air near the ground, worked out by a computer model.
     scientific: MERRA-2 monthly surface organic carbon mass concentration. The Simple view shows a relative scale, the surface concentration in µg/m³ times 10.
-    simple_es: "Partículas diminutas que vienen sobre todo de incendios y humo, calculadas por un modelo de computadora."
+    simple_es: "Partículas diminutas hechas de compuestos de carbono, en el aire cerca del suelo, calculadas por un modelo de computadora."
     scientific_es: "Concentración másica mensual de carbono orgánico en superficie de MERRA-2. La vista Simple usa una escala relativa: la concentración en superficie en µg/m³ por 10."
   source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   kind: other  # which published assessments speak about it (expectations.yaml)
@@ -408,9 +408,9 @@
   record_start: 1980-01
   artifacts: []
   cross_check: null
-  words: { subject: "smoke in the air", verb: is, up: "going up", down: "going down" }
-  words_es: { subject: "el humo en el aire", up: "está aumentando", down: "está disminuyendo", changing: "está cambiando" }
-  kid_units: { scale: 10, label: "on an air-particles scale", label_es: "en una escala de partículas en el aire" }  # relative scale: the model's surface concentration (µg/m³) x 10 so whole numbers move
+  words: { subject: "carbon in the air", verb: is, up: "going up", down: "going down" }
+  words_es: { subject: "el carbono en el aire", up: "está aumentando", down: "está disminuyendo", changing: "está cambiando" }
+  kid_units: { scale: 10, label: "on our carbon-particle scale", label_es: "en nuestra escala de partículas de carbono" }  # relative scale: the model's surface concentration (µg/m³) x 10 so whole numbers move
   themes: { air: driver, smoke_haze: driver }
 
 - id: mopitt_co
@@ -495,7 +495,7 @@
   words: { subject: "the pollution gas NO₂", verb: is, up: "going up", down: "going down" }
   words_es: { subject: "el gas contaminante NO₂", up: "está aumentando", down: "está disminuyendo", changing: "está cambiando" }
   # display is in 10^15 units; x10 gives whole numbers that can show a change (about 10 in a clean area, 50+ in a city)
-  kid_units: { scale: 10, label: "on a pollution-gas scale", label_es: "en una escala de gas contaminante" }
+  kid_units: { scale: 10, label: "on our NO₂ gas scale", label_es: "en nuestra escala de gas NO₂" }
   themes: { air: target, burning_fuel: target }
 
 # --- NASA POWER (live, any region up to 10° x 10°; MERRA-2-based; no login) ---

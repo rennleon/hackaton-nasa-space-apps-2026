@@ -1,6 +1,7 @@
 """C2/C3: AR6 expectations (stage-1 check b for any place), the published finding, instrument caveats, independence."""
 
 import re
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -237,3 +238,18 @@ def test_independence_note_is_none_for_separate_instruments(cat):
     assert independence_note(cat.variables["omi_aod"], cat.variables["power_aod"], cat) is None
     assert independence_note(cat.variables["gpm_precip"], cat.variables["power_precip"], cat) is None
     assert independence_note(cat.variables["omi_no2"], cat.variables["omi_aod"], cat) is None
+
+
+def test_agreement_needs_a_window_covering_half_the_stated_period():
+    """A 2002-2021 satellite window says nothing about a 1961-2015 statement (audit finding 10)."""
+    from trend_detective.published import stated_span
+
+    assert stated_span("1961-2015") == (1961, 2015)
+    assert stated_span("since about 1950 (Table 11.1 header)") == (1950, 2020)
+    assert stated_span("not stated") is None
+    entry = SimpleNamespace(direction="up", partial=False, period="1961-2015")
+    assert agreement_of(entry, "significant", +0.3, (2002, 2021)) == "too_soon"  # 14 of 55 years
+    assert agreement_of(entry, "significant", -0.3, (2002, 2021)) == "too_soon"  # not "differs" either
+    assert agreement_of(entry, "significant", +0.3, (1981, 2025)) == "agrees"  # 35 of 55 years
+    unknown = SimpleNamespace(direction="up", partial=False, period="not stated")
+    assert agreement_of(unknown, "significant", +0.3, (1981, 2025)) == "too_soon"

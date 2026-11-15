@@ -15,9 +15,9 @@
     scientific_es: "Temperatura del aire en superficie, humedad relativa en superficie y muchos campos de perfil, dos veces al día (pasadas de ≈13:30 y ≈01:30 hora local), rejilla mensual de nivel 3 a 1°."
   how:
     simple: It reads the heat glow of the air from space, twice a day. The satellite now passes over a bit later each year.
-    scientific: "Hyperspectral infrared sounder (2378 channels); retrievals from cloud-cleared radiances. Aqua is in free drift, so its local crossing time is slowly moving later (NASA Aqua mission page, https://science.nasa.gov/mission/aqua/); the nominal crossing is 13:30 ascending and 01:30 descending (AIRS V7 Level 3 Product User Guide, Section 1.5)."
+    scientific: "Hyperspectral infrared sounder (2378 channels). Aqua is in free drift, so its local crossing time is slowly moving later (NASA Aqua mission page, https://science.nasa.gov/mission/aqua/); the nominal crossing is 13:30 ascending and 01:30 descending (AIRS V7 Level 3 Product User Guide, Section 1.5)."
     simple_es: "Lee el brillo de calor del aire desde el espacio, dos veces al día. Ahora el satélite pasa un poco más tarde cada año."
-    scientific_es: "Sondeador hiperespectral de infrarrojos (2378 canales); recuperaciones a partir de radiancias sin nubes. Aqua está en deriva libre, así que su hora local de cruce se va retrasando poco a poco (página de la misión Aqua de la NASA, https://science.nasa.gov/mission/aqua/); el cruce nominal es a las 13:30 en ascenso y a las 01:30 en descenso (AIRS V7 Level 3 Product User Guide, Sección 1.5)."
+    scientific_es: "Sondeador hiperespectral de infrarrojos (2378 canales). Aqua está en deriva libre, así que su hora local de cruce se va retrasando poco a poco (página de la misión Aqua de la NASA, https://science.nasa.gov/mission/aqua/); el cruce nominal es a las 13:30 en ascenso y a las 01:30 en descenso (AIRS V7 Level 3 Product User Guide, Sección 1.5)."
   live: giovanni
   link: https://airs.jpl.nasa.gov/
 

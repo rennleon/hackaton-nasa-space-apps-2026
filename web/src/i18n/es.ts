@@ -793,7 +793,7 @@ const es: Record<string, string> = {
   'homog.aria': '¿Es un solo tipo de lugar?',
   'homog.mixed.title': 'Lugar mezclado',
   'homog.one.title': 'Un solo tipo de lugar',
-  'homog.spot.title': 'Un punto pequeño',
+  'homog.spot.title': 'Un cuadrado del mapa',
   'homog.why': 'Cuéntame más',
   'homog.try': 'Probar solo {name}',
   'homog.try.sci': 'Usar solo {name} ({n} celdas)',

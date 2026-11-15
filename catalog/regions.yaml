@@ -219,9 +219,9 @@
       direction: down
       expected_per_decade: null
       reason:
-        simple: "Factories and power plants put out much less of this pollution than before."
+        simple: "The US puts out much less of this pollution than before."
         scientific: "US SO2 emissions declined by over 70% between 1995 and 2013, coinciding with observed AOD reductions of 3.0 ± 0.6% per year over the eastern US (the study period ends in 2013; the decline in emissions is national, so it motivates the sign here)."
-        simple_es: "Las fábricas y las centrales eléctricas echan mucha menos de esta contaminación que antes."
+        simple_es: "EE. UU. echa mucha menos de esta contaminación que antes."
         scientific_es: "Las emisiones de SO₂ de EE. UU. bajaron más de 70 % entre 1995 y 2013, a la par de reducciones observadas de AOD de 3.0 ± 0.6 % por año en el este de EE. UU. (el estudio termina en 2013; la baja de emisiones es nacional, así que motiva el signo aquí)."
       source: "NOAA Chemical Sciences Laboratory news item (2016) on Keppel-Aleks and Washenfelder, The effect of atmospheric sulfate reductions on diffuse radiation and photosynthesis in the United States during 1995-2013, Geophysical Research Letters, doi:10.1002/2016GL070052. https://csl.noaa.gov/news/2016/196_1021.html"
     - variable: merra2_t2m

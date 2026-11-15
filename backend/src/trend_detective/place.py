@@ -259,7 +259,8 @@ def _simple_feel_es(code: str | None) -> str | None:
     if code[0] == "B":
         return ("muy seco" if code[1] == "W" else "seco") + (" y cálido" if code[2] == "h" else " y fresco")
     if code[0] == "C":
-        return "templado, ni muy caliente ni muy frío"
+        return ("cálido, con veranos calurosos e inviernos suaves" if code[2:3] == "a"
+                else "templado, ni muy caliente ni muy frío")
     if code[0] == "D":
         return "frío, con un invierno largo y frío"
     return "muy frío todo el año"
@@ -282,8 +283,8 @@ def _simple_feel(code: str | None) -> str | None:
         return "hot, with a rainy time and a dry time"
     if code[0] == "B":
         return ("very dry" if code[1] == "W" else "dry") + (" and hot" if code[2] == "h" else " and cool")
-    if code[0] == "C":
-        return "mild, not too hot and not too cold"
+    if code[0] == "C":  # third letter a: hottest month at least 22 °C (Beck et al. 2018, Table 2)
+        return "warm, with hot summers and mild winters" if code[2:3] == "a" else "mild, not too hot and not too cold"
     if code[0] == "D":
         return "cold, with a long cold winter"
     return "very cold all year"

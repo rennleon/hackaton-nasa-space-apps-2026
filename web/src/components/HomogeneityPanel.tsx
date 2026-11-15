@@ -49,7 +49,7 @@ export function HomogeneityPanel({ homogeneity: h, route, go, canTry = true }: {
         {t('homog.one.title', 'One kind of place')}
       </Term>
     ) : (
-      t('homog.spot.title', 'One small spot')
+      t('homog.spot.title', 'One map square')
     )
   // a different box is a different question: keep the theme, drop the years and the time of year
   const tryPart = (bbox: number[]) => go({ screen: 'shortlist', theme: route.theme, place: formatPlace({ kind: 'box', w: bbox[0], s: bbox[1], e: bbox[2], n: bbox[3] }) })

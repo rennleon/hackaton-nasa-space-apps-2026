@@ -43,6 +43,12 @@ for how to release and how to roll back.
   ready-made places keep it working offline.
 
 ### Fixed
+- Facts audit: every claim on screen checked against NASA data or an opened source. Haze (POWER AOD_55) is
+  CERES SYN1deg, not MERRA-2; unsourced claims removed (Wisconsin wildfire smoke, sulfate from coal and oil,
+  organic carbon "mostly fires"); "watch N more years" only while N is plausible; "rainiest months" instead of
+  "most rain"; mixed boxes are not described as one place; IPCC agreement only when our years cover at least
+  half of the statement's period; then-vs-now numbers fall back to the size of the change when rounding would
+  distort it; Aqua drift dated per NASA (last manoeuvre Dec 2021).
 - Box means no longer depend on which grid cells happen to report: each cell is fitted as the box
   series plus its own monthly offset, estimated over the months it shares with the box, so a cell that
   drops out can neither create a trend nor shrink a real one (exactly the cos(latitude)-weighted mean

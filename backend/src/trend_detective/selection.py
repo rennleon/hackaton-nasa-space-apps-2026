@@ -59,16 +59,13 @@ def _theme_names(theme_id: str | None, variable: VariableCard, themes: dict[str,
 def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> str:
     """Spanish twin of detect_sentences (same decisions, same rounding rules)."""
     if expected is None:
-        if abs(mdt) < 1:
-            return "Podemos ver incluso cambios pequeños."
         return f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
     ok = mdt <= abs(expected)
     if kid_amount_es(mdt) == kid_amount_es(expected):
         if ok:
             return "Este registro es lo bastante largo para ver un cambio típico."
         return "Este registro solo puede ver cambios mayores que uno típico."
-    spot = ("Podemos ver incluso cambios pequeños." if abs(mdt) < 1
-            else f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años.")
+    spot = f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
     typical = f"Un cambio típico es de {kid_amount_es(expected)} {u_simple}."
     return f"{spot} {typical} " + ("Eso basta para verlo." if ok else "Aún no podemos verlo.")
 
@@ -80,16 +77,14 @@ def detect_sentences(mdt: float, expected: float | None, u_simple: str) -> tuple
     tracker #6). Amounts are shown only when the rounded amounts differ, so they can't read "less than 1 ...
     less than 1. Not enough"."""
     if expected is None:
-        if abs(mdt) < 1:
-            return "We can spot even small changes.", None
+        # never "even small changes": below 1 unit can still be large for the variable (e.g. 0.8 mm/day of rain)
         return f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.", None
     ok = mdt <= abs(expected)
     if kid_amount(mdt) == kid_amount(expected):
         if ok:
             return "This record is long enough to spot a typical change.", ok
         return "This record can only spot changes bigger than a typical one.", ok
-    spot = ("We can spot even small changes." if abs(mdt) < 1
-            else f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.")
+    spot = f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years."
     if ok:
         return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. That's enough to see it.", ok
     return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. We can't see that yet.", ok

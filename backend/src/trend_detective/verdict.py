@@ -148,6 +148,27 @@ def less_than_one(label: str) -> str:
     return f"less than 1 {label}"
 
 
+def amount_en(n: int, label: str) -> str:
+    """'<n> <unit>' for a kid label, singular for 1 ('1 point on the haze scale', '2 degrees')."""
+    if label.startswith("on "):
+        return f"{n} point{'' if n == 1 else 's'} {label}"
+    for plural, one in (("degrees", "degree"), (" units", " unit")):
+        if label.endswith(plural) and n == 1:
+            return f"1 {label[: -len(plural)] + one}"
+    return f"{n} {label}"
+
+
+def amount_es(n: int, label: str) -> str:
+    """Spanish '<n> <unidad>' with singular agreement for 1."""
+    if label.startswith("en "):
+        return f"{n} punto{'' if n == 1 else 's'} {label}"
+    if label == "grados" and n == 1:
+        return "1 grado"
+    if label.startswith("unidades") and n == 1:
+        return f"1 unidad{label[len('unidades'):]}"
+    return f"{n} {label}"
+
+
 def less_than_one_es(label: str) -> str:
     """Spanish 'menos de 1 <unidad>' with singular agreement ('grado', 'unidad ...')."""
     if label.startswith("en "):
@@ -263,16 +284,28 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     )
     level_sc_es = level_sc.replace("fitted level", "nivel ajustado")
     if certainty in ("sure", "maybe") and tn:
+        # then/now are points on the fitted trend line. Whole numbers can distort a small change (1.5 shown as
+        # "6 then 7"), so when rounding moves the step by more than half a unit we say the size of the change
+        # instead; the direction word is always there.
         a, b = kid_number(tn.value_then, tn.kid_scale), kid_number(tn.value_now, tn.kid_scale)
-        if a == b:
-            how_s = f"Since {tn.year_then} it changed by {less_than_one(tn.kid_label)}."
+        a_n, b_n = round(tn.value_then * tn.kid_scale), round(tn.value_now * tn.kid_scale)
+        change = (tn.value_now - tn.value_then) * tn.kid_scale
+        up = change > 0
+        size = max(1, round(abs(change)))
+        if a_n == b_n:
+            how_s = f"Since {tn.year_then} it went {'up' if up else 'down'} by {less_than_one(tn.kid_label)}."
+        elif abs((b_n - a_n) - change) > 0.5:
+            how_s = f"Since {tn.year_then} it went {'up' if up else 'down'} by about {amount_en(size, tn.kid_label)}."
         else:
             how_s = f"In {tn.year_then}: about {a} {tn.kid_label}. In {tn.year_now}: about {b}."
         how_sc = f"{slope_sc}{level_sc}."
         if es:
             lab = v.kid_units.label_es
-            if a == b:
-                how_es = f"Desde {tn.year_then} cambió {less_than_one_es(lab)}."
+            verb_es = "subió" if up else "bajó"
+            if a_n == b_n:
+                how_es = f"Desde {tn.year_then} {verb_es} {less_than_one_es(lab)}."
+            elif abs((b_n - a_n) - change) > 0.5:
+                how_es = f"Desde {tn.year_then} {verb_es} {_unos_es(lab)} {amount_es(size, lab)}."
             else:
                 how_es = (f"En {tn.year_then}: {_unos_es(lab)} {kid_value_es(tn.value_then, tn.kid_scale, lab)}. "
                           f"En {tn.year_now}: {_unos_es(lab)} {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
@@ -331,15 +364,15 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         ran_es = ""
         if x.checks_run:
             names = ", ".join(CHECK_NAMES_ES.get(c, c) for c in x.checks_run)
-            ran_es = f" Se hicieron comprobaciones de robustez ({names}) y todas se cumplen."
+            ran_es = f" Comprobaciones de robustez hechas ({names}): ninguna contradice la tendencia."
     if label == "significant":
-        more_s = f"From {y0} to {y1} it changed by {per10}. A change this steady is very unlikely to be luck."
-        ran = f" Robustness checks run ({', '.join(x.checks_run)}) pass." if x.checks_run else ""
+        more_s = f"From {y0} to {y1} it changed by {per10}. It is very unlikely this is luck."
+        ran = f" Robustness checks run ({', '.join(x.checks_run)}): none contradicts the trend." if x.checks_run else ""
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}.{ran}"
         headline_sc = f"Significant {direction}"
         if es:
             more_es = (f"De {y0} a {y1} cambió {per10_es}. "
-                       "Es muy poco probable que un cambio tan constante sea pura suerte.")
+                       "Es muy poco probable que esto sea pura suerte.")
             more_sc_es = f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con α = {x.alpha}.{ran_es}"
             headline_sc_es = f"{direction_es.capitalize()} {adj_es}"
     elif label == "significant_fragile":

@@ -111,29 +111,62 @@ def expectation_check(entry: PublishedExpectation) -> SelectionCheck:
     )
 
 
-def agreement_of(entry: PublishedExpectation, label: Label | None, slope_per_decade: float | None):
+AR6_LAST_YEAR = 2020  # "since X" statements in IPCC AR6 WGI (2021) assess up to about 2020
+MIN_SPAN_SHARE = 0.5  # project rule: compare only when our window covers at least half of the stated period
+
+
+def stated_span(period: str | None) -> tuple[int, int] | None:
+    """(first, last) year of a statement's period text, or None when it is not stated / cannot be read.
+    '1961-2015' -> (1961, 2015); 'since about 1950' -> (1950, 2020); 'since the mid-1990s' -> (1995, 2020)."""
+    import re
+
+    if not period or "not stated" in period.lower():
+        return None
+    m = re.search(r"(1[89]\d\d|20\d\d)\s*[-–]\s*(1[89]\d\d|20\d\d)", period)
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    m = re.search(r"since (?:about |the )?(?:mid-)?(1[89]\d\d|20\d\d)", period)
+    if m:
+        y = int(m.group(1)) + (5 if "mid-" in period[m.start():m.end()] else 0)
+        return y, AR6_LAST_YEAR
+    return None
+
+
+def agreement_of(entry: PublishedExpectation, label: Label | None, slope_per_decade: float | None,
+                 window: tuple[int, int] | None = None):
     """agrees / differs / too_soon, or None when the statement has no direction to compare with.
 
     `agrees`: our verdict is significant with the stated sign. `differs`: significant with the opposite sign,
     never claimed when the statement holds only for parts of the region (our place may lie outside them).
-    Everything else (not significant, fragile, no verdict) is `too_soon`: never read as "no change"."""
+    Everything else (not significant, fragile, no verdict) is `too_soon`: never read as "no change".
+    `window` (first, last year of our analysis): agree/differ only when it covers at least MIN_SPAN_SHARE of the
+    statement's stated period; a 19-year satellite window says nothing about a 1961-2015 statement. An unknown
+    period is not compared either. The shown text for `too_soon` is "our record is too short to compare"."""
     if entry.direction in ("unclear", "either"):
         return None
     if label != "significant" or slope_per_decade is None or slope_per_decade == 0:
         return "too_soon"
+    if window is not None:
+        span = stated_span(getattr(entry, "period", None))
+        if span is None:
+            return "too_soon"
+        lo, hi = max(window[0], span[0]), min(window[1], span[1])
+        if hi - lo + 1 < MIN_SPAN_SHARE * (span[1] - span[0] + 1):
+            return "too_soon"
     if (slope_per_decade > 0) == (entry.direction == "up"):
         return "agrees"
     return "too_soon" if entry.partial else "differs"
 
 
-def finding(entry: PublishedExpectation, label: Label | None = None, slope_per_decade: float | None = None) -> PublishedFinding:
+def finding(entry: PublishedExpectation, label: Label | None = None, slope_per_decade: float | None = None,
+            window: tuple[int, int] | None = None) -> PublishedFinding:
     return PublishedFinding(
         statement=statement_text(entry),
         source=entry.source,
         confidence=entry.confidence,
         confidence_es=entry.confidence_es,
         direction=None if entry.direction == "unclear" else entry.direction,
-        agreement=None if entry.about_extremes else agreement_of(entry, label, slope_per_decade),
+        agreement=None if entry.about_extremes else agreement_of(entry, label, slope_per_decade, window),
         ar6_region=entry.ar6_region,
         scope="extremes" if entry.about_extremes else "mean",
         partial=entry.partial,
@@ -143,11 +176,11 @@ def finding(entry: PublishedExpectation, label: Label | None = None, slope_per_d
 def for_result(
     catalog: Catalog, region: RegionCard, variable: VariableCard,
     label: Label | None = None, slope_per_decade: float | None = None,
-    m: PublishedMatch | None = None,
+    m: PublishedMatch | None = None, window: tuple[int, int] | None = None,
 ) -> tuple[PublishedFinding | None, list[PublishedFinding]]:
     """(published finding for the mean, extremes context) for an analysis result."""
     m = m or match(catalog, region, variable)
     return (
-        finding(m.mean, label, slope_per_decade) if m.mean else None,
+        finding(m.mean, label, slope_per_decade, window) if m.mean else None,
         [finding(e) for e in m.context],
     )

@@ -348,9 +348,9 @@ def evaluate(cells: list[Cell], bound: list[float] | None = None) -> Homogeneity
     sci_en, sci_es = _sci_numbers(cells, counts)
     if len(cells) == 1:
         return Homogeneity(kind="single_spot", **common, text=Text(
-            simple="This is one small spot. Nothing is mixed.",
+            simple="This is one map square. We can't see differences inside it.",
             scientific=f"Single grid cell, so no mixing inside the box is possible ({sci_en}).",
-            simple_es="Este es un solo punto pequeño. No hay nada mezclado.",
+            simple_es="Esto es un solo cuadrado del mapa. No vemos diferencias dentro de él.",
             scientific_es=f"Una sola celda, así que no hay mezcla dentro del cuadro ({sci_es}).",
         ))
     reasons = _reasons(cells)
@@ -378,9 +378,9 @@ def evaluate(cells: list[Cell], bound: list[float] | None = None) -> Homogeneity
 def single_spot() -> Homogeneity:
     """A point: one grid cell, nothing to mix. No network needed."""
     return Homogeneity(kind="single_spot", n_cells=1, text=Text(
-        simple="This is one small spot. Nothing is mixed.",
+        simple="This is one map square. We can't see differences inside it.",
         scientific="Single grid cell, so no mixing inside the box is possible.",
-        simple_es="Este es un solo punto pequeño. No hay nada mezclado.",
+        simple_es="Esto es un solo cuadrado del mapa. No vemos diferencias dentro de él.",
         scientific_es="Una sola celda, así que no hay mezcla dentro del cuadro.",
     ))
 
