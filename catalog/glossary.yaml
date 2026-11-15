@@ -254,3 +254,10 @@
     scientific: The Intergovernmental Panel on Climate Change Sixth Assessment Report (2021), Working Group I. Its confidence words (for example high confidence, likely) are the panel's own, and are not our "how sure are we" meter.
     simple_es: "Cientos de científicos leyeron todos los estudios y anotaron en qué coinciden. Citamos lo que dicen de cada región."
     scientific_es: "Sexto Informe de Evaluación del Grupo Intergubernamental de Expertos sobre el Cambio Climático (2021), Grupo de Trabajo I. Sus palabras de confianza (por ejemplo confianza alta, probable) son las del panel y no son nuestro medidor de qué tan seguros estamos."
+- id: start_year
+  term: { simple: start year, scientific: start year, simple_es: "año de inicio", scientific_es: "año de inicio" }
+  definition:
+    simple: The first year we count. We can try starting in an earlier or a later year.
+    scientific: The first year of the analysis window. Trends over a few decades can change with the start or end year (Liebmann et al. 2010).
+    simple_es: "El primer año que contamos. Podemos probar empezando en un año más temprano o más tardío."
+    scientific_es: "El primer año de la ventana de análisis. Las tendencias de pocas décadas pueden cambiar con el año de inicio o de fin (Liebmann et al. 2010)."

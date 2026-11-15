@@ -3,6 +3,7 @@ import { useData, useView } from '../context'
 import { useAsync } from '../lib/useAsync'
 import { Charts } from '../components/Charts'
 import { VerdictCard } from '../components/Verdict'
+import { StartYears } from '../components/StartYears'
 import { TrustPanel } from '../components/TrustPanel'
 import { SourceTag } from '../components/SourceTag'
 import { cleanInternal, fmt, useResultCopy } from '../lib/resultCopy'
@@ -163,6 +164,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
             <div className="variable-main">
               <VerdictCard result={res.data} />
               <TrustPanel result={res.data} />
+              <StartYears result={res.data} />
             </div>
             <Charts result={res.data} />
           </div>
