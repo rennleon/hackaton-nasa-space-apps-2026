@@ -1,5 +1,5 @@
 /* ===== Design system: tokens, type, surfaces, shared components =====
-   v3 look (design "Earth System Trend Detective, UI polish"): warm paper light theme by default, deep green-black
+   v3 look (design "Earth System Trend Detective, UI polish"): warm paper light theme by default, neutral near-black
    dark theme when the system asks for it (prefers-color-scheme: dark) or data-theme="dark"; data-theme="light"
    forces light. Verdict colours are defined here ONCE and used by every component. The verdict palette is
    colour-blind safe and never the only signal (icon + word, dashed outline for "can't tell"). */
@@ -41,38 +41,38 @@
 /* dark theme */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0e1513; --surface: #16201d; --surface-2: #1e2a26; --hairline: #2b3833;
-    --text: #ecf1ee; --text-2: #b9c4bf; --muted: #97a39e; --border: #3a4943;
-    --accent: #8db0ff; --accent-text: #0e1513; --accent-soft: #1d2a47; --focus: #8db0ff;
-    --tip-bg: #ecf1ee; --tip-text: #0e1513;
+    --bg: #0f1115; --surface: #171a20; --surface-2: #20242c; --hairline: #2d323b;
+    --text: #eceef2; --text-2: #babfc8; --muted: #979ca6; --border: #3b414c;
+    --accent: #8db0ff; --accent-text: #0f1115; --accent-soft: #1d2a47; --focus: #8db0ff;
+    --tip-bg: #eceef2; --tip-text: #0f1115;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 28px rgb(0 0 0 / 0.35);
-    --scrim: rgb(2 8 6 / 0.6);
+    --scrim: rgb(4 6 10 / 0.6);
     --trend: #f59e6b; --trend-soft: #3a2418; --water: #1a2b30;
     --danger: #ff9d92; --danger-bg: #4a1f1b;
-    --v-sure: #5fd3c0; --v-sure-fill: #2fb5a8; --v-sure-bg: #14332e;
+    --v-sure: #5fd3c0; --v-sure-fill: #2fb5a8; --v-sure-bg: #12302d;
     --v-maybe: #f6c969; --v-maybe-fill: #e69a1a; --v-maybe-bg: #3d3010;
-    --v-soon: #b4beb9; --v-soon-fill: #7d8a84; --v-soon-bg: #25302c;
-    --v-cant: #b4beb9;
-    --chart-grid: #26332e;
+    --v-soon: #b9bec7; --v-soon-fill: #7f8591; --v-soon-bg: #262a32;
+    --v-cant: #b9bec7;
+    --chart-grid: #272c34;
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --bg: #0e1513; --surface: #16201d; --surface-2: #1e2a26; --hairline: #2b3833;
-  --text: #ecf1ee; --text-2: #b9c4bf; --muted: #97a39e; --border: #3a4943;
-  --accent: #8db0ff; --accent-text: #0e1513; --accent-soft: #1d2a47; --focus: #8db0ff;
-  --tip-bg: #ecf1ee; --tip-text: #0e1513;
+  --bg: #0f1115; --surface: #171a20; --surface-2: #20242c; --hairline: #2d323b;
+  --text: #eceef2; --text-2: #babfc8; --muted: #979ca6; --border: #3b414c;
+  --accent: #8db0ff; --accent-text: #0f1115; --accent-soft: #1d2a47; --focus: #8db0ff;
+  --tip-bg: #eceef2; --tip-text: #0f1115;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
   --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 28px rgb(0 0 0 / 0.35);
-  --scrim: rgb(2 8 6 / 0.6);
+  --scrim: rgb(4 6 10 / 0.6);
   --trend: #f59e6b; --trend-soft: #3a2418; --water: #1a2b30;
   --danger: #ff9d92; --danger-bg: #4a1f1b;
-  --v-sure: #5fd3c0; --v-sure-fill: #2fb5a8; --v-sure-bg: #14332e;
+  --v-sure: #5fd3c0; --v-sure-fill: #2fb5a8; --v-sure-bg: #12302d;
   --v-maybe: #f6c969; --v-maybe-fill: #e69a1a; --v-maybe-bg: #3d3010;
-  --v-soon: #b4beb9; --v-soon-fill: #7d8a84; --v-soon-bg: #25302c;
-  --v-cant: #b4beb9;
-  --chart-grid: #26332e;
+  --v-soon: #b9bec7; --v-soon-fill: #7f8591; --v-soon-bg: #262a32;
+  --v-cant: #b9bec7;
+  --chart-grid: #272c34;
   color-scheme: dark;
 }
 
