@@ -296,9 +296,9 @@ function Summary({ summary, scan, available, notes }: { summary: ReturnType<type
       </div>
       <ul className="summary-tiles" aria-label={l('findings.tiles.aria')}>
         {LEVELS.filter((c) => counts[c] > 0).map((c) => (
-          <li key={c} className={`tile tile-${c}`}>
-            <span className="tile-n">{counts[c]}</span>
-            <span className="tile-w">
+          <li key={c} className={`count-tile count-tile-${c}`}>
+            <span className="count-tile-n">{counts[c]}</span>
+            <span className="count-tile-w">
               <CertaintyIcon certainty={c} />
               {l(`findings.chip.${c}` as FKey)}
             </span>

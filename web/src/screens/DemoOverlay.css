@@ -1,11 +1,11 @@
 /* Guided tour: dim, spotlight, note. The page behind is for looking only (the shield blocks clicks, not scrolling). */
 .demo-root { position: fixed; inset: 0; z-index: 3000; pointer-events: none; }
 .demo-shield { position: fixed; inset: 0; pointer-events: auto; background: transparent; }
-.demo-dim { position: fixed; inset: 0; background: rgb(0 0 0 / 0.66); pointer-events: none; }
+.demo-dim { position: fixed; inset: 0; background: rgb(4 10 24 / 0.66); pointer-events: none; }
 .demo-spot {
   position: fixed;
   border-radius: calc(var(--radius) + 4px);
-  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.66), 0 0 0 3px var(--accent);
+  box-shadow: 0 0 0 100vmax rgb(4 10 24 / 0.66), 0 0 0 3px var(--accent);
   pointer-events: none;
   transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
 }
