@@ -21,6 +21,7 @@ from .contract import (
     Comparison,
     Detectability,
     FitPoint,
+    GateCheck,
     Gates,
     MonthPoint,
     Persistence,
@@ -47,7 +48,7 @@ from .prepare import (
 )
 from .robustness import leave_one_year_out
 from .selection import stage1
-from .sources import SourceChain
+from .sources import LiveSourceUnavailable, SourceChain
 from .sources.giovanni_csv import GiovanniCsvSource
 from .sources.power import PowerSource
 from .stats import TrendTests, seasonal_mk, trend_tests, years_to_detect
@@ -217,6 +218,127 @@ def _compare(
     )
 
 
+def _fetch_failed_gate(exc: Exception) -> GateCheck:
+    return GateCheck(
+        code="fetch_failed", passed=False,
+        detail=Text(
+            simple="We could not reach NASA's data service just now. Try again in a minute.",
+            scientific=f"Live data source unavailable: {exc}",
+        ),
+    )
+
+
+def _fetch(
+    ctx: EngineContext, variable_id: str, region: RegionCard, failed: dict[str, Exception] | None
+) -> tuple[MonthlySeries | None, Exception | None]:
+    """Fetch a series. With `failed` given (the scan), an unreachable live source is recorded
+    instead of raised, and a failure already recorded is not retried. Never cached as 'no data'."""
+    if failed is not None and variable_id in failed:
+        return None, failed[variable_id]
+    try:
+        return ctx.series(variable_id, region), None
+    except LiveSourceUnavailable as exc:
+        if failed is None:
+            raise
+        failed[variable_id] = exc
+        return None, exc
+
+
+def _p_weak(tt: TrendTests) -> float:
+    return max(float(tt.p_mk_hr), float(tt.p_ols))
+
+
+def _dir_word(slope: float) -> str:
+    return "up" if slope > 0 else "down"
+
+
+def _contrast_text(
+    outcome: str, var: VariableCard, other: VariableCard, c1: Core, c2: Core, sig1: bool, sig2: bool,
+    start: str, end: str,
+) -> Text:
+    s1, s2 = c1.tt.slope_per_year * 10, c2.tt.slope_per_year * 10
+    simple = {
+        "agree": f"Two instruments agree: both see it going {_dir_word(s1)}.",
+        "same_direction_one_unsure": "Another instrument shows the same direction, but is not sure yet.",
+        "disagree": f"The two instruments disagree. One sees it going {_dir_word(s1)}, the other {_dir_word(s2)}.",
+        "both_unsure": "The two instruments do not tell the same story yet."
+        if np.sign(s1) != np.sign(s2) else "Neither instrument is sure yet.",
+    }[outcome]
+    verdicts = {
+        "agree": "Both are significant at 0.05 with the same sign: the instruments agree.",
+        "same_direction_one_unsure": "Same sign, but only one is significant at 0.05.",
+        "disagree": "Opposite signs and both are significant at 0.05: the instruments disagree.",
+        "both_unsure": "Neither is significant at 0.05 together with the same sign, so there is no contrast to report.",
+    }
+    sci = (
+        f"Overlapping window {start} to {end}, same place, each series de-seasonalised over that window. "
+        f"{var.source.instrument} ({var.name.scientific}): {s1:+.3g} {var.units.display} per decade, "
+        f"p = {_p_weak(c1.tt):.3g}. "
+        f"{other.source.instrument} ({other.name.scientific}): {s2:+.3g} {other.units.display} per decade, "
+        f"p = {_p_weak(c2.tt):.3g} (p is the weaker of the two decisive tests). {verdicts[outcome]}"
+    )
+    ids = {var.source.instrument_id, other.source.instrument_id}
+    if "airs" in ids and len(ids) == 2:
+        sci += (" AIRS is a snapshot at about 1:30 (day or night pass), the other series is a daily mean: "
+                "compare the direction only, not the size.")
+    if var.grid_deg != other.grid_deg:
+        sci += f" The grid cells differ ({var.grid_deg}° vs {other.grid_deg}°), so the footprints differ."
+    return Text(simple=simple, scientific=sci)
+
+
+def _only_one(other: VariableCard, detail: str) -> Comparison:
+    """No second opinion available. The numeric fields are placeholders; `outcome` says so."""
+    return Comparison(
+        against=other.id, slope_per_decade=0.0, same_sign=False, significant=False,
+        outcome="only_one", against_instrument=other.source.instrument,
+        text=Text(simple="Only one instrument has data for this place.",
+                  scientific=f"No usable {other.name.scientific} series ({other.source.instrument}) to compare with: "
+                             f"{detail}"),
+    )
+
+
+def contrast_instruments(
+    ctx: EngineContext, var: VariableCard, other: VariableCard, region: RegionCard, window: Window,
+    series: MonthlySeries, season: Season | None, failed: dict[str, Exception] | None = None,
+) -> Comparison:
+    """A5: the same quantity from another instrument, over the years both series cover in this place.
+    Both series are re-tested on that overlap only; they are never merged into one number."""
+    s2, err = _fetch(ctx, other.id, region, failed) if other.listed else (None, None)
+    if err is not None:
+        return _only_one(other, f"the live source could not be reached ({err}).")
+    if s2 is None or not np.isfinite(s2.values).any():
+        return _only_one(other, "no data for this place.")
+    try:
+        w2 = resolve_window(s2, other)
+        start = max(window.start, w2.start, key=month_index)
+        end = min(window.end, w2.end, key=month_index)
+        years = window_years(start, end) if month_index(end) >= month_index(start) else 0.0
+        if years < MIN_COMPARISON_YEARS:
+            return _only_one(other, f"the two series share only {years:.1f} years (minimum {MIN_COMPARISON_YEARS:.0f}).")
+        win = Window(start=start, end=end, reason="user", years=round(years, 2))
+        p1, p2 = prepare(series, win), prepare(s2, win)
+        months = season.months if season else None
+        bad = [c.detail.scientific for c in quality(p2, other, months) if not c.passed]
+        if bad:
+            return _only_one(other, bad[0])
+        c1, c2 = _core(p1, season), _core(p2, season)
+    except ValueError as exc:
+        return _only_one(other, f"{exc}.")
+    sig1, sig2 = _sig(c1.tt, ctx.alpha), _sig(c2.tt, ctx.alpha)
+    same = bool(np.sign(c1.tt.slope_per_year) == np.sign(c2.tt.slope_per_year))
+    if sig1 and sig2:
+        outcome = "agree" if same else "disagree"
+    elif (sig1 or sig2) and same:
+        outcome = "same_direction_one_unsure"
+    else:  # neither sure, or one sure and the other pointing the other way without being sure
+        outcome = "both_unsure"
+    return Comparison(
+        against=other.id, slope_per_decade=_r(c2.tt.slope_per_year * 10, 6), same_sign=same, significant=sig2,
+        outcome=outcome, against_instrument=other.source.instrument, window_start=start, window_end=end,
+        text=_contrast_text(outcome, var, other, c1, c2, sig1, sig2, start, end),
+    )
+
+
 def analyze(
     ctx: EngineContext,
     region_id: str,
@@ -245,7 +367,10 @@ def analyze_region(
     with_robustness: bool = True,
     theme_id: str | None = None,
     window_reason: str = "user",
+    failed_fetches: dict[str, Exception] | None = None,
 ) -> AnalysisResult:
+    """`failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
+    `fetch_failed` gate instead of raising `LiveSourceUnavailable`; the dict maps variable id to the error."""
     cat = ctx.catalog
     if variable_id not in cat.variables:
         raise KeyError(f"unknown variable {variable_id}")
@@ -260,7 +385,13 @@ def analyze_region(
             raise KeyError(f"no declared season {season_id} for {variable_id} in {region_id}")
         season = Season(id=ds.id, name=ds.name, months=ds.months)
 
-    series = ctx.series(variable_id, region)
+    series, fetch_err = _fetch(ctx, variable_id, region, failed_fetches)
+    if fetch_err is not None:
+        g = _fetch_failed_gate(fetch_err)
+        return AnalysisResult(
+            **base, provenance=None, window=None, season=season, gates=Gates(passed=False, checks=[g]),
+            verdict=cant_tell(var, region, [g.detail]),
+        )
     if series is None or not np.isfinite(series.values).any():
         g = no_data()
         return AnalysisResult(
@@ -357,17 +488,21 @@ def analyze_region(
                     ))
             except ValueError:
                 pass
-        if var.cross_check:
-            other = cat.variables[var.cross_check]
-            rob.cross_check = _compare(ctx, other, region, window, season, tt.slope_per_year, other.id)
-            if rob.cross_check:
+        other = cat.variables[var.cross_check] if var.cross_check else None
+        # The same model delivered twice (e.g. MERRA-2 direct and via POWER) is never a second opinion.
+        same_source = other is not None and var.source.instrument_id is not None and (
+            other.source.instrument_id, other.source.platform) == (var.source.instrument_id, var.source.platform)
+        if other is not None and not same_source:
+            rob.cross_check = contrast_instruments(ctx, var, other, region, window, series, season, failed_fetches)
+            cc = rob.cross_check
+            if cc.outcome != "only_one":
                 checks_run.append("cross-check source")
-            if rob.cross_check and base_sig and not rob.cross_check.same_sign:
+            if cc.outcome != "only_one" and base_sig and not cc.same_sign:
                 chips.append(Chip(
                     code="cross_check_disagrees", severity="warning",
                     text=Text(simple=f"A second source ({other.name.simple.lower()}) shows the opposite direction.",
                               scientific=f"Cross-check {other.name.scientific} has the opposite sign "
-                                         f"({rob.cross_check.slope_per_decade:+g} per decade)."),
+                                         f"({cc.slope_per_decade:+g} per decade)."),
                 ))
         if region.comparison_region:
             comp = cat.regions[region.comparison_region]

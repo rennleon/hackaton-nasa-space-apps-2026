@@ -183,6 +183,10 @@ def trend_tests(t: np.ndarray, y: np.ndarray) -> TrendTests:
         raise ValueError("series is constant")
     ols_slope, p_ols, t_ols, r1, n_eff, resid_sd, _ = ols_neff(t, y)
     p_mk, z_mk, var_s = mk_hamed_rao(y[m])
+    if not (np.isfinite(var_s) and var_s > 0 and np.isfinite(p_mk)):
+        # The Hamed-Rao correction can overshoot to a non-positive variance; the test is then
+        # undefined. Say so (the engine answers "can't tell") instead of crashing on a NaN.
+        raise ValueError("the Mann-Kendall variance correction is undefined for this series")
     slope, lo, hi, icpt = sen_slope_ci(t, y, var_s)
     return TrendTests(
         slope_per_year=slope,
