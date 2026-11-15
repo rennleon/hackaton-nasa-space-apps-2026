@@ -7,6 +7,8 @@ for how to release and how to roll back.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-15
+
 ### Changed
 - New look (v3 design): warm light theme by default; the dark theme keeps the deep-space navy palette (follows the system, or the
   switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
