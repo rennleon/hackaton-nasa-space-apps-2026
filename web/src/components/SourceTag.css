@@ -1,6 +1,6 @@
 /* Compact form on cards: icon + "Measured by AIRS (Aqua satellite)" */
-.source-tag { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; line-height: 1.3; color: var(--muted); background: var(--surface-2); border-radius: 14px; padding: 2px 11px; max-width: 100%; overflow-wrap: anywhere; }
-.source-tag.source-model { box-shadow: inset 0 0 0 1px var(--muted); background: transparent; }
+.source-tag { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; line-height: 1.3; color: var(--muted); background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--radius-pill); padding: 2px 11px; max-width: 100%; overflow-wrap: anywhere; }
+.source-tag.source-model { border: 1px dashed var(--muted); background: transparent; }
 .source-icon { flex: none; }
 /* links sit above a card's stretched "open" button */
 .source-tag a, .source-block a { position: relative; z-index: 1; color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
@@ -15,10 +15,10 @@
 .fcard-same { color: var(--muted); }
 
 /* Full form on the result page: two labelled lines */
-.source-block { display: grid; gap: 4px; margin: 0.3rem 0 0.6rem; padding: 0.5rem 0.8rem; background: var(--surface-2); border-left: 4px solid var(--accent); border-radius: 12px; max-width: 46rem; }
+.source-block { display: grid; gap: 4px; margin: 0.3rem 0 0.6rem; padding: 0.5rem 0.8rem; background: var(--surface-2); border: 1px solid var(--hairline); border-left: 4px solid var(--accent); border-radius: var(--radius-md); max-width: 46rem; }
 .source-block.source-model { border-left-style: dashed; }
 .source-line { margin: 0; display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 0.5rem; align-items: baseline; }
-.source-k { font-weight: 700; font-size: 0.85rem; color: var(--muted); }
+.source-k { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .source-v { overflow-wrap: anywhere; }
 .source-v .source-icon { vertical-align: -2px; }
 .source-note { display: block; }
