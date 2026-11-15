@@ -641,5 +641,102 @@ const es: Record<string, string> = {
   'sp.notUsedWhy.scientific': 'No lo ofrece el servicio en la nube de Giovanni; solo exportación guardada.',
   'sp.notUsedNone.simple': 'Ninguna variable de la app viene de él por ahora.',
   'sp.notUsedNone.scientific': 'Ninguna variable de la app viene de él por ahora.',
+
+  // ---------- "How it works" page (lib/howCopy.ts)
+  'how.link': 'Cómo funciona',
+  'how.title': 'Cómo funciona',
+  'how.lead.simple': 'Sigue los números desde tu pregunta hasta la respuesta.',
+  'how.lead.scientific':
+    'Cada paso por el que pasan los datos, desde el lugar que eliges hasta el veredicto. El módulo del backend de cada paso aparece en letra pequeña.',
+  'how.stepN': 'Paso {n}',
+  'how.code': 'Código',
+  'how.flowLabel.simple': 'Pasos desde tu pregunta hasta la respuesta',
+  'how.flowLabel.scientific': 'Pasos del proceso, en orden',
+  'how.band.get': 'Conseguir los datos',
+  'how.band.clean': 'Limpiarlos',
+  'how.band.trend': 'Hallar la tendencia',
+  'how.band.check': 'Revisar y explicar',
+  'how.pic.label.simple': 'Antes: una línea con olas. Después: una línea más calmada y un poco inclinada.',
+  'how.pic.label.scientific': 'Antes: serie mensual cruda con una onda estacional. Después: anomalías mensuales con una tendencia pequeña.',
+  'how.pic.before': 'Antes',
+  'how.pic.after': 'Después',
+
+  'how.s1.title.simple': 'Elige una pregunta y un lugar',
+  'how.s1.title.scientific': 'Elige un tema y un lugar',
+  'how.s1.text.simple': 'Eliges una pregunta, como calor, agua o aire. Luego eliges un lugar.',
+  'how.s1.text.scientific': 'Tema (calor, agua o aire) y luego una región ya preparada, un punto o un cuadro dibujado (O, S, E, N).',
+  'how.s2.title.simple': 'Pedimos los números a la NASA',
+  'how.s2.title.scientific': 'Obtener los datos de la NASA',
+  'how.s2.text.simple': 'Le pedimos los números a la NASA. Las copias guardadas funcionan sin internet.',
+  'how.s2.text.scientific':
+    'Cadena de fuentes, la primera que responde: CSV de Giovanni ya preparado, luego la API de series de tiempo de NASA Giovanni (primero la copia guardada, después en vivo, con un token de Earthdata en el servidor) y luego NASA POWER (basado en MERRA-2). Las copias guardadas hacen que la demo funcione sin conexión.',
+  'how.s3.title': 'Limpiamos los números',
+  'how.s3.text.simple': 'Tiramos los números dañados. También quitamos los cuadros fuera de tu lugar.',
+  'how.s3.text.scientific':
+    'Los valores de relleno (−9999, −999, 1e15 …) pasan a ser faltantes. La unidad que informa la fuente se compara con nuestra ficha del catálogo (API de Giovanni y NASA POWER); si no coincide, se detiene la corrida. Se descartan las celdas de la rejilla que quedaron fuera del cuadro.',
+  'how.s4.title.simple': 'Hacemos meses',
+  'how.s4.title.scientific': 'Construir valores mensuales',
+  'how.s4.text.simple': 'Algunos números llegan cada día u hora. Los convertimos en un número por mes.',
+  'how.s4.text.scientific':
+    'Los productos diarios pasan a media mensual solo si hay al menos 10 días válidos (OMI). Los horarios, solo si al menos el 90 % de las horas es válido (aerosoles de MERRA-2).',
+  'how.s5.title.simple': 'Promediamos los cuadros del mapa',
+  'how.s5.title.scientific': 'Promediar las celdas de la rejilla',
+  'how.s5.text.simple': 'Promediamos todos los cuadros del mapa dentro de tu lugar. Los cuadros más grandes cuentan más.',
+  'how.s5.text.scientific':
+    'Las celdas fijas propias del producto dentro del cuadro (MERRA-2 y POWER 0,5°×0,625°; AIRS, MODIS y OMI 1°; GLDAS 0,25°; GPM 0,1°), combinadas con una media ponderada por cos(latitud). El ciclo estacional de cada celda se quita antes de promediar y se devuelve el del cuadro, así que una celda que falta en algunos meses no puede crear una tendencia falsa. Un mes necesita al menos la mitad de las celdas.',
+  'how.s6.title.simple': 'Usamos unidades de todos los días',
+  'how.s6.title.scientific': 'Convertir a unidades de estudiante',
+  'how.s6.text.simple': 'Pasamos a unidades que conoces, como grados y milímetros de lluvia al día.',
+  'how.s6.text.scientific': 'Escala y desfase por variable: K a °C, kg m⁻² s⁻¹ a mm/día, mm/h a mm/día.',
+  'how.s7.title.simple': 'Elegimos los años',
+  'how.s7.title.scientific': 'Elegir la ventana',
+  'how.s7.text.simple': 'Usamos todos los años que tenemos. Saltamos los años que no son de fiar.',
+  'how.s7.text.scientific':
+    'Registro completo. La humedad y la temperatura en superficie de AIRS terminan antes de 2022, porque la deriva de la órbita de Aqua cambia la hora de paso. Otras rupturas conocidas (anomalía de filas de OMI en 2007, cambio de insumos de GPM en 2014, cambios de forzamiento de GLDAS, deriva de MODIS) conservan los datos y muestran una advertencia.',
+  'how.s8.title.simple': '¿Los datos son suficientes?',
+  'how.s8.title.scientific': 'Filtros de calidad',
+  'how.s8.text.simple': 'Necesitamos muchos años y suficientes cuadros del mapa. Si no, decimos que no podemos saberlo.',
+  'how.s8.text.scientific':
+    'Al menos 15 años, al menos 4 celdas de rejilla (o una celda para un punto), al menos el 90 % de los meses presentes, como máximo el 30 % de los meses en cero, y que el producto cubra el lugar. Si falla un filtro, la respuesta es "no se puede saber", nunca un número.',
+  'how.s9.title.simple': '¿Vale la pena mirarlo?',
+  'how.s9.title.scientific': 'Selección (etapa 1)',
+  'how.s9.text.simple': 'Elegimos qué revisar antes de ver ninguna respuesta. Así somos justos.',
+  'how.s9.text.scientific':
+    'Usa solo lo que se sabe antes de calcular la tendencia: la pregunta, una razón publicada y citada para esperar un cambio, la aptitud de los datos y la tendencia mínima detectable (Weatherhead et al. 1998).',
+  'how.s10.title.simple': 'Quitamos las estaciones',
+  'how.s10.title.scientific': 'Quitar el ciclo estacional',
+  'how.s10.text.simple': 'El verano siempre es más cálido que el invierno. Lo quitamos, y solo queda el cambio real.',
+  'how.s10.text.scientific':
+    'Se resta la media de largo plazo de cada mes del calendario en la ventana (al menos 3 valores por mes) y quedan anomalías mensuales. Se informa la parte de la varianza que explica el ciclo estacional.',
+  'how.s11.title.simple': 'Manejamos los saltos',
+  'how.s11.title.scientific': 'Manejar el ruido (sin suavizar)',
+  'how.s11.text.simple': 'El clima sube y baja. No escondemos los saltos. Mejor, hacemos más estrictas nuestras revisiones. El gráfico muestra un punto por año.',
+  'how.s11.text.scientific':
+    'La serie no se suaviza ni se filtra antes de contrastar, porque suavizar fabrica persistencia y tendencias falsas. En cambio, se mide la persistencia de mes a mes (autocorrelación de rezago 1 de los residuos) y los contrastes se corrigen por ella (tamaño de muestra efectivo; varianza de Hamed–Rao). El gráfico Simple muestra un punto por año.',
+  'how.s12.title.simple': 'Medimos el cambio',
+  'how.s12.title.scientific': 'Medir la tasa de cambio',
+  'how.s12.text.simple': 'Trazamos la línea que mejor sigue los puntos. Su inclinación muestra el cambio.',
+  'how.s12.text.scientific':
+    'Pendiente de Sen por 10 años, con un rango del 95 % a partir de la varianza corregida por persistencia (Hamed–Rao). La banda del gráfico y el rango del veredicto salen del mismo cálculo.',
+  'how.s13.title.simple': 'Dos revisiones deben coincidir',
+  'how.s13.title.scientific': 'Dos contrastes deben coincidir',
+  'how.s13.text.simple': 'Hacemos dos revisiones distintas. Decimos "seguro" solo si las dos coinciden.',
+  'how.s13.text.scientific':
+    'Contraste A: Mann–Kendall con corrección de Hamed–Rao. Contraste B: prueba t de MCO con tamaño de muestra efectivo (Santer et al. 2000). "Seguro" solo si ambos dan p < 0,05. Solo como contexto: Mann–Kendall estacional y una prueba de homogeneidad estacional (van Belle y Hughes 1984) que avisa cuando el cambio difiere entre estaciones.',
+  'how.s14.title.simple': 'Intentamos romper la respuesta',
+  'how.s14.title.scientific': 'Revisiones de robustez',
+  'how.s14.text.simple': 'Intentamos demostrar que nos equivocamos. Quitamos años y probamos otros datos.',
+  'how.s14.text.scientific':
+    'Dejar un año fuera cada vez; repetir con los años de deriva incluidos; un segundo instrumento en los años que se solapan (nunca el mismo modelo dos veces); una revisión de salto en los años excluidos; una advertencia de cercanía a 0/100 para la humedad; una etiqueta cuando el cuadro de datos difiere del lugar.',
+  'how.s15.title.simple': 'Comparamos con justicia',
+  'how.s15.title.scientific': 'Comparar con justicia (muchos contrastes a la vez)',
+  'how.s15.text.simple': 'Miramos cada medida en los mismos años. Así es justo.',
+  'how.s15.text.scientific':
+    'El escaneo compara todas las variables de una pregunta en una ventana común y ajusta por muchos contrastes a la vez (Benjamini–Hochberg).',
+  'how.s16.title.simple': 'Lo decimos claro',
+  'how.s16.title.scientific': 'Informar el veredicto',
+  'how.s16.text.simple': 'Recibes una respuesta corta y un medidor de tres pasos. Luego ves antes y ahora.',
+  'how.s16.text.scientific':
+    'Las etiquetas se traducen al medidor de tres pasos ("Seguro que es real", "Quizás, aún no estamos seguros", "Es muy pronto para saberlo", y además "no podemos saberlo"). Antes y ahora en números enteros; la tasa por 10 años con su rango del 95 % en la vista Científica. Nunca escribimos "causado por", "demuestra" ni "sin cambio".',
 }
 export default es
