@@ -12,8 +12,8 @@ import math
 import os
 import threading
 import time
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
 from fastapi import Request
 

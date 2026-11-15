@@ -230,7 +230,7 @@ def _place(ctx: EngineContext, region: RegionCard):
 
     try:
         return profile_place(ctx, region)
-    except Exception:  # the profile is context only; never let it break a scan
+    except Exception:  # noqa: BLE001 - the profile is context only; never let it break a scan
         return None
 
 

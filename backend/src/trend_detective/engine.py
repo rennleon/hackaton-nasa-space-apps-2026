@@ -37,6 +37,7 @@ from .contract import (
     YearPoint,
 )
 from .gates import bbox_chip, fitness, near_bound_chip, no_data, quality, step_month
+from .independence import independence_note
 from .ingest import MonthlySeries, to_monthly
 from .prepare import (
     Prepared,
@@ -52,7 +53,6 @@ from .published import for_result as published_for_result
 from .published import match as published_match
 from .robustness import leave_one_year_out
 from .selection import stage1
-from .independence import independence_note
 from .sources import GiovanniBoxTooLarge, LiveSourceUnavailable, SourceChain
 from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
