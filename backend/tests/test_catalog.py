@@ -122,3 +122,25 @@ def test_every_variable_has_spanish_words_units_and_label(cat):
         assert v.words_es and v.words_es.subject and v.words_es.up and v.words_es.down and v.words_es.changing, v.id
         assert v.kid_units.label_es, v.id
         assert v.units.simple_es, v.id
+
+
+def test_sub_topics_load_with_a_parent_and_stay_inside_it(cat):
+    subs = {t.id: t.parent for t in cat.themes.values() if t.parent}
+    assert subs == {
+        "hot_afternoons": "heat", "warm_nights": "heat", "rain": "water", "damp_air": "water", "soil": "water",
+        "smoke_haze": "air", "burning_fuel": "air",
+    }
+    assert list(cat.themes)[:3] == ["heat", "water", "air"]  # main questions first
+    for sub, parent in subs.items():
+        assert {v.id for v, _ in cat.theme_members(sub)} <= {v.id for v, _ in cat.theme_members(parent)}
+
+
+def test_validation_rejects_a_sub_topic_member_missing_from_its_parent(cat):
+    bad = cat.model_copy(deep=True)
+    bad.variables["power_t2m"].themes = {"warm_nights": "cross_check"}  # drops heat
+    with pytest.raises(ValueError, match="not in its parent"):
+        bad.validate_links()
+    bad = cat.model_copy(deep=True)
+    bad.themes["rain"].parent = "soil"  # a sub-topic of a sub-topic
+    with pytest.raises(ValueError, match="one level only"):
+        bad.validate_links()

@@ -638,7 +638,8 @@ def analyze_region(
     else:
         sel_t, sel_y, f = p.t_window, p.anomalies_window, 12
     pub = published_match(cat, region, var)  # known before the trend: AR6 entry for this place and variable
-    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f, published=pub)
+    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f, published=pub,
+                       themes=cat.themes)
     # Until a verdict exists the finding says "too soon"; the final return replaces it with the real agreement.
     pub_finding, pub_context = published_for_result(cat, region, var, m=pub)
     common = dict(

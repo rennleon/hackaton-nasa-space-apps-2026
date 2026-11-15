@@ -140,3 +140,14 @@ def test_prefetch_worker_cap(monkeypatch):
     assert scan_mod.MAX_PREFETCH_WORKERS == 8
     scan_mod.prefetch_series(ctx, point_region(), ids)
     assert 1 < src.max_active <= 8
+
+
+def test_a_sub_topic_scans_like_any_theme():
+    ctx, _ = make_ctx({
+        "airs_t_surf_day": make_raw("2002-09", "2021-12", seed=2, **GOOD),
+        "power_t2m": make_raw("1981-01", "2021-12", seed=1, **GOOD),
+    })
+    s = scan_region(ctx, point_region(), "hot_afternoons")
+    assert s.theme_id == "hot_afternoons"
+    assert {e.variable_id for e in s.entries} == {"airs_t_surf_day", "power_t2m"}
+    assert all(e.availability == "available" for e in s.entries)

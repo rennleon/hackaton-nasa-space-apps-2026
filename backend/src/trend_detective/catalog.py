@@ -228,6 +228,7 @@ class ThemeCard(Card):
     id: str
     name: Text
     question: Text
+    parent: str | None = None  # a sub-topic names its top-level theme (one level only)
 
 
 class GlossaryTerm(Card):
@@ -279,6 +280,17 @@ class Catalog(BaseModel):
             for t in v.themes:
                 if t not in self.themes:
                     raise ValueError(f"{v.id}: unknown theme {t}")
+        for t in self.themes.values():
+            if not t.parent:
+                continue
+            parent = self.themes.get(t.parent)
+            if parent is None:
+                raise ValueError(f"{t.id}: unknown parent theme {t.parent}")
+            if parent.parent:
+                raise ValueError(f"{t.id}: parent {t.parent} is itself a sub-topic (one level only)")
+            for v in self.variables.values():
+                if t.id in v.themes and t.parent not in v.themes:
+                    raise ValueError(f"{v.id}: in sub-topic {t.id} but not in its parent theme {t.parent}")
         for inst in self.instruments.values():
             for a in inst.assimilates:
                 if a not in self.instruments:

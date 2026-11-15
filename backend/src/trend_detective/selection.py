@@ -20,7 +20,7 @@ import math
 
 import numpy as np
 
-from .catalog import RegionCard, VariableCard
+from .catalog import RegionCard, ThemeCard, VariableCard
 from .contract import GateCheck, Selection, SelectionCheck, Text
 from .published import PublishedMatch, expectation_check
 from .stats import ols_neff
@@ -43,7 +43,17 @@ def kid_amount_es(x: float) -> str:
     return "menos de 1" if abs(x) < 1 else f"unos {round(abs(x))}"
 
 
-THEME_ES = {"heat": "el calor", "water": "el agua", "air": "el aire"}  # kid names of the themes (themes.yaml)
+def _theme_names(theme_id: str | None, variable: VariableCard, themes: dict[str, ThemeCard] | None) -> tuple[str, str]:
+    """Kid names (EN, ES), lower-cased, for the question check. They come from the theme cards (themes.yaml);
+    with no theme asked for, the variable's top-level questions. Falls back to the raw id without a catalog."""
+    themes = themes or {}
+    if theme_id:
+        ids = [theme_id]
+    else:  # every sub-topic folds into its parent, so the sentence names each main question once
+        ids = list(dict.fromkeys((themes[i].parent or i) if i in themes else i for i in variable.themes))
+    en = [themes[i].name.simple.lower() if i in themes else i for i in ids]
+    es = [(themes[i].name.simple_es or themes[i].name.simple).lower() if i in themes else i for i in ids]
+    return ", ".join(en), ", ".join(es)
 
 
 def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> str:
@@ -102,20 +112,24 @@ def stage1(
     n_years: float,
     samples_per_year: int,
     published: PublishedMatch | None = None,
+    themes: dict[str, ThemeCard] | None = None,
 ) -> Selection:
     """`published`: the AR6 entry for this place and variable (published.match). Used for check (b) only when the
-    region card has no cited expectation of its own. Only facts known before the trend go in here."""
+    region card has no cited expectation of its own. Only facts known before the trend go in here.
+    `themes`: the catalog's theme cards, so the question check can use their kid names."""
     checks: list[SelectionCheck] = []
 
     # (a) question
     if theme_id is None or theme_id in variable.themes:
-        themes = ", ".join(variable.themes) if theme_id is None else theme_id
+        theme_list = ", ".join(variable.themes) if theme_id is None else theme_id
+        roles = ", ".join(variable.themes.values()) if theme_id is None else variable.themes[theme_id]
+        name_en, name_es = _theme_names(theme_id, variable, themes)
         checks.append(SelectionCheck(
             code="question", status="pass",
-            detail=Text(simple=f"It helps answer the {themes} question.",
-                        scientific=f"Member of theme(s): {themes} (role: {', '.join(variable.themes.values())}).",
-                        simple_es=f"Ayuda a responder la pregunta sobre {THEME_ES.get(theme_id, theme_id) if theme_id else 'este tema'}.",
-                        scientific_es=f"Pertenece al tema o temas: {themes} (rol: {', '.join(variable.themes.values())})."),
+            detail=Text(simple=f"It helps answer the {name_en} question.",
+                        scientific=f"Member of theme(s): {theme_list} (role: {roles}).",
+                        simple_es=f"Ayuda a responder la pregunta «{name_es}».",
+                        scientific_es=f"Pertenece al tema o temas: {theme_list} (rol: {roles})."),
         ))
     else:
         checks.append(SelectionCheck(

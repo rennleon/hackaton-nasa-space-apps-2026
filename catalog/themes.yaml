@@ -23,3 +23,63 @@
     scientific: Are aerosol optical depth, aerosol species or CO trending in this region?
     simple_es: "¿Aquí el aire se está llenando de más bruma o más humo?"
     scientific_es: "¿Tienen tendencia la profundidad óptica de aerosoles, las especies de aerosoles o el CO en esta región?"
+
+# Sub-topics: finer questions inside one of the three main ones. A sub-topic is a theme with a `parent`;
+# its members are declared on the variable cards (variables.yaml -> themes) and must also belong to the parent.
+# Declared before any result was seen; never regroup them after looking at a trend.
+- id: hot_afternoons
+  parent: heat
+  name: { simple: Hot afternoons, scientific: Daytime temperature, simple_es: "Tardes calurosas", scientific_es: "Temperatura diurna" }
+  question:
+    simple: Are afternoons getting hotter here?
+    scientific: Is daytime (about 13:30 local overpass) near-surface air temperature trending in this region?
+    simple_es: "¿Aquí las tardes se están poniendo más calurosas?"
+    scientific_es: "¿Tiene tendencia la temperatura del aire cerca de la superficie de día (paso local cerca de las 13:30) en esta región?"
+- id: warm_nights
+  parent: heat
+  name: { simple: Warm nights, scientific: Night-time temperature, simple_es: "Noches cálidas", scientific_es: "Temperatura nocturna" }
+  question:
+    simple: Are nights getting warmer here?
+    scientific: Is night-time (about 01:30 local overpass) near-surface air temperature trending in this region?
+    simple_es: "¿Aquí las noches se están poniendo más cálidas?"
+    scientific_es: "¿Tiene tendencia la temperatura del aire cerca de la superficie de noche (paso local cerca de la 01:30) en esta región?"
+- id: rain
+  parent: water
+  name: { simple: Rain, scientific: Precipitation, simple_es: "Lluvia", scientific_es: "Precipitación" }
+  question:
+    simple: Is it raining more or less here?
+    scientific: Is precipitation trending in this region?
+    simple_es: "¿Aquí llueve más o menos?"
+    scientific_es: "¿Tiene tendencia la precipitación en esta región?"
+- id: damp_air
+  parent: water
+  name: { simple: Damp air, scientific: Near-surface humidity, simple_es: "Aire húmedo", scientific_es: "Humedad cerca de la superficie" }
+  question:
+    simple: Is the air getting damper or drier here?
+    scientific: Is near-surface humidity trending in this region?
+    simple_es: "¿Aquí el aire se está poniendo más húmedo o más seco?"
+    scientific_es: "¿Tiene tendencia la humedad cerca de la superficie en esta región?"
+- id: soil
+  parent: water
+  name: { simple: Wet ground, scientific: Soil moisture and evaporation, simple_es: "Suelo mojado", scientific_es: "Humedad del suelo y evaporación" }
+  question:
+    simple: Is the ground getting wetter or drier here?
+    scientific: Are soil moisture and evaporation trending in this region?
+    simple_es: "¿Aquí el suelo se está poniendo más mojado o más seco?"
+    scientific_es: "¿Tienen tendencia la humedad del suelo y la evaporación en esta región?"
+- id: smoke_haze
+  parent: air
+  name: { simple: Smoke and haze, scientific: Aerosols and organic carbon, simple_es: "Humo y bruma", scientific_es: "Aerosoles y carbono orgánico" }
+  question:
+    simple: Is there more smoke and haze in the air here?
+    scientific: Are aerosol optical depth and organic carbon trending in this region?
+    simple_es: "¿Aquí hay más humo y bruma en el aire?"
+    scientific_es: "¿Tienen tendencia la profundidad óptica de aerosoles y el carbono orgánico en esta región?"
+- id: burning_fuel
+  parent: air
+  name: { simple: Burning fuel, scientific: "Combustion pollutants (NO₂, sulfate)", simple_es: "Combustibles quemados", scientific_es: "Contaminantes de combustión (NO₂, sulfato)" }
+  question:
+    simple: Is there more pollution from burning fuel here?
+    scientific: Are NO₂ and sulfate trending in this region?
+    simple_es: "¿Aquí hay más contaminación por quemar combustibles?"
+    scientific_es: "¿Tienen tendencia el NO₂ y el sulfato en esta región?"
