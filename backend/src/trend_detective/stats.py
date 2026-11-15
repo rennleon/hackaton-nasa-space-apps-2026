@@ -157,6 +157,42 @@ def seasonal_mk(values: np.ndarray, period: int = 12) -> tuple[float, float]:
     return float(res.p), float(res.z)
 
 
+def _mk_s_var(x: np.ndarray) -> tuple[float, float]:
+    """Mann-Kendall S and its variance with the tie correction (NaN skipped, order kept)."""
+    v = x[np.isfinite(x)]
+    n = len(v)
+    if n < 3:
+        return 0.0, 0.0
+    i, j = np.triu_indices(n, k=1)
+    s = float(np.sign(v[j] - v[i]).sum())
+    _, counts = np.unique(v, return_counts=True)
+    ties = counts[counts > 1]
+    var = (n * (n - 1) * (2 * n + 5) - float(np.sum(ties * (ties - 1) * (2 * ties + 5)))) / 18.0
+    return s, var
+
+
+def seasonal_homogeneity(values: np.ndarray, period: int = 12) -> tuple[float, float, list[float]] | None:
+    """van Belle & Hughes (1984) test that the trend is the same in every season; context only.
+
+    values: a contiguous monthly series (position mod `period` = season; NaN kept in place).
+    Z_i = S_i / sqrt(Var S_i) per season; chi2_homog = sum(Z_i^2) - K * mean(Z)^2 with K - 1 degrees of
+    freedom. A small p means the seasons trend differently, so one yearly rate averages unlike changes.
+    Like the seasonal Mann-Kendall test it ignores serial correlation, which is why it never decides.
+    Source: van Belle, G. & Hughes, J.P. (1984) "Nonparametric tests for trend in water quality",
+    Water Resources Research 20(1):127-136. Returns (chi2_homog, p, Z per season) or None if too short.
+    """
+    x = np.asarray(values, dtype=float)
+    zs: list[float] = []
+    for k in range(period):
+        s_k, var_k = _mk_s_var(x[k::period])
+        if var_k <= 0:
+            return None
+        zs.append(s_k / np.sqrt(var_k))
+    z = np.array(zs)
+    chi2 = float(np.sum(z**2) - period * z.mean() ** 2)
+    return chi2, float(sps.chi2.sf(chi2, df=period - 1)), [float(v) for v in z]
+
+
 def years_to_detect(
     resid_sd: float, slope_per_year: float, r1: float, samples_per_year: int
 ) -> float | None:

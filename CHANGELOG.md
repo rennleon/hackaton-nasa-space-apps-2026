@@ -7,6 +7,20 @@ for how to release and how to roll back.
 
 ## [Unreleased]
 
+### Added
+- "How it works" page (`#/how`): the whole data pipeline as a step-by-step flow, in both views and
+  both languages.
+- Seasonal homogeneity check (van Belle & Hughes 1984), context only: an info chip in the Scientific
+  view when the trend differs between calendar months, naming the months that rise or fall.
+
+### Fixed
+- Box means no longer drift when grid cells drop in and out: each cell's departure from its own
+  seasonal cycle is averaged and the box cycle added back (identical to the plain mean when every cell
+  reports). Shared by the Giovanni API and NASA POWER sources.
+- NASA POWER box means are now cos(latitude)-weighted, like the Giovanni API source.
+- NASA POWER units are checked against the catalog card; a mismatch stops the run instead of
+  mislabelling the data.
+
 ## [2.0.0] - 2026-11-15
 
 ### Added

@@ -131,3 +131,16 @@ def test_persistence_correction_inflates_p() -> None:
         assert r.r1 > 0.6 and r.n_eff < 120
         ratios.append(r.p_ols >= naive)
     assert all(ratios)
+
+
+def test_seasonal_homogeneity_flags_opposite_seasons_only() -> None:
+    from trend_detective.stats import seasonal_homogeneity
+
+    rng = np.random.default_rng(3)
+    years = 25
+    t = np.repeat(np.arange(years), 12).astype(float)
+    same = t * 0.1 + rng.normal(0, 0.3, years * 12)  # every month rises alike
+    sign = np.tile([1.0] * 6 + [-1.0] * 6, years)  # half the months rise, half fall
+    differ = sign * t * 0.1 + rng.normal(0, 0.3, years * 12)
+    assert seasonal_homogeneity(same)[1] > 0.05
+    assert seasonal_homogeneity(differ)[1] < 0.001

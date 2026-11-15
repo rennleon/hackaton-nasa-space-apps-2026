@@ -57,7 +57,7 @@ from .sources import GiovanniBoxTooLarge, LiveSourceUnavailable, SourceChain
 from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
 from .sources.power import PowerSource
-from .stats import TrendTests, seasonal_mk, trend_tests, years_to_detect
+from .stats import TrendTests, seasonal_homogeneity, seasonal_mk, trend_tests, years_to_detect
 from .timeutil import from_index, month_index, month_to_float
 from .verdict import VerdictInputs, build_verdict, cant_tell, decide
 
@@ -126,6 +126,36 @@ class Core:
     z_c: float | None
     years_needed: float | None
     years_available: float
+    homogeneity: tuple[float, float, list[float]] | None = None  # van Belle-Hughes (chi2, p, Z per position)
+
+
+MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def _season_differs_chip(core: Core, window: Window, alpha: float) -> Chip | None:
+    """Info chip when the van Belle-Hughes test says the calendar months trend differently (context only)."""
+    if core.homogeneity is None:
+        return None
+    chi2, p_h, zs = core.homogeneity
+    if p_h >= alpha:
+        return None
+    c0 = int(window.start[5:7])
+    by_month = sorted(((c0 - 1 + k) % 12, z) for k, z in enumerate(zs))
+    up = [MONTH_ABBR[m] for m, z in by_month if z > 1.96]
+    down = [MONTH_ABBR[m] for m, z in by_month if z < -1.96]
+    parts = ([f"rising in {', '.join(up)}"] if up else []) + ([f"falling in {', '.join(down)}"] if down else [])
+    detail = f" ({'; '.join(parts)})" if parts else ""
+    return Chip(
+        code="trend_differs_by_season", severity="info",
+        text=Text(
+            simple="The change is not the same in every season.",
+            scientific=f"Trends differ between calendar months (van Belle–Hughes homogeneity χ² = {chi2:.1f}, "
+                       f"df = 11, p = {p_h:.3g}){detail}; the rate per decade averages over unlike seasonal changes.",
+            simple_es="El cambio no es igual en todas las estaciones.",
+            scientific_es=f"Las tendencias difieren entre meses (homogeneidad de van Belle–Hughes χ² = {chi2:.1f}, "
+                          f"gl = 11, p = {p_h:.3g}); la tasa por década promedia cambios estacionales distintos.",
+        ),
+    )
 
 
 def _core_monthly(p: Prepared) -> Core:
@@ -136,7 +166,8 @@ def _core_monthly(p: Prepared) -> Core:
     except Exception:  # noqa: BLE001 - context-only test; never block the analysis
         p_c, z_c = None, None
     yn = years_to_detect(tt.resid_sd, tt.slope_per_year, tt.r1, 12)
-    return Core(tt, t, y, np.floor(t).astype(int), p_c, z_c, yn, p.window.years)
+    homog = seasonal_homogeneity(p.values_window, 12)  # context only: is the change the same in every season?
+    return Core(tt, t, y, np.floor(t).astype(int), p_c, z_c, yn, p.window.years, homog)
 
 
 def _core_season(p: Prepared, months: list[int]) -> Core:
@@ -694,6 +725,10 @@ def analyze_region(
                               scientific_es=f"Las anomalías posteriores a la ventana se apartan de la tendencia ajustada "
                                             f"desde {sm2} (coherente con el artefacto documentado)."),
                 ))
+
+    hc = _season_differs_chip(core, window, ctx.alpha)
+    if hc:
+        chips.append(hc)
 
     then_now = _then_now(p, core, var, season)
     warn = [c for c in chips if c.code in ROBUSTNESS_CODES]

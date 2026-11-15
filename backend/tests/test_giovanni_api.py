@@ -631,3 +631,17 @@ def test_series_cache_with_a_different_unit_is_refused(tmp_path):
     f.write_text(json.dumps(doc))
     with pytest.raises(GiovanniUnitMismatch):
         Fake(tmp_path, airs_serve).fetch(AIRS, BOX)
+
+
+def test_area_mean_is_not_biased_by_a_cell_dropping_out():
+    """A wet cell missing in the later years must not make the box look drier (no trend in either cell)."""
+    from trend_detective.sources.base import area_mean
+
+    months = [f"{y}-{m:02d}" for y in range(2000, 2020) for m in range(1, 13)]
+    dry = np.full(len(months), 1.0)
+    wet = np.full(len(months), 9.0)
+    wet[len(months) // 2:] = np.nan  # the wet cell stops reporting halfway
+    _, plain_like = area_mean([(0.0, months, dry)], 1, 0.5)
+    _, out = area_mean([(0.0, months, dry), (0.0, months, wet)], 2, 0.5)
+    assert np.allclose(plain_like, 1.0)
+    assert np.allclose(out, 5.0)  # both halves read as the two-cell climate: no false drop to 1.0

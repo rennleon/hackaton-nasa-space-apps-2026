@@ -27,7 +27,7 @@ import numpy as np
 
 from ..catalog import RegionCard, VariableCard
 from ..contract import Provenance
-from .base import LiveSourceUnavailable, RawSeries
+from .base import LiveSourceUnavailable, RawSeries, area_mean, check_unit
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ USER_AGENT = "trend-detective/0.1"
 TIMEOUT_S = 60
 MAX_SPAN_DEG = 10.0
 MIN_REGIONAL_SPAN_DEG = 2.0
+MIN_POINT_SHARE = 0.5  # a month needs at least half the grid points with a value (same rule as Giovanni boxes)
 FIRST_YEAR = 1981
 
 
@@ -89,26 +90,43 @@ def last_complete_year() -> int:
     return date.today().year - 1
 
 
-def parse_power(doc: dict, param: str) -> tuple[dict[str, list[float]], list[list[float]]]:
-    """Return ({month: [value per grid point]}, [[lon, lat] per point]); fill values become NaN, YYYY13 dropped."""
+def parse_power_points(doc: dict, param: str) -> list[tuple[float, float, dict[str, float]]]:
+    """[(lon, lat, {month: value})] per grid point; fill values become NaN, the annual YYYY13 is dropped."""
     fill = float((doc.get("header") or {}).get("fill_value", -999.0))
     feats = doc.get("features") if doc.get("type") == "FeatureCollection" else [doc]
-    by_month: dict[str, list[float]] = {}
-    coords: list[list[float]] = []
+    points: list[tuple[float, float, dict[str, float]]] = []
     for f in feats or []:
         series = ((f.get("properties") or {}).get("parameter") or {}).get(param)
         if not series:
             continue
         lon, lat = f["geometry"]["coordinates"][:2]
-        coords.append([float(lon), float(lat)])
+        vals: dict[str, float] = {}
         for key, v in series.items():
             if len(key) != 6 or key.endswith("13"):
                 continue
             v = float(v)
             if v == fill or v <= -990.0 or not math.isfinite(v):
                 v = float("nan")
-            by_month.setdefault(f"{key[:4]}-{key[4:]}", []).append(v)
+            vals[f"{key[:4]}-{key[4:]}"] = v
+        points.append((float(lon), float(lat), vals))
+    return points
+
+
+def parse_power(doc: dict, param: str) -> tuple[dict[str, list[float]], list[list[float]]]:
+    """Return ({month: [value per grid point]}, [[lon, lat] per point]); fill values become NaN, YYYY13 dropped."""
+    by_month: dict[str, list[float]] = {}
+    coords: list[list[float]] = []
+    for lon, lat, vals in parse_power_points(doc, param):
+        coords.append([lon, lat])
+        for m, v in vals.items():
+            by_month.setdefault(m, []).append(v)
     return by_month, coords
+
+
+def reported_unit(doc: dict, param: str) -> str | None:
+    """The unit NASA POWER states for the parameter (e.g. 'C', 'mm/day', '%', 'dimensionless')."""
+    info = (doc.get("parameters") or {}).get(param) or {}
+    return info.get("units") if isinstance(info, dict) else None
 
 
 class PowerSource:
@@ -196,27 +214,30 @@ class PowerSource:
         if loaded is None:
             return None
         doc, url = loaded
+        unit = reported_unit(doc, param)
+        if unit is not None:  # a different unit is an error, never a silent conversion
+            check_unit("NASA POWER", variable.id, variable.units.native, unit)
         try:
-            by_month, coords = parse_power(doc, param)
+            points = parse_power_points(doc, param)
         except (KeyError, TypeError, ValueError) as exc:
             log.warning("could not parse NASA POWER response: %s", exc)
             return None
-        if not by_month:
+        if not points:
             return None
-        months = sorted(by_month)
-        vals = np.full(len(months), np.nan)
-        for i, m in enumerate(months):
-            arr = np.asarray(by_month[m], dtype=np.float64)
-            arr = arr[np.isfinite(arr)]
-            if arr.size:
-                vals[i] = float(arr.mean())
+        coords = [[lon, lat] for lon, lat, _ in points]
+        # Same cos(latitude)-weighted, composition-robust mean as the Giovanni API source (base.area_mean).
+        months, vals = area_mean(
+            [(lat, list(v), np.array(list(v.values()), dtype=np.float64)) for _, lat, v in points],
+            n_total=len(points), min_share=MIN_POINT_SHARE)
+        if not months:
+            return None
         lons = [p[0] for p in coords]
         lats = [p[1] for p in coords]
         title = f"NASA POWER monthly {param} (MERRA-2-based)"
         if geom.kind != "point" and endpoint == "point":
             title += f"; box smaller than {MIN_REGIONAL_SPAN_DEG:g} degrees, so the grid cell at its centre was used"
         elif endpoint == "regional":
-            title += f"; mean of {len(coords)} grid points"
+            title += f"; cos(latitude)-weighted mean of {len(coords)} grid points"
             if geom.kind == "shape":
                 title += " over the shape's bounding box"
         return RawSeries(

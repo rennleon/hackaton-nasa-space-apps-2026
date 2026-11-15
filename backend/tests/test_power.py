@@ -41,7 +41,8 @@ def test_regional_area_mean_and_drop_13():
     s = FakeSource(REG).fetch(CAT.variables["power_t2m"], region())
     assert len(s.months) == 36 and all(not m.endswith("-13") for m in s.months)
     vals = [f["properties"]["parameter"]["T2M"]["200101"] for f in REG["features"]]
-    assert s.values[0] == pytest.approx(np.mean(vals))
+    w = [np.cos(np.radians(f["geometry"]["coordinates"][1])) for f in REG["features"]]
+    assert s.values[0] == pytest.approx(np.average(vals, weights=w))  # cos(latitude)-weighted, all points present
     assert s.provenance.source_kind == "nasa_power"
     assert s.provenance.requested_bbox == [-79.0, -8.0, -77.0, -5.0]
     assert s.provenance.data_bbox[0] >= -79.0 and s.provenance.data_bbox[3] <= -5.0
@@ -55,7 +56,8 @@ def test_fill_values_become_nan():
     s = FakeSource(doc).fetch(CAT.variables["power_t2m"], region())
     assert math.isnan(s.values[1])  # every point missing
     ok = [f["properties"]["parameter"]["T2M"]["200103"] for f in doc["features"][1:]]
-    assert s.values[2] == pytest.approx(np.mean(ok))  # one missing point is ignored
+    w = [np.cos(np.radians(f["geometry"]["coordinates"][1])) for f in doc["features"][1:]]
+    assert s.values[2] == pytest.approx(np.average(ok, weights=w))  # one missing point is ignored
 
 
 def test_point_endpoint_for_point_and_small_box():
@@ -167,3 +169,11 @@ def test_live_tiny_request(tmp_path):
     s = PowerSource(cache_dir=tmp_path, offline=False, end_year=2002).fetch(
         CAT.variables["power_t2m"], region("point", (-78.51, -7.16, -78.51, -7.16)))
     assert s is not None and s.months[0] == "1981-01" and np.isfinite(s.values).all()
+
+
+def test_unit_mismatch_is_refused():
+    from trend_detective.sources.base import UnitMismatch
+
+    doc = {**REG, "parameters": {"T2M": {"units": "K"}}}
+    with pytest.raises(UnitMismatch):
+        FakeSource(doc).fetch(CAT.variables["power_t2m"], region())
