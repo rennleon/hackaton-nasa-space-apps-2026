@@ -23,6 +23,7 @@ export interface AnalysisResult {
   robustness: Robustness;
   chips: Chip[];
   published: PublishedFinding | null;
+  published_context: PublishedFinding[];
   verdict: Verdict;
 }
 /**
@@ -308,8 +309,12 @@ export interface PublishedFinding {
   statement: Text;
   source: string;
   confidence: string | null;
+  confidence_es: string | null;
   direction: ("up" | "down" | "either") | null;
   agreement: ("agrees" | "differs" | "too_soon") | null;
+  ar6_region: string | null;
+  scope: "mean" | "extremes";
+  partial: boolean;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema

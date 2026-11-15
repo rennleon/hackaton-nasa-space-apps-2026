@@ -11,6 +11,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from .contract import RegionRef, Text, UnitsInfo, VariableRef
 
 Role = Literal["target", "driver", "response", "cross_check"]
+# What a variable measures, in the words of the published assessments (catalog/expectations.yaml).
+VariableKind = Literal["temperature", "rainfall", "humidity", "soil_water", "haze", "no2", "other"]
 
 
 class Card(BaseModel):
@@ -55,6 +57,7 @@ class InstrumentCard(Card):
     how: Text  # how it measures, in kid words for simple
     live: Literal["giovanni", "power", "offline"]
     link: str | None = None
+    assimilates: list[str] = Field(default_factory=list)  # instrument ids whose data this model ingests (not independent)
 
 
 class Artifact(Card):
@@ -110,6 +113,7 @@ class VariableCard(Card):
     floor: float | None = None
     artifacts: list[Artifact] = Field(default_factory=list)
     cross_check: str | None = None
+    kind: VariableKind = "other"  # which published assessments (AR6) speak about this variable
     reference_trend_per_decade: float | None = None  # published typical trend size (stage-1 detectability)
     reference_source: str | None = None
     words: Words
@@ -166,6 +170,39 @@ class Expectation(Card):
     source: str
 
 
+# Metrics that describe extremes or events, not the monthly mean we test. A statement about them is context only.
+EXTREME_METRICS = frozenset({"hot_extremes", "heavy_precipitation", "meteorological_drought"})
+
+
+class PublishedExpectation(Card):
+    """A checked statement from the IPCC AR6 regional assessment (catalog/expectations.yaml).
+
+    direction: up | down | either | unclear. `unclear` = the source says data are limited or evidence is low
+    confidence; it is never read as "nothing is happening". `confidence` is the source's own wording and is
+    kept apart from our "how sure are we" meter. `partial`: the statement holds for parts of the region, so a
+    place that disagrees may simply lie outside them (never reported as "differs")."""
+
+    ar6_region: str  # AR6 acronym, or GLOBAL_LAND for a worldwide pattern
+    ar6_region_name: str | None = None
+    place: str | None = None
+    variable_kind: VariableKind
+    metric: str | None = None
+    direction: Literal["up", "down", "either", "unclear"]
+    partial: bool = False
+    confidence: str  # the source's own words, e.g. "High confidence"; never our meter
+    confidence_es: str | None = None
+    period: str
+    statement: Text
+    source: str
+    checked_by: str
+    opened_at: str
+
+    @property
+    def about_extremes(self) -> bool:
+        """True when the statement is about extremes or events, so it must not stand in for a MONTHLY MEAN trend."""
+        return self.metric in EXTREME_METRICS
+
+
 class RegionCard(Card):
     id: str
     name: Text
@@ -205,6 +242,7 @@ class Catalog(BaseModel):
     regions: dict[str, RegionCard]
     glossary: dict[str, GlossaryTerm]
     instruments: dict[str, InstrumentCard] = Field(default_factory=dict)
+    published: list[PublishedExpectation] = Field(default_factory=list)
 
     def theme_members(self, theme_id: str) -> list[tuple[VariableCard, Role]]:
         return [(v, v.themes[theme_id]) for v in self.variables.values() if theme_id in v.themes]
@@ -223,7 +261,12 @@ class Catalog(BaseModel):
             {d["id"]: InstrumentCard(**d) for d in read("instruments.yaml")}
             if (catalog_dir / "instruments.yaml").exists() else {}
         )
-        cat = cls(variables=variables, themes=themes, regions=regions, glossary=glossary, instruments=instruments)
+        published = (
+            [PublishedExpectation(**_stringify_dates(d)) for d in read("expectations.yaml")]
+            if (catalog_dir / "expectations.yaml").exists() else []
+        )
+        cat = cls(variables=variables, themes=themes, regions=regions, glossary=glossary, instruments=instruments,
+                  published=published)
         cat.validate_links()
         return cat
 
@@ -236,6 +279,10 @@ class Catalog(BaseModel):
             for t in v.themes:
                 if t not in self.themes:
                     raise ValueError(f"{v.id}: unknown theme {t}")
+        for inst in self.instruments.values():
+            for a in inst.assimilates:
+                if a not in self.instruments:
+                    raise ValueError(f"{inst.id}: assimilates unknown instrument {a}")
         for r in self.regions.values():
             if r.comparison_region and r.comparison_region not in self.regions:
                 raise ValueError(f"{r.id}: unknown comparison_region {r.comparison_region}")
@@ -247,6 +294,14 @@ class Catalog(BaseModel):
                         f"{r.id}/{s.variable}/{s.id}: months must be unique, 1-12 and ascending "
                         "(seasons crossing the year end are not supported yet)"
                     )
+
+
+def _stringify_dates(d: dict) -> dict:
+    """YAML reads an unquoted 2026-11-15 as a date; the card keeps it as text."""
+    d = dict(d)
+    if d.get("opened_at") is not None:
+        d["opened_at"] = str(d["opened_at"])
+    return d
 
 
 def _stringify_months(d: dict) -> dict:

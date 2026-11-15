@@ -241,8 +241,13 @@ class PublishedFinding(Model):
     statement: Text
     source: str  # full citation incl. table/page
     confidence: str | None = None  # as worded by the source, e.g. "high confidence"
-    direction: Literal["up", "down", "either"] | None = None
+    confidence_es: str | None = None
+    direction: Literal["up", "down", "either"] | None = None  # None when the source says "unclear"
     agreement: Literal["agrees", "differs", "too_soon"] | None = None  # our result vs the statement; never causal
+    # None when direction is unclear or either: nothing to compare with.
+    ar6_region: str | None = None  # AR6 acronym the statement is about (GLOBAL_LAND for a worldwide pattern)
+    scope: Literal["mean", "extremes"] = "mean"  # "extremes": about extremes or events, shown as context only
+    partial: bool = False  # the statement holds for parts of the region, so "differs" is never claimed
 
 
 class PlaceProfile(Model):
@@ -280,7 +285,8 @@ class AnalysisResult(Model):
     detectability: Detectability | None = None
     robustness: Robustness = Field(default_factory=Robustness)
     chips: list[Chip] = Field(default_factory=list)
-    published: PublishedFinding | None = None
+    published: PublishedFinding | None = None  # what scientists found here, for the MEAN we tested
+    published_context: list[PublishedFinding] = Field(default_factory=list)  # extremes, Scientific view only
     verdict: Verdict
 
 

@@ -226,3 +226,31 @@
     scientific: Daily products are averaged to months only when the month has at least the declared minimum number of valid days.
     simple_es: "Algunos satélites solo ven bien en días sin nubes. Un mes cuenta solo si tiene suficientes días despejados."
     scientific_es: "Los productos diarios se promedian a meses solo cuando el mes tiene al menos el mínimo declarado de días válidos."
+- id: heavy_rainstorms
+  term: { simple: heavy rainstorms, scientific: heavy precipitation events, simple_es: "tormentas fuertes", scientific_es: "eventos de precipitación fuerte" }
+  definition:
+    simple: Storms that drop a lot of rain in a short time.
+    scientific: Days or short spells with very high rainfall, for example the wettest 1 percent of days. They are extremes, not the monthly average we test.
+    simple_es: "Tormentas que dejan mucha lluvia en poco tiempo."
+    scientific_es: "Días o periodos cortos con lluvia muy alta, por ejemplo el 1 por ciento de los días más lluviosos. Son extremos, no el promedio mensual que analizamos."
+- id: dry_spells
+  term: { simple: dry spells, scientific: meteorological drought, simple_es: "periodos secos", scientific_es: "sequía meteorológica" }
+  definition:
+    simple: Stretches of weeks or months with much less rain than usual.
+    scientific: Periods in which precipitation is well below its normal level. It describes rain shortfalls, not soil moisture.
+    simple_es: "Épocas de semanas o meses con mucha menos lluvia que de costumbre."
+    scientific_es: "Periodos en que la precipitación queda muy por debajo de su nivel normal. Describe déficits de lluvia, no la humedad del suelo."
+- id: polluting_gas
+  term: { simple: polluting gas, scientific: nitrogen dioxide (NO₂) pollution, simple_es: "gas contaminante", scientific_es: "contaminación por dióxido de nitrógeno (NO₂)" }
+  definition:
+    simple: A gas that engines, power plants and factories release when they burn fuel. In our app it is NO₂.
+    scientific: Tropospheric nitrogen dioxide (NO₂), emitted mainly by combustion; satellites measure its vertical column.
+    simple_es: "Un gas que sueltan motores, centrales eléctricas y fábricas al quemar combustible. En nuestra app es el NO₂."
+    scientific_es: "Dióxido de nitrógeno (NO₂) troposférico, emitido sobre todo por la combustión; los satélites miden su columna vertical."
+- id: ipcc
+  term: { simple: scientists' big climate report, scientific: IPCC AR6, simple_es: "el gran informe de los científicos del clima", scientific_es: "IPCC AR6" }
+  definition:
+    simple: Hundreds of scientists read all the studies and wrote down what they agree on. We quote what they say about each region.
+    scientific: The Intergovernmental Panel on Climate Change Sixth Assessment Report (2021), Working Group I. Its confidence words (for example high confidence, likely) are the panel's own, and are not our "how sure are we" meter.
+    simple_es: "Cientos de científicos leyeron todos los estudios y anotaron en qué coinciden. Citamos lo que dicen de cada región."
+    scientific_es: "Sexto Informe de Evaluación del Grupo Intergubernamental de Expertos sobre el Cambio Climático (2021), Grupo de Trabajo I. Sus palabras de confianza (por ejemplo confianza alta, probable) son las del panel y no son nuestro medidor de qué tan seguros estamos."

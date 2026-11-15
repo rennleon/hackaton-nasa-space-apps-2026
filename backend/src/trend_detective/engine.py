@@ -46,6 +46,8 @@ from .prepare import (
     season_means,
     window_years,
 )
+from .published import for_result as published_for_result
+from .published import match as published_match
 from .robustness import leave_one_year_out
 from .selection import stage1
 from .sources import LiveSourceUnavailable, SourceChain
@@ -454,10 +456,14 @@ def analyze_region(
         sel_t, sel_y, f = sy.astype(float) + 0.5, sm_, 1
     else:
         sel_t, sel_y, f = p.t_window, p.anomalies_window, 12
-    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f)
+    pub = published_match(cat, region, var)  # known before the trend: AR6 entry for this place and variable
+    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f, published=pub)
+    # Until a verdict exists the finding says "too soon"; the final return replaces it with the real agreement.
+    pub_finding, pub_context = published_for_result(cat, region, var, m=pub)
     common = dict(
         **base, provenance=series.provenance, window=window, season=season, gates=gates, selection=selection,
         series=points, yearly_series=_yearly(p), seasonal_share=_r(p.seasonal_share, 3),
+        published=pub_finding, published_context=pub_context,
     )
     if not gates.passed:
         reasons = [c.detail for c in checks if not c.passed]
@@ -580,8 +586,10 @@ def analyze_region(
     ]
     if core.p_c is not None:
         tests.append(SignificanceTest(name="seasonal_mk", p=float(core.p_c), statistic=_r(core.z_c), decisive=False))
+    # C3: the same AR6 entry stage 1 used, now compared with our verdict (never causal wording).
+    pub_final, _ = published_for_result(cat, region, var, verdict.label, tt.slope_per_year * 10, m=pub)
     return AnalysisResult(
-        **common,
+        **{**common, "published": pub_final},
         season_series=[YearPoint(year=int(y), anomaly=_r(a)) for y, a in zip(core.years, core.y)] if season else None,
         trend=Trend(
             slope_per_decade=_r(tt.slope_per_year * 10, 6),

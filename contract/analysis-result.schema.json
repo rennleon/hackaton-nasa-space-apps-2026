@@ -431,6 +431,18 @@
           "default": null,
           "title": "Confidence"
         },
+        "confidence_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Es"
+        },
         "direction": {
           "anyOf": [
             {
@@ -464,14 +476,44 @@
           ],
           "default": null,
           "title": "Agreement"
+        },
+        "ar6_region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ar6 Region"
+        },
+        "scope": {
+          "default": "mean",
+          "enum": [
+            "mean",
+            "extremes"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "partial": {
+          "default": false,
+          "title": "Partial",
+          "type": "boolean"
         }
       },
       "required": [
         "statement",
         "source",
         "confidence",
+        "confidence_es",
         "direction",
-        "agreement"
+        "agreement",
+        "ar6_region",
+        "scope",
+        "partial"
       ],
       "title": "PublishedFinding",
       "type": "object"
@@ -1225,6 +1267,13 @@
       ],
       "default": null
     },
+    "published_context": {
+      "items": {
+        "$ref": "#/$defs/PublishedFinding"
+      },
+      "title": "Published Context",
+      "type": "array"
+    },
     "verdict": {
       "$ref": "#/$defs/Verdict"
     }
@@ -1251,6 +1300,7 @@
     "robustness",
     "chips",
     "published",
+    "published_context",
     "verdict"
   ],
   "title": "AnalysisResult",
