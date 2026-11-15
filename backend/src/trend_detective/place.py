@@ -289,22 +289,29 @@ def _simple_feel(code: str | None) -> str | None:
     return "very cold all year"
 
 
-def _texts(code, ar6, elev, high_up, wet, dry, years, yours: bool = True) -> Text | None:
-    """`yours`: a place the user chose ("Your place is ..."); a ready-made one reads "This place is ..."."""
-    feel = _simple_feel(code)
+def _texts(code, ar6, elev, high_up, wet, dry, years, yours: bool = True, mixed: bool = False) -> Text | None:
+    """`yours`: a place the user chose ("Your place is ..."); a ready-made one reads "This place is ...".
+    `mixed`: the homogeneity check found different kinds of places in the box. Then one "feel" for the whole box
+    (from an average of the cells, or from the centre cell of a small box) would describe no real part of it,
+    so the Simple text says it is mixed instead, and the Scientific text says the class is of the mean."""
+    feel = None if mixed else _simple_feel(code)
     simple: list[str] = []
+    if mixed:
+        simple.append(f"{'Your' if yours else 'This'} box holds different kinds of places.")
     if feel:
         simple.append(f"{'Your' if yours else 'This'} place is {feel}.")
-    if high_up:
+    if high_up and not mixed:
         simple.append("It is high up above the sea.")
-    if wet:
-        simple.append(f"Most rain comes from {_rain_span(wet)}.")
-    if feel:
+    if wet and not mixed:
+        # the declared rule picks the wettest 4-month run; it does not guarantee more than half the rain
+        simple.append(f"The rainiest months are {_rain_span(wet)}.")
+    if feel or mixed:
         simple.append("This is a computer model estimate.")
     sci: list[str] = []
     if code and years:
         sci.append(f"Köppen–Geiger {code} (Beck et al. 2018 rules on NASA POWER {years[0]}–{years[1]} "
-                   "climatology, MERRA-2 based)")
+                   "climatology, MERRA-2 based)" + ("; mixed box, so this is the class of the mean, not of every part"
+                                                    if mixed else ""))
     if ar6:
         sci.append(f"IPCC AR6 region {ar6[0]} ({ar6[1]})")
     if elev is not None:
@@ -316,20 +323,23 @@ def _texts(code, ar6, elev, high_up, wet, dry, years, yours: bool = True) -> Tex
     if not simple:
         simple = ["We could not tell what kind of place this is."]
     # Spanish twin, built from the same facts
-    feel_es = _simple_feel_es(code)
+    feel_es = None if mixed else _simple_feel_es(code)
     simple_es: list[str] = []
+    if mixed:
+        simple_es.append(f"{'Tu' if yours else 'Esta'} zona tiene distintos tipos de lugar.")
     if feel_es:
         simple_es.append(f"{'Tu' if yours else 'Este'} lugar es {feel_es}.")
-    if high_up:
+    if high_up and not mixed:
         simple_es.append("Está en un lugar alto, sobre el nivel del mar.")
-    if wet:
-        simple_es.append(f"La mayor parte de la lluvia cae {_rain_span_es(wet)}.")
-    if feel_es:
+    if wet and not mixed:
+        simple_es.append(f"Los meses más lluviosos van {_rain_span_es(wet)}.")
+    if feel_es or mixed:
         simple_es.append("Esto es una estimación de un modelo de computadora.")
     sci_es: list[str] = []
     if code and years:
         sci_es.append(f"Köppen–Geiger {code} (reglas de Beck et al. 2018 sobre la climatología de NASA POWER "
-                      f"{years[0]}–{years[1]}, basada en MERRA-2)")
+                      f"{years[0]}–{years[1]}, basada en MERRA-2)" + ("; zona mezclada, así que es la clase de la media, "
+                                                                   "no de cada parte" if mixed else ""))
     if ar6:
         sci_es.append(f"región IPCC AR6 {ar6[0]} ({ar6[1]})")
     if elev is not None:
@@ -389,8 +399,9 @@ def profile_place(ctx, region: RegionCard) -> PlaceProfile:
             code = koppen_geiger(t_cl[0], precip)
             group = GROUP_OF_MAIN[code[0]]
             wet, dry = wet_dry_months(precip)
+    homog = _homogeneity(src, geom)
     return PlaceProfile(
-        homogeneity=_homogeneity(src, geom),
+        homogeneity=homog,
         ar6_region_code=ar6[0] if ar6 else None,
         ar6_region_name=ar6[1] if ar6 else None,
         climate_group=group,
@@ -399,5 +410,6 @@ def profile_place(ctx, region: RegionCard) -> PlaceProfile:
         elevation_m_model=elev,
         wet_months=wet,
         dry_months=dry,
-        text=_texts(code, ar6, elev, high_up, wet, dry, years, yours=region.id.startswith("custom")),
+        text=_texts(code, ar6, elev, high_up, wet, dry, years, yours=region.id.startswith("custom"),
+                    mixed=bool(homog and homog.kind == "mixed")),
     )

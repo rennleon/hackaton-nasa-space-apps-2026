@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 from .catalog import RegionCard, VariableCard
 from .contract import Certainty, Chip, Label, Season, Selection, Text, ThenNow, Verdict, Window
 
+MAX_MORE_YEARS = 30  # project choice: beyond this a 'watch N more years' number is not meaningful to show
+
 CERTAINTY: dict[str, Certainty] = {
     "significant": "sure",
     "significant_fragile": "maybe",
@@ -276,15 +278,26 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
                           f"En {tn.year_now}: {_unos_es(lab)} {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
             how_sc_es = f"{slope_sc_es}{level_sc_es}."
     elif certainty == "too_soon":
-        if x.years_needed is not None and x.years_needed > x.years_available:
-            more = math.ceil(x.years_needed - x.years_available)
+        # Weatherhead's n* is evaluated at the OBSERVED slope, which here is not significant: when that slope is
+        # tiny, n* explodes (hundreds of years) and the number means nothing. Give a number only while it is
+        # plausible -- at most as many more years as we already have, and at most MAX_MORE_YEARS.
+        more = math.ceil(x.years_needed - x.years_available) if x.years_needed is not None else None
+        if more is not None and 0 < more <= min(MAX_MORE_YEARS, x.years_available):
             how_s = f"We need to watch for about {more} more years."
             how_sc = (f"{slope_sc}. Years to detection ≈ {x.years_needed:.0f} vs {x.years_available:.0f} "
-                      "available (Weatherhead et al. 1998).")
+                      "available (Weatherhead et al. 1998), evaluated at the observed slope.")
             if es:
                 how_es = f"Necesitamos mirar unos {more} años más."
                 how_sc_es = (f"{slope_sc_es}. Años hasta la detección ≈ {x.years_needed:.0f} frente a "
-                             f"{x.years_available:.0f} disponibles (Weatherhead et al. 1998).")
+                             f"{x.years_available:.0f} disponibles (Weatherhead et al. 1998), con la pendiente observada.")
+        elif more is not None and more > 0:
+            how_s = "This change is too small to see in these years."
+            how_sc = (f"{slope_sc}. Not significant at α = {x.alpha}; at the observed slope, detection would need far "
+                      f"longer than the {x.years_available:.0f} years available, so no waiting time is given.")
+            if es:
+                how_es = "Este cambio es demasiado pequeño para verlo en estos años."
+                how_sc_es = (f"{slope_sc_es}. No significativo con α = {x.alpha}; con la pendiente observada, detectarlo "
+                             f"necesitaría mucho más que los {x.years_available:.0f} años disponibles, así que no damos un tiempo de espera.")
         else:
             how_s = "The normal ups and downs are still bigger than the change."
             how_sc = f"{slope_sc}. Not significant at α = {x.alpha}."
