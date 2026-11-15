@@ -4,7 +4,7 @@ Runs before any trend is judged (challenge Objective 1), so a variable is never
 "selected" because it came out significant. Four checks:
   (a) question      - does it fit the theme the user asked about?
   (b) expectation   - is there a cited, published reason to expect change here?
-  (c) fitness       - gates 2-3 (coverage, cells, record, completeness, floor) and known breaks
+  (c) fitness       - gates 2-3 (coverage, cells, record, completeness, zero months) and known breaks
   (d) detectability - minimum detectable trend (MDT) for this record <= expected trend size
 
 MDT is Weatherhead et al. (1998) inverted, using only the noise of the series
@@ -36,6 +36,28 @@ def mdt_per_decade(resid_sd: float, r1: float, n_years: float, samples_per_year:
 def kid_amount(x: float) -> str:
     """Simple-view amount: whole numbers, or 'less than 1' (R5: no decimals for children)."""
     return "less than 1" if abs(x) < 1 else f"about {round(abs(x))}"
+
+
+def detect_sentences(mdt: float, expected: float | None, u_simple: str) -> tuple[str, bool | None]:
+    """Simple-view detectability text, and whether a typical change is detectable (None: no reference size).
+
+    The comparison is made on the real numbers; the words never contradict it after rounding (CLAUDE.md R5,
+    tracker #6). Amounts are shown only when the rounded amounts differ, so they can't read "less than 1 ...
+    less than 1. Not enough"."""
+    if expected is None:
+        if abs(mdt) < 1:
+            return "We can spot even small changes.", None
+        return f"We can spot changes of {kid_amount(mdt)} {u_simple} or more every 10 years.", None
+    ok = mdt <= abs(expected)
+    if kid_amount(mdt) == kid_amount(expected):
+        if ok:
+            return "This record is long enough to spot a typical change.", ok
+        return "This record can only spot changes bigger than a typical one.", ok
+    spot = ("We can spot even small changes." if abs(mdt) < 1
+            else f"We can spot changes of {kid_amount(mdt)} {u_simple} or more every 10 years.")
+    if ok:
+        return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. That's enough to see it.", ok
+    return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. We can't see that yet.", ok
 
 
 def noise_of(t: np.ndarray, y: np.ndarray) -> tuple[float, float]:
@@ -97,7 +119,7 @@ def stage1(
         checks.append(SelectionCheck(
             code="fitness", status="pass",
             detail=Text(simple="The data covers this place well enough and for long enough.",
-                        scientific="Coverage, grid cells, record length, completeness and floor checks pass."),
+                        scientific="Coverage, grid cells, record length, completeness and zero-month checks pass."),
         ))
     if flagged:
         checks.append(SelectionCheck(
@@ -127,22 +149,20 @@ def stage1(
                         scientific="MDT not computable (insufficient data)."),
         ))
     elif expected is None:
+        simple, _ = detect_sentences(mdt, None, u.simple)
         checks.append(SelectionCheck(
             code="detectability", status="pass",
-            detail=Text(simple=f"With {n_years:.0f} years we can spot changes of {kid_amount(mdt)} {u.simple} "
-                               "every 10 years or bigger.",
+            detail=Text(simple=simple,
                         scientific=f"MDT ≈ {mdt:.{d}f} {u.display} per decade over {n_years:.1f} years "
                                    "(no reference trend size recorded)."),
         ))
     else:
-        ok = mdt <= abs(expected)
+        simple, ok = detect_sentences(mdt, expected, u.simple)
         ref = exp.source if exp else (variable.reference_source or "reference")
         checks.append(SelectionCheck(
             code="detectability", status="pass" if ok else "fail",
             detail=Text(
-                simple=(f"With {n_years:.0f} years we can spot changes of {kid_amount(mdt)} {u.simple} every 10 years. "
-                        f"A typical change is {kid_amount(expected)}. "
-                        + ("That's enough to see it." if ok else "That's not enough years to see a typical change.")),
+                simple=simple,
                 scientific=(f"MDT ≈ {mdt:.{d}f} {u.display}/decade over {n_years:.1f} yr vs expected "
                             f"{abs(expected):.{d}f} ({ref}): {'detectable' if ok else 'not detectable'}."),
             ),

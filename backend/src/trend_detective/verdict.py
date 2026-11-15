@@ -12,7 +12,7 @@ import math
 from dataclasses import dataclass, field
 
 from .catalog import RegionCard, VariableCard
-from .contract import Certainty, Chip, Label, Season, Text, ThenNow, Verdict, Window
+from .contract import Certainty, Chip, Label, Season, Selection, Text, ThenNow, Verdict, Window
 
 CERTAINTY: dict[str, Certainty] = {
     "significant": "sure",
@@ -86,6 +86,7 @@ class VerdictInputs:
     warning_chips: list[Chip] = field(default_factory=list)
     checks_run: list[str] = field(default_factory=list)
     then_now: ThenNow | None = None
+    selection: Selection | None = None  # stage 1, used only to explain the result afterwards
 
 
 def _place(region: RegionCard) -> str:
@@ -96,6 +97,29 @@ def _place(region: RegionCard) -> str:
 def _subject(x: VerdictInputs) -> str:
     s = x.variable.words.subject
     return f"{s} in the {x.season.name.simple}" if x.season else s
+
+
+def short_record_note(label: Label, x: VerdictInputs) -> list[Text]:
+    """Explains, after the fact, why a sure result sits beside "hard to spot with this record" (tracker #5).
+
+    Both are true: the record is short for the TYPICAL change (stage 1), but the change seen here is
+    bigger than typical. Never alters selection or the label."""
+    sel = x.selection
+    if label != "significant" or sel is None or sel.mdt_per_decade is None or sel.expected_per_decade is None:
+        return []
+    if not any(c.code == "detectability" and c.status == "fail" for c in sel.checks):
+        return []
+    v, d = x.variable, x.variable.units.decimals
+    observed, expected, mdt = abs(x.slope_per_decade), abs(sel.expected_per_decade), sel.mdt_per_decade
+    if observed < expected:
+        return []
+    return [Text(
+        simple="This record is short for a typical change. But this change is bigger than typical, so we still see it.",
+        scientific=f"Stage-1 detectability failed (MDT ≈ {mdt:.{d}f} {v.units.display}/decade vs expected "
+                   f"{expected:.{d}f}), but the observed |slope| {observed:.{d}f} {v.units.display}/decade "
+                   "exceeds the expected size, so both decisive tests can still reject no-trend. "
+                   "This explains the result; it does not change selection or the label.",
+    )]
 
 
 def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
@@ -192,6 +216,7 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
             scientific=f"Seasonal Mann–Kendall p {fmt_p(x.p_c)} ignores autocorrelation and is not decisive; "
                        "it may reflect multi-year variability.",
         ))
+    notes.extend(short_record_note(label, x))
     if v.source.type == "model":
         notes.append(Text(
             simple="This is a computer model estimate, not a direct measurement.",

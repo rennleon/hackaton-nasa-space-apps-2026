@@ -76,6 +76,25 @@ def test_answers_are_short(outputs):
                 assert len(words) <= MAX_WORDS, (key, sentence)
 
 
+def test_selection_gate_chip_and_note_strings_are_plain_and_short(outputs):
+    """A4: detectability sentences, gate details, chips and verdict notes the engine produces."""
+    seen = []
+    for o in outputs:
+        sel, gates = o.get("selection"), o.get("gates")
+        items = (sel["checks"] if sel else []) + (gates["checks"] if gates else [])
+        seen += [i["detail"]["simple"] for i in items]
+        # rests_on_few_years lists every flipping year (engine.py, not covered here): length-exempt, see report
+        seen += [c["text"]["simple"] for c in o.get("chips", []) if c["code"] != "rests_on_few_years"]
+        seen += [n["simple"] for n in (o.get("verdict") or {}).get("notes", [])]
+    assert seen
+    for s in seen:
+        assert not BANNED.search(s), s
+        assert not re.search(r"\d\.\d|%", s), s
+        for sentence in re.split(r"(?<=[.!?])\s+", s):
+            words = [w for w in re.sub(r"\([^)]*\)", "", sentence).split() if re.search(r"\w", w)]
+            assert len(words) <= MAX_WORDS, sentence
+
+
 def test_headline_numbers_are_whole_and_not_negative(outputs):
     for o in outputs:
         v = o.get("verdict")

@@ -11,7 +11,16 @@ from .prepare import Prepared
 MIN_YEARS = 15.0
 MIN_CELLS = 4.0
 MIN_COMPLETENESS = 0.9
-MAX_FLOOR_FRACTION = 0.3
+# Many-zero-months gate. Declared before any result is seen (CLAUDE.md statistics rules): if more than
+# 30% of the months in the analysis window sit at zero (or at/below the card's `floor`), the series is
+# mostly ties. Ties make the Mann-Kendall S statistic and Sen's median slope degenerate (slope pinned at
+# 0, p-values unreliable), so the gate fails instead of reporting a number. 30% leaves rainy-season series
+# alone (dry months are a minority) and stops year-round-dry places (a few wet months a year).
+MAX_ZERO_MONTH_SHARE = 0.3
+
+# Near-bound chip: humidity-like series on a 0-100 scale flatten close to the bound (saturation).
+BOUND_MARGIN = 5.0
+BOUNDED_DISPLAY_UNITS = ("%RH", "%")
 
 
 def no_data() -> GateCheck:
@@ -88,7 +97,7 @@ def fitness(
 
 
 def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None) -> list[GateCheck]:
-    """Completeness and floor checks over the window, or over the season's months only."""
+    """Completeness and zero-month checks over the window, or over the season's months only."""
     vals = p.values_window
     if months:
         cal = np.array([int(m[5:7]) for m in p.months_window])
@@ -99,28 +108,60 @@ def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None
             code="completeness",
             passed=completeness >= MIN_COMPLETENESS,
             detail=Text(
-                simple=f"{completeness:.0%} of the months have data (we need {MIN_COMPLETENESS:.0%}).",
+                simple=f"{completeness * 100:.0f} of every 100 months have data (we need {MIN_COMPLETENESS * 100:.0f}).",
                 scientific=f"Completeness {completeness:.1%} within the window (minimum {MIN_COMPLETENESS:.0%}).",
             ),
         )
     ]
-    if variable.floor is not None:
-        finite = vals[np.isfinite(vals)]
-        frac = float((finite <= variable.floor + 1e-9).mean()) if finite.size else 1.0
-        checks.append(
-            GateCheck(
-                code="floor",
-                passed=frac < MAX_FLOOR_FRACTION,
-                detail=Text(
-                    simple=f"{frac:.0%} of the months are at zero, so a trend would mean little."
-                    if frac >= MAX_FLOOR_FRACTION
-                    else "The values are not stuck at zero.",
-                    scientific=f"{frac:.1%} of months at the floor value {variable.floor} "
-                    f"(maximum {MAX_FLOOR_FRACTION:.0%}).",
-                ),
-            )
+    # Zero months: exactly zero for every variable (negatives are legitimate, e.g. winter temperature),
+    # at or below the card floor when one is declared (e.g. rainfall floor 0).
+    finite = vals[np.isfinite(vals)]
+    if finite.size == 0:
+        frac = 1.0
+    elif variable.floor is not None:
+        frac = float((finite <= variable.floor + 1e-9).mean())
+    else:
+        frac = float((np.abs(finite) <= 1e-9).mean())
+    zero_level = variable.floor if variable.floor is not None else 0.0
+    checks.append(
+        GateCheck(
+            code="zero_months",
+            passed=frac <= MAX_ZERO_MONTH_SHARE,
+            detail=Text(
+                simple="It hardly ever rains here, so monthly numbers can't show a trend."
+                if frac > MAX_ZERO_MONTH_SHARE
+                else "The values are not stuck at zero.",
+                scientific=f"{frac:.1%} of months in the window are at or below {zero_level:g} "
+                f"(maximum {MAX_ZERO_MONTH_SHARE:.0%}; ties make Mann–Kendall and Sen's slope degenerate).",
+            ),
         )
+    )
     return checks
+
+
+def near_bound_chip(p: Prepared, variable: VariableCard, months: list[int] | None = None) -> Chip | None:
+    """Info chip when a 0-100 series (display units %RH or %) has its window mean within 5 of a bound."""
+    if variable.units.display not in BOUNDED_DISPLAY_UNITS:
+        return None
+    vals = p.values_window
+    if months:
+        cal = np.array([int(m[5:7]) for m in p.months_window])
+        vals = vals[np.isin(cal, months)]
+    finite = vals[np.isfinite(vals)]
+    if finite.size == 0:
+        return None
+    mean = float(finite.mean())
+    if BOUND_MARGIN < mean < 100 - BOUND_MARGIN:
+        return None
+    return Chip(
+        code="near_bound",
+        severity="info",
+        text=Text(
+            simple="This is close to its top or bottom limit, so changes can look smaller.",
+            scientific=f"Window mean {mean:.1f} {variable.units.display} is within {BOUND_MARGIN:g} of the 0–100 "
+            "bound; a trend near a bound can flatten (saturation), so the slope may understate the change.",
+        ),
+    )
 
 
 def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> Chip | None:
