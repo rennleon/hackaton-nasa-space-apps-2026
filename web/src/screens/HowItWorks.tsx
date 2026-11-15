@@ -1,17 +1,9 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useView } from '../context'
-import { BANDS, STEPS, useH, type HKey } from '../lib/howCopy'
+import { BANDS, STEPS, useH, type Band, type HKey } from '../lib/howCopy'
 import './HowItWorks.css'
 
 const key = (n: number, part: 'title' | 'text') => `how.s${n}.${part}` as HKey
-
-function Arrow() {
-  return (
-    <svg className="how-arrow" viewBox="0 0 12 24" width="14" height="28" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 1v20M1 16l5 6 5-6" />
-    </svg>
-  )
-}
 
 /** A wavy series (seasons included) becomes a calmer line with a slight slope once the seasons are taken out. */
 function SeasonsPicture() {
@@ -38,42 +30,135 @@ function SeasonsPicture() {
   )
 }
 
-/** "How it works": the pipeline from "pick a place" to the verdict, one box per step, four bands, top to bottom. */
+/** Which stage the reader is in: the last one whose milestone has passed a line about 40% down the screen
+ * (the last stage once the page is scrolled to the bottom). */
+function useActiveBand(refs: React.MutableRefObject<Partial<Record<Band, HTMLElement | null>>>) {
+  const [active, setActive] = useState<Band>(BANDS[0])
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const line = window.innerHeight * 0.4
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+      let current: Band = BANDS[0]
+      for (const band of BANDS) {
+        const el = refs.current[band]
+        if (el && el.getBoundingClientRect().top <= line) current = band
+      }
+      setActive(atBottom && window.scrollY > 0 ? BANDS[BANDS.length - 1] : current)
+    }
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [refs])
+  return [active, setActive] as const
+}
+
+/** The stage bar sticks under the top bar on wide screens: keep it just below, however tall the top bar wraps. */
+function useTopbarHeight(ref: React.RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const bar = document.querySelector<HTMLElement>('.topbar')
+    const el = ref.current
+    if (!bar || !el) return
+    const set = () => el.style.setProperty('--how-top', `${bar.offsetHeight}px`)
+    set()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(set)
+    ro.observe(bar)
+    return () => ro.disconnect()
+  }, [ref])
+}
+
+function Check() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  )
+}
+
+/** "How it works": the pipeline from "pick a place" to the verdict as one journey: a stage bar on top, then a line
+ * down the page with a numbered stop per step, a milestone where each of the four stages begins, and the answer at the end. */
 export function HowItWorks() {
   const { view } = useView()
   const h = useH()
-  const last = STEPS[STEPS.length - 1].n
+  const bands = useRef<Partial<Record<Band, HTMLElement | null>>>({})
+  const nav = useRef<HTMLElement>(null)
+  const [active, setActive] = useActiveBand(bands)
+  useTopbarHeight(nav)
+  const goTo = (band: Band) => {
+    setActive(band)
+    const still = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    bands.current[band]?.scrollIntoView?.({ behavior: still ? 'auto' : 'smooth', block: 'start' })
+  }
   return (
     <div className="page how">
       <h1>{h('how.title')}</h1>
       <p className="lead">{h('how.lead')}</p>
-      <div className="how-flow" role="group" aria-label={h('how.flowLabel')}>
-        {BANDS.map((band) => {
+
+      <nav ref={nav} className="how-stages" aria-label={h('how.stagesLabel')}>
+        <ol>
+          {BANDS.map((band, i) => {
+            const steps = STEPS.filter((s) => s.band === band)
+            return (
+              <li key={band} className={`how-stage how-band-${band}`}>
+                <button type="button" aria-current={active === band ? 'step' : undefined} onClick={() => goTo(band)}>
+                  <span className="how-stage-n" aria-hidden="true">{i + 1}</span>
+                  <span className="how-stage-words">
+                    <span className="how-stage-name">{h(`how.band.${band}` as HKey)}</span>
+                    <span className="how-stage-steps">{h('how.stageSteps', { from: steps[0].n, to: steps[steps.length - 1].n })}</span>
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      </nav>
+
+      <div className="how-journey" role="group" aria-label={h('how.flowLabel')}>
+        {BANDS.map((band, i) => {
           const steps = STEPS.filter((s) => s.band === band)
           return (
-            <section key={band} className={`how-band how-band-${band}`} aria-labelledby={`how-band-${band}`}>
-              <h2 id={`how-band-${band}`} className="how-band-title">{h(`how.band.${band}` as HKey)}</h2>
+            <section
+              key={band}
+              ref={(el) => { bands.current[band] = el }}
+              data-band={band}
+              className={`how-band how-band-${band}`}
+              aria-labelledby={`how-band-${band}`}
+            >
+              <h2 id={`how-band-${band}`} className="how-milestone">
+                <span className="how-milestone-dot" aria-hidden="true">{i + 1}</span>
+                <span>{h(`how.band.${band}` as HKey)}</span>
+              </h2>
               <ol className="how-steps" start={steps[0].n}>
                 {steps.map((s) => (
-                  <Fragment key={s.n}>
-                    <li className="how-step card" id={`how-step-${s.n}`}>
-                      <p className="how-n eyebrow">{h('how.stepN', { n: s.n })}</p>
-                      <h3>{h(key(s.n, 'title'))}</h3>
+                  <li key={s.n} className="how-step" id={`how-step-${s.n}`}>
+                    <span className="how-dot" aria-hidden="true">{s.n}</span>
+                    <div className="how-body card">
+                      <h3><span className="visually-hidden">{h('how.stepN', { n: s.n })}: </span>{h(key(s.n, 'title'))}</h3>
                       <p className="how-text">{h(key(s.n, 'text'))}</p>
                       {s.n === 10 && <SeasonsPicture />}
                       {view === 'scientific' && (
                         <p className="how-code small muted">
-                          {h('how.code')}: {s.modules.map((m, i) => <Fragment key={m}>{i > 0 && ', '}<code>{m}</code></Fragment>)}
+                          {h('how.code')}: {s.modules.map((m, j) => <Fragment key={m}>{j > 0 && ', '}<code>{m}</code></Fragment>)}
                         </p>
                       )}
-                    </li>
-                    {s.n !== last && <li className="how-link" aria-hidden="true"><Arrow /></li>}
-                  </Fragment>
+                    </div>
+                  </li>
                 ))}
               </ol>
             </section>
           )
         })}
+        <p className="how-finish">
+          <span className="how-finish-dot"><Check /></span>
+          <strong>{h('how.finish')}</strong>
+        </p>
       </div>
     </div>
   )

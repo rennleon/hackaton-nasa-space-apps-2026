@@ -1,19 +1,61 @@
 .how h1 { margin-bottom: 0.4rem; }
-.how-flow { max-width: 720px; margin: 1.2rem auto 0; display: flex; flex-direction: column; gap: 1.6rem; }
-.how-band { min-width: 0; }
-.how-band-title { margin: 0 0 0.8rem; padding: 0.35rem 0.9rem; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block; max-width: 100%; }
-.how-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: stretch; }
-.how-step { position: relative; min-width: 0; border-radius: 12px; border-left: 5px solid var(--accent); overflow-wrap: anywhere; }
-.how-band-clean .how-step { border-left-color: var(--v-maybe-fill); }
-.how-band-trend .how-step { border-left-color: var(--trend); }
-.how-band-check .how-step { border-left-color: var(--v-sure-fill); }
+.how { --rail-x: 1.25rem; --rail-gap: 3.4rem; }
+.how-band-get { --band: var(--accent); }
+.how-band-clean { --band: var(--v-maybe-fill); }
+.how-band-trend { --band: var(--trend); }
+.how-band-check { --band: var(--v-sure-fill); }
+
+/* stage bar: four chevrons, the current stage filled in */
+.how-stages { max-width: 760px; margin: 1.2rem auto 0; z-index: 900; }
+.how-stages ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.how-stage button {
+  font: inherit; color: var(--text); cursor: pointer; width: 100%; height: 100%; min-height: 3.2rem; border: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem; text-align: center; padding: 0.45rem 1rem 0.45rem 1.2rem;
+  background: color-mix(in srgb, var(--band) 14%, var(--surface-2));
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+  transition: background 0.15s;
+}
+.how-stage:first-child button { clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); padding-left: 0.5rem; border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.how-stage:last-child button { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.how-stage button:hover { background: color-mix(in srgb, var(--band) 28%, var(--surface-2)); }
+.how-stage button:focus-visible { outline: 3px solid var(--focus); outline-offset: -5px; }
+.how-stage button[aria-current='step'] { background: color-mix(in srgb, var(--band) 42%, var(--surface)); }
+.how-stage button[aria-current='step'] .how-stage-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.how-stage-n { flex: none; width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 0.85rem; background: var(--surface); box-shadow: inset 0 0 0 2px var(--band); }
+.how-stage-words { display: flex; flex-direction: column; align-items: center; min-width: 0; line-height: 1.2; }
+.how-stage-name { font-weight: 700; font-size: 0.92rem; overflow-wrap: anywhere; }
+.how-stage-steps { font-size: 0.78rem; color: var(--muted); }
+@media (min-width: 720px) {
+  .how-stages { position: sticky; top: var(--how-top, 3.5rem); padding: 0.5rem 0; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); }
+}
+@media (max-width: 560px) {
+  /* four chevrons don't fit a phone: two rows of numbered boxes, read left to right */
+  .how-stages ol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .how-stage button, .how-stage:first-child button, .how-stage:last-child button { clip-path: none; border-radius: var(--radius-sm); flex-direction: row; justify-content: flex-start; text-align: left; padding: 0.45rem 0.6rem; min-height: 2.8rem; }
+  .how-stage-words { align-items: flex-start; }
+  .how-stage-steps { display: none; }
+  .how-stage-name { font-size: 0.85rem; }
+}
+
+/* the journey: one line down the page, a stop per step */
+.how-journey { max-width: 720px; margin: 1.4rem auto 0; }
+.how-band { position: relative; padding-bottom: 1.2rem; scroll-margin-top: calc(var(--how-top, 3.5rem) + 5rem); }
+.how-band::before { content: ''; position: absolute; left: calc(var(--rail-x) - 2px); top: 0; bottom: 0; width: 4px; background: color-mix(in srgb, var(--band) 55%, var(--hairline)); }
+.how-band:first-child::before { top: 1.25rem; }
+.how-milestone { position: relative; display: flex; align-items: center; min-height: 2.5rem; margin: 0 0 0.9rem; padding-left: var(--rail-gap); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.how-milestone-dot { position: absolute; left: calc(var(--rail-x) - 1.25rem); top: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 1.1rem; letter-spacing: 0; background: color-mix(in srgb, var(--band) 30%, var(--surface)); box-shadow: 0 0 0 3px var(--band), 0 0 0 7px var(--bg); }
+.how-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+.how-step { position: relative; padding-left: var(--rail-gap); min-width: 0; }
+.how-step::before { content: ''; position: absolute; left: calc(var(--rail-x) + 1rem); width: calc(var(--rail-gap) - var(--rail-x) - 1rem); top: 1.9rem; height: 2px; background: color-mix(in srgb, var(--band) 55%, var(--hairline)); }
+.how-dot { position: absolute; left: calc(var(--rail-x) - 1rem); top: 0.9rem; width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 0.85rem; background: var(--surface); box-shadow: inset 0 0 0 3px var(--band); }
+.how-body { min-width: 0; border-radius: 12px; overflow-wrap: anywhere; }
 .how-step h3 { margin: 0.1rem 0 0.3rem; }
-.how-n { margin: 0; }
 .how-text { margin: 0.2rem 0; }
 .how-code { margin: 0.5rem 0 0; }
 .how-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em; background: var(--surface-2); padding: 1px 6px; border-radius: 6px; }
-.how-link { display: flex; justify-content: center; color: var(--muted); padding: 0.25rem 0; }
-.how-arrow { flex: none; }
+.how-finish { position: relative; display: flex; align-items: center; min-height: 2.5rem; margin: 0; padding-left: var(--rail-gap); font-size: 1.1rem; }
+.how-finish-dot { position: absolute; left: calc(var(--rail-x) - 1.25rem); top: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center; background: var(--v-sure-bg); color: var(--v-sure); box-shadow: 0 0 0 3px var(--v-sure-fill); }
+
 .how-pic { margin: 0.8rem 0 0.2rem; padding: 0.6rem 0.8rem; max-width: 100%; box-shadow: none; background: var(--surface-2); border-radius: var(--radius-sm); }
 .how-pic svg { display: block; width: 100%; height: auto; }
 .how-pic-cap { display: flex; justify-content: space-between; margin-top: 0.2rem; }

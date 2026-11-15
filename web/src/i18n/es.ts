@@ -672,6 +672,12 @@ const es: Record<string, string> = {
   'how.pic.label.scientific': 'Antes: serie mensual cruda con una onda estacional. Después: anomalías mensuales con una tendencia pequeña.',
   'how.pic.before': 'Antes',
   'how.pic.after': 'Después',
+  'how.stagesLabel.simple': 'Las cuatro etapas',
+  'how.stagesLabel.scientific': 'Etapas del proceso',
+  'how.stageSteps.simple': 'Pasos {from} a {to}',
+  'how.stageSteps.scientific': 'Pasos {from}–{to}',
+  'how.finish.simple': 'Recibes tu respuesta.',
+  'how.finish.scientific': 'Salida: el veredicto, el gráfico y las revisiones en la página del resultado.',
 
   'how.s1.title.simple': 'Elige una pregunta y un lugar',
   'how.s1.title.scientific': 'Elige un tema y un lugar',

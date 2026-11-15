@@ -61,6 +61,9 @@ export const HOW = {
   ),
   'how.pic.before': p('Before'),
   'how.pic.after': p('After'),
+  'how.stagesLabel': p('The four stages', 'Pipeline stages'),
+  'how.stageSteps': p('Steps {from} to {to}', 'Steps {from}–{to}'),
+  'how.finish': p('You get your answer.', 'Output: the verdict, chart and checks on the result page.'),
 
   'how.s1.title': p('Pick a question and a place', 'Choose a theme and a place'),
   'how.s1.text': p(

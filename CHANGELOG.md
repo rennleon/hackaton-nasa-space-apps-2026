@@ -8,6 +8,10 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Added
+- "How it works" reads as one process: a bar with the four stages on top (sticks under the top bar on wide
+  screens, marks the stage you are reading, click to jump there; two rows of boxes on phones), then one line down
+  the page with a numbered stop for each of the 16 steps, a milestone where each stage starts, and "You get your
+  answer." at the end.
 - Finer questions: seven sub-topics under the three main ones (heat: hot afternoons, warm nights; water: rain,
   damp air, wet ground; air: smoke and haze, burning fuel). A sub-topic is a theme with a `parent`; its members
   are declared on the variable cards before any result and must also belong to the parent. Each is scanned on
