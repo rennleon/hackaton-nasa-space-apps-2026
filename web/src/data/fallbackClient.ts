@@ -1,4 +1,5 @@
 import type { Place } from '../lib/place'
+import { exampleAt } from '../lib/places'
 import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient } from './client'
 
 /** Tries the API first and falls back to the static twin when it fails. */
@@ -42,6 +43,17 @@ export class FallbackClient implements DataClient {
       throw err instanceof LiveDataUnavailable ? err : new LiveDataUnavailable(err instanceof Error ? err.message : undefined)
     }
   }
-  customScan = (p: Place, t: string) => this.live((c) => c.customScan(p, t))
-  customResult = (p: Place, v: string, o: { start?: string; end?: string }) => this.live((c) => c.customResult(p, v, o))
+  readonly staticExamples = true
+  /**
+   * A ready-made example point is answered from its precomputed files first (same numbers every time, no wait,
+   * and the demo narration matches); the API is only asked for a custom period, or when the files are missing.
+   */
+  customScan = (p: Place, t: string) =>
+    exampleAt(p) ? this.fallback.customScan(p, t).catch(() => this.live((c) => c.customScan(p, t))) : this.live((c) => c.customScan(p, t))
+  customResult = (p: Place, v: string, o: { start?: string; end?: string }) => {
+    const apiFirst = () => this.live((c) => c.customResult(p, v, o))
+    if (!exampleAt(p)) return apiFirst()
+    if (o.start || o.end) return apiFirst().catch(() => this.fallback.customResult(p, v, o))
+    return this.fallback.customResult(p, v, o).catch(apiFirst)
+  }
 }

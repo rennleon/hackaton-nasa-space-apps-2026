@@ -40,7 +40,7 @@ export const StartQuestions = forwardRef<HTMLElement, Props>(function StartQuest
       <h3 className="sq-ask">{s('start.question.title', 'What do you want to know?', 'Choose a question')}</h3>
       <ul className="sq-grid">
         {catalog.themes.map((th) => (
-          <li key={th.id}>
+          <li key={th.id} data-demo={`question-${th.id}`}>
             <button type="button" className="sq-card" onClick={() => onAsk(th.id)}>
               <span className="sq-icon">
                 <ThemeIcon id={th.id} />

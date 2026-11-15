@@ -14,6 +14,8 @@ export type AnalysisOutcome = AnalysisResult & { customPeriodUnavailable?: boole
 export interface DataClient {
   /** False when no live API is configured, so custom places cannot work. Missing means true. */
   readonly customPlaces?: boolean
+  /** True when the three ready-made example points are served from precomputed files, with no live API. */
+  readonly staticExamples?: boolean
   regions(): Promise<RegionCard[]>
   themes(): Promise<ThemeCard[]>
   variables(): Promise<VariableCard[]>

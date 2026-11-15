@@ -24,7 +24,7 @@ export function VerdictCard({ result }: { result: AnalysisResult }) {
   const simple = view === 'simple'
   const clean = (x: string) => cleanInternal(x, view)
   return (
-    <section className="card verdict" aria-labelledby="verdict-h">
+    <section className="card verdict" aria-labelledby="verdict-h" data-demo="verdict">
       {!simple && (
         <div className="verdict-top">
           <Badge meta={VERDICT_META[v.label]} />
@@ -34,7 +34,7 @@ export function VerdictCard({ result }: { result: AnalysisResult }) {
         {clean(bx(v.answer))}
       </h2>
       <VerdictGauge certainty={v.certainty} />
-      <p className={simple ? 'how-much' : 'lead'}>{clean(bx(v.how_much))}</p>
+      <p className={simple ? 'how-much' : 'lead'} data-demo="how-much">{clean(bx(v.how_much))}</p>
       {simple ? (
         <details className="more">
           <summary>{c('result.card.more', COPY.tellMeMore)}</summary>

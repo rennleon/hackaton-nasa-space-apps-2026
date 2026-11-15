@@ -14,6 +14,7 @@ import { fmt } from '../lib/resultCopy'
 const KNOWN_TEMPLATES = new Set([
   '`${key}.${sfx(view)}`',
   '`${key}.${view}`',
+  '`demo.${d.id}.label`',
   '`demo.${demo.id}.step${at}`',
   '`demo.${demo.id}.title`',
   '`result.chart.dir.${dir}`',

@@ -323,7 +323,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
   const sure = certainty === 'sure'
   const dec = e.units.decimals
   return (
-    <li className={`fcard fcard-${certainty}`}>
+    <li className={`fcard fcard-${certainty}`} data-demo={`finding-${e.variable_id}`}>
       <h3 className="fcard-name">
         <button type="button" className="fcard-open" aria-label={l('findings.open', { name })} onClick={onOpen}>
           {name}

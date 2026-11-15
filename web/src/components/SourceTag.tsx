@@ -82,7 +82,7 @@ export function SourceTag({ variable, compact = false }: { variable: VariableRef
   const byLabel = s(model ? 'src.label.model' : 'src.label.by')
 
   return (
-    <div className={`source-block source-${info.kind}`}>
+    <div className={`source-block source-${info.kind}`} data-demo="source">
       <p className="source-line">
         <span className="source-k">{view === 'simple' ? s('src.label.what') : <Term id="variable">{s('src.label.what')}</Term>}</span>
         <span className="source-v">{varText}</span>
