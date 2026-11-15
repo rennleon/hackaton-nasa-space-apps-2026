@@ -2,6 +2,7 @@ import calendar
 import json
 import logging
 import math
+import shutil
 import urllib.parse
 from pathlib import Path
 
@@ -413,7 +414,15 @@ def test_offline_reads_the_cache_and_never_the_network(tmp_path):
     off = Fake(tmp_path, None, offline=True, end_year=2030)  # even a different end year finds the cached span
     b = off.fetch(AIRS, BOX)
     assert b.months == a.months and np.array_equal(b.values, a.values)
-    assert any(p.name.endswith(".csv") for p in (tmp_path / "giovanni").iterdir())
+    assert any(p.name.endswith(".csv") for p in (tmp_path / "giovanni" / "cells").iterdir())
+
+
+def test_offline_falls_back_to_raw_cells_when_no_series_file(tmp_path):
+    online = Fake(tmp_path, airs_serve)
+    a = online.fetch(AIRS, BOX)
+    shutil.rmtree(tmp_path / "giovanni" / "box")  # only the level-2 cache is left
+    b = Fake(tmp_path, None, offline=True).fetch(AIRS, BOX)
+    assert np.array_equal(b.values, a.values) and b.provenance.n_cells == a.provenance.n_cells
 
 
 def test_offline_with_empty_cache_is_no_data(tmp_path, monkeypatch):
@@ -425,7 +434,8 @@ def test_offline_with_empty_cache_is_no_data(tmp_path, monkeypatch):
 def test_offline_partial_cache_counts_missing_cells_as_invalid(tmp_path):
     src = Fake(tmp_path, airs_serve)
     src.fetch(AIRS, BOX)
-    for p in list((tmp_path / "giovanni").glob("*_-5.5000_*.csv")):  # drop the cells at 5.5 S
+    shutil.rmtree(tmp_path / "giovanni" / "box")  # level 1 would answer first; test the raw cells
+    for p in list((tmp_path / "giovanni" / "cells").glob("*_-5.5000_*.csv")):  # drop the cells at 5.5 S
         p.unlink()
     raw = Fake(tmp_path, None, offline=True).fetch(AIRS, BOX)
     assert raw.provenance.n_cells == 4 and not np.isnan(raw.values).all()
@@ -458,7 +468,7 @@ def test_garbled_reply_is_not_cached(tmp_path):
     src = Fake(tmp_path, lambda *a: "<html>oops</html>")
     with pytest.raises(LiveSourceUnavailable, match="unreadable"):
         src.fetch(AIRS, POINT)
-    assert not list((tmp_path / "giovanni").glob("*.csv"))
+    assert not list((tmp_path / "giovanni").rglob("*.csv"))
 
 
 def test_missing_token_means_no_live_data_not_a_crash(tmp_path, monkeypatch, caplog):
@@ -493,8 +503,9 @@ def test_token_never_in_logs_cache_or_provenance(tmp_path, caplog):
     raw = src.fetch(AIRS, BOX)
     assert set(src.tokens) == {TOKEN}  # it is sent, as the header value, to every call
     assert TOKEN not in caplog.text and TOKEN not in raw.provenance.model_dump_json()
-    for p in (tmp_path / "giovanni").iterdir():
-        assert TOKEN not in p.read_text()
+    for p in (tmp_path / "giovanni").rglob("*"):
+        if p.is_file():
+            assert TOKEN not in p.read_text()
 
 
 def test_env_file_parser_and_token_order(tmp_path, monkeypatch):
@@ -522,3 +533,97 @@ def test_engine_chain_keeps_the_csv_source_first():
     ctx = EngineContext.from_repo()
     kinds = [s.kind for s in ctx.sources.sources]
     assert kinds[0] == "giovanni_csv" and kinds[-1] == "giovanni_api"
+
+
+# ----------------------------------------------------------------------------- level-1 cache: box and point series
+
+
+def test_box_series_is_cached_as_one_small_json_with_provenance(tmp_path):
+    src = Fake(tmp_path, airs_serve)
+    raw = src.fetch(AIRS, BOX)
+    f = tmp_path / "giovanni" / "box" / "AIRS3STM_7_0_SurfAirTemp_A__-79_-8_-77_-5.json"
+    doc = json.loads(f.read_text())
+    assert doc["unit"] == "K" and doc["prod_name"] == "AIRS3STM_7_0_SurfAirTemp_A" and doc["doi"] == "x"
+    assert doc["provenance"]["requested_bbox"] == [-79.0, -8.0, -77.0, -5.0]
+    assert doc["provenance"]["n_cells"] == 6 and doc["provenance"]["data_bbox"] == raw.provenance.data_bbox
+    assert doc["provenance"]["retrieved_at"] and len(doc["months"]) == len(doc["values"]) == len(raw.months)
+
+
+def test_box_series_is_read_first_even_offline_with_no_cells(tmp_path):
+    a = Fake(tmp_path, airs_serve).fetch(AIRS, BOX)
+    shutil.rmtree(tmp_path / "giovanni" / "cells")
+    off = Fake(tmp_path, None, offline=True)
+    b = off.fetch(AIRS, BOX)
+    assert b.months == a.months and np.array_equal(b.values, a.values, equal_nan=True)
+    assert b.provenance == a.provenance
+
+
+def test_box_series_hit_makes_no_calls_online(tmp_path):
+    Fake(tmp_path, airs_serve).fetch(AIRS, BOX)
+    src = Fake(tmp_path, airs_serve)
+    assert src.fetch(AIRS, BOX) is not None and src.calls == []
+
+
+def test_box_series_keeps_nan_months(tmp_path):
+    def serve(gid, lat, lon, s, e):
+        return csv_text(month_rows(fn=lambda i: -9999 if i == 2 else 290.0 + i), lat=lat, lon=lon)
+
+    a = Fake(tmp_path, serve).fetch(AIRS, BOX)
+    b = Fake(tmp_path, None, offline=True).fetch(AIRS, BOX)
+    assert np.isnan(a.values[2]) and np.array_equal(a.values, b.values, equal_nan=True)
+
+
+def test_series_cache_older_end_year_is_refetched_online_but_used_offline(tmp_path):
+    Fake(tmp_path, airs_serve, end_year=2003).fetch(AIRS, BOX)
+    newer = Fake(tmp_path, airs_serve, end_year=2004)
+    shutil.rmtree(tmp_path / "giovanni" / "cells")
+    newer.fetch(AIRS, BOX)
+    assert len(newer.calls) == 6  # a newer year exists: asked again
+    assert Fake(tmp_path, None, offline=True, end_year=2030).fetch(AIRS, BOX) is not None
+
+
+def test_unreadable_series_file_is_ignored(tmp_path):
+    src = Fake(tmp_path, airs_serve)
+    src.fetch(AIRS, BOX)
+    (tmp_path / "giovanni" / "box" / "AIRS3STM_7_0_SurfAirTemp_A__-79_-8_-77_-5.json").write_text("{nope")
+    again = Fake(tmp_path, airs_serve)
+    assert again.fetch(AIRS, BOX) is not None
+
+
+def test_snap_point_uses_the_card_grid():
+    assert G.snap_point(AIRS, 28.61, 77.21) == (28.5, 77.5)       # 1 degree cells: centres at x.5
+    assert G.snap_point(AIRS, -3.10, -60.02) == (-3.5, -60.5)
+    assert G.snap_point(GPM, -3.12, -60.02) == (-3.15, -60.05)    # 0.1 degree cells
+    assert G.snap_point(SOIL, 22.79, 5.52) == (22.875, 5.625)     # 0.25 degree cells
+    m2 = CAT.variables["merra2_t2m"]
+    assert G.snap_point(m2, 28.61, 77.21) == (28.5, 77.5)         # 0.5 x 0.625, centres on multiples of the step
+
+
+def test_nearby_points_share_one_point_file_and_one_call(tmp_path):
+    src = Fake(tmp_path, airs_serve)
+    a = src.fetch(AIRS, region("point", (77.21, 28.61, 77.21, 28.61)))
+    b = src.fetch(AIRS, region("point", (77.40, 28.80, 77.40, 28.80)))  # same 1-degree cell
+    assert len(src.calls) == 1 and (src.calls[0][1], src.calls[0][2]) == (28.5, 77.5)
+    files = list((tmp_path / "giovanni" / "point").iterdir())
+    assert [f.name for f in files] == ["AIRS3STM_7_0_SurfAirTemp_A__28.5_77.5.json"]
+    assert np.array_equal(a.values, b.values)
+    assert a.provenance.requested_bbox == [77.21, 28.61, 77.21, 28.61]
+    assert b.provenance.requested_bbox == [77.4, 28.8, 77.4, 28.8]  # each click reports its own point
+
+
+def test_point_series_is_read_offline_without_cells(tmp_path):
+    pt = region("point", (-60.02, -3.10, -60.02, -3.10))
+    a = Fake(tmp_path, airs_serve).fetch(AIRS, pt)
+    shutil.rmtree(tmp_path / "giovanni" / "cells")
+    b = Fake(tmp_path, None, offline=True).fetch(AIRS, pt)
+    assert np.array_equal(a.values, b.values) and b.months == a.months
+
+
+def test_series_cache_with_a_different_unit_is_refused(tmp_path):
+    Fake(tmp_path, airs_serve).fetch(AIRS, BOX)
+    f = tmp_path / "giovanni" / "box" / "AIRS3STM_7_0_SurfAirTemp_A__-79_-8_-77_-5.json"
+    doc = json.loads(f.read_text())
+    doc["unit"] = "degC"
+    f.write_text(json.dumps(doc))
+    with pytest.raises(GiovanniUnitMismatch):
+        Fake(tmp_path, airs_serve).fetch(AIRS, BOX)

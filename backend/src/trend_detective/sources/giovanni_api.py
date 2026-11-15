@@ -18,8 +18,12 @@ The reply is CSV: 13 `key,value` header lines (unit, undef, snapped cell centre 
   split into chunks of at most 10 years, fetched in parallel and cached one file per chunk.
 * Values stay in the card's NATIVE units (the engine applies scale/offset). A different unit in
   the CSV is an error, never a silent conversion.
-* Network rules: 60 s timeout per call, at most 8 calls in flight, raw CSV cached on disk under
-  `data/cache/giovanni/`. `TD_GIOVANNI_OFFLINE=1` means cache only, never the network.
+* Network rules: 60 s timeout per call, at most 8 calls in flight. `TD_GIOVANNI_OFFLINE=1` means
+  cache only, never the network.
+* Two cache levels under `data/cache/giovanni/`. (1) `box/` and `point/`: the final monthly series
+  plus provenance, one small JSON per id x box (or id x snapped cell centre), read first, offline
+  included; these are committed so the demo needs no network. (2) `cells/`: the raw CSV per id x cell
+  x chunk (hundreds to thousands per fine-grid box), git-ignored, a work area for rebuilding level 1.
   Network and HTTP failures raise `LiveSourceUnavailable`, so the app says "can't fetch right
   now" instead of crashing.
 * The Earthdata token (`EARTHDATA_TOKEN`, else `TD_ENV_FILE`, else `backend/.env`) is only ever
@@ -87,6 +91,12 @@ def _repo_root() -> Path:
 
 def default_cache_dir() -> Path:
     return _repo_root() / "data" / "cache" / "giovanni"
+
+
+def _num(x: float) -> str:
+    """Compact, stable number for file names: -79 -> '-79', 0.125 -> '0.125'."""
+    t = f"{round(float(x), 4):.4f}".rstrip("0").rstrip(".")
+    return "0" if t in ("-0", "") else t
 
 
 def read_env_file(path: Path) -> dict[str, str]:
@@ -259,13 +269,24 @@ def cell_steps(variable: VariableCard) -> tuple[float, float, float, float]:
     return g, g, 0.5, 0.5
 
 
+def snap_point(variable: VariableCard, lat: float, lon: float) -> tuple[float, float]:
+    """Centre of the product's grid cell that holds (lat, lon), using the card's grid (see cell_steps)."""
+    lat_step, lon_step, lat_off, lon_off = cell_steps(variable)
+
+    def snap(x: float, step: float, off: float) -> float:
+        k = math.floor(x / step + EDGE_EPS - off + 0.5)  # nearest centre (k + off) * step
+        return round((k + off) * step, 4)
+
+    return snap(lat, lat_step, lat_off), snap(lon, lon_step, lon_off)
+
+
 def plan_cells(variable: VariableCard, region: RegionCard) -> list[tuple[float, float]]:
-    """(lat, lon) request points: the point itself, or every cell centre of the product inside the box.
-    A box smaller than one cell is answered by the cell at its centre."""
+    """(lat, lon) request points: the snapped cell centre of the point, or every cell centre of the
+    product inside the box. A box smaller than one cell is answered by the cell at its centre."""
     geom = region.geometry
     w, s, e, n = geom.bbox
     if geom.kind == "point":
-        return [(round(s, 4), round(w, 4))]
+        return [snap_point(variable, s, w)]
     lat_step, lon_step, lat_off, lon_off = cell_steps(variable)
     lats = _centres(s, n, lat_step, lat_off)
     lons = _centres(w, e, lon_step, lon_off)
@@ -402,8 +423,57 @@ class GiovanniApiSource:
     def _stem(self, gid: str, lat: float, lon: float) -> str:
         return f"{gid}__{lat:.4f}_{lon:.4f}"
 
+    @property
+    def cells_dir(self) -> Path:
+        return self.cache_dir / "cells"
+
     def cache_path(self, gid: str, lat: float, lon: float, chunk: tuple[str, str]) -> Path:
-        return self.cache_dir / f"{self._stem(gid, lat, lon)}__{_tag(chunk[0])}_{_tag(chunk[1])}.csv"
+        return self.cells_dir / f"{self._stem(gid, lat, lon)}__{_tag(chunk[0])}_{_tag(chunk[1])}.csv"
+
+    def series_path(self, variable: VariableCard, region: RegionCard) -> Path:
+        """Level-1 cache file: one per id x box, or id x snapped cell centre for a point."""
+        geom = region.geometry
+        if geom.kind == "point":
+            lat, lon = snap_point(variable, geom.bbox[1], geom.bbox[0])
+            return self.cache_dir / "point" / f"{variable.giovanni_id}__{_num(lat)}_{_num(lon)}.json"
+        w, s, e, n = geom.bbox
+        return self.cache_dir / "box" / f"{variable.giovanni_id}__{_num(w)}_{_num(s)}_{_num(e)}_{_num(n)}.json"
+
+    def _read_series(self, path: Path, variable: VariableCard, region: RegionCard, end_year: int) -> RawSeries | None:
+        """The cached final series, or None (missing, unreadable, or older than the wanted end year while online)."""
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            if doc.get("giovanni_id") != variable.giovanni_id:
+                return None
+            if not self.offline and int(doc.get("end_year", 0)) < end_year:
+                return None  # a new year of data exists: refetch
+            check_unit(variable, doc["unit"])
+            months = [str(m) for m in doc["months"]]
+            vals = np.array([np.nan if v is None else float(v) for v in doc["values"]])
+            prov = Provenance(**doc["provenance"])
+        except FileNotFoundError:
+            return None
+        except (OSError, ValueError, KeyError, TypeError):
+            log.warning("unreadable Giovanni series cache %s", path.name)
+            return None
+        if len(months) != len(vals):
+            return None
+        if region.geometry.kind == "point":  # a nearby click reuses the cell: report this request's own point
+            prov = prov.model_copy(update={"requested_bbox": list(region.geometry.bbox)})
+        return RawSeries(months=months, values=vals, provenance=prov)
+
+    def _write_series(self, path: Path, variable: VariableCard, raw: RawSeries, end_year: int, meta: dict) -> None:
+        doc = {
+            "giovanni_id": variable.giovanni_id,
+            "prod_name": meta.get("prod_name"),
+            "doi": meta.get("doi"),
+            "unit": meta.get("unit"),
+            "end_year": end_year,
+            "provenance": raw.provenance.model_dump(mode="json"),
+            "months": raw.months,
+            "values": [None if not math.isfinite(v) else float(v) for v in raw.values],
+        }
+        self._write(path, json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n")
 
     def _write(self, path: Path, text: str) -> None:
         try:
@@ -427,7 +497,7 @@ class GiovanniApiSource:
         return None
 
     def _offline_texts(self, gid: str, lat: float, lon: float) -> list[str]:
-        files = sorted(self.cache_dir.glob(f"{self._stem(gid, lat, lon)}__*.csv"))
+        files = sorted(self.cells_dir.glob(f"{self._stem(gid, lat, lon)}__*.csv"))
         texts = []
         for p in files:
             try:
@@ -471,14 +541,27 @@ class GiovanniApiSource:
         gid = variable.giovanni_id
         if not gid:
             return None
-        ids = self.configured_ids()
-        if ids is not None and gid not in ids:
-            return None
-        geom = region.geometry
-        cadence = variable.cadence
         end_year = self.end_year or last_complete_year()
         if variable.record_end:
             end_year = min(end_year, int(variable.record_end[:4]))
+        path = self.series_path(variable, region)
+        hit = self._read_series(path, variable, region, end_year)
+        if hit is not None:
+            return hit
+        ids = self.configured_ids()
+        if ids is not None and gid not in ids:
+            return None
+        meta: dict = {}
+        raw = self._fetch_cells(variable, region, gid, end_year, meta)
+        if raw is not None and meta:
+            self._write_series(path, variable, raw, end_year, meta)
+        return raw
+
+    def _fetch_cells(
+        self, variable: VariableCard, region: RegionCard, gid: str, end_year: int, meta: dict
+    ) -> RawSeries | None:
+        geom = region.geometry
+        cadence = variable.cadence
         chunks = plan_chunks(cadence, variable.record_start, end_year)
         points = plan_cells(variable, region)
         cells = [_Cell(la, lo) for la, lo in points]
@@ -565,6 +648,9 @@ class GiovanniApiSource:
         vals = np.where(ok, num / np.where(den > 0, den, 1.0), np.nan)
         if not np.isfinite(vals).any():
             return None
+        got = next(c for c in unique if c.parsed is not None and np.isfinite(c.values).any())
+        meta.update(prod_name=got.parsed.header.get("prod_name"), doi=got.parsed.header.get("doi"),
+                    unit=got.parsed.unit)
         return RawSeries(
             months=months,
             values=vals,
