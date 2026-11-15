@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import { ViewProvider } from '../context'
 import { HowStrip } from './HowStrip'
@@ -6,6 +6,11 @@ import { HowItWorks } from '../screens/HowItWorks'
 import { BANDS } from '../lib/howCopy'
 import { monthRuns } from '../lib/placeFacts'
 import { bannedIn } from '../lib/copy.test'
+
+const originalScrollIntoView = Element.prototype.scrollIntoView
+afterEach(() => {
+  Element.prototype.scrollIntoView = originalScrollIntoView
+})
 
 describe('How we worked this out strip', () => {
   it('shows the four stages, each a link that opens the How it works page on that stage', () => {
