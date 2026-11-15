@@ -29,9 +29,9 @@ const DELHI = 'pt:28.61,77.21'
  */
 export const DEMOS: Demo[] = [
   {
-    id: 'cajamarca_heat',
-    label: tx('The mountains of Peru', 'Cajamarca highlands: temperature'),
-    title: tx('Demo: is it getting warmer in the Peruvian mountains?', 'Demo: 2-m air temperature, Cajamarca highlands'),
+    id: 'cajamarca_water',
+    label: tx('The mountains of Peru', 'Cajamarca highlands: afternoon humidity'),
+    title: tx('Demo: are afternoons getting more humid in the Peruvian mountains?', 'Demo: surface relative humidity (AIRS), Cajamarca highlands'),
     steps: [
       {
         route: { screen: 'home' },
@@ -40,47 +40,47 @@ export const DEMOS: Demo[] = [
       },
       {
         route: { screen: 'home', region: 'cajamarca_highlands' },
-        target: 'question-heat',
-        caption: tx('Then we ask a question. Heat: is it getting hotter or colder?', 'Pick a question. Heat selects the temperature series for this region.'),
+        target: 'question-water',
+        caption: tx('Then we ask a question. Water: is it getting wetter or drier here?', 'Pick a question. Water selects the precipitation, soil moisture, evaporation and humidity series.'),
       },
       {
-        route: { screen: 'shortlist', region: 'cajamarca_highlands', theme: 'heat' },
-        target: 'finding-power_t2m',
+        route: { screen: 'shortlist', region: 'cajamarca_highlands', theme: 'water' },
+        target: 'finding-airs_rh_surf_day',
         caption: tx(
-          'Each card is one measurement. Over only 2002 to 2021, air temperature says "Too soon to tell".',
-          'The scan compares all series over one shared window, 2002 to 2021. Over that window air temperature (MERRA-2) is not significant.',
+          'Each card is one measurement. The afternoon humidity card says "Sure it\'s real".',
+          'The scan compares all series over one shared window, 2002 to 2021. Surface relative humidity (AIRS) is significant.',
         ),
       },
       {
-        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'heat', variable: 'power_t2m' },
+        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'verdict',
         caption: tx(
-          'With all the years, 1981 to 2025, the answer is yes. The meter says we are sure: about 17 degrees then, about 18 now.',
-          'Over the full record, 1981 to 2025, the trend is significant: +0.24 °C per decade (95% CI +0.16 to +0.32), both decisive tests agree.',
+          'Yes, afternoons are getting more humid. We are sure: about 66 on the humidity scale in 2002, about 69 in 2021.',
+          'Significant increase in surface relative humidity, 2002 to 2021: +1.33 %RH per decade (95% CI +1.15 to +1.50), both decisive tests agree.',
         ),
       },
       {
-        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'heat', variable: 'power_t2m' },
+        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'source',
         caption: tx(
-          'This measurement is air temperature. A computer model called MERRA-2 worked it out.',
-          'Variable: 2-m air temperature. Source: MERRA-2 reanalysis (a model), delivered by NASA POWER.',
+          'AIRS, an instrument on the Aqua satellite, measured this.',
+          'Variable: surface relative humidity, daytime. Source: AIRS on the Aqua satellite, Level 3 monthly data, 1° grid.',
         ),
       },
       {
-        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'heat', variable: 'power_t2m' },
+        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'trust-second',
         caption: tx(
-          'Can we trust this? AIRS, an instrument on the Aqua satellite, gives a second opinion. It points the same way, but is not sure yet.',
-          'Second opinion from AIRS (Aqua satellite), 2002 to 2021: same direction, but not significant over that shorter window.',
+          'Can we trust this? The MERRA-2 computer model points the same way and is sure too. But the two share some data.',
+          'Second opinion from MERRA-2 (a model), 2002 to 2021: +1.85 %RH per decade, same direction, also significant. It assimilates AIRS, so the two are not independent.',
         ),
       },
       {
-        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'heat', variable: 'power_t2m' },
+        route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'where',
         caption: tx(
-          'Where else? The same measurement in other places. In the Amazon it goes up too, and we are sure.',
-          'The same variable in the ready-made places, each with its own full record. Manaus is also significant and increasing.',
+          'Where else? Only Cajamarca says "Sure it\'s real". The other four places say "Too soon to tell".',
+          'The same variable in the other four ready-made places, each analysed separately over 2002 to 2021: none is significant.',
         ),
       },
     ],

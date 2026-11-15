@@ -192,3 +192,16 @@ def test_rests_on_few_years_chip_names_at_most_three_years(ctx, monkeypatch):
     assert chip.text.simple == "The answer changes if we leave out 2003, 2004, 2005 and 3 more."
     assert chip.text.simple_es == "La respuesta cambia si dejamos fuera 2003, 2004, 2005 y 3 más."
     assert "2008" in chip.text.scientific and "2008" in chip.text.scientific_es
+
+
+def test_less_than_one_agrees_in_number_and_gender():
+    from trend_detective.verdict import _unos_es, less_than_one, less_than_one_es
+
+    assert less_than_one("degrees") == "less than 1 degree"
+    assert less_than_one("smoke-gas units") == "less than 1 smoke-gas unit"
+    assert less_than_one("mm of rain a day") == "less than 1 mm of rain a day"
+    assert less_than_one("on a haze scale of 0 to 100") == "less than 1 point on a haze scale of 0 to 100"
+    assert less_than_one_es("grados") == "menos de 1 grado"
+    assert less_than_one_es("unidades de gas del humo") == "menos de 1 unidad de gas del humo"
+    assert less_than_one_es("en una escala de bruma de 0 a 100") == "menos de 1 punto en una escala de bruma de 0 a 100"
+    assert _unos_es("unidades de gas del humo") == "unas" and _unos_es("grados") == "unos"

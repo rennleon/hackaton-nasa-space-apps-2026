@@ -289,11 +289,12 @@ def _simple_feel(code: str | None) -> str | None:
     return "very cold all year"
 
 
-def _texts(code, ar6, elev, high_up, wet, dry, years) -> Text | None:
+def _texts(code, ar6, elev, high_up, wet, dry, years, yours: bool = True) -> Text | None:
+    """`yours`: a place the user chose ("Your place is ..."); a ready-made one reads "This place is ..."."""
     feel = _simple_feel(code)
     simple: list[str] = []
     if feel:
-        simple.append(f"Your place is {feel}.")
+        simple.append(f"{'Your' if yours else 'This'} place is {feel}.")
     if high_up:
         simple.append("It is high up above the sea.")
     if wet:
@@ -318,7 +319,7 @@ def _texts(code, ar6, elev, high_up, wet, dry, years) -> Text | None:
     feel_es = _simple_feel_es(code)
     simple_es: list[str] = []
     if feel_es:
-        simple_es.append(f"Tu lugar es {feel_es}.")
+        simple_es.append(f"{'Tu' if yours else 'Este'} lugar es {feel_es}.")
     if high_up:
         simple_es.append("Está en un lugar alto, sobre el nivel del mar.")
     if wet:
@@ -384,5 +385,5 @@ def profile_place(ctx, region: RegionCard) -> PlaceProfile:
         elevation_m_model=elev,
         wet_months=wet,
         dry_months=dry,
-        text=_texts(code, ar6, elev, high_up, wet, dry, years),
+        text=_texts(code, ar6, elev, high_up, wet, dry, years, yours=region.id.startswith("custom")),
     )

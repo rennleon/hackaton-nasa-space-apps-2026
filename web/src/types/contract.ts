@@ -192,6 +192,7 @@ export interface ThenNow {
   value_now: number;
   kid_scale: number;
   kid_label: string;
+  kid_label_es: string | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema

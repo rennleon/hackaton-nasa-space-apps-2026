@@ -161,7 +161,7 @@ Feature freeze: **16:00 Peru, Sun Nov 15**. After that, only R5 fixes, deploy an
 | U5 | Source tag with instrument on every card; "Where our data comes from" page from `catalog/instruments.yaml` | R1 R6 | ✅ |
 | U6 | Start: question inline after place, area size shown, "use my location", offline city search | R2 | ✅ |
 | U7 | Loading / empty / error states for live fetches | R2 | ✅ |
-| U8 | Demo: narration matches screen, spotlight, ends on a real result (#3, #4) | R5 | ⬜ after A6 stage 1 |
+| U8 | Demo: narration matches screen, spotlight, ends on a real result (#3, #4) | R5 | ✅ Demo 1 = Cajamarca highlands, Water, afternoon humidity (AIRS, second opinion, Where else?); Demo 2 = Delhi air; narration checked against regenerated data, one test per step |
 | U9 | Visual refresh (contrast AA, fewer borders, self-hosted fonts); 390 px check | R5 | ✅ |
 | L0 | Every UI string through `web/src/i18n` (`t()`, `tx()` for backend Text) in U1–U7 | R5 | ✅ |
 | L1 | Spanish for backend text: optional `simple_es` / `scientific_es` on `Text`; Spanish in catalog YAML (names, definitions, glossary, themes, instruments, regions) and engine sentence templates (verdict, selection, gates, contrast, place) | R5 | 🟡 last strings (contrast, availability, custom place) |
@@ -198,3 +198,4 @@ Feature freeze: **16:00 Peru, Sun Nov 15**. After that, only R5 fixes, deploy an
 | Nov 15 01:45 | MODIS aerosol, MOPITT CO | ⛔ no live route (not in Giovanni cloud list, not in POWER) → manual export, see `docs/offline-downloads.md` |
 | Nov 15 01:15 | v2 base commit `eaf5da3` (contract, instruments catalog); 9 agents launched in parallel worktrees | 🟡 running |
 | Nov 15 00:10 | Audit of `web/public/data/results` | ⚠️ All 15 Giovanni-based results for Cajamarca highlands and Wisconsin are "No series loaded". `data/raw/` holds only 2 CSVs (cajamarca_west humidity). Only the 3 POWER variables work today |
+| Nov 15 final polish | Demo 1 rewritten for Cajamarca afternoon humidity (AIRS 66 → 69 on the humidity scale, 2002–2021; MERRA-2 second opinion agrees, partly shared data; only Cajamarca is sure in Where else?). Sulfate and organic carbon get a relative "air-particles" kid scale; "less than 1" agrees in number and gender (EN/ES); `ThenNow.kid_label_es` added; example place names in Spanish; ready-made places read "This place is …"; static data regenerated offline | ✅ backend 277 passed, web 197 passed, tsc clean |

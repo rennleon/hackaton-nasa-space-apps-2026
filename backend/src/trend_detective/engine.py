@@ -184,7 +184,7 @@ def _then_now(p: Prepared, core: Core, var: VariableCard, season: Season | None)
     return ThenNow(
         year_then=math.floor(t0), value_then=_r(level + tt.intercept + tt.slope_per_year * t0),
         year_now=math.floor(t1), value_now=_r(level + tt.intercept + tt.slope_per_year * t1),
-        kid_scale=var.kid_units.scale, kid_label=var.kid_units.label,
+        kid_scale=var.kid_units.scale, kid_label=var.kid_units.label, kid_label_es=var.kid_units.label_es,
     )
 
 

@@ -3,7 +3,7 @@ import type { AnalysisResult, YearPoint } from '../types/contract'
 import { formatYm, type ViewMode } from './text'
 import { COPY } from './copy'
 import { fmt, sv } from './resultCopy'
-import { tx } from '../i18n'
+import { getLang, tx } from '../i18n'
 
 const BLUE = '#1c6ea4'
 const ORANGE = '#d9480f'
@@ -215,7 +215,7 @@ export function yearlyChart(r: AnalysisResult, view: ViewMode): ChartSpec {
   const unit = unitLabel(r, view)
   const yTitle = simple
     ? off != null
-      ? (r.then_now?.kid_label ?? unit)
+      ? ((getLang() === 'es' ? r.then_now?.kid_label_es : null) ?? r.then_now?.kid_label ?? unit)
       : sv(view, 'result.chart.axisDiff', 'Difference from a normal year ({unit})', '', { unit })
     : seasonName
       ? sv(view, 'result.chart.axisSeasonAnomaly', '', '{season} anomaly ({unit})', { season: seasonName, unit })

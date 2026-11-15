@@ -1,10 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import type { AnalysisResult } from '../types/contract'
 import { yearlyChart, yearlyPoints } from './charts'
+import { setLang } from '../i18n'
 
 const dry = JSON.parse(readFileSync('src/fixtures/airs_rh_surf_day__dry.json', 'utf8')) as AnalysisResult
 const all = JSON.parse(readFileSync('src/fixtures/airs_rh_surf_day.json', 'utf8')) as AnalysisResult
+
+afterEach(() => setLang('en'))
 
 describe('yearly chart (R3, season bug)', () => {
   it('plots the season series when a season is selected, not the all-months yearly means', () => {
@@ -33,6 +36,15 @@ describe('yearly chart (R3, season bug)', () => {
     const sci = yearlyChart(all, 'scientific')
     const band = sci.data.find((d) => (d as { fill?: string }).fill === 'tonexty') as { fillcolor: string }
     expect(band.fillcolor).toMatch(/0\.28/)
+  })
+  it('Simple y-axis title is in Spanish when the card has kid_label_es', () => {
+    const r: AnalysisResult = { ...all, then_now: { ...all.then_now!, kid_label_es: 'en la escala de humedad (0 a 100)' } }
+    setLang('es')
+    try {
+      expect((yearlyChart(r, 'simple').layout.yaxis as { title: { text: string } }).title.text).toBe('en la escala de humedad (0 a 100)')
+    } finally {
+      setLang('en')
+    }
   })
   it('annotates years that were left out', () => {
     const r: AnalysisResult = {

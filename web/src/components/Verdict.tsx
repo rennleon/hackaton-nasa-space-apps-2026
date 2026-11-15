@@ -149,7 +149,7 @@ function Details({ result }: { result: AnalysisResult }) {
           <>
             <dt>{s('result.details.loyo', '', 'Leave-one-year-out')}</dt>
             <dd>
-              {s('result.details.loyoValue', '', 'slope {lo} to {hi}; worst p = {p}', {
+              {s('result.details.loyoValue', '', 'Slope {lo} to {hi}; worst p = {p}', {
                 lo: fmt(result.robustness.leave_one_year_out.slope_min, dec),
                 hi: fmt(result.robustness.leave_one_year_out.slope_max, dec),
                 p: formatP(result.robustness.leave_one_year_out.worst_p),

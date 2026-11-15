@@ -51,14 +51,14 @@ def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> st
     if expected is None:
         if abs(mdt) < 1:
             return "Podemos ver incluso cambios pequeños."
-        return f"Podemos ver cambios de {kid_amount_es(mdt)} {u_simple} o más cada 10 años."
+        return f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
     ok = mdt <= abs(expected)
     if kid_amount_es(mdt) == kid_amount_es(expected):
         if ok:
             return "Este registro es lo bastante largo para ver un cambio típico."
         return "Este registro solo puede ver cambios mayores que uno típico."
     spot = ("Podemos ver incluso cambios pequeños." if abs(mdt) < 1
-            else f"Podemos ver cambios de {kid_amount_es(mdt)} {u_simple} o más cada 10 años.")
+            else f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años.")
     typical = f"Un cambio típico es de {kid_amount_es(expected)} {u_simple}."
     return f"{spot} {typical} " + ("Eso basta para verlo." if ok else "Aún no podemos verlo.")
 
@@ -72,14 +72,14 @@ def detect_sentences(mdt: float, expected: float | None, u_simple: str) -> tuple
     if expected is None:
         if abs(mdt) < 1:
             return "We can spot even small changes.", None
-        return f"We can spot changes of {kid_amount(mdt)} {u_simple} or more every 10 years.", None
+        return f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.", None
     ok = mdt <= abs(expected)
     if kid_amount(mdt) == kid_amount(expected):
         if ok:
             return "This record is long enough to spot a typical change.", ok
         return "This record can only spot changes bigger than a typical one.", ok
     spot = ("We can spot even small changes." if abs(mdt) < 1
-            else f"We can spot changes of {kid_amount(mdt)} {u_simple} or more every 10 years.")
+            else f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.")
     if ok:
         return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. That's enough to see it.", ok
     return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. We can't see that yet.", ok

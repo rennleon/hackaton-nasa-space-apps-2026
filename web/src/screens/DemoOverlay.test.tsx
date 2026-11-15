@@ -36,7 +36,7 @@ afterEach(() => vi.unstubAllGlobals())
 
 describe('demo script', () => {
   it('has 5 to 7 short steps per demo, each pointing at something', () => {
-    expect(DEMOS.map((d) => d.id)).toEqual(['cajamarca_heat', 'delhi_air'])
+    expect(DEMOS.map((d) => d.id)).toEqual(['cajamarca_water', 'delhi_air'])
     for (const d of DEMOS) {
       expect(d.steps.length).toBeGreaterThanOrEqual(5)
       expect(d.steps.length).toBeLessThanOrEqual(7)

@@ -131,6 +131,32 @@ def kid_value_es(value: float, scale: float, label: str) -> str:
     return f"{abs(n)} {label} bajo cero" if n < 0 else f"{n} {label}"
 
 
+def _unos_es(label: str) -> str:
+    """'unos' before a masculine label, 'unas' before 'unidades ...'."""
+    return "unas" if label.startswith("unidades") else "unos"
+
+
+def less_than_one(label: str) -> str:
+    """'less than 1 <unit>' for a kid label, singular where the label is a plural noun (never '1 units')."""
+    if label.startswith("on "):
+        return f"less than 1 point {label}"
+    for plural, one in (("degrees", "degree"), (" units", " unit")):
+        if label.endswith(plural):
+            return f"less than 1 {label[: -len(plural)] + one}"
+    return f"less than 1 {label}"
+
+
+def less_than_one_es(label: str) -> str:
+    """Spanish 'menos de 1 <unidad>' with singular agreement ('grado', 'unidad ...')."""
+    if label.startswith("en "):
+        return f"menos de 1 punto {label}"
+    if label == "grados":
+        return "menos de 1 grado"
+    if label.startswith("unidades"):
+        return f"menos de 1 unidad{label[len('unidades'):]}"
+    return f"menos de 1 {label}"
+
+
 def has_es(v: VariableCard) -> bool:
     return v.words_es is not None and v.kid_units.label_es is not None and v.units.simple_es is not None
 
@@ -237,19 +263,17 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     if certainty in ("sure", "maybe") and tn:
         a, b = kid_number(tn.value_then, tn.kid_scale), kid_number(tn.value_now, tn.kid_scale)
         if a == b:
-            one = "degree" if tn.kid_label == "degrees" else tn.kid_label
-            how_s = f"Since {tn.year_then} it changed by less than 1 {one}."
+            how_s = f"Since {tn.year_then} it changed by {less_than_one(tn.kid_label)}."
         else:
             how_s = f"In {tn.year_then}: about {a} {tn.kid_label}. In {tn.year_now}: about {b}."
         how_sc = f"{slope_sc}{level_sc}."
         if es:
             lab = v.kid_units.label_es
             if a == b:
-                one_es = "grado" if lab == "grados" else lab
-                how_es = f"Desde {tn.year_then} cambió menos de 1 {one_es}."
+                how_es = f"Desde {tn.year_then} cambió {less_than_one_es(lab)}."
             else:
-                how_es = (f"En {tn.year_then}: unos {kid_value_es(tn.value_then, tn.kid_scale, lab)}. "
-                          f"En {tn.year_now}: unos {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
+                how_es = (f"En {tn.year_then}: {_unos_es(lab)} {kid_value_es(tn.value_then, tn.kid_scale, lab)}. "
+                          f"En {tn.year_now}: {_unos_es(lab)} {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
             how_sc_es = f"{slope_sc_es}{level_sc_es}."
     elif certainty == "too_soon":
         if x.years_needed is not None and x.years_needed > x.years_available:

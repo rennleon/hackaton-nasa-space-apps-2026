@@ -144,7 +144,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
                         seasonal_cycle: '{seasonal_cycle}',
                       })
                 }
-                terms={{ seasonal_cycle: <Term id="seasonal_cycle" /> }}
+                terms={{ seasonal_cycle: <Term id="seasonal_cycle" cap={view !== 'simple'} /> }}
               />
             </p>
           )}

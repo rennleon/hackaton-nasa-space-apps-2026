@@ -111,6 +111,7 @@ class ThenNow(Model):
     value_now: float
     kid_scale: float
     kid_label: str
+    kid_label_es: str | None = None
 
 
 class FitPoint(Model):
