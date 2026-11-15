@@ -93,6 +93,15 @@ describe('Findings screen', () => {
     await waitFor(() => expect(window.location.hash).toMatch(/^#\/variable\?.*variable=airs_rh_surf_day/))
   })
 
+  it('a card opens the result on the same years it used (the shared window), so both give one answer', async () => {
+    const user = userEvent.setup()
+    const s = scanFile('cajamarca_west', 'water')
+    const shared = { ...base, scan: async () => ({ ...s, common_window: true, window_start: '2002-09', window_end: '2021-12' }) }
+    open('#/shortlist?region=cajamarca_west&theme=water', shared)
+    await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
+    await waitFor(() => expect(window.location.hash).toMatch(/start=2002-09&end=2021-12/))
+  })
+
   it('shows the loading state, then the cards', async () => {
     let release: (s: ScanResult) => void = () => {}
     const slow = { ...base, scan: () => new Promise<ScanResult>((r) => { release = r }) }

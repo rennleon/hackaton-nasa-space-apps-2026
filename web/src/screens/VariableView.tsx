@@ -15,6 +15,12 @@ import { LiveNotice } from '../components/LiveNotice'
 import { WhereElse } from '../components/WhereElse'
 import { parsePlace, placeRegion } from '../lib/place'
 
+/** Route years are `YYYY` (typed by the user) or `YYYY-MM` (handed over by a shortlist card: its exact shared window). */
+export function periodMonth(v: string | undefined, edge: 'start' | 'end'): string | undefined {
+  if (!v) return undefined
+  return /^\d{4}-\d{2}$/.test(v) ? v : `${v}-${edge === 'start' ? '01' : '12'}`
+}
+
 export function VariableView({ route, go }: { route: Route; go: (r: Route) => void }) {
   const { client, catalog } = useData()
   const { view } = useView()
@@ -24,24 +30,22 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
   const region = place ? placeRegion(place) : catalog.regions.find((r) => r.id === route.region)
   const card = catalog.variables.find((v) => v.id === route.variable)
   const customPeriod = Boolean(route.start || route.end)
+  // opened from a shortlist card: the period is that card's shared window, so both say the same thing
+  const fromList = /^\d{4}-\d{2}$/.test(route.start ?? '') && /^\d{4}-\d{2}$/.test(route.end ?? '')
+  const pStart = periodMonth(route.start, 'start')
+  const pEnd = periodMonth(route.end, 'end')
   const res = useAsync(async () => {
     if (!region || !card) throw new Error('unknown region or variable')
-    if (place) {
-      return client.customResult(place, card.id, { start: route.start ? `${route.start}-01` : undefined, end: route.end ? `${route.end}-12` : undefined })
-    }
+    if (place) return client.customResult(place, card.id, { start: pStart, end: pEnd })
     if (!customPeriod) return client.result(region.id, card.id, route.season)
-    return client.analyze(region.id, card.id, {
-      start: route.start ? `${route.start}-01` : undefined,
-      end: route.end ? `${route.end}-12` : undefined,
-      seasonId: route.season,
-    })
+    return client.analyze(region.id, card.id, { start: pStart, end: pEnd, seasonId: route.season })
   }, [region?.id, card?.id, route.place, route.season, route.start, route.end])
 
-  const [start, setStart] = useState(route.start ?? '')
-  const [end, setEnd] = useState(route.end ?? '')
+  const [start, setStart] = useState(route.start?.slice(0, 4) ?? '')
+  const [end, setEnd] = useState(route.end?.slice(0, 4) ?? '')
   useEffect(() => {
-    setStart(route.start ?? '')
-    setEnd(route.end ?? '')
+    setStart(route.start?.slice(0, 4) ?? '')
+    setEnd(route.end?.slice(0, 4) ?? '')
   }, [route.start, route.end])
 
   if (!region || !card) {
@@ -60,7 +64,9 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
   const back = () => go({ screen: 'shortlist', region: custom ? undefined : region.id, place: route.place, theme: route.theme, season: route.season })
   const apply = (e: React.FormEvent) => {
     e.preventDefault()
-    go({ ...route, start: start || undefined, end: end || undefined })
+    // keep the card's exact months when the user did not change the years
+    const keep = (typed: string, cur?: string) => (typed && cur?.slice(0, 4) === typed ? cur : typed || undefined)
+    go({ ...route, start: keep(start, route.start), end: keep(end, route.end) })
   }
   const invalid = Boolean(start && end && Number(start) > Number(end))
   return (
@@ -103,7 +109,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
           </button>
           {customPeriod && (
             <button type="button" className="link" onClick={() => go({ ...route, start: undefined, end: undefined })}>
-              {s('result.period.reset', 'Reset to default')}
+              {fromList ? s('result.period.allYears', 'Use all the years we have', 'Use the full record') : s('result.period.reset', 'Reset to default')}
             </button>
           )}
           {invalid && <span role="alert" className="error">{s('result.period.invalid', 'Start must be before end.')}</span>}
@@ -119,10 +125,15 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
       )}
       {res.data && (
         <>
-          {custom && <p className="muted small">{c('result.powerCredit', COPY.powerCredit)}</p>}
+          {custom && res.data.variable.delivered_by === 'NASA POWER' && <p className="muted small">{c('result.powerCredit', COPY.powerCredit)}</p>}
           {(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable && (
             <p role="status" className="notice">
               {s('result.periodUnavailable', 'Custom period unavailable right now, showing the default.')}
+            </p>
+          )}
+          {fromList && res.data.window && !(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable && (
+            <p className="muted small" data-testid="same-years-note">
+              {s('result.sameYears', 'Same years as the list, so the answer is the same.', 'Same window as the shortlist card (shared window across the theme), so the verdict matches the card. Use the full record to see this variable on its own.')}
             </p>
           )}
           {res.data.window && (

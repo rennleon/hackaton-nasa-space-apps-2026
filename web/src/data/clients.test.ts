@@ -19,14 +19,11 @@ describe('FallbackClient', () => {
     const c = new FallbackClient(fake({ analyze: async () => res }), fake({ result: async () => { throw new Error('unused') } }))
     expect(await c.analyze('r', 'v', { start: '2005-01' })).toBe(res)
   })
-  it('falls back for a custom period and flags it', async () => {
-    const c = new FallbackClient(fake({}), fake({ result: async () => res }))
-    const out = await c.analyze('r', 'v', { start: '2005-01' })
-    expect(out.customPeriodUnavailable).toBe(true)
-  })
-  it('falls back silently when no custom period was asked', async () => {
-    const c = new FallbackClient(fake({}), fake({ result: async () => res }))
-    expect((await c.analyze('r', 'v', {})).customPeriodUnavailable).toBeUndefined()
+  it('falls back to the static twin, which holds the shared windows', async () => {
+    const twin = vi.fn(async () => res)
+    const c = new FallbackClient(fake({}), fake({ analyze: twin }))
+    expect(await c.analyze('r', 'v', { start: '2002-09', end: '2021-12' })).toBe(res)
+    expect(twin).toHaveBeenCalledWith('r', 'v', { start: '2002-09', end: '2021-12' })
   })
   it('falls back for plain reads', async () => {
     const c = new FallbackClient(fake({ regions: async () => { throw new Error('down') } }), fake({ regions: async () => [{ id: 'a' } as never] }))
@@ -45,6 +42,20 @@ describe('StaticClient', () => {
   it('flags custom periods', async () => {
     vi.stubGlobal('fetch', async () => new Response(JSON.stringify(res)))
     const out = await new StaticClient('/').analyze('r', 'v', { end: '2010-12' })
+    expect(out.customPeriodUnavailable).toBe(true)
+    vi.unstubAllGlobals()
+  })
+  it('serves a shortlist card\'s shared window from its precomputed file', async () => {
+    const f = vi.fn(async (...args: [string]) => new Response(JSON.stringify({ ...res, url: args[0] })))
+    vi.stubGlobal('fetch', f)
+    const out = await new StaticClient('/').analyze('r', 'v', { start: '2002-09', end: '2021-12' })
+    expect(f.mock.calls[0][0]).toBe('/data/results/r/v__win_2002-09_2021-12.json')
+    expect(out.customPeriodUnavailable).toBeUndefined()
+    vi.unstubAllGlobals()
+  })
+  it('falls back to the default with a flag when no shared-window file exists', async () => {
+    vi.stubGlobal('fetch', async (u: string) => (u.includes('__win_') ? new Response('nope', { status: 404 }) : new Response(JSON.stringify(res))))
+    const out = await new StaticClient('/').analyze('r', 'v', { start: '2002-09', end: '2021-12' })
     expect(out.customPeriodUnavailable).toBe(true)
     vi.unstubAllGlobals()
   })

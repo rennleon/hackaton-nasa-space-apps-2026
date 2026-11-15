@@ -27,10 +27,8 @@ export class FallbackClient implements DataClient {
     try {
       return await this.api.analyze(regionId, variableId, opts)
     } catch {
-      // No static twin for a custom period: serve the default (or season) result and say so.
-      const res = await this.fallback.result(regionId, variableId, opts.seasonId)
-      const custom = Boolean(opts.start || opts.end)
-      return custom ? { ...res, customPeriodUnavailable: true } : res
+      // The static twin holds the shared windows; any other custom period gets the default (or season) result and a flag.
+      return this.fallback.analyze(regionId, variableId, opts)
     }
   }
 

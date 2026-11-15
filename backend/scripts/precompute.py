@@ -80,6 +80,17 @@ def dump(path: Path, obj) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
+def dump_shared_windows(ctx, out: Path, dir_id: str, region, theme_id: str, sc) -> None:
+    """Each scanned variable at the scan's shared window, exactly as the scan ran it, so a shortlist card opens
+    on its own numbers offline: `results/<dir>/<var>__win_<start>_<end>.json` (read by web StaticClient)."""
+    if not (sc.common_window and sc.window_start and sc.window_end):
+        return
+    for e in sc.entries:
+        res = analyze_region(ctx, region, e.variable_id, start=sc.window_start, end=sc.window_end,
+                             theme_id=theme_id, window_reason="common")
+        dump(out / "results" / dir_id / f"{e.variable_id}__win_{sc.window_start}_{sc.window_end}.json", res)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, default=repo_root() / "web" / "public" / "data")
@@ -107,7 +118,9 @@ def main() -> None:
                      analyze(ctx, region.id, var.id, season_id=s.id))
             print(f"{region.id:22s} {var.id:22s} {res.verdict.label}")
         for theme in cat.themes.values():
-            dump(out / "results" / region.id / f"scan_{theme.id}.json", scan(ctx, region.id, theme.id, cache))
+            sc = scan(ctx, region.id, theme.id, cache)
+            dump(out / "results" / region.id / f"scan_{theme.id}.json", sc)
+            dump_shared_windows(ctx, out, region.id, region, theme.id, sc)
 
     # Example places: the same results as a pre-loaded region, plus one "where else?" file per listed variable.
     listed = [v for v in cat.variables.values() if v.listed]
@@ -122,7 +135,9 @@ def main() -> None:
             where[var.id].append(where_entry(region, "example", res, var))
             print(f"{region.id:22s} {var.id:22s} {res.verdict.label}")
         for theme in cat.themes.values():
-            dump(out / "results" / region.id / f"scan_{theme.id}.json", scan_region(ctx, region, theme.id))
+            sc = scan_region(ctx, region, theme.id)
+            dump(out / "results" / region.id / f"scan_{theme.id}.json", sc)
+            dump_shared_windows(ctx, out, region.id, region, theme.id, sc)
     generated = date.today().isoformat()
     for var in listed:
         dump(out / "where" / f"{var.id}.json",

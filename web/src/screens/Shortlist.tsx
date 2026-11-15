@@ -50,7 +50,15 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
   const summary = summarize(available)
   const open = (e: ScanEntry) => {
     const declared = region.declared_seasons.some((s) => s.variable === e.variable_id && s.id === route.season)
-    go({ screen: 'variable', region: custom ? undefined : region.id, place: route.place, theme: themeId, variable: e.variable_id, season: declared ? route.season : undefined, start: route.start, end: route.end })
+    // open the variable page on the SAME years this card's verdict used (the scan's shared window, as YYYY-MM),
+    // so the card and the page give the same answer; the page offers "all the years we have" from there
+    const shared = data?.common_window && data.window_start && data.window_end
+    go({
+      screen: 'variable', region: custom ? undefined : region.id, place: route.place, theme: themeId, variable: e.variable_id,
+      season: declared ? route.season : undefined,
+      start: route.start ?? (shared ? data.window_start! : undefined),
+      end: route.end ?? (shared ? data.window_end! : undefined),
+    })
   }
   const years = data?.window_start && data.window_end ? { start: data.window_start.slice(0, 4), end: data.window_end.slice(0, 4) } : null
   const placeText = data?.place?.text ? tx(data.place.text, view) : region.listed !== false && !custom ? tx(region.description, view) : ''
