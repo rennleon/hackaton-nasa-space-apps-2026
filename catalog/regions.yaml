@@ -137,14 +137,14 @@
 - id: wisconsin
   name:
     simple: Wisconsin
-    scientific: Wisconsin, USA (state shape)
+    scientific: Wisconsin area, USA (box around the state)
     simple_es: "Wisconsin"
-    scientific_es: "Wisconsin, EE. UU. (forma del estado)"
+    scientific_es: "Zona de Wisconsin, EE. UU. (rectángulo alrededor del estado)"
   description:
-    simple: A US state with farms, forests and lakes, where smoke from Canadian wildfires sometimes arrives in summer.
-    scientific: Giovanni US-state shape; the organizers' example region (MODIS-Aqua AOD and wildfire smoke).
-    simple_es: "Un estado de EE. UU. con granjas, bosques y lagos, adonde a veces llega en verano el humo de incendios de Canadá."
-    scientific_es: "Forma de estado de EE. UU. de Giovanni; región de ejemplo de los organizadores (AOD de MODIS-Aqua y humo de incendios)."
+    simple: A US state with farms, forests and lakes, where smoke from Canadian wildfires sometimes arrives in summer. We look at a box around the state.
+    scientific: "Bounding box of the Wisconsin state shape (W -92.9, S 42.5, E -86.8, N 47.1). Live Giovanni and NASA POWER series are averaged over the whole box (cos-latitude weighted grid cells), not masked to the state outline, so edges of neighbouring states and part of Lake Michigan are included (land-only products such as GLDAS skip water cells)."
+    simple_es: "Un estado de EE. UU. con granjas, bosques y lagos, adonde a veces llega en verano el humo de incendios de Canadá. Miramos un rectángulo alrededor del estado."
+    scientific_es: "Rectángulo que contiene la forma del estado de Wisconsin (O -92.9, S 42.5, E -86.8, N 47.1). Las series en vivo de Giovanni y NASA POWER se promedian sobre todo el rectángulo (celdas ponderadas por coseno de la latitud), sin recortar al contorno del estado; incluye bordes de estados vecinos y parte del lago Michigan (los productos solo de tierra, como GLDAS, omiten las celdas de agua)."
   regime: temperate continental
   geometry:
     kind: shape
