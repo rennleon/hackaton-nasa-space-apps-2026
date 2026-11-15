@@ -387,5 +387,51 @@ export interface PlaceProfile {
   wet_months: number[];
   dry_months: number[];
   text: Text | null;
+  homogeneity: Homogeneity | null;
+}
+/**
+ * "Is this one kind of place?" From long-term means only (never a trend), before any trend is computed.
+ * The rules are PROJECT HEURISTICS (the concept follows Hosking & Wallis 1993); the literature gives no thresholds.
+ *
+ * This interface was referenced by `ScanResult`'s JSON-Schema
+ * via the `definition` "Homogeneity".
+ */
+
+export interface Homogeneity {
+  kind: "one_kind" | "mixed" | "single_spot";
+  reasons: HomogeneityReason[];
+  n_cells: number;
+  precip_min: number | null;
+  precip_max: number | null;
+  t2m_min: number | null;
+  t2m_max: number | null;
+  elev_min: number | null;
+  elev_max: number | null;
+  climate_groups: {
+    [k: string]: number;
+  };
+  suggestions: HomogeneitySuggestion[];
+  text: Text;
+}
+/**
+ * This interface was referenced by `ScanResult`'s JSON-Schema
+ * via the `definition` "HomogeneityReason".
+ */
+
+export interface HomogeneityReason {
+  code: "climate_groups" | "elevation" | "rain" | "temperature";
+  text: Text;
+}
+/**
+ * A smaller box inside a mixed one that is itself one kind of place.
+ *
+ * This interface was referenced by `ScanResult`'s JSON-Schema
+ * via the `definition` "HomogeneitySuggestion".
+ */
+
+export interface HomogeneitySuggestion {
+  bbox: number[];
+  name: Text;
+  n_cells: number;
 }
 

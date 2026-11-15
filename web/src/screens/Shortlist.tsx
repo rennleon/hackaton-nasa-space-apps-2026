@@ -3,6 +3,7 @@ import { useData, useView } from '../context'
 import { tx } from '../i18n'
 import { useAsync } from '../lib/useAsync'
 import { Timeline } from '../components/Timeline'
+import { HomogeneityPanel } from '../components/HomogeneityPanel'
 import { SourceTag } from '../components/SourceTag'
 import { Term } from '../components/Term'
 import { VerdictChip } from '../components/VerdictChip'
@@ -70,6 +71,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
         <h1 id="res-h">{placeName}</h1>
         {theme && <p className="findings-q">{tx(theme.question, view)}</p>}
         {placeText && <p className="muted place-text">{placeText}</p>}
+        <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} />
         <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
       </header>
 

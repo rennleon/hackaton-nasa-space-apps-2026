@@ -100,6 +100,185 @@
       "title": "Comparison",
       "type": "object"
     },
+    "Homogeneity": {
+      "description": "\"Is this one kind of place?\" From long-term means only (never a trend), before any trend is computed.\nThe rules are PROJECT HEURISTICS (the concept follows Hosking & Wallis 1993); the literature gives no thresholds.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "one_kind",
+            "mixed",
+            "single_spot"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/HomogeneityReason"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "n_cells": {
+          "title": "N Cells",
+          "type": "integer"
+        },
+        "precip_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Precip Min"
+        },
+        "precip_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Precip Max"
+        },
+        "t2m_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "T2M Min"
+        },
+        "t2m_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "T2M Max"
+        },
+        "elev_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elev Min"
+        },
+        "elev_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elev Max"
+        },
+        "climate_groups": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Climate Groups",
+          "type": "object"
+        },
+        "suggestions": {
+          "items": {
+            "$ref": "#/$defs/HomogeneitySuggestion"
+          },
+          "title": "Suggestions",
+          "type": "array"
+        },
+        "text": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "kind",
+        "reasons",
+        "n_cells",
+        "precip_min",
+        "precip_max",
+        "t2m_min",
+        "t2m_max",
+        "elev_min",
+        "elev_max",
+        "climate_groups",
+        "suggestions",
+        "text"
+      ],
+      "title": "Homogeneity",
+      "type": "object"
+    },
+    "HomogeneityReason": {
+      "properties": {
+        "code": {
+          "enum": [
+            "climate_groups",
+            "elevation",
+            "rain",
+            "temperature"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "HomogeneityReason",
+      "type": "object"
+    },
+    "HomogeneitySuggestion": {
+      "description": "A smaller box inside a mixed one that is itself one kind of place.",
+      "properties": {
+        "bbox": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Bbox",
+          "type": "array"
+        },
+        "name": {
+          "$ref": "#/$defs/Text"
+        },
+        "n_cells": {
+          "title": "N Cells",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bbox",
+        "name",
+        "n_cells"
+      ],
+      "title": "HomogeneitySuggestion",
+      "type": "object"
+    },
     "PlaceProfile": {
       "description": "What kind of place this is, from facts known before any trend (long-term means, elevation, maps).",
       "properties": {
@@ -206,6 +385,17 @@
             }
           ],
           "default": null
+        },
+        "homogeneity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Homogeneity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -217,7 +407,8 @@
         "elevation_m_model",
         "wet_months",
         "dry_months",
-        "text"
+        "text",
+        "homogeneity"
       ],
       "title": "PlaceProfile",
       "type": "object"

@@ -742,5 +742,20 @@ const es: Record<string, string> = {
   'how.s16.text.simple': 'Recibes una respuesta corta y un medidor de tres pasos. Luego ves antes y ahora.',
   'how.s16.text.scientific':
     'Las etiquetas se traducen al medidor de tres pasos ("Seguro que es real", "Quizás, aún no estamos seguros", "Es muy pronto para saberlo", y además "no podemos saberlo"). Antes y ahora en números enteros; la tasa por 10 años con su rango del 95 % en la vista Científica. Nunca escribimos "causado por", "demuestra" ni "sin cambio".',
+  // ---------- "Is this one kind of place?" panel (shortlist page)
+  'homog.aria': '¿Es un solo tipo de lugar?',
+  'homog.mixed.title': 'Lugar mezclado',
+  'homog.one.title': 'Un solo tipo de lugar',
+  'homog.spot.title': 'Un punto pequeño',
+  'homog.why': 'Cuéntame más',
+  'homog.try': 'Probar solo {name}',
+  'homog.try.sci': 'Usar solo {name} ({n} celdas)',
+  'homog.rule.sci': 'regla: heurística del proyecto',
+  'homog.cells.sci': 'Celdas de la rejilla',
+  'homog.rain.sci': 'Precipitación anual',
+  'homog.unit.rain.sci': 'mm/día',
+  'homog.elev.sci': 'Elevación del modelo',
+  'homog.t2m.sci': 'T2M anual',
+  'homog.groups.sci': 'Grupos principales de Köppen',
 }
 export default es

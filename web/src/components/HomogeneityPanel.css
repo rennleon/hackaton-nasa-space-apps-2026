@@ -1,0 +1,13 @@
+/* "Is this one kind of place?" panel on the shortlist page. Quiet for one kind, a visible note when mixed. */
+.homog { margin: 0.2rem 0 0.8rem; max-width: 60ch; }
+.homog-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0; }
+.homog-icon { flex: none; }
+.homog-text { margin: 0.2rem 0 0; }
+.homog-one_kind .homog-text, .homog-single_spot .homog-text { color: var(--muted); }
+.homog-mixed { padding: 8px 12px; border-left: 4px solid var(--v-maybe-fill, #e69a1a); background: var(--v-maybe-bg, #fff1d6); border-radius: 0 6px 6px 0; }
+.homog-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.1rem 0.8rem; margin: 0.5rem 0 0; font-size: 0.9rem; }
+.homog-facts dt { color: var(--muted); }
+.homog-facts dd { margin: 0; }
+.homog-why { margin-top: 0.4rem; }
+.homog-why ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+.homog-try { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }

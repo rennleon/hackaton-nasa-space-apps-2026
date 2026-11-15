@@ -18,7 +18,7 @@ function v2Scan(): ScanResult {
   const years = Array.from({ length: 12 }, (_, i) => ({ year: 2003 + i, anomaly: i * 0.5 + (i % 2), in_window: true }))
   return {
     ...s,
-    place: { ar6_region_code: null, ar6_region_name: null, climate_group: null, climate_code: null, high_up: true, elevation_m_model: null, wet_months: [], dry_months: [], text: { simple: 'Your place is high up and fairly dry.', scientific: 'Highland, dry.' } },
+    place: { ar6_region_code: null, ar6_region_name: null, climate_group: null, climate_code: null, high_up: true, elevation_m_model: null, wet_months: [], dry_months: [], text: { simple: 'Your place is high up and fairly dry.', scientific: 'Highland, dry.' }, homogeneity: null },
     entries: s.entries.map((e) =>
       e.variable_id === 'airs_rh_surf_day'
         ? {
@@ -100,6 +100,30 @@ describe('Findings screen', () => {
     open('#/shortlist?region=cajamarca_west&theme=water', shared)
     await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
     await waitFor(() => expect(window.location.hash).toMatch(/start=2002-09&end=2021-12/))
+  })
+
+  it('shows the "one kind of place?" panel under the place text, and a part opens the shortlist for that box', async () => {
+    const user = userEvent.setup()
+    const t = (simple: string, scientific = simple) => ({ simple, scientific })
+    const mixed = (): ScanResult => {
+      const s = v2Scan()
+      return {
+        ...s,
+        place: {
+          ...s.place!,
+          homogeneity: {
+            kind: 'mixed', n_cells: 54, climate_groups: { B: 42, C: 7 }, precip_min: 0.04, precip_max: 2.42, t2m_min: 8.4, t2m_max: 25.5, elev_min: 0, elev_max: 3843,
+            reasons: [{ code: 'rain', text: t('Some parts get much more rain than others.') }],
+            suggestions: [{ bbox: [-78.12, -8.25, -76.56, -6.25], name: t('the high, cool part'), n_cells: 12 }],
+            text: t('This box mixes different kinds of places. Their changes can cancel out.'),
+          },
+        },
+      }
+    }
+    open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => mixed() })
+    expect(await screen.findByText('Mixed place')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Try just the high, cool part' }))
+    await waitFor(() => expect(window.location.hash).toBe('#/shortlist?place=box:-78.12,-8.25,-76.56,-6.25&theme=water'))
   })
 
   it('shows the loading state, then the cards', async () => {
