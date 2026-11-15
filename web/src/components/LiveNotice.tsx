@@ -1,4 +1,5 @@
-import { useData, useView } from '../context'
+import { useData } from '../context'
+import { useResultCopy } from '../lib/resultCopy'
 import { HttpError, LiveDataUnavailable } from '../data/client'
 import { COPY } from '../lib/copy'
 import type { Route } from '../lib/route'
@@ -18,22 +19,22 @@ export function classifyLiveError(error: Error): LiveErrorKind {
 /** Shown when a custom place could not be loaded: API down, or the API rejected the place. */
 export function LiveNotice({ error, go }: { error: Error; go: (r: Route) => void }) {
   const { catalog } = useData()
-  const { t, view } = useView()
+  const { c, bx, view } = useResultCopy()
   const kind = classifyLiveError(error)
   const text = { down: COPY.liveDown, place: COPY.placeRejected, placeOther: COPY.placeRejectedOther, period: COPY.periodRejected }[kind]
   const detail = error instanceof HttpError && kind !== 'down' ? error.detail : undefined
   return (
     <div role="alert" className="error live-notice">
-      <p>{t(text)}</p>
+      <p>{c(`result.live.${kind}`, text)}</p>
       {view === 'scientific' && detail && <p className="small">{detail}</p>}
-      <p className="small">{t(COPY.readyMade)}:</p>
+      <p className="small">{c('result.live.readyMade', COPY.readyMade)}:</p>
       <ul className="inline-list">
         {catalog.regions
           .filter((r) => r.listed !== false)
           .map((r) => (
             <li key={r.id}>
               <button type="button" className="link" onClick={() => go({ screen: 'theme', region: r.id })}>
-                {t(r.name)}
+                {bx(r.name)}
               </button>
             </li>
           ))}

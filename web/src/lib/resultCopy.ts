@@ -1,6 +1,6 @@
 // Translation plumbing for the variable result screen: every UI string goes through i18n `t` with a
-// stable `result.*` key, one key per register (suffix .simple / .sci). Backend Text goes through `tx`.
-import { getLang, t, tx, useT } from '../i18n'
+// stable `result.*` key, one key per register (suffix .simple / .sci) unless both registers read the same. Backend Text goes through `tx`.
+import { numberLocale, t, tx, useT } from '../i18n'
 import { useView } from '../context'
 import type { Text } from '../types/contract'
 import type { ViewMode } from './text'
@@ -9,12 +9,13 @@ const sfx = (view: ViewMode) => (view === 'simple' ? 'simple' : 'sci')
 
 /** Non-hook: one string with a Simple and a Scientific English default. */
 export function sv(view: ViewMode, key: string, simple: string, scientific: string = simple, vars?: Record<string, string | number>): string {
-  return t(`${key}.${sfx(view)}`, view === 'simple' ? simple : scientific, vars)
+  // one key when both registers read the same, `<key>.simple` / `<key>.sci` when they differ
+  return t(simple === scientific ? key : `${key}.${sfx(view)}`, view === 'simple' ? simple : scientific, vars)
 }
 
 /** Number with a fixed number of decimals, in the active language. */
 export function fmt(n: number, decimals: number): string {
-  return n.toLocaleString(getLang() === 'es' ? 'es' : 'en', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+  return n.toLocaleString(numberLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
 /** Strip internal wording (for example "(test box)") that must not reach a child in the Simple view. */

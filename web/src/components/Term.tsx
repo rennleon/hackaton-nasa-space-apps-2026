@@ -1,5 +1,6 @@
 import { useId, useState, type ReactNode } from 'react'
 import { useGlossary, useView } from '../context'
+import { tx } from '../i18n'
 
 /**
  * A glossary word: underlined, with its definition (for the active view) on hover, focus or tap.
@@ -36,10 +37,10 @@ export function Term({ id, children }: { id: string; children?: ReactNode }) {
           }
         }}
       >
-        {children ?? entry.term[view]}
+        {children ?? tx(entry.term, view)}
       </button>
       <span role="tooltip" id={tipId} className="term-tip" data-open={open}>
-        <strong>{entry.term[view]}</strong>: {entry.definition[view]}
+        <strong>{tx(entry.term, view)}</strong>: {tx(entry.definition, view)}
       </span>
     </span>
   )

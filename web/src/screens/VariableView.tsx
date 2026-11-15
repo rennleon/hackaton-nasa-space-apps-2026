@@ -7,6 +7,7 @@ import { TrustPanel } from '../components/TrustPanel'
 import { SourceTag } from '../components/SourceTag'
 import { cleanInternal, fmt, useResultCopy } from '../lib/resultCopy'
 import { Term } from '../components/Term'
+import { TermText } from '../components/TermText'
 import type { Route } from '../lib/route'
 import { parseYm } from '../lib/text'
 import { COPY } from '../lib/copy'
@@ -64,7 +65,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
   const invalid = Boolean(start && end && Number(start) > Number(end))
   return (
     <div className="page variable">
-      <nav aria-label="Breadcrumb">
+      <nav aria-label={s('result.breadcrumb', 'Breadcrumb')}>
         <button type="button" className="link" onClick={back}>
           {s('result.back', '← Back to the shortlist')}
         </button>
@@ -126,22 +127,25 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
           )}
           {res.data.window && (
             <p className="muted">
-              {view === 'simple' ? (
-                <>
-                  {s('result.window.years', 'Years used: {from} to {to}.', '', { from: res.data.window.start.slice(0, 4), to: res.data.window.end.slice(0, 4) })}
-                  {res.data.season ? ` (${bx(res.data.season.name)})` : ''} {s('result.window.seasons', 'We take away the', '')} <Term id="seasonal_cycle" /> {s('result.window.first', 'first.', '')}
-                </>
-              ) : (
-                <>
-                  {s('result.window.sci', '', 'Window: {from} to {to} ({years} years{season}). Seasonal cycle removed per calendar month:', {
-                    from: res.data.window.start,
-                    to: res.data.window.end,
-                    years: fmt(res.data.window.years, 1),
-                    season: res.data.season ? `, ${bx(res.data.season.name)}` : '',
-                  })}{' '}
-                  <Term id="seasonal_cycle" />
-                </>
-              )}
+              <TermText
+                text={
+                  view === 'simple'
+                    ? s('result.window.simple', 'Years used: {from} to {to}{season}. We take away the {seasonal_cycle} first.', '', {
+                        from: res.data.window.start.slice(0, 4),
+                        to: res.data.window.end.slice(0, 4),
+                        season: res.data.season ? ` (${bx(res.data.season.name)})` : '',
+                        seasonal_cycle: '{seasonal_cycle}',
+                      })
+                    : s('result.window.sci', '', 'Window: {from} to {to} ({years} years{season}). {seasonal_cycle} removed per calendar month.', {
+                        from: res.data.window.start,
+                        to: res.data.window.end,
+                        years: fmt(res.data.window.years, 1),
+                        season: res.data.season ? `, ${bx(res.data.season.name)}` : '',
+                        seasonal_cycle: '{seasonal_cycle}',
+                      })
+                }
+                terms={{ seasonal_cycle: <Term id="seasonal_cycle" /> }}
+              />
             </p>
           )}
           <div className="variable-grid">

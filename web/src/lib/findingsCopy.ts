@@ -1,6 +1,6 @@
 // UI copy for the Findings screen, the source tag and the "Where our data comes from" page.
 // Every entry has a Simple wording (for a primary-school child, R5) and a Scientific one. Components read them
-// with useL(), which routes through the i18n helper under the key `<entry key>.<view>`, so Spanish can be added
+// with useL(), which routes through the i18n helper under the key `<entry key>` (same words in both views) or `<entry key>.<view>`, so Spanish can be added
 // in i18n/es.ts without touching a component. findingsCopy.test.ts bans technical words in the Simple strings.
 import { useT } from '../i18n'
 import { useView } from '../context'
@@ -81,6 +81,12 @@ export const FC = {
   'findings.unavailable.too_many_gaps': p('Too many months are missing.', 'Too many gaps in the record.'),
   'findings.unavailable.fetch_failed': p("We couldn't get this one from NASA this time.", 'Fetch failed.'),
   'findings.coverage': p('Years of data', 'Record coverage'),
+  'findings.timeline.aria': p('How many years of data each measurement has', 'Record coverage timeline'),
+  'findings.timeline.row': p('{name}: used {from} to {to}', '{name}: used {from} to {to}'),
+  'findings.timeline.rowDrift': p('{name}: used {from} to {to}; {cut} onward left out ({note})', '{name}: used {from} to {to}; {cut} onward left out ({note})'),
+  'findings.timeline.used': p('years we use', 'analysis window'),
+  'findings.timeline.out': p('years left out (satellite drift)', 'excluded (orbit drift)'),
+  'findings.mdt': p('', 'MDT {mdt} {unit}/decade'),
   // source tag
   'common.source.satellite': p('Satellite'),
   'common.source.model': p('Computer model estimate', 'Computer model'),
@@ -123,5 +129,9 @@ export type FKey = keyof typeof FC
 export function useL() {
   const t = useT()
   const { view } = useView()
-  return (key: FKey, vars?: Record<string, string | number>) => t(`${key}.${view}`, FC[key][view], vars)
+  // one key when both registers read the same, `<key>.simple` / `<key>.scientific` when they differ
+  return (key: FKey, vars?: Record<string, string | number>) => {
+    const pair: Pair = FC[key]
+    return t(pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view], vars)
+  }
 }

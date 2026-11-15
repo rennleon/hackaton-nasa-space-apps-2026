@@ -2,9 +2,28 @@ import { useEffect, useState } from 'react'
 import Plotly from 'plotly.js-basic-dist-min'
 import createPlotlyComponent from 'react-plotly.js/factory'
 import type { Data, Layout } from 'plotly.js'
+import { useLang } from '../i18n'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Plot = createPlotlyComponent(Plotly as any)
+
+// Spanish month and day names for axis ticks and hover text (the basic Plotly bundle ships English only).
+// Peru: decimal point, comma for thousands. Registered once; the chart picks it with config.locale.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(Plotly as any).register({
+  moduleType: 'locale',
+  name: 'es',
+  dictionary: {},
+  format: {
+    days: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+    shortDays: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+    months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'],
+    shortMonths: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+    date: '%d/%m/%Y',
+    decimal: '.',
+    thousands: ',',
+  },
+})
 
 /** Chart chrome (text, grid, font) comes from the theme tokens in styles.css, so charts follow light, dark and the theme switch. */
 interface ChartTheme { text: string; muted: string; grid: string; fontBody: string }
@@ -50,6 +69,7 @@ function useChartTheme(): ChartTheme {
 export default function PlotlyChart({ data, layout, height = 320 }: { data: Data[]; layout: Partial<Layout>; height?: number }) {
   const th = useChartTheme()
   const axis = { gridcolor: th.grid, zerolinecolor: th.grid, linecolor: th.grid, tickfont: { size: 14, color: th.muted }, ticklen: 4, tickcolor: th.grid }
+  const lang = useLang()
   const merged: Partial<Layout> = {
     autosize: true,
     height,
@@ -68,7 +88,7 @@ export default function PlotlyChart({ data, layout, height = 320 }: { data: Data
     <Plot
       data={data}
       layout={merged}
-      config={{ displaylogo: false, responsive: true, displayModeBar: false }}
+      config={{ displaylogo: false, responsive: true, displayModeBar: false, locale: lang }}
       useResizeHandler
       style={{ width: '100%' }}
     />

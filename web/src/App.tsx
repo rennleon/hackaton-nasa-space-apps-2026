@@ -3,6 +3,7 @@ import { createClient, defaultApiUrl } from './data'
 import type { DataClient } from './data/client'
 import { DataProvider, GlossaryProvider, ViewProvider, useView } from './context'
 import { useL } from './lib/findingsCopy'
+import { useT } from './i18n'
 import { Sources } from './screens/Sources'
 import './App.css'
 import { parseHash, toHash, type Route } from './lib/route'
@@ -10,6 +11,7 @@ import { useAsync } from './lib/useAsync'
 import { demoById } from './lib/demos'
 import type { Catalog } from './types/catalog'
 import { ViewToggle } from './components/ViewToggle'
+import { LangToggle } from './components/LangToggle'
 import { Home } from './screens/Home'
 import { ThemePicker } from './screens/ThemePicker'
 import { Shortlist } from './screens/Shortlist'
@@ -41,23 +43,24 @@ export default function App({ client: injected }: { client?: DataClient }) {
   const client = useMemo(() => injected ?? createClient(defaultApiUrl()), [injected])
   const cat = useAsync(() => loadCatalog(client), [client])
   const [route, go] = useRoute()
+  const t = useT()
 
   return (
     <ViewProvider>
       <a href="#main" className="skip">
-        Skip to content
+        {t('app.skip', 'Skip to content')}
       </a>
       <header className="topbar">
         <button type="button" className="brand" onClick={() => go({ screen: 'home' })}>
-          <span aria-hidden="true">🌍</span> Earth System Trend Detective
+          <span aria-hidden="true">🌍</span> {t('app.title', 'Earth System Trend Detective')}
         </button>
         <TopNav />
       </header>
       <main id="main">
-        {cat.loading && <p className="page">Loading…</p>}
+        {cat.loading && <p className="page">{t('app.loading', 'Loading…')}</p>}
         {cat.error && (
           <p className="page error" role="alert">
-            Could not load the catalog: {cat.error.message}
+            {t('app.catalogError', 'Could not load the catalog: {message}', { message: cat.error.message })}
           </p>
         )}
         {cat.data && (
@@ -90,6 +93,7 @@ function TopNav() {
     <nav className="topnav">
       <a href="#/sources">{l('sources.link')}</a>
       <ViewToggle />
+      <LangToggle />
     </nav>
   )
 }

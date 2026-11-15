@@ -4,6 +4,7 @@ import { tx, useT } from '../i18n'
 import { formatPlace, parsePlace } from '../lib/place'
 import { rememberPlaceName } from '../lib/placeNames'
 import type { Route } from '../lib/route'
+import { signed } from '../lib/text'
 import type { Certainty } from '../lib/findings'
 import type { Text } from '../types/catalog'
 import { VerdictChip } from './VerdictChip'
@@ -66,7 +67,7 @@ function isCurrent(p: WherePlace, route: Route): boolean {
 function range(p: WherePlace): string {
   if (p.slope_per_decade === null) return '—'
   const d = Math.max(p.units.decimals, 1)
-  const sign = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n).toFixed(d)}`
+  const sign = (n: number) => signed(n, d)
   const ci = p.ci_low !== null && p.ci_high !== null ? ` [${sign(p.ci_low)}, ${sign(p.ci_high)}]` : ''
   return `${sign(p.slope_per_decade)}${ci} ${p.units.display}`
 }
