@@ -16,6 +16,7 @@ import { LiveNotice } from '../components/LiveNotice'
 import { WhereElse } from '../components/WhereElse'
 import { parsePlace, placeRegion } from '../lib/place'
 import { YourYears } from '../components/YourYears'
+import { HowStrip } from '../components/HowStrip'
 
 /** Route years are `YYYY` (typed by the user) or `YYYY-MM` (handed over by a shortlist card: its exact shared window). */
 export function periodMonth(v: string | undefined, edge: 'start' | 'end'): string | undefined {
@@ -180,6 +181,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
             </div>
             <Charts result={res.data} fromList={fromList && !(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable} />
           </div>
+          <HowStrip />
           <WhereElse variableId={card.id} route={route} go={go} />
         </>
       )}

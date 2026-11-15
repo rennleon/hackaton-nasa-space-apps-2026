@@ -1,22 +1,26 @@
 import { useState } from 'react'
 import { useData, useView } from '../context'
-import { tx } from '../i18n'
+import { numberLocale, tx } from '../i18n'
 import { useAsync } from '../lib/useAsync'
 import { Timeline } from '../components/Timeline'
 import { HomogeneityPanel } from '../components/HomogeneityPanel'
+import { HowStrip } from '../components/HowStrip'
+import { ThemeIcon } from '../components/ThemeIcon'
 import { SourceTag } from '../components/SourceTag'
 import { Term } from '../components/Term'
-import { VerdictChip } from '../components/VerdictChip'
+import { CertaintyIcon, VerdictChip } from '../components/VerdictChip'
 import { Sparkline, TrendArrow } from '../components/Sparkline'
 import { classifyLiveError, LiveNotice } from '../components/LiveNotice'
+import { monthRuns } from '../lib/placeFacts'
+import { sizeParts } from '../lib/places'
 import { parsePlace, placeRegion } from '../lib/place'
 import { capFirst, formatSlope, plainNum } from '../lib/text'
-import { availabilityOf, certaintyOfEntry, cleanPlaceName, directionOf, splitEntries, summarize, variableRefFromEntry } from '../lib/findings'
+import { availabilityOf, certaintyOfEntry, cleanPlaceName, countByCertainty, directionOf, splitEntries, summarize, variableRefFromEntry, type Certainty } from '../lib/findings'
 import { useL, type FKey } from '../lib/findingsCopy'
 import { instrumentById } from '../lib/instruments'
 import { instrumentHref, manySatellites, shortName, useS } from '../lib/sourceLabels'
 import type { Route } from '../lib/route'
-import type { Comparison, ScanEntry, ScanResult } from '../types/contract'
+import type { Comparison, PlaceProfile, ScanEntry, ScanResult } from '../types/contract'
 import { childrenOf, relatedThemes, topLevel } from '../lib/themes'
 import type { RegionCard, VariableCard } from '../types/catalog'
 import './Findings.css'
@@ -68,40 +72,68 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
   const years = data?.window_start && data.window_end ? { start: data.window_start.slice(0, 4), end: data.window_end.slice(0, 4) } : null
   const placeText = data?.place?.text ? tx(data.place.text, view) : region.listed !== false && !custom ? tx(region.description, view) : ''
 
+  const notes = (
+    <>
+      {years && <p className="muted small">{l('findings.commonWindow', { start: years.start, end: years.end })}</p>}
+      {parentTheme && (
+        <p className="muted small">
+          {l('findings.subtopicNote', { parent: view === 'simple' ? tx(parentTheme.name, view).toLowerCase() : tx(parentTheme.name, view), n: summary.total })}
+        </p>
+      )}
+    </>
+  )
+
   return (
     <div className="findings">
+      <button type="button" className="findings-back link" onClick={() => go({ screen: 'home' })}>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+        {l('findings.back')}
+      </button>
+
       <header className="findings-head">
-        <p className="eyebrow">{l('findings.eyebrow')}</p>
-        <h1 id="res-h">{placeName}</h1>
-        {parentTheme && theme && (
-          <p className="muted small findings-crumb">
-            {tx(parentTheme.name, view)} <span aria-hidden="true">›</span> {tx(theme.name, view)}
-          </p>
-        )}
-        {theme && <p className="findings-q">{tx(theme.question, view)}</p>}
-        {placeText && <p className="muted place-text">{placeText}</p>}
-        <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} canTry={client.customPlaces !== false} />
-        <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
+        <div className="findings-title">
+          <p className="eyebrow">{l('findings.eyebrow')}</p>
+          <h1 id="res-h">{placeName}</h1>
+          {parentTheme && theme && (
+            <p className="muted small findings-crumb">
+              {tx(parentTheme.name, view)} <span aria-hidden="true">›</span> {tx(theme.name, view)}
+            </p>
+          )}
+          {theme && (
+            <div className="findings-theme">
+              <span className="theme-chip">
+                <ThemeIcon id={theme.id} parent={theme.parent} size={16} />
+                {tx(theme.name, view)}
+              </span>
+              <p className="findings-q">{tx(theme.question, view)}</p>
+            </div>
+          )}
+          {placeText && <p className="muted place-text">{placeText}</p>}
+          <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} canTry={client.customPlaces !== false} />
+        </div>
+        <PlaceFacts profile={data?.place} bbox={region.geometry.bbox} />
       </header>
 
-      <section aria-labelledby="res-h" aria-busy={scan.loading}>
+      <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
+
+      <section className="findings-body" aria-labelledby="res-h" aria-busy={scan.loading}>
         {scan.loading && <LoadingState />}
         {!scan.loading && scan.error && <ErrorState error={scan.error} custom={custom} go={go} onRetry={() => setAttempt((n) => n + 1)} />}
         {data && (
           <>
-            {years && <p className="muted small">{l('findings.commonWindow', { start: years.start, end: years.end })}</p>}
-            {parentTheme && (
-              <p className="muted small">
-                {l('findings.subtopicNote', { parent: view === 'simple' ? tx(parentTheme.name, view).toLowerCase() : tx(parentTheme.name, view), n: summary.total })}
-              </p>
-            )}
             {available.length > 0 ? (
               <>
-                <Summary summary={summary} scan={data} />
+                <Summary summary={summary} scan={data} available={available} notes={notes} />
+                <HowStrip />
                 <Legend entries={available} variables={catalog.variables} />
               </>
             ) : (
-              <EmptyState themeId={themeId} set={set} />
+              <>
+                <div className="findings-notes">{notes}</div>
+                <EmptyState themeId={themeId} set={set} />
+              </>
             )}
             {available.length > 0 && (
               <ul className="fgrid">
@@ -110,17 +142,53 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
                 ))}
               </ul>
             )}
+            {available.length > 0 && <Timeline entries={available} variables={catalog.variables} />}
             {unavailable.length > 0 && <UnavailableRow entries={unavailable} startOpen={available.length === 0} />}
             {custom && <p className="muted small">{l('findings.livePlace')}</p>}
-            {available.length > 0 && (
-              <details className="coverage">
-                <summary>{l('findings.coverage')}</summary>
-                <Timeline entries={available} variables={catalog.variables} />
-              </details>
-            )}
           </>
         )}
       </section>
+    </div>
+  )
+}
+
+/** "About this place": only facts the scan really carries (climate group, height, rainy months) plus the size of the box. */
+function PlaceFacts({ profile, bbox }: { profile: PlaceProfile | null | undefined; bbox: [number, number, number, number] }) {
+  const { view } = useView()
+  const l = useL()
+  const sci = view === 'scientific'
+  const facts: { key: string; label: string; value: string }[] = []
+  let fromModel = false
+  if (profile?.climate_group) {
+    const word = l(`findings.climate.${profile.climate_group}` as FKey)
+    facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile.climate_code ? `${word} (${profile.climate_code})` : word })
+    fromModel = true
+  }
+  const elev = profile?.elevation_m_model
+  const metres = elev != null ? l('findings.facts.elev', { m: Math.round(elev).toLocaleString(numberLocale()) }) : null
+  const height = sci ? [profile?.high_up ? l('findings.facts.highUp') : null, metres].filter(Boolean).join(' · ') : profile?.high_up ? l('findings.facts.highUp') : ''
+  if (height) {
+    facts.push({ key: 'height', label: l('findings.facts.height'), value: height })
+    fromModel = true
+  }
+  const runs = monthRuns(profile?.wet_months ?? [])
+  if (runs.length > 0) {
+    const month = (m: number) => capFirst(new Date(2000, m - 1, 1).toLocaleString(numberLocale(), { month: 'long' }))
+    facts.push({ key: 'wet', label: l('findings.facts.wet'), value: runs.map(([a, b]) => (a === b ? month(a) : `${month(a)} – ${month(b)}`)).join(', ') })
+    fromModel = true
+  }
+  facts.push({ key: 'area', label: l('findings.facts.area'), value: l('findings.facts.areaValue', sizeParts(bbox)) })
+  return (
+    <div className="findings-facts">
+      <dl className="facts-grid" aria-label={l('findings.facts.aria')}>
+        {facts.map((f) => (
+          <div key={f.key} className="card fact">
+            <dt className="eyebrow">{f.label}</dt>
+            <dd>{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {fromModel && <p className="muted small facts-note">{l('findings.facts.model')}</p>}
     </div>
   )
 }
@@ -131,21 +199,23 @@ function EditBar({ route, region, custom, themeId, set, go, years }: { route: Ro
   const l = useL()
   const seasons = [...new Map(region.declared_seasons.map((s) => [s.id, s])).values()]
   const pickable = catalog.regions.filter((r) => r.listed !== false || r.id === region.id)
+  // every change applies at once: there is no Update button
   return (
-    <div className="editbar" role="group" aria-label={l('findings.editLabel')}>
-      <span className="editbar-label">{l('findings.edit')}</span>
+    <form className="card editform" aria-label={l('findings.editLabel')} onSubmit={(e) => e.preventDefault()}>
       {custom ? (
-        <span className="chip chip-static">
-          <span className="chip-k">{l('findings.chip.place')}</span>
-          <span>{cleanPlaceName(tx(region.name, view))}</span>
-          <button type="button" className="link" onClick={() => go({ screen: 'home' })}>
-            {l('findings.changePlace')}
-          </button>
-        </span>
+        <div className="field field-place">
+          <span className="field-k">{l('findings.chip.place')}</span>
+          <span className="input input-static">
+            <span className="input-static-name">{cleanPlaceName(tx(region.name, view))}</span>
+            <button type="button" className="link" onClick={() => go({ screen: 'home' })}>
+              {l('findings.changePlace')}
+            </button>
+          </span>
+        </div>
       ) : (
-        <label className="chip">
-          <span className="chip-k">{l('findings.chip.place')}</span>
-          <select value={region.id} onChange={(e) => e.target.value !== region.id && set({ region: e.target.value, place: undefined, season: undefined })}>
+        <label className="field field-place">
+          <span className="field-k">{l('findings.chip.place')}</span>
+          <select className="input" value={region.id} onChange={(e) => e.target.value !== region.id && set({ region: e.target.value, place: undefined, season: undefined })}>
             {pickable.map((r) => (
               <option key={r.id} value={r.id}>
                 {cleanPlaceName(tx(r.name, view))}
@@ -154,9 +224,9 @@ function EditBar({ route, region, custom, themeId, set, go, years }: { route: Ro
           </select>
         </label>
       )}
-      <label className="chip">
-        <span className="chip-k">{l('findings.chip.question')}</span>
-        <select value={themeId} onChange={(e) => set({ theme: e.target.value })}>
+      <label className="field field-question">
+        <span className="field-k">{l('findings.chip.question')}</span>
+        <select className="input" value={themeId} onChange={(e) => set({ theme: e.target.value })}>
           {topLevel(catalog.themes).map((top) => (
             <optgroup key={top.id} label={tx(top.name, view)}>
               {[top, ...childrenOf(catalog.themes, top.id)].map((th) => (
@@ -168,16 +238,18 @@ function EditBar({ route, region, custom, themeId, set, go, years }: { route: Ro
           ))}
         </select>
       </label>
-      <span className="chip" role="group" aria-label={l('findings.chip.years')}>
-        <span className="chip-k">{l('findings.chip.years')}</span>
-        <input type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.from')} placeholder={years?.start ?? l('findings.anyYear')} value={route.start ?? ''} onChange={(e) => set({ start: e.target.value || undefined })} />
-        <span aria-hidden="true">–</span>
-        <input type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.to')} placeholder={years?.end ?? l('findings.anyYear')} value={route.end ?? ''} onChange={(e) => set({ end: e.target.value || undefined })} />
-      </span>
+      <fieldset className="field field-years">
+        <legend className="field-k">{l('findings.chip.years')}</legend>
+        <div className="years-pair">
+          <input className="input mono" type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.from')} placeholder={years?.start ?? l('findings.anyYear')} value={route.start ?? ''} onChange={(e) => set({ start: e.target.value || undefined })} />
+          <span aria-hidden="true" className="muted">–</span>
+          <input className="input mono" type="number" inputMode="numeric" min={1980} max={2026} aria-label={l('findings.to')} placeholder={years?.end ?? l('findings.anyYear')} value={route.end ?? ''} onChange={(e) => set({ end: e.target.value || undefined })} />
+        </div>
+      </fieldset>
       {!custom && seasons.length > 0 && (
-        <label className="chip">
-          <span className="chip-k">{l('findings.chip.season')}</span>
-          <select value={route.season ?? ''} onChange={(e) => set({ season: e.target.value || undefined })}>
+        <label className="field field-season">
+          <span className="field-k">{l('findings.chip.season')}</span>
+          <select className="input" value={route.season ?? ''} onChange={(e) => set({ season: e.target.value || undefined })}>
             <option value="">{l('findings.allMonths')}</option>
             {seasons.map((s) => (
               <option key={s.id} value={s.id}>
@@ -187,30 +259,69 @@ function EditBar({ route, region, custom, themeId, set, go, years }: { route: Ro
           </select>
         </label>
       )}
-      <p className="muted small editbar-hint">{route.season && !custom ? l('findings.seasonHint') : l('findings.yearsHint')}</p>
-    </div>
+      <p className="muted small editform-hint">{route.season && !custom ? l('findings.seasonHint') : l('findings.yearsHint')}</p>
+    </form>
   )
 }
 
-function Summary({ summary, scan }: { summary: ReturnType<typeof summarize>; scan: ScanResult }) {
+/** Count tiles: one per certainty level that is present, with a big number, an icon and the words (never colour alone). */
+const LEVELS: Certainty[] = ['sure', 'maybe', 'too_soon', 'cant_tell']
+
+function Summary({ summary, scan, available, notes }: { summary: ReturnType<typeof summarize>; scan: ScanResult; available: ScanEntry[]; notes: React.ReactNode }) {
   const { view } = useView()
   const l = useL()
   const { total, clear, strongest } = summary
   const vars = { clear, total, alpha: scan.alpha }
   const key: FKey =
     clear === 0 ? (total === 1 ? 'findings.summary.noneOne' : 'findings.summary.none') : total === 1 ? 'findings.summary.oneOfOne' : clear === 1 ? 'findings.summary.one' : 'findings.summary.some'
+  const counts = countByCertainty(available)
   return (
-    <div className="summary" role="status">
-      <p className="summary-main">{l(key, vars)}</p>
-      {strongest && (
-        <p className="summary-sub">{l('findings.strongest', { name: tx(strongest.name, view), slope: formatSlope(strongest.slope_per_decade, strongest.units, view) })}</p>
-      )}
-      {view === 'scientific' && <p className="muted small">{l('findings.scanNote', { n: total, alpha: scan.alpha })}</p>}
-    </div>
+    <section className="card summary" role="status">
+      <div className="summary-text">
+        <h2 className="summary-main">{l(key, vars)}</h2>
+        {strongest && (
+          <p className="summary-sub">{l('findings.strongest', { name: tx(strongest.name, view), slope: formatSlope(strongest.slope_per_decade, strongest.units, view) })}</p>
+        )}
+        {notes}
+        {view === 'scientific' && <p className="muted small">{l('findings.scanNote', { n: total, alpha: scan.alpha })}</p>}
+      </div>
+      <ul className="summary-tiles" aria-label={l('findings.tiles.aria')}>
+        {LEVELS.filter((c) => counts[c] > 0).map((c) => (
+          <li key={c} className={`tile tile-${c}`}>
+            <span className="tile-n">{counts[c]}</span>
+            <span className="tile-w">
+              <CertaintyIcon certainty={c} />
+              {l(`findings.chip.${c}` as FKey)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
-/** "Instruments in this list: AIRS (satellite) · GPM IMERG (satellites) · MERRA-2 (computer model)", each linking to the sources page. */
+/** Small picture for the kind of instrument: a satellite with its panels, or a model grid. */
+function InstrumentIcon({ model }: { model: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {model ? (
+        <>
+          <rect x="4" y="4" width="16" height="16" rx="2" />
+          <path d="M4 12h16M12 4v16" />
+        </>
+      ) : (
+        <>
+          <rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+          <path d="M9.5 9.5 6 6M14.5 14.5 18 18" />
+          <rect x="2" y="2" width="5" height="5" rx="1" />
+          <rect x="17" y="17" width="5" height="5" rx="1" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+/** "Instruments in this list: [AIRS (satellite)] [MERRA-2 (computer model)]", chips that link to the sources page. */
 function Legend({ entries, variables }: { entries: ScanEntry[]; variables: VariableCard[] }) {
   const { s, rich } = useS()
   const ids = [
@@ -234,7 +345,10 @@ function Legend({ entries, variables }: { entries: ScanEntry[]; variables: Varia
           const key = i.kind === 'model' ? 'legend.model' : manySatellites(i.platform) ? 'legend.satMany' : 'legend.sat'
           return (
             <li key={i.id}>
-              <a href={instrumentHref(i.id)}>{s(key, { name: shortName(i) })}</a>
+              <a href={instrumentHref(i.id)}>
+                <InstrumentIcon model={i.kind === 'model'} />
+                {s(key, { name: shortName(i) })}
+              </a>
             </li>
           )
         })}
@@ -353,25 +467,37 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
   const dec = e.units.decimals
   return (
     <li className={`fcard fcard-${certainty}`} data-demo={`finding-${e.variable_id}`}>
-      <h3 className="fcard-name">
-        <button type="button" className="fcard-open" aria-label={l('findings.open', { name })} onClick={onOpen}>
-          {name}
-        </button>
-      </h3>
-      <SourceTag compact variable={variableRefFromEntry(e, card)} />
-      {card && <p className="fcard-def muted">{tx(card.definition, view)}</p>}
+      <div className="fcard-top">
+        <VerdictChip certainty={certainty} />
+        {dir && (
+          <span className={`fcard-dir${sure ? ' fcard-dir-sure' : ''}`}>
+            <TrendArrow direction={dir} sure={sure} label={l(`findings.heading.${dir}` as FKey)} />
+            <span aria-hidden="true">{l(`findings.heading.${dir}` as FKey)}</span>
+          </span>
+        )}
+      </div>
+      <div className="fcard-title">
+        <h3 className="fcard-name">
+          <button type="button" className="fcard-open" aria-label={l('findings.open', { name })} onClick={onOpen}>
+            {name}
+          </button>
+        </h3>
+        {card && <p className="fcard-def muted">{tx(card.definition, view)}</p>}
+      </div>
       {years && (
-        <div className="fcard-trend">
-          <Sparkline series={years} label={l('findings.spark', { from: years[0].year, to: years[years.length - 1].year })} />
-          {dir && <TrendArrow direction={dir} sure={sure} label={l(`findings.heading.${dir}` as FKey)} />}
+        <div className="fcard-chart">
+          <div className="fcard-panel">
+            <Sparkline wide series={years} label={l('findings.spark', { from: years[0].year, to: years[years.length - 1].year })} />
+          </div>
+          <div className="fcard-axis small muted">
+            <span className="mono">{years[0].year}</span>
+            {usedFrom != null && usedTo != null && <span className="fcard-years">{l('findings.cardYears', { from: usedFrom, to: usedTo })}</span>}
+            <span className="mono">{years[years.length - 1].year}</span>
+          </div>
         </div>
       )}
-      {usedFrom != null && usedTo != null && <p className="fcard-years muted small">{l('findings.cardYears', { from: usedFrom, to: usedTo })}</p>}
-      <div className="fcard-verdict">
-        <VerdictChip certainty={certainty} />
-        {!e.worth_investigating && !sure && <span className="fcard-rec small muted">{l('findings.hardToSpot')}</span>}
-      </div>
-      {e.cross_check && <SecondOpinion c={e.cross_check} own={e.instrument_id ?? (card?.source as { instrument_id?: string | null } | undefined)?.instrument_id ?? null} />}
+      {!e.worth_investigating && !sure && <p className="fcard-rec small muted">{l('findings.hardToSpot')}</p>}
+      <SourceTag compact variable={variableRefFromEntry(e, card)} />
       {view === 'scientific' && (
         <p className="muted small">
           {e.slope_per_decade != null && formatSlope(e.slope_per_decade, e.units, view)}
@@ -379,6 +505,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
           {e.mdt_per_decade != null && <> · {l('findings.mdt', { mdt: plainNum(e.mdt_per_decade, dec), unit: e.units.display })}</>}
         </p>
       )}
+      {e.cross_check && <SecondOpinion c={e.cross_check} own={e.instrument_id ?? (card?.source as { instrument_id?: string | null } | undefined)?.instrument_id ?? null} />}
     </li>
   )
 }

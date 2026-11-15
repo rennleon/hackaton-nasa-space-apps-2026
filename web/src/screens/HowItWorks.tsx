@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { useView } from '../context'
 import { BANDS, STEPS, useH, type Band, type HKey } from '../lib/howCopy'
+import { parseHash } from '../lib/route'
 import './HowItWorks.css'
 
 const key = (n: number, part: 'title' | 'text') => `how.s${n}.${part}` as HKey
@@ -91,11 +92,23 @@ export function HowItWorks() {
   const nav = useRef<HTMLElement>(null)
   const [active, setActive] = useActiveBand(bands)
   useTopbarHeight(nav)
-  const goTo = (band: Band) => {
+  const goTo = (band: Band, smooth = true) => {
     setActive(band)
-    const still = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const still = !smooth || (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     bands.current[band]?.scrollIntoView?.({ behavior: still ? 'auto' : 'smooth', block: 'start' })
   }
+  // opened from a "How we worked this out" strip (#/how?stage=trend): land on that stage; otherwise start at the top
+  useEffect(() => {
+    const land = () => {
+      const stage = parseHash(window.location.hash).stage
+      if (stage && (BANDS as string[]).includes(stage)) goTo(stage as Band, false)
+      else if (window.scrollY > 0) window.scrollTo?.(0, 0)
+    }
+    land()
+    window.addEventListener('hashchange', land)
+    return () => window.removeEventListener('hashchange', land)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <div className="page how">
       <h1>{h('how.title')}</h1>

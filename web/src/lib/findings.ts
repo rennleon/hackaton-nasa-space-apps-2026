@@ -59,6 +59,13 @@ export function summarize(available: ScanEntry[]): Summary {
   return { total: available.length, clear: sure.length, strongest: sure[0] ?? null }
 }
 
+/** How many cards sit at each certainty level (the summary tiles show the levels that are present). */
+export function countByCertainty(available: ScanEntry[]): Record<Certainty, number> {
+  const n: Record<Certainty, number> = { sure: 0, maybe: 0, too_soon: 0, cant_tell: 0 }
+  for (const e of available) n[certaintyOfEntry(e)] += 1
+  return n
+}
+
 export type Direction = 'up' | 'down' | 'flat'
 export function directionOf(slope: number | null): Direction | null {
   if (slope == null) return null
