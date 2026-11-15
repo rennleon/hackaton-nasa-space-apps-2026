@@ -1,0 +1,612 @@
+# Published expectations: what scientists have already assessed for the places we show.
+# Written by the sources-research unit on 2026-11-15. Every entry was checked against the opened final
+# IPCC AR6 WGI chapter PDFs on ipcc.ch (not drafts), with table and page recorded in `source`.
+# Page numbers are the printed report page numbers (pp. of the Cambridge University Press volume).
+#
+# Fields (as requested): ar6_region, variable_kind, direction, confidence, period, statement{simple,scientific},
+# source, checked_by, opened_at. Extra optional fields: ar6_region_name, place (which of our places this covers),
+# metric (what exactly is assessed, e.g. hot_extremes, heavy_precipitation, mean_annual).
+#
+# direction: up | down | either | unclear.   unclear = the source says data are limited or evidence is low
+# confidence; the Simple text then says scientists don't have enough data yet. Never read unclear as proof that nothing is happening.
+# confidence is worded as the source words it (IPCC calibrated language or the chapter's own phrasing).
+#
+# AR6 reference region of each place (point-in-polygon on IPCC-WGI-reference-regions-v4.geojson from
+# github.com/IPCC-WG1/Atlas, Iturbide et al. 2020, https://doi.org/10.5194/essd-12-2959-2020):
+#   Cajamarca highlands box (W-79 S-8 E-77 N-5): NWS (all four corners and the centre)
+#   Wisconsin box: split by the CNA/ENA boundary at about 90 W; west part CNA, east part ENA (entries for both)
+#   Delhi (28.61, 77.21): SAS    Manaus (-3.10, -60.02): NSA    Tamanrasset (22.79, 5.52): SAH
+#
+# Not found / not used: no AR6 regional assessment of relative humidity or soil moisture by region beyond the
+# drought rows above; the GLOBAL_LAND humidity entry is a global pattern only. Variable kinds with no entry for a
+# region simply mean AR6 gives nothing citable there.
+#
+# R5 note: simple texts follow the CLAUDE.md plain-language rules (short sentences, no banned words, no
+# decimals or percentages). The mapping used for the words: IPCC high confidence or very likely -> "quite sure";
+# likely or medium confidence -> "think so"; low confidence or limited evidence -> "not sure / not enough data".
+
+- ar6_region: "NWS"
+  ar6_region_name: "N.W.South-America"
+  place: "Cajamarca highlands (box W-79 S-8 E-77 N-5): whole box lies inside NWS"
+  variable_kind: temperature
+  metric: mean_annual
+  direction: up
+  confidence: "High confidence (as worded for Andean warming)"
+  period: "not stated in this sentence; it summarises several station and gridded studies"
+  statement:
+    simple: "Air in the northern Andes mountains has been getting warmer. Scientists are quite sure."
+    scientific: "Andean temperature records show significant warming trends, especially at inland and higher-elevation sites, while trends are non-significant or negative at coastal sites. The sentence is about the Andes in general, not about NWS alone."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.7.2.2 (South America, Assessment and Synthesis of Observations, Trends and Attribution), p. 1995, 2nd paragraph. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NWS"
+  ar6_region_name: "N.W.South-America"
+  place: "Cajamarca highlands (box W-79 S-8 E-77 N-5): whole box lies inside NWS"
+  variable_kind: temperature
+  metric: hot_extremes
+  direction: up
+  confidence: "Likely increase in hot extremes (observed trend); high confidence in a human contribution"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period)"
+  statement:
+    simple: "Very hot days have become more common here. Scientists think so, but are not fully sure."
+    scientific: "Observed trends: likely increase in the intensity and frequency of hot extremes and decrease in cold extremes in North-Western South America. A literature row above it reports significant increases (Dereczynski et al. 2020, Dunn et al. 2020). Human contribution to the observed increase: high confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.13 (Central and South America, temperature extremes), pp. 1667-1668, row North-Western South America (NWS). Observed-since-1950 framing: Table 11.1, p. 1532. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NWS"
+  ar6_region_name: "N.W.South-America"
+  place: "Cajamarca highlands (box W-79 S-8 E-77 N-5): whole box lies inside NWS"
+  variable_kind: rainfall
+  metric: mean_annual
+  direction: unclear
+  confidence: "No confidence level given for this sentence"
+  period: "not stated; the Peruvian Amazon-Andes basin example covers 1965-2007"
+  statement:
+    simple: "Rain here goes up in some places and down in others."
+    scientific: "Annual precipitation trends in the north tropical Andes (north of 8 S) do not show a homogeneous pattern; no mean-rainfall trend was found in the Peruvian Amazon-Andes basin for 1965-2007, although significant decreases in annual rainfall were reported for the central and southern Peruvian Andes (1966-2010). The Cajamarca box lies between 5 S and 8 S."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.7.2.2, p. 1995, paragraphs 4-5. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NWS"
+  ar6_region_name: "N.W.South-America"
+  place: "Cajamarca highlands (box W-79 S-8 E-77 N-5): whole box lies inside NWS"
+  variable_kind: rainfall
+  metric: heavy_precipitation
+  direction: unclear
+  confidence: "Low confidence (observed trends); evidence of a human contribution for some events only"
+  period: "not stated (limited data)"
+  statement:
+    simple: "We don't have enough data yet on heavy rain here. Scientists need more years of records."
+    scientific: "Insufficient data coverage; trends in the available data are generally not significant. Observed-trend confidence is low; detection and attribution: disagreement among studies."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.14 (Central and South America, heavy precipitation), p. 1673, row NWS. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NWS"
+  ar6_region_name: "N.W.South-America"
+  place: "Cajamarca highlands (box W-79 S-8 E-77 N-5): whole box lies inside NWS"
+  variable_kind: soil_water
+  metric: agricultural_ecological_drought
+  direction: unclear
+  confidence: "Low confidence: mixed trends (also low confidence, mixed signal, for meteorological drought)"
+  period: "not stated"
+  statement:
+    simple: "Too soon to tell if the land is getting drier or wetter. Scientists need more data."
+    scientific: "Agricultural and ecological drought: mixed trends between subregions and between drought metrics (soil moisture, PDSI, SPEI-PM); low confidence. Meteorological drought: mixed signal, low confidence. Human contribution: limited evidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.15 (Central and South America, drought), pp. 1676-1677, rows NWS MET and AGR/ECOL. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NSA"
+  ar6_region_name: "N.South-America"
+  place: "central Amazon near Manaus (-3.10, -60.02)"
+  variable_kind: temperature
+  metric: mean_annual
+  direction: up
+  confidence: "High confidence (Amazonia warming trend)"
+  period: "about the last 40 years (the sentence does not give exact years)"
+  statement:
+    simple: "The Amazon rainforest has been getting warmer. Scientists are quite sure."
+    scientific: "Analyses point to increased warming over Amazonia over the last 40 years of roughly 0.6-0.7 degC, stronger in the dry season and in the south-east. Amazonia covers NSA and SAM."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.7.2.2, p. 1995, 2nd paragraph. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NSA"
+  ar6_region_name: "N.South-America"
+  place: "central Amazon near Manaus (-3.10, -60.02)"
+  variable_kind: temperature
+  metric: hot_extremes
+  direction: up
+  confidence: "Likely increase in hot extremes (observed trend); medium confidence in a human contribution"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period)"
+  statement:
+    simple: "Very hot days have become more common here. Scientists think so, but are not fully sure."
+    scientific: "Observed trends: likely increase in the intensity and frequency of hot extremes and decrease in cold extremes in Northern South America. A literature row reports significant increases (Geirinhas et al. 2018, Avila-Diaz et al. 2020, Dereczynski et al. 2020, Dunn et al. 2020). Human contribution: medium confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.13, p. 1668, row Northern South America (NSA). Observed-since-1950 framing: Table 11.1, p. 1532. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NSA"
+  ar6_region_name: "N.South-America"
+  place: "central Amazon near Manaus (-3.10, -60.02)"
+  variable_kind: rainfall
+  metric: mean_seasonal
+  direction: either
+  confidence: "No single confidence level for this sentence; AR6 says the changes are not explained by radiative forcing in CMIP6 and are insignificant over longer periods"
+  period: "since the 1980s (wet-season increases in the northern and central Amazon); insignificant since 1930 or since 1973 per the cited studies"
+  statement:
+    simple: "In the Amazon, the rainy season got wetter. The dry season in the south got drier."
+    scientific: "Wet-season rainfall increased in the northern and central Amazon since the 1980s and dry-season rainfall decreased in the southern Amazon. These changes are not explained by radiative forcing in CMIP6 experiments, and trends are insignificant over longer periods (since 1930, or since 1973). Manaus lies in the central Amazon."
+  source: "Douville, H. et al., 2021: Chapter 8, Water Cycle Changes, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.010, pp. 1055-1210, Section 8.3.1.3 (Precipitation Amount, Frequency and Intensity), p. 1082, paragraph on South American precipitation. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter08.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NSA"
+  ar6_region_name: "N.South-America"
+  place: "central Amazon near Manaus (-3.10, -60.02)"
+  variable_kind: rainfall
+  metric: heavy_precipitation
+  direction: unclear
+  confidence: "Low confidence (observed trends); evidence of a human contribution for some events only"
+  period: "not stated (limited data)"
+  statement:
+    simple: "We don't have enough data yet on heavy rain here. Scientists need more years of records."
+    scientific: "Insufficient data coverage; trends in the available data are generally not significant. Observed-trend confidence is low."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.14, p. 1673, row Northern South America (NSA). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "NSA"
+  ar6_region_name: "N.South-America"
+  place: "central Amazon near Manaus (-3.10, -60.02)"
+  variable_kind: soil_water
+  metric: agricultural_ecological_drought
+  direction: unclear
+  confidence: "Low confidence: mixed trends (meteorological drought: low confidence, mixed trends, with some evidence of longer droughts)"
+  period: "not stated"
+  statement:
+    simple: "Too soon to tell if the land is getting drier or wetter. Scientists need more data."
+    scientific: "Meteorological drought: mixed trends between subregions, some evidence of increased drought duration; low confidence. Agricultural and ecological drought: mixed trends between subregions and metrics; low confidence. Hydrological drought: limited evidence; low confidence. Human contribution: limited evidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.15, p. 1677, row NSA (MET, AGR/ECOL, HYDR). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAH"
+  ar6_region_name: "Sahara"
+  place: "Sahara near Tamanrasset (22.79, 5.52)"
+  variable_kind: temperature
+  metric: mean_annual
+  direction: up
+  confidence: "High confidence (Africa-wide: significant increases in all regions)"
+  period: "1961-2015"
+  statement:
+    simple: "The Sahara has been getting warmer. Scientists are quite sure."
+    scientific: "Annual mean surface temperature rose with significant increases in all African regions of 0.1-0.2 degC per decade, and more over some northern, eastern and south-western regions (Figure Atlas.11). The sentence is Africa-wide; region-level values are in Figure Atlas.11 and the Interactive Atlas, not transcribed here."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.4.2 (Africa, Assessment and Synthesis of Observations, Trends and Attribution), p. 1968, 1st paragraph. Also Chapter 12, Section 12.4.1, p. 1791 (Mean air temperature, Africa). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAH"
+  ar6_region_name: "Sahara"
+  place: "Sahara near Tamanrasset (22.79, 5.52)"
+  variable_kind: temperature
+  metric: hot_extremes
+  direction: up
+  confidence: "Likely increase in hot extremes (observed trend); medium confidence in a human contribution"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period)"
+  statement:
+    simple: "Very hot days have become more common here. Scientists think so, but are not fully sure."
+    scientific: "Observed trends: likely increase in the intensity and frequency of hot extremes and decrease in cold extremes in the Sahara. A literature row reports significant increases (Donat et al. 2014a, Moron et al. 2016, Dunn et al. 2020). Human contribution: medium confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.4 (Africa, temperature extremes), p. 1614, row Sahara (SAH). Observed-since-1950 framing: Table 11.1, p. 1532. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAH"
+  ar6_region_name: "Sahara"
+  place: "Sahara near Tamanrasset (22.79, 5.52)"
+  variable_kind: rainfall
+  metric: mean_annual
+  direction: unclear
+  confidence: "Not assessed for SAH; Africa-wide text says most areas lack enough data"
+  period: "not applicable"
+  statement:
+    simple: "The Sahara has too few rain records to see a trend."
+    scientific: "Most African areas lack enough observational data to draw conclusions about annual precipitation trends over the past century, and observed precipitation datasets disagree in many regions."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.4.2, p. 1968, 2nd paragraph. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAH"
+  ar6_region_name: "Sahara"
+  place: "Sahara near Tamanrasset (22.79, 5.52)"
+  variable_kind: rainfall
+  metric: heavy_precipitation
+  direction: unclear
+  confidence: "Low confidence; insufficient data to assess trends"
+  period: "not stated (limited data)"
+  statement:
+    simple: "We don't have enough data yet on heavy rain here. Scientists need more years of records."
+    scientific: "Insufficient data to assess trends; limited evidence for a human contribution; low confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.5 (Africa, heavy precipitation), p. 1620, row Sahara (SAH). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAH"
+  ar6_region_name: "Sahara"
+  place: "Sahara near Tamanrasset (22.79, 5.52)"
+  variable_kind: soil_water
+  metric: drought_all_types
+  direction: unclear
+  confidence: "Low confidence: limited evidence (meteorological, agricultural/ecological and hydrological drought)"
+  period: "not stated (limited data)"
+  statement:
+    simple: "Too soon to tell if the land is getting drier or wetter. Scientists need more data."
+    scientific: "Observed trends and human contribution are both assessed as low confidence with limited evidence, for meteorological, agricultural and ecological, and hydrological drought."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.6 (Africa, drought), pp. 1624-1625, row Sahara (SAH). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: temperature
+  metric: mean_annual
+  direction: up
+  confidence: "High confidence (Asia-wide warming 1960-2015); India-specific warming rates are reported without a confidence label"
+  period: "1960-2015 (Asia); 1901-2018 (India)"
+  statement:
+    simple: "India has been getting warmer over the last hundred years. Scientists are quite sure."
+    scientific: "A long-term warming trend in annual mean surface temperature was observed across Asia during 1960-2015, accelerating after the 1970s (high confidence). Annual mean land temperature over India rose about 0.6 degC per century during 1901-2018, mostly from higher maximum temperatures."
+  source: "Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.2, p. 1799 (Mean air temperature, Asia). ATLAS: Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.5.3.2 (South Asia), p. 1979, 1st paragraph. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: temperature
+  metric: hot_extremes
+  direction: up
+  confidence: "High confidence in the increase in hot extremes (observed trend); high confidence in a human contribution"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period)"
+  statement:
+    simple: "Very hot days have become more common here. Scientists are quite sure."
+    scientific: "Observed trends: high confidence in the increase in the intensity and frequency of hot extremes and decrease in cold extremes in South Asia. A literature row reports significant increases (Zahid and Rasul 2012, Sheikh et al. 2015, Donat et al. 2016, Dimri 2019 and others). Human contribution: high confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.7 (Asia, temperature extremes), p. 1637, row South Asia (SAS). Observed-since-1950 framing: Table 11.1, p. 1532. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: rainfall
+  metric: mean_annual
+  direction: down
+  confidence: "High confidence (decrease in mean rainfall over most of eastern and central north India); the sentence does not say whether Delhi is inside that area"
+  period: "not stated for this sentence (heavy-rain statement in the same paragraph covers since 1950)"
+  statement:
+    simple: "Total rain has dropped in large parts of India. We do not know if Delhi is one of them."
+    scientific: "A decline in monsoon rainfall with more frequent deficits is reported in South Asia, and regions of agreement among datasets give high confidence of a decrease in mean rainfall over most of eastern and central north India. Datasets differ widely in India. Positive annual trends are reported for Pakistan."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.5.3.2 (South Asia), p. 1979, paragraphs 2-3. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: rainfall
+  metric: heavy_precipitation
+  direction: up
+  confidence: "High confidence in the intensification of heavy precipitation (observed trend); low confidence in a human contribution (disagreement among studies)"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period); the Atlas text says heavy events increased over India since 1950 (high confidence)"
+  statement:
+    simple: "Heavy rainstorms have become more common in South Asia. Scientists are quite sure."
+    scientific: "Observed trends: high confidence in the intensification of heavy precipitation in South Asia (a literature row reports significant intensification). Detection and attribution: disagreement among studies, low confidence. The Atlas notes that heavy events increased and moderate events decreased over India since 1950 (high confidence)."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.8 (Asia, heavy precipitation), p. 1643, row South Asia (SAS). ATLAS: Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.5.3.2, p. 1979. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: rainfall
+  metric: meteorological_drought
+  direction: down
+  confidence: "Medium confidence: increase in meteorological drought (human contribution: low confidence, limited evidence)"
+  period: "not stated"
+  statement:
+    simple: "Dry spells have grown in parts of South Asia. Scientists think so."
+    scientific: "Observed trends: medium confidence of an increase in meteorological drought, with subregional differences but drying dominant (see also Section 10.6.3). Human contribution: low confidence, limited evidence. Direction here is for rainfall: more drought means rain shortfalls have become more common."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.9 (Asia, drought), p. 1653, row South Asia (SAS), MET. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: soil_water
+  metric: agricultural_ecological_drought
+  direction: either
+  confidence: "Low confidence: lack of signal and inconsistent trends (AGR/ECOL); aridity increased in parts of South Asia with medium confidence"
+  period: "1979-2018 for the Indo-Gangetic Plain aridity decline; other periods not stated"
+  statement:
+    simple: "Experts disagree about how dry the ground has become in north India."
+    scientific: "Agricultural and ecological drought: lack of signal and inconsistent trends depending on subregion and soil-moisture metric; low confidence. Chapter 12 reports increased aridity in parts of South Asia, including many parts of India (medium confidence), but significant aridity declines over the Indo-Gangetic Plain during 1979-2018, due in part to irrigation. Delhi lies in the Indo-Gangetic Plain."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.9, p. 1653, row SAS, AGR/ECOL. CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.2, p. 1800 (Aridity). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: haze
+  metric: aerosol_optical_depth
+  direction: up
+  confidence: "High confidence (satellite and ground records: AOD increased over South Asia)"
+  period: "2000-2019"
+  statement:
+    simple: "The air over South Asia has got hazier since the year 2000. Scientists are quite sure."
+    scientific: "Satellite (MODIS, MISR) and AERONET retrievals of aerosol optical depth show continuing increases over southern Asia, with similar trends from UV-based retrievals from OMI on Aura. The trend maps in Figure 2.9c cover 2000-2019. The assessed summary says AOD rose over South Asia and East Africa since 2000 (high confidence)."
+  source: "Gulev, S.K. et al., 2021: Chapter 2, Changing State of the Climate System, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.004, pp. 287-422, Section 2.2.6 (Aerosols), p. 309 (OMI sentence) and p. 310 (summary 'To conclude' paragraph), Figure 2.9. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter02.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "SAS"
+  ar6_region_name: "S.Asia"
+  place: "Delhi (28.61, 77.21)"
+  variable_kind: no2
+  metric: tropospheric_no2_column
+  direction: up
+  confidence: "Medium confidence (NO2 increased over Southern Asia by about 50 percent since 2005); the reversal since 2011 in parts of India has no separate confidence label"
+  period: "2005-2015 increase; many parts of India reversed after 2011"
+  statement:
+    simple: "A pollution gas from burning fuel rose a lot over India. In many places it has started falling since 2011."
+    scientific: "Satellite tropospheric NO2 over Southern Asia grew rapidly, about 50 percent during 2005-2015, driven by hotspots in India's power sector; many parts of India show a trend reversal since 2011 (Georgoulias et al. 2019, as cited by AR6). Independent NASA-led OMI study: NO2 over India rose by more than 50 percent from 2005 to 2015 (Krotkov et al. 2016, abstract). Measured by OMI, the same instrument we use."
+  source: "Szopa, S. et al., 2021: Chapter 6, Short-Lived Climate Forcers, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.008, pp. 817-922, Section 6.3.3.1 (Nitrogen Oxides), p. 839 (text and 'In summary' paragraph). Also Krotkov, N.A. et al., 2016: Aura OMI observations of regional SO2 and NO2 pollution changes from 2005 to 2015, Atmospheric Chemistry and Physics 16, 4605-4629, doi:10.5194/acp-16-4605-2016 (abstract), https://acp.copernicus.org/articles/16/4605/2016/. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter06.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: temperature
+  metric: mean_annual
+  direction: up
+  confidence: "Very likely mean warming across North America (Chapter 12 summary of Atlas.9.2)"
+  period: "1961-2015"
+  statement:
+    simple: "The air in this part of the US has been getting warmer. Scientists are quite sure."
+    scientific: "Annual mean surface temperature shows significant positive trends across North America in 1961-2015 and a temperature change signal has emerged in all North American regions (Berkeley Earth, aggregated over reference regions). Chapter 12 states that observed mean warming across North America is very likely. The sentence is annual; warming by season in Wisconsin is not assessed here (the NOAA state summary in regions.yaml says summers warmed little)."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.9.2 (North America, Assessment and Synthesis of Observations, Trends, and Attribution), p. 2004, 1st paragraph; CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1828 (Mean air temperature). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: temperature
+  metric: hot_extremes
+  direction: unclear
+  confidence: "Low confidence (observed trends: weak and inconsistent; detection and attribution: low confidence)"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period)"
+  statement:
+    simple: "Very hot days have not clearly become more common here. Scientists are not sure why."
+    scientific: "Observed trends in hot and cold extremes in CNA are weak and inconsistent (Dunn et al. 2020); the assessed row is low confidence, and evidence of a human contribution applies to some events only. Chapter 12 repeats that extreme temperatures increased in North America in recent decades except in Central and Eastern North America (low confidence). Region of Wisconsin: the box straddles CNA and ENA, both assessed low confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.19 (North America, temperature extremes), pp. 1695-1696, row CNA. CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1828 (Extreme heat). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: rainfall
+  metric: mean_annual
+  direction: up
+  confidence: "High confidence for consistent positive trends over parts of ENA and CNA; annual precipitation trends are generally non-significant over the whole continent"
+  period: "1961-2015"
+  statement:
+    simple: "Over the years, more rain has fallen in parts of this area. Scientists are quite sure."
+    scientific: "Trends in annual precipitation over 1961-2015 are generally non-significant in North America, though there are consistent positive trends over parts of ENA and CNA (high confidence). Observed precipitation trends are modest compared to large natural year-to-year variability."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.9.2, p. 2004, 2nd paragraph; CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1830 (Mean precipitation). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: rainfall
+  metric: heavy_precipitation
+  direction: up
+  confidence: "High confidence in the intensification of heavy precipitation (observed trend); human contribution: medium confidence"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period) (literature row cites studies up to 2020)"
+  statement:
+    simple: "Heavy rainstorms have become more common here. Scientists are quite sure."
+    scientific: "Observed trends: high confidence in the intensification of heavy precipitation in CNA (a literature row reports significant intensification; for ENA it also notes a lack of a significant trend over Canada). Human contribution: medium confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.20 (North America, heavy precipitation), p. 1699, row CNA. CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1831. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: rainfall
+  metric: meteorological_drought
+  direction: up
+  confidence: "Medium confidence: decrease in the duration and frequency of meteorological droughts (human contribution: low confidence)"
+  period: "not stated"
+  statement:
+    simple: "Dry spells have got shorter and rarer in the central US. Scientists think so."
+    scientific: "Observed trends: medium confidence in a decrease in the duration and frequency of meteorological droughts in Central North America. Human contribution: low confidence, limited evidence. Direction here is for rainfall: fewer droughts means rain shortfalls have become less common."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.21 (North America, drought), p. 1702, row CNA, MET. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: soil_water
+  metric: agricultural_ecological_drought
+  direction: unclear
+  confidence: "Low confidence: mixed signal (agricultural and ecological and hydrological drought)"
+  period: "not stated"
+  statement:
+    simple: "Too soon to tell if the ground is getting drier or wetter. Scientists need more data."
+    scientific: "Agricultural and ecological drought: mixed signal depending on soil moisture, water-balance estimates, PDSI and SPEI, with conflicting trends in parts of the subregion; low confidence. Hydrological drought: mixed signal; low confidence. Human contribution: limited evidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.21, p. 1703, row CNA (continued), AGR/ECOL and HYDR. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: haze
+  metric: aerosol_optical_depth
+  direction: down
+  confidence: "High confidence (AOD predominantly negative trends since 2000 over Northern Hemisphere mid-latitudes; declines over the USA corroborated by AERONET)"
+  period: "2000-2019"
+  statement:
+    simple: "The air over the US has got clearer since the year 2000. Scientists are quite sure."
+    scientific: "Satellite and ground-based records show predominantly negative aerosol optical depth trends since 2000 over Northern Hemisphere mid-latitudes, and AERONET corroborates satellite declines over the USA. Chapter 6 adds that surface observations in North America show substantial reductions in sulphate since measurements began around 1980. Wisconsin smoke events (wildfires) can still raise single years."
+  source: "Gulev, S.K. et al., 2021: Chapter 2, Changing State of the Climate System, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.004, pp. 287-422, Section 2.2.6 (Aerosols), p. 309 (USA declines) and p. 310 (summary 'To conclude' paragraph), Figure 2.9. CH6: Szopa, S. et al., 2021: Chapter 6, Short-Lived Climate Forcers, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.008, pp. 817-922, Section 6.3.5.1 (Sulphate), pp. 845-846. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter02.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter06.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "CNA"
+  ar6_region_name: "C.North-America"
+  place: "Wisconsin: the part west of about 90 W (about half of the state box)"
+  variable_kind: no2
+  metric: tropospheric_no2_column
+  direction: down
+  confidence: "High confidence (NO2 declined over the USA since the mid-1990s)"
+  period: "since the mid-1990s (satellite record 1996-2015 and later)"
+  statement:
+    simple: "A polluting gas from cars and power plants has dropped. Scientists are quite sure."
+    scientific: "Satellite observations show tropospheric NO2 columns declined over the USA, with the decline slowing after 2011, because of effective fossil-fuel NOx emission controls. High confidence that NO2 has declined over the USA and Western Europe since the mid-1990s."
+  source: "Szopa, S. et al., 2021: Chapter 6, Short-Lived Climate Forcers, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.008, pp. 817-922, Section 6.3.3.1 (Nitrogen Oxides), p. 839 (text and 'In summary' paragraph). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter06.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: temperature
+  metric: mean_annual
+  direction: up
+  confidence: "Very likely mean warming across North America (Chapter 12 summary of Atlas.9.2)"
+  period: "1961-2015"
+  statement:
+    simple: "The air in this part of the US has been getting warmer. Scientists are quite sure."
+    scientific: "Annual mean surface temperature shows significant positive trends across North America in 1961-2015 and a temperature change signal has emerged in all North American regions (Berkeley Earth, aggregated over reference regions). Chapter 12 states that observed mean warming across North America is very likely. The sentence is annual; warming by season in Wisconsin is not assessed here (the NOAA state summary in regions.yaml says summers warmed little)."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.9.2 (North America, Assessment and Synthesis of Observations, Trends, and Attribution), p. 2004, 1st paragraph; CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1828 (Mean air temperature). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: temperature
+  metric: hot_extremes
+  direction: unclear
+  confidence: "Low confidence (observed trends: weak and inconsistent; detection and attribution: low confidence)"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period)"
+  statement:
+    simple: "Very hot days have not clearly become more common here. Scientists are not sure why."
+    scientific: "Observed trends in hot and cold extremes in ENA are weak and inconsistent (Dunn et al. 2020); the assessed row is low confidence, and evidence of a human contribution applies to some events only. Chapter 12 repeats that extreme temperatures increased in North America in recent decades except in Central and Eastern North America (low confidence). Region of Wisconsin: the box straddles CNA and ENA, both assessed low confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.19 (North America, temperature extremes), pp. 1695-1696, row ENA. CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1828 (Extreme heat). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: rainfall
+  metric: mean_annual
+  direction: up
+  confidence: "High confidence for consistent positive trends over parts of ENA and CNA; annual precipitation trends are generally non-significant over the whole continent"
+  period: "1961-2015"
+  statement:
+    simple: "Over the years, more rain has fallen in parts of this area. Scientists are quite sure."
+    scientific: "Trends in annual precipitation over 1961-2015 are generally non-significant in North America, though there are consistent positive trends over parts of ENA and CNA (high confidence). Observed precipitation trends are modest compared to large natural year-to-year variability."
+  source: "Gutierrez, J.M. et al., 2021: Atlas, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.021, pp. 1927-2058, Section Atlas.9.2, p. 2004, 2nd paragraph; CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1830 (Mean precipitation). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Atlas.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: rainfall
+  metric: heavy_precipitation
+  direction: up
+  confidence: "High confidence in the intensification of heavy precipitation (observed trend); human contribution: low confidence"
+  period: "since about 1950 (Table 11.1 header; the regional table row gives no separate period) (literature row cites studies up to 2020)"
+  statement:
+    simple: "Heavy rainstorms have become more common here. Scientists are quite sure."
+    scientific: "Observed trends: high confidence in the intensification of heavy precipitation in ENA (a literature row reports significant intensification; for ENA it also notes a lack of a significant trend over Canada). Human contribution: low confidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.20 (North America, heavy precipitation), p. 1699, row ENA. CH12: Ranasinghe, R. et al., 2021: Chapter 12, Climate Change Information for Regional Impact and for Risk Assessment, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.014, pp. 1767-1926, Section 12.4.6, p. 1831. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter12.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: soil_water
+  metric: drought_all_types
+  direction: unclear
+  confidence: "Low confidence: inconsistent trends (meteorological drought); mixed signals (agricultural and ecological drought)"
+  period: "not stated"
+  statement:
+    simple: "Too soon to tell if the ground is getting drier or wetter. Scientists need more data."
+    scientific: "Meteorological drought: inconsistent trends depending on the region and metric; low confidence. Agricultural and ecological drought: mixed signals, inconsistent trends depending on metric, subregion and time frame; low confidence. Human contribution: limited evidence."
+  source: "Seneviratne, S.I. et al., 2021: Chapter 11, Weather and Climate Extreme Events in a Changing Climate, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.013, pp. 1513-1766, Table 11.21, p. 1703, row ENA (MET and AGR/ECOL). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_ch11.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: haze
+  metric: aerosol_optical_depth
+  direction: down
+  confidence: "High confidence (AOD predominantly negative trends since 2000 over Northern Hemisphere mid-latitudes; declines over the USA corroborated by AERONET)"
+  period: "2000-2019"
+  statement:
+    simple: "The air over the US has got clearer since the year 2000. Scientists are quite sure."
+    scientific: "Satellite and ground-based records show predominantly negative aerosol optical depth trends since 2000 over Northern Hemisphere mid-latitudes, and AERONET corroborates satellite declines over the USA. Chapter 6 adds that surface observations in North America show substantial reductions in sulphate since measurements began around 1980. Wisconsin smoke events (wildfires) can still raise single years."
+  source: "Gulev, S.K. et al., 2021: Chapter 2, Changing State of the Climate System, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.004, pp. 287-422, Section 2.2.6 (Aerosols), p. 309 (USA declines) and p. 310 (summary 'To conclude' paragraph), Figure 2.9. CH6: Szopa, S. et al., 2021: Chapter 6, Short-Lived Climate Forcers, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.008, pp. 817-922, Section 6.3.5.1 (Sulphate), pp. 845-846. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter02.pdf ; Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter06.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "ENA"
+  ar6_region_name: "E.North-America"
+  place: "Wisconsin: the part east of about 90 W (about half of the state box)"
+  variable_kind: no2
+  metric: tropospheric_no2_column
+  direction: down
+  confidence: "High confidence (NO2 declined over the USA since the mid-1990s)"
+  period: "since the mid-1990s (satellite record 1996-2015 and later)"
+  statement:
+    simple: "A polluting gas from cars and power plants has dropped. Scientists are quite sure."
+    scientific: "Satellite observations show tropospheric NO2 columns declined over the USA, with the decline slowing after 2011, because of effective fossil-fuel NOx emission controls. High confidence that NO2 has declined over the USA and Western Europe since the mid-1990s."
+  source: "Szopa, S. et al., 2021: Chapter 6, Short-Lived Climate Forcers, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.008, pp. 817-922, Section 6.3.3.1 (Nitrogen Oxides), p. 839 (text and 'In summary' paragraph). Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter06.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
+- ar6_region: "GLOBAL_LAND"
+  ar6_region_name: "all land (no AR6 region)"
+  place: "any land place"
+  variable_kind: humidity
+  metric: surface_relative_humidity
+  direction: either
+  confidence: "Very likely decrease in relative humidity over much of the global land area since 2000; trends show distinct spatial patterns"
+  period: "since 2000 (decrease); since 1973 (spatial pattern of trends)"
+  statement:
+    simple: "Across the world's land, the air has got less damp since 2000. A few places got damper."
+    scientific: "Very likely decrease in surface relative humidity over much of global land since 2000, particularly Northern Hemisphere mid-latitudes, with increases at northern high latitudes. Since 1973 relative-humidity trends are generally increasing over higher latitudes and the tropics and generally decreasing over the sub-tropics and mid-latitudes, particularly over land. Not assessed region by region in AR6; the pattern is a hint, not a regional finding."
+  source: "Gulev, S.K. et al., 2021: Chapter 2, Changing State of the Climate System, in IPCC, 2021: Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report [Masson-Delmotte, V. et al. (eds.)]. Cambridge University Press, doi:10.1017/9781009157896.004, pp. 287-422, Section 2.3.1.3.2 (Surface humidity), p. 330 (text and summary paragraph), Figure 2.13c. Final chapter PDF: https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_Chapter02.pdf"
+  checked_by: "agent (sources-research), needs human confirmation"
+  opened_at: "2026-11-15"
+
