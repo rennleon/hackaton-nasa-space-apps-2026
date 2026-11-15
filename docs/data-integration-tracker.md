@@ -180,8 +180,8 @@ Feature freeze: **16:00 Peru, Sun Nov 15**. After that, only R5 fixes, deploy an
 | ID | Task | Serves | Status |
 |---|---|---|---|
 | C1 | Place profile: AR6 region, climate group, "high up" | R1 R5 | ✅ wired into scans |
-| C2 | `catalog/expectations.yaml` from H1/H2 | R1 | 🟡 waiting on H1 |
-| C3 | "What scientists found here" line (agrees / differs / too soon) | R4 R5 | ⬜ |
+| C2 | `catalog/expectations.yaml` from H1/H2 | R1 | ✅ loaded (`published.py`), Spanish added, stage-1 check (b) uses it for any place |
+| C3 | "What scientists found here" line (agrees / differs / too soon) | R4 R5 | 🟡 backend done (`AnalysisResult.published`, `published_context`); UI line pending |
 | C4 | Declared seasons for picked places from climatology | R3 | 🟡 wet/dry months computed, not yet used as seasons |
 | D1 | R5 read-aloud pass on every Simple screen | R5 | ⬜ |
 | E1 | Deploy (needs the user's OK + hosting choice); token as server secret | R6 | ⬜ needs user OK + hosting |

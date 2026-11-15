@@ -34,7 +34,7 @@ describe('TrustPanel', () => {
   const full: AnalysisResult = {
     ...base,
     robustness: { ...base.robustness, cross_check: cc },
-    published: { statement: t('Regional assessments expect more humid air here.'), source: 'IPCC AR6 WGI', confidence: 'medium confidence', direction: 'up', agreement: 'agrees' },
+    published: { statement: t('Regional assessments expect more humid air here.'), source: 'IPCC AR6 WGI', confidence: 'medium confidence', confidence_es: null, direction: 'up', agreement: 'agrees', ar6_region: 'NWS', scope: 'mean', partial: false },
     verdict: { ...base.verdict, notes: [t('Short record, but the change is bigger than typical.')] },
   }
   it('groups the checks and shows second opinion, published science and the notes', () => {

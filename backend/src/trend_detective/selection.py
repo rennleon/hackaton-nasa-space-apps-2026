@@ -22,6 +22,7 @@ import numpy as np
 
 from .catalog import RegionCard, VariableCard
 from .contract import GateCheck, Selection, SelectionCheck, Text
+from .published import PublishedMatch, expectation_check
 from .stats import ols_neff
 
 
@@ -100,7 +101,10 @@ def stage1(
     y: np.ndarray | None,
     n_years: float,
     samples_per_year: int,
+    published: PublishedMatch | None = None,
 ) -> Selection:
+    """`published`: the AR6 entry for this place and variable (published.match). Used for check (b) only when the
+    region card has no cited expectation of its own. Only facts known before the trend go in here."""
     checks: list[SelectionCheck] = []
 
     # (a) question
@@ -130,6 +134,8 @@ def stage1(
                         simple_es=exp.reason.simple_es,
                         scientific_es=f"{exp.reason.scientific_es or exp.reason.scientific} Fuente: {exp.source}"),
         ))
+    elif published is not None and published.mean is not None:
+        checks.append(expectation_check(published.mean))
     else:
         checks.append(SelectionCheck(
             code="expectation", status="caution",
