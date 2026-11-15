@@ -100,6 +100,9 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
     "Where else?" strip (same variable's verdict across the ready-made places). Trend map stays parked.
   - Spanish as a second UI language (EN/ES toggle, English default; submission materials stay in English).
   - v2 work lives on `feat/v2-live-data`. Progress and resources: `docs/data-integration-tracker.md`.
+- Release v2.0.0 (Nov 15): PR #2 squash-merged into `main` and tagged. Work for the next version lives on
+  `feat/v3` (branched from `v2.0.0`); `feat/v2-live-data` is merged and frozen. Add changes under
+  `## [Unreleased]` in `CHANGELOG.md`; release with `npm run release` (see RELEASING.md).
 - Never invent a citation. Every "expected to change because…" line needs a source someone opened and checked.
 - When reporting status, list each requirement R1–R6 as done, partial or not started, with what the user should
   click to see it.
