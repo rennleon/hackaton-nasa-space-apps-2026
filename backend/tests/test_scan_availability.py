@@ -13,6 +13,8 @@ GOOD = dict(slope_per_decade=0.8, sd=1.0)
 
 def entries(data, **kw):
     ctx, src = make_ctx(data, **kw)
+    # merra2_t2m is unlisted in the catalog (duplicate of power_t2m); re-list it here as a 4th heat member.
+    ctx.catalog.variables["merra2_t2m"].listed = True
     s = scan_region(ctx, point_region(), "heat")
     return ctx, src, s, {e.variable_id: e for e in s.entries}
 
@@ -40,6 +42,7 @@ def test_each_availability_label():
 def test_land_only_variable_with_no_data_says_land():
     ctx, _ = make_ctx({})
     ctx.catalog.variables["merra2_t2m"].domain = "land"
+    ctx.catalog.variables["merra2_t2m"].listed = True
     s = scan_region(ctx, point_region(), "heat")
     e = next(e for e in s.entries if e.variable_id == "merra2_t2m")
     assert e.availability == "no_data_here"

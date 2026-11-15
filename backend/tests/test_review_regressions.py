@@ -51,7 +51,8 @@ def test_scientific_sentence_names_only_checks_that_ran(ctx):
     r = analyze(ctx, "cajamarca_west", "airs_rh_surf_day")
     sci = r.verdict.sentence.scientific
     assert "leave-one-year-out" in sci
-    assert "cross-check" not in sci  # no cross-check source for humidity
+    # v2: AIRS humidity now pairs with NASA POWER RH2M (a different instrument), so the cross-check runs.
+    assert "cross-check" in sci
 
 
 def test_step_month_detects_a_jump_and_ignores_noise():
