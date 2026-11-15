@@ -101,12 +101,19 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
   - Moved out of the parking lot: three example points (Delhi, Amazon near Manaus, Sahara near Tamanrasset) and a
     "Where else?" strip (same variable's verdict across the ready-made places). Trend map stays parked.
   - Spanish as a second UI language (EN/ES toggle, English default; submission materials stay in English).
-  - v2 work lives on `feat/v2-live-data`. Progress and resources: `docs/data-integration-tracker.md`.
+  - Progress and resources for live data: `docs/data-integration-tracker.md`.
 - Known breaks (Nov 15): when the window crosses any flagged break (frozen model emissions, model input changes,
   OMI row anomaly, MODIS orbit drift), "Sure it's real" drops to "Maybe, not sure yet". The record is still kept.
-- Release v2.0.0 (Nov 15): PR #2 squash-merged into `main` and tagged. Work for the next version lives on
-  `feat/v3` (branched from `v2.0.0`); `feat/v2-live-data` is merged and frozen. Add changes under
-  `## [Unreleased]` in `CHANGELOG.md`; release with `npm run release` (see RELEASING.md).
+- Releases (Nov 15): v2.0.0 (PR #2) and v2.1.0 (PRs #3 and #4, the v3 work and UI redesign) are on `main`
+  and tagged; v2.1.0 has a GitHub Release. `feat/v2-live-data` and `feat/v3` are merged and deleted. Start new
+  work on a fresh feature branch from `main`. Add changes under `## [Unreleased]` in `CHANGELOG.md`; release
+  with `npm run release -- <patch|minor|major>` (see RELEASING.md).
+- Merging: PRs are squash-merged, so a long-lived branch loses its shared history with `main` after each merge.
+  Branch fresh from `main` after a merge, or the next PR shows false conflicts.
+- Builds: never build into `web/dist` while `npm run lan` is serving it (it went offline-only once). For a build
+  check use `npx vite build --outDir <scratch dir>`; check UI changes in a production build, since the dev server
+  loads CSS per screen and hides class-name clashes between screen stylesheets.
+- Nothing is deployed yet (Nov 15): the release workflow builds the web bundle and API image only.
 - Never invent a citation. Every "expected to change because…" line needs a source someone opened and checked.
 - When reporting status, list each requirement R1–R6 as done, partial or not started, with what the user should
   click to see it.
