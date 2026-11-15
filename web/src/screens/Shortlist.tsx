@@ -53,7 +53,8 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
     const declared = region.declared_seasons.some((s) => s.variable === e.variable_id && s.id === route.season)
     // open the variable page on the SAME years this card's verdict used (the scan's shared window, as YYYY-MM),
     // so the card and the page give the same answer; the page offers "all the years we have" from there
-    const shared = data?.common_window && data.window_start && data.window_end
+    // a season asks a different question than the card's all-months answer: then the page keeps its own default
+    const shared = !declared && data?.common_window && data.window_start && data.window_end
     go({
       screen: 'variable', region: custom ? undefined : region.id, place: route.place, theme: themeId, variable: e.variable_id,
       season: declared ? route.season : undefined,

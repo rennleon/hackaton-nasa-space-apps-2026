@@ -52,10 +52,14 @@ export class FallbackClient implements DataClient {
    */
   customScan = (p: Place, t: string) =>
     exampleAt(p) ? this.fallback.customScan(p, t).catch(() => this.live((c) => c.customScan(p, t))) : this.live((c) => c.customScan(p, t))
-  customResult = (p: Place, v: string, o: { start?: string; end?: string }) => {
+  customResult = async (p: Place, v: string, o: { start?: string; end?: string }) => {
     const apiFirst = () => this.live((c) => c.customResult(p, v, o))
     if (!exampleAt(p)) return apiFirst()
-    if (o.start || o.end) return apiFirst().catch(() => this.fallback.customResult(p, v, o))
-    return this.fallback.customResult(p, v, o).catch(apiFirst)
+    // Example points: precomputed files first (the default, and each shortlist card's shared window), so the demo
+    // numbers match and no live computation or rate-limit token is spent. A period with no file (the static client
+    // flags it) goes to the API; if that fails too, the flagged default is shown with its notice.
+    const pre: AnalysisOutcome | null = await this.fallback.customResult(p, v, o).catch(() => null)
+    if (pre && !pre.customPeriodUnavailable) return pre
+    return apiFirst().catch((err) => (pre ? pre : Promise.reject(err)))
   }
 }

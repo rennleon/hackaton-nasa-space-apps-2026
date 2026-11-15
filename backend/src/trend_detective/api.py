@@ -16,7 +16,7 @@ from . import ENGINE_VERSION
 from .catalog import Geometry, RegionCard
 from .contract import AnalysisResult, ScanResult, Text
 from .engine import EngineContext, analyze
-from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client
+from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client, limit_map
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
 from .sources.power import CLIMATOLOGY_PARAMS, fetch_climatology, validate_climatology_bbox, validate_geometry
@@ -217,11 +217,12 @@ def _custom_analyze_cached(kind: str, c: tuple[float, ...], variable: str, start
 
 
 @lru_cache(maxsize=64)
+@counts_as_live
 def _climatology_cached(param: str, box: tuple[float, ...]) -> dict:
     return fetch_climatology(param, box)  # raises LiveSourceUnavailable (HTTP 503), which lru_cache never stores
 
 
-@app.get("/climatology/grid", dependencies=[Depends(limit_client)])
+@app.get("/climatology/grid", dependencies=[Depends(limit_map)])
 def climatology_grid(param: str = Query(...), bbox: str = Query(...)) -> dict:
     """Annual-mean value per NASA POWER grid cell in a 2 to 10 degree box: {param, units, source, cells, cell_deg}."""
     if param not in CLIMATOLOGY_PARAMS:

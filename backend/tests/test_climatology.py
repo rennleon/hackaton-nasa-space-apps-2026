@@ -75,3 +75,14 @@ def test_unexpected_unit_is_refused(client, tmp_path):
 ])
 def test_bad_input_422(client, params):
     assert client.get("/climatology/grid", params=params).status_code == 422
+
+
+def test_map_layer_has_its_own_rate_bucket():
+    """Panning the colour layer must not spend the tokens the next /custom scan needs (review finding 3)."""
+    from trend_detective import ratelimit
+    from trend_detective.api import app
+
+    route = next(r for r in app.routes if getattr(r, "path", "") == "/climatology/grid")
+    deps = [d.call for d in route.dependant.dependencies]
+    assert ratelimit.limit_map in deps and ratelimit.limit_client not in deps
+    assert ratelimit.map_ip is not ratelimit.per_ip

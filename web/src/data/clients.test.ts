@@ -31,6 +31,27 @@ describe('FallbackClient', () => {
   })
 })
 
+describe('FallbackClient example points', () => {
+  const delhi = { kind: 'point' as const, lat: 28.61, lon: 77.21 }
+  it('a card window at an example point reads the precomputed file and never calls the API', async () => {
+    const api = vi.fn(async () => res)
+    const c = new FallbackClient(fake({ customResult: api }), fake({ customResult: async () => res }))
+    expect(await c.customResult(delhi, 'power_aod', { start: '2004-10', end: '2025-12' })).toBe(res)
+    expect(api).not.toHaveBeenCalled()
+  })
+  it('a period with no precomputed file at an example point asks the API', async () => {
+    const api = vi.fn(async () => res)
+    const c = new FallbackClient(fake({ customResult: api }), fake({ customResult: async () => ({ ...res, customPeriodUnavailable: true }) }))
+    expect(await c.customResult(delhi, 'power_aod', { start: '2010-01', end: '2020-12' })).toBe(res)
+    expect(api).toHaveBeenCalled()
+  })
+  it('API down too: the flagged default is shown, with its notice', async () => {
+    const flagged = { ...res, customPeriodUnavailable: true }
+    const c = new FallbackClient(fake({}), fake({ customResult: async () => flagged }))
+    expect(((await c.customResult(delhi, 'power_aod', { start: '2010-01', end: '2020-12' })) as { customPeriodUnavailable?: boolean }).customPeriodUnavailable).toBe(true)
+  })
+})
+
 describe('StaticClient', () => {
   it('builds season file urls', async () => {
     const f = vi.fn((...args: [string]) => Promise.resolve(new Response(JSON.stringify(res), { headers: { "x-url": args[0] } })))
