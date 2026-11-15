@@ -5,6 +5,7 @@ import { useAsync } from '../lib/useAsync'
 import { Timeline } from '../components/Timeline'
 import { certaintyOf } from '../components/CertaintyMeter'
 import { SourceTag } from '../components/SourceTag'
+import { Term } from '../components/Term'
 import { VerdictChip } from '../components/VerdictChip'
 import { Sparkline, TrendArrow } from '../components/Sparkline'
 import { classifyLiveError, LiveNotice } from '../components/LiveNotice'
@@ -12,6 +13,8 @@ import { parsePlace, placeRegion } from '../lib/place'
 import { formatSlope, plainNum } from '../lib/text'
 import { availabilityOf, cleanPlaceName, directionOf, splitEntries, summarize, variableRefFromEntry } from '../lib/findings'
 import { useL, type FKey } from '../lib/findingsCopy'
+import { instrumentById } from '../lib/instruments'
+import { instrumentHref, manySatellites, shortName, useS } from '../lib/sourceLabels'
 import type { Route } from '../lib/route'
 import type { Comparison, ScanEntry, ScanResult } from '../types/contract'
 import type { RegionCard, VariableCard } from '../types/catalog'
@@ -70,7 +73,10 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
           <>
             {years && <p className="muted small">{l('findings.commonWindow', { start: years.start, end: years.end })}</p>}
             {available.length > 0 ? (
-              <Summary summary={summary} scan={data} />
+              <>
+                <Summary summary={summary} scan={data} />
+                <Legend entries={available} variables={catalog.variables} />
+              </>
             ) : (
               <EmptyState themeId={themeId} set={set} />
             )}
@@ -177,6 +183,39 @@ function Summary({ summary, scan }: { summary: ReturnType<typeof summarize>; sca
   )
 }
 
+/** "Instruments in this list: AIRS (satellite) · GPM IMERG (satellites) · MERRA-2 (computer model)", each linking to the sources page. */
+function Legend({ entries, variables }: { entries: ScanEntry[]; variables: VariableCard[] }) {
+  const { s, rich } = useS()
+  const ids = [
+    ...new Set(
+      entries.flatMap((e) => {
+        const id = e.instrument_id ?? (variables.find((v) => v.id === e.variable_id)?.source as { instrument_id?: string | null } | undefined)?.instrument_id
+        return id ? [id] : []
+      }),
+    ),
+  ]
+  const list = ids.flatMap((id) => {
+    const inst = instrumentById(id)
+    return inst ? [inst] : []
+  })
+  if (list.length === 0) return null
+  return (
+    <div className="legend">
+      <p className="legend-label small">{rich('legend.label', {}, { instrument: <Term id="instrument">{s('legend.instruments')}</Term> })}</p>
+      <ul className="inline-list small">
+        {list.map((i) => {
+          const key = i.kind === 'model' ? 'legend.model' : manySatellites(i.platform) ? 'legend.satMany' : 'legend.sat'
+          return (
+            <li key={i.id}>
+              <a href={instrumentHref(i.id)}>{s(key, { name: shortName(i) })}</a>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
 function LoadingState() {
   const l = useL()
   return (
@@ -253,14 +292,23 @@ function EmptyState({ themeId, set }: { themeId?: string; set: (p: Partial<Route
   )
 }
 
-function SecondOpinion({ c }: { c: Comparison }) {
+function SecondOpinion({ c, own }: { c: Comparison; own: string | null }) {
   const { view } = useView()
   const l = useL()
+  const { s } = useS()
   if (!c.outcome) return null
+  // the partner measures the same thing with a different instrument: say so, and name it
+  const other = c.against_instrument && c.against_instrument !== own ? instrumentById(c.against_instrument) : undefined
   return (
     <p className="fcard-second small">
       <strong>{l('findings.secondOpinion')}:</strong> {l(`findings.second.${c.outcome}` as FKey)}
       {view === 'scientific' && c.text && <> · {tx(c.text, view)}</>}
+      {other && (
+        <>
+          <br />
+          <span className="fcard-same">{s('legend.same', { name: shortName(other) })}</span>
+        </>
+      )}
     </p>
   )
 }
@@ -281,7 +329,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
           {name}
         </button>
       </h3>
-      <SourceTag variable={variableRefFromEntry(e, card)} />
+      <SourceTag compact variable={variableRefFromEntry(e, card)} />
       {card && <p className="fcard-def muted">{tx(card.definition, view)}</p>}
       {years && (
         <div className="fcard-trend">
@@ -297,7 +345,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
           !sure && <span className="fcard-rec small muted">{l('findings.hardToSpot')}</span>
         )}
       </div>
-      {e.cross_check && <SecondOpinion c={e.cross_check} />}
+      {e.cross_check && <SecondOpinion c={e.cross_check} own={e.instrument_id ?? (card?.source as { instrument_id?: string | null } | undefined)?.instrument_id ?? null} />}
       {view === 'scientific' && (
         <p className="muted small">
           {e.slope_per_decade != null && formatSlope(e.slope_per_decade, e.units, view)}

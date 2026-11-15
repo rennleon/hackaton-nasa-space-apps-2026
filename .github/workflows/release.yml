@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TD_POWER_OFFLINE: "1"
+      TD_GIOVANNI_OFFLINE: "1" # never call Giovanni from CI; the committed cache serves pre-loaded data
     steps:
       - uses: actions/checkout@v4
       - name: Tag matches VERSION
