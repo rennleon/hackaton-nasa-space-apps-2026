@@ -347,6 +347,19 @@ def _texts(code, ar6, elev, high_up, wet, dry, years, yours: bool = True) -> Tex
 
 # ---------------------------------------------------------------- entry point
 
+def _homogeneity(src: P.PowerSource | None, geom):
+    """"Is this one kind of place?" (see homogeneity.py); None when it cannot be computed. Never raises."""
+    if src is None:
+        return None
+    try:
+        # late import: homogeneity.py imports koppen_geiger from this module
+        from .homogeneity import compute_homogeneity
+
+        return compute_homogeneity(src.cache_dir, src.offline, geom.kind, list(geom.bbox))
+    except Exception:  # noqa: BLE001 - context only
+        return None
+
+
 def profile_place(ctx, region: RegionCard) -> PlaceProfile:
     """Profile for a region card (point or box). Never raises on missing data: unknown fields stay None."""
     geom = region.geometry
@@ -377,6 +390,7 @@ def profile_place(ctx, region: RegionCard) -> PlaceProfile:
             group = GROUP_OF_MAIN[code[0]]
             wet, dry = wet_dry_months(precip)
     return PlaceProfile(
+        homogeneity=_homogeneity(src, geom),
         ar6_region_code=ar6[0] if ar6 else None,
         ar6_region_name=ar6[1] if ar6 else None,
         climate_group=group,

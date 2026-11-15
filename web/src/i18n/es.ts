@@ -782,5 +782,20 @@ const es: Record<string, string> = {
     'Solo contexto: el veredicto de arriba se mantiene en la ventana declarada ({from} a {to}). Cada año de inicio repite los mismos contrastes con el mes final fijo; las anomalías usan la climatología de toda la ventana declarada. El umbral del 75 % para "mayormente" es una decisión del proyecto.',
   'startyears.termLine.simple': 'El {start_year} es el primer año que contamos.',
   'startyears.refNote.sci': 'Las tendencias de pocas décadas pueden cambiar de signo con el año de inicio o de fin:',
+  // ---------- "Is this one kind of place?" panel (shortlist page)
+  'homog.aria': '¿Es un solo tipo de lugar?',
+  'homog.mixed.title': 'Lugar mezclado',
+  'homog.one.title': 'Un solo tipo de lugar',
+  'homog.spot.title': 'Un punto pequeño',
+  'homog.why': 'Cuéntame más',
+  'homog.try': 'Probar solo {name}',
+  'homog.try.sci': 'Usar solo {name} ({n} celdas)',
+  'homog.rule.sci': 'regla: heurística del proyecto',
+  'homog.cells.sci': 'Celdas de la rejilla',
+  'homog.rain.sci': 'Precipitación anual',
+  'homog.unit.rain.sci': 'mm/día',
+  'homog.elev.sci': 'Elevación del modelo',
+  'homog.t2m.sci': 'T2M anual',
+  'homog.groups.sci': 'Grupos principales de Köppen',
 }
 export default es

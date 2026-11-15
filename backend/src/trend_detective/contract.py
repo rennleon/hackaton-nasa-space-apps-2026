@@ -273,6 +273,37 @@ class PublishedFinding(Model):
     partial: bool = False  # the statement holds for parts of the region, so "differs" is never claimed
 
 
+class HomogeneityReason(Model):
+    code: Literal["climate_groups", "elevation", "rain", "temperature"]
+    text: Text
+
+
+class HomogeneitySuggestion(Model):
+    """A smaller box inside a mixed one that is itself one kind of place."""
+
+    bbox: list[float]  # [W, S, E, N], 2 decimals
+    name: Text  # "the high, cool part"
+    n_cells: int
+
+
+class Homogeneity(Model):
+    """"Is this one kind of place?" From long-term means only (never a trend), before any trend is computed.
+    The rules are PROJECT HEURISTICS (the concept follows Hosking & Wallis 1993); the literature gives no thresholds."""
+
+    kind: Literal["one_kind", "mixed", "single_spot"]
+    reasons: list[HomogeneityReason] = Field(default_factory=list)
+    n_cells: int
+    precip_min: float | None = None  # annual mean, mm/day (NASA POWER climatology, MERRA-2)
+    precip_max: float | None = None
+    t2m_min: float | None = None  # annual mean, degrees C
+    t2m_max: float | None = None
+    elev_min: float | None = None  # model-grid elevation, m
+    elev_max: float | None = None
+    climate_groups: dict[str, int] = Field(default_factory=dict)  # Koppen main group letter -> number of cells
+    suggestions: list[HomogeneitySuggestion] = Field(default_factory=list)
+    text: Text
+
+
 class PlaceProfile(Model):
     """What kind of place this is, from facts known before any trend (long-term means, elevation, maps)."""
 
@@ -285,6 +316,7 @@ class PlaceProfile(Model):
     wet_months: list[int] = Field(default_factory=list)
     dry_months: list[int] = Field(default_factory=list)
     text: Text | None = None  # "Your place is dry and hot, high in the mountains."
+    homogeneity: Homogeneity | None = None  # "Is this one kind of place?" (boxes only; None when unknown)
 
 
 class AnalysisResult(Model):

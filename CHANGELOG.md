@@ -17,6 +17,11 @@ for how to release and how to roll back.
 - "The change is bigger in some months than in others": an info chip (context only, never changes the
   verdict) from a Welch test on the 12 per-month slopes, naming the months with the smallest and largest
   change. It compares trend sizes, so months with more noise do not make equal changes look unequal.
+- "Is this one kind of place?" check on the shortlist page (R1/R2/R5): before any trend, the box's NASA POWER
+  climatology (one value per 0.5 x 0.625 degree cell) is checked for mixing. Four project-heuristic rules (more
+  than one Koppen main group with 20% or more of the cells; model elevation range over 1000 m; wettest cell more
+  than 2x the driest and over 0.5 mm/day apart; annual T2M range over 5 C). A mixed box says so, in kid words,
+  and offers up to three smaller parts that are each one kind of place. Long-term means only, never a trend.
 
 ### Fixed
 - Box means no longer depend on which grid cells happen to report: each cell is fitted as the box

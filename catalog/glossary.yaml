@@ -219,6 +219,20 @@
     scientific: The same quantity from an independent instrument or product over the shared years; direction is compared, not size.
     simple_es: "Le preguntamos lo mismo a una segunda fuente distinta. Si las dos dicen lo mismo, confiamos más."
     scientific_es: "La misma magnitud medida por un instrumento o producto independiente en los años compartidos; se compara la dirección, no el tamaño."
+- id: mixed_place
+  term: { simple: mixed place, scientific: mixed region, simple_es: "lugar mezclado", scientific_es: "región mezclada" }
+  definition:
+    simple: A box that holds very different kinds of places, like dry land and a rainy mountain. If one part goes up and another goes down, the average can look flat.
+    scientific: A box whose grid cells differ strongly in long-term climate, elevation, rainfall or temperature (project heuristic rules, no trend used). Averaging across such regimes can cancel opposite trends.
+    simple_es: "Un cuadro con lugares muy distintos, como tierra seca y una montaña lluviosa. Si una parte sube y otra baja, el promedio puede verse plano."
+    scientific_es: "Un cuadro cuyas celdas difieren mucho en clima de largo plazo, elevación, lluvia o temperatura (reglas heurísticas del proyecto, sin usar ninguna tendencia). Promediar regímenes así puede anular tendencias opuestas."
+- id: one_kind_place
+  term: { simple: one kind of place, scientific: homogeneous region, simple_es: "un solo tipo de lugar", scientific_es: "región homogénea" }
+  definition:
+    simple: A box where every part has about the same weather, height and rain. Its average is fair for all of it.
+    scientific: A box where none of the four mixing rules applies, with one dominant Köppen main group, model elevation range up to 1000 m, similar annual precipitation and temperature (project heuristics).
+    simple_es: "Un cuadro donde todas las partes tienen más o menos el mismo clima, altura y lluvia. Su promedio es justo para todo el cuadro."
+    scientific_es: "Un cuadro donde no se cumple ninguna de las cuatro reglas de mezcla: un grupo principal de Köppen dominante, rango de elevación del modelo de hasta 1000 m, precipitación y temperatura anuales parecidas (heurísticas del proyecto)."
 - id: clear_days
   term: { simple: clear days, scientific: valid days per month, simple_es: "días despejados", scientific_es: "días válidos por mes" }
   definition:
