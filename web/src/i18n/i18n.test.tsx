@@ -63,7 +63,9 @@ const BANNED_ES = [
   /valor p/i, /significativ/i, /significancia/i, /d[ée]cada/i, /anomal[ií]a/i, /autocorrelaci/i, /puntos porcentuales/i, /intervalo de confianza/i,
   /estad[ií]stic/i, /mann|kendall|hamed|\bols\b|t-test/i, /\bprueba/i, /sin cambio/i, /causad[oa] por/i, /%\s*hr\b|%RH|kg\s*m|\bK\b/,
 ]
-const isScientificKey = (k: string) => /\.(sci|scientific)$/.test(k)
+// Scientific-only strings that happen to share one key for both views, and the page footer (English one is as long).
+const SCIENTIFIC_ONLY = [/^where\.col\./, /^findings\.adjP$/, /^result\.trust\.(mdt|noSlope|yr)/, /^common\.footer$/]
+const isScientificKey = (k: string) => /\.(sci|scientific)$/.test(k) || SCIENTIFIC_ONLY.some((re) => re.test(k))
 
 describe('Spanish Simple copy (R5)', () => {
   const simple = Object.entries(es).filter(([k]) => !isScientificKey(k))
