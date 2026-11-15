@@ -32,7 +32,7 @@ def test_all_missing_series_is_cant_tell_not_a_crash():
     cat = Catalog.load(ROOT / "catalog")
     ctx = EngineContext(cat, SourceChain([FillOnlySource()]))
     r = analyze(ctx, "cajamarca_west", "airs_rh_surf_day")
-    assert r.verdict.label == "cant_tell" and r.gates.checks[0].code == "no_data"
+    assert r.verdict.label == "cant_tell" and r.gates.checks[0].code == "all_fill"
 
 
 def test_user_window_crossing_drift_is_flagged_and_not_fully_significant(ctx):
