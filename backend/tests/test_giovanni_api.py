@@ -619,6 +619,10 @@ def test_point_series_is_read_offline_without_cells(tmp_path):
     assert np.array_equal(a.values, b.values) and b.months == a.months
 
 
+def test_unit_spelling_cm2_matches_superscript():
+    assert G.normalize_unit("molecules/cm^2") == G.normalize_unit("molecules/cm²")
+
+
 def test_series_cache_with_a_different_unit_is_refused(tmp_path):
     Fake(tmp_path, airs_serve).fetch(AIRS, BOX)
     f = tmp_path / "giovanni" / "box" / "AIRS3STM_7_0_SurfAirTemp_A__-79_-8_-77_-5.json"

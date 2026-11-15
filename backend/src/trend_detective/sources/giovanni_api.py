@@ -209,7 +209,7 @@ def parse_timeseries(text: str) -> ParsedTimeseries:
 
 
 def normalize_unit(u: str) -> str:
-    u = re.sub(r"[\s^]", "", u or "").lower()
+    u = re.sub(r"[\s^]", "", u or "").lower().replace("²", "2").replace("³", "3")  # cm^2 and cm² are the same unit
     if u in ("", "1", "none", "dimensionless", "-", "unitless"):
         return "1"
     return "%" if u in ("%", "percent", "pct") else u  # AIRS humidity says 'percent' where the card says '%'
@@ -702,7 +702,7 @@ class GiovanniApiSource:
             source_ref=variable.giovanni_id,
             title=title,
             requested_bbox=list(bbox),
-            data_bbox=[min(lons) - half_lon, min(lats) - half_lat, max(lons) + half_lon, max(lats) + half_lat],
+            data_bbox=[round(x, 4) for x in (min(lons) - half_lon, min(lats) - half_lat, max(lons) + half_lon, max(lats) + half_lat)],
             n_cells=len(got),
             retrieved_at=date.today().isoformat(),
         )
