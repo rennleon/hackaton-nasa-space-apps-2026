@@ -221,8 +221,8 @@ figcaption p { margin: 0; }
   .tl-row { grid-template-columns: 110px 1fr; }
   .topbar { padding: 0.45rem 0.8rem; }
   .brand { font-size: 0.95rem; }
-  .topbar { padding-right: 3.6rem; }
-  .theme-switch { right: 8px; top: 0.4rem; }
+  .topbar { padding-right: 3.6rem; position: static; }
+  .theme-switch { position: absolute; right: 8px; top: 0.4rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }

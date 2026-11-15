@@ -11,10 +11,10 @@ const viewport = () => ({
   width: Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth),
   height: window.innerHeight,
 })
-/** Bottom edge of the sticky top bar: spotlights and notes stay below it. */
+/** Bottom edge of the top bar while it is sticky (it scrolls away on phones): spotlights and notes stay below it. */
 const headerBottom = () => {
   const bar = document.querySelector<HTMLElement>('.topbar')
-  return bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0
+  return bar && getComputedStyle(bar).position === 'sticky' ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0
 }
 
 const toBox = (r: DOMRect): Box => ({ top: Math.round(r.top), left: Math.round(r.left), width: Math.round(r.width), height: Math.round(r.height) })
