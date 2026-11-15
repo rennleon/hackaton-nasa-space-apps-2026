@@ -52,7 +52,7 @@ export default function App({ client: injected }: { client?: DataClient }) {
       </a>
       <header className="topbar">
         <button type="button" className="brand" onClick={() => go({ screen: 'home' })}>
-          <span aria-hidden="true">🌍</span> {t('app.title', 'Earth System Trend Detective')}
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: '-4px', marginRight: 6 }}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg>{t('app.title', 'Earth System Trend Detective')}
         </button>
         <TopNav />
       </header>
