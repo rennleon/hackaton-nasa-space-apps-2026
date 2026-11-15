@@ -113,7 +113,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
           {placeText && <p className="muted place-text">{placeText}</p>}
           <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} canTry={client.customPlaces !== false} />
         </div>
-        <PlaceFacts profile={data?.place} bbox={region.geometry.bbox} />
+        <PlaceFacts profile={data?.place} bbox={region.geometry.bbox} area={place?.kind === 'point' ? 'pin' : region.geometry.kind === 'shape' ? 'shape' : 'box'} />
       </header>
 
       <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
@@ -154,7 +154,8 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
 }
 
 /** "About this place": only facts the scan really carries (climate group, height, rainy months) plus the size of the box. */
-function PlaceFacts({ profile, bbox }: { profile: PlaceProfile | null | undefined; bbox: [number, number, number, number] }) {
+/** `area`: a pin is one data grid cell drawn as a square; a shape region (Wisconsin) is measured by the box around it. */
+function PlaceFacts({ profile, bbox, area }: { profile: PlaceProfile | null | undefined; bbox: [number, number, number, number]; area: 'box' | 'pin' | 'shape' }) {
   const { view } = useView()
   const l = useL()
   const sci = view === 'scientific'
@@ -184,7 +185,8 @@ function PlaceFacts({ profile, bbox }: { profile: PlaceProfile | null | undefine
     facts.push({ key: 'wet', label: l('findings.facts.wet'), value: runs.map(([a, b]) => (a === b ? month(a) : `${month(a)} – ${month(b)}`)).join(', ') })
     fromModel = true
   }
-  facts.push({ key: 'area', label: l('findings.facts.area'), value: l('findings.facts.areaValue', sizeParts(bbox)) })
+  const areaLabel = area === 'pin' ? l('findings.facts.areaPin') : area === 'shape' ? l('findings.facts.areaShape') : l('findings.facts.area')
+  facts.push({ key: 'area', label: areaLabel, value: l(area === 'pin' ? 'findings.facts.areaPinValue' : 'findings.facts.areaValue', sizeParts(bbox)) })
   return (
     <div className="findings-facts">
       <dl className="facts-grid" aria-label={l('findings.facts.aria')}>
