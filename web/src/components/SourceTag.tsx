@@ -18,6 +18,7 @@ export function SourceTag({ variable }: { variable: VariableRef }) {
   if (view === 'simple') {
     parts.push(l(s.kind === 'model' ? 'common.source.model' : 'common.source.satellite'))
     if (s.name) parts.push(s.name)
+    if (s.viaPower) parts.push(l('common.source.viaPower'))
   } else if (s.kind === 'model') {
     parts.push(s.name ? l('common.source.modelOf', { name: s.name }) : l('common.source.model'))
     parts.push(s.viaPower ? l('common.source.viaPower') : s.since ? l('common.source.since', { year: s.since }) : '')
