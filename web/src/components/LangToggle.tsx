@@ -12,7 +12,7 @@ export function LangToggle() {
   return (
     <div role="group" aria-label={t('app.lang.label', 'Language')} className="view-toggle lang-toggle">
       {OPTIONS.map((o) => (
-        <button key={o.id} type="button" lang={o.id} aria-pressed={lang === o.id} aria-label={o.name} title={o.name} onClick={() => setLang(o.id)}>
+        <button key={o.id} type="button" lang={o.id} aria-pressed={lang === o.id} aria-label={`${o.name} (${o.short})`} title={o.name} onClick={() => setLang(o.id)}>
           {o.short}
         </button>
       ))}

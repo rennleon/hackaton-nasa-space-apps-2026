@@ -4,6 +4,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import ts from 'typescript'
 import { FC } from '../lib/findingsCopy'
+import { S } from '../lib/sourceLabels'
 import { COPY, CERTAINTY_CANT_TELL, CERTAINTY_STEPS } from '../lib/copy'
 import { SHORTLIST_META, VERDICT_META } from '../lib/labels'
 import { DEMOS } from '../lib/demos'
@@ -141,6 +142,10 @@ export function dynamicUses(): KeyUse[] {
     out.push(...both(k, p, ['simple', 'scientific'], 'lib/findingsCopy.ts'))
   }
   for (const m of [...Object.values(SHORTLIST_META), ...Object.values(VERDICT_META)]) out.push(...both(m.key, m.text, ['simple', 'sci'], 'lib/labels.ts'))
+  // useS(): always `<key>.simple` and `<key>.scientific`
+  for (const [k, pair] of Object.entries(S)) {
+    out.push({ key: `${k}.simple`, en: pair.simple, file: 'lib/sourceLabels.tsx' }, { key: `${k}.scientific`, en: pair.scientific, file: 'lib/sourceLabels.tsx' })
+  }
   const rc = (key: string, t: Pair, file: string) => out.push(...both(key, t, ['simple', 'sci'], file))
   rc('result.gauge.label', COPY.meterLabel, 'lib/copy.ts')
   rc('result.gauge.cant', CERTAINTY_CANT_TELL.text, 'lib/copy.ts')
