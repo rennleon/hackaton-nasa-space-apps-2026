@@ -150,9 +150,9 @@ def stage1(
     if failed:
         checks.append(SelectionCheck(
             code="fitness", status="fail",
-            detail=Text(simple="; ".join(c.detail.simple.rstrip(".") for c in failed) + ".",
+            detail=Text(simple=" ".join(c.detail.simple for c in failed),  # one sentence per failed check (R5: short sentences)
                         scientific=" ".join(c.detail.scientific for c in failed),
-                        simple_es="; ".join((c.detail.simple_es or c.detail.simple).rstrip(".") for c in failed) + ".",
+                        simple_es=" ".join(c.detail.simple_es or c.detail.simple for c in failed),
                         scientific_es=" ".join(c.detail.scientific_es or c.detail.scientific for c in failed)),
         ))
     else:

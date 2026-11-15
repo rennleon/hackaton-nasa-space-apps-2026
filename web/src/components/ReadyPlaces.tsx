@@ -13,7 +13,7 @@ interface Props {
   onExample: (e: ExamplePlace) => void
 }
 
-/** A row of ready-made places: the two pre-loaded regions plus three live example points. */
+/** A row of ready-made places: the pre-loaded regions (every listed catalog region) plus three live example points. */
 export function ReadyPlaces({ regions, liveOff, selectedId, onRegion, onExample }: Props) {
   const { s, tx, view } = useStartT()
   return (

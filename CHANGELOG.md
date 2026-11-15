@@ -16,6 +16,7 @@ for how to release and how to roll back.
   as the box average, and how many go the opposite way with a sure trend of their own (Benjamini–Hochberg
   FDR across the cells; Wilks 2016). It tests whether the box mixes opposite changes that cancel out. Counts
   only, no map; shown in "Tell me more", skipped in the scan, and never changes the verdict.
+- New pre-loaded region `cajamarca_high_only` ("Cajamarca, only the high mountains"): a highland-only twin of `cajamarca_highlands` (79.0-77.3°W, 7.3-6.3°S) where every NASA POWER (MERRA-2) cell is at model elevation 2348-2771 m, for a before/after comparison with the mixed lowland and highland box. Raw NASA data is cached under `data/cache/` so it works offline; AIRS variables report the 4-cell gate there.
 - "How it works" page (`#/how`): the whole data pipeline as a step-by-step flow, in both views and
   both languages.
 - "The change is bigger in some months than in others": an info chip (context only, never changes the
