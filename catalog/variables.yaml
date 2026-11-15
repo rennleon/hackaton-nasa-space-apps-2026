@@ -35,9 +35,9 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua dejó de mantener su órbita en enero de 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
   cross_check: power_rh2m
   words: { subject: "afternoons", verb: are, up: "getting more humid", down: "getting less humid" }
   words_es: { subject: "las tardes", up: "se vuelven más húmedas", down: "se vuelven menos húmedas", changing: "están cambiando" }
@@ -63,9 +63,9 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua dejó de mantener su órbita en enero de 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
   cross_check: power_rh2m
   words: { subject: "nights", verb: are, up: "getting more humid", down: "getting less humid" }
   words_es: { subject: "las noches", up: "se vuelven más húmedas", down: "se vuelven menos húmedas", changing: "están cambiando" }
@@ -91,9 +91,9 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua dejó de mantener su órbita en enero de 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
   cross_check: power_t2m
   words: { subject: "afternoons", verb: are, up: "getting warmer", down: "getting cooler" }
   words_es: { subject: "las tardes", up: "se vuelven más cálidas", down: "se vuelven más frías", changing: "están cambiando" }
@@ -121,9 +121,9 @@
       action: end_window_before
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
-        scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
+        scientific: Aqua no longer holds its orbit from 2022 on; the drifting overpass time biases the diurnal sampling.
         simple_es: "Después de 2021 el satélite pasó más tarde en el día. Dejamos fuera esos años."
-        scientific_es: "Aqua dejó de mantener su órbita en enero de 2022; la hora de paso desviada sesga el muestreo diurno."
+        scientific_es: "Aqua ya no mantiene su órbita desde 2022; la hora de paso desviada sesga el muestreo diurno."
   cross_check: power_t2m
   words: { subject: "nights", verb: are, up: "getting warmer", down: "getting cooler" }
   words_es: { subject: "las noches", up: "se vuelven más cálidas", down: "se vuelven más frías", changing: "están cambiando" }
@@ -312,7 +312,7 @@
   cross_check: modis_terra_aod
   words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
   words_es: { subject: "el aire", up: "se llena de más bruma", down: "se vuelve más despejado", changing: "está cambiando" }
-  kid_units: { scale: 100, label: "on a haze scale of 0 to 100", label_es: "en una escala de bruma de 0 a 100" }
+  kid_units: { scale: 100, label: "on the haze scale", label_es: "en la escala de bruma" }
   themes: { air: target }
 
 - id: modis_terra_aod
@@ -342,7 +342,7 @@
   cross_check: modis_aqua_aod
   words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
   words_es: { subject: "el aire", up: "se llena de más bruma", down: "se vuelve más despejado", changing: "está cambiando" }
-  kid_units: { scale: 100, label: "on a haze scale of 0 to 100", label_es: "en una escala de bruma de 0 a 100" }
+  kid_units: { scale: 100, label: "on the haze scale", label_es: "en la escala de bruma" }
   themes: { air: cross_check }
 
 - id: merra2_aod
@@ -364,16 +364,16 @@
   cross_check: null
   words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
   words_es: { subject: "el aire", up: "se llena de más bruma", down: "se vuelve más despejado", changing: "está cambiando" }
-  kid_units: { scale: 100, label: "on a haze scale of 0 to 100", label_es: "en una escala de bruma de 0 a 100" }
+  kid_units: { scale: 100, label: "on the haze scale", label_es: "en la escala de bruma" }
   themes: { air: cross_check }
 
 - id: merra2_sulfate
   giovanni_id: M2T1NXAER_5_12_4_SO4SMASS
-  name: { simple: Pollution particles from burning coal and oil (computer model), scientific: Surface sulfate mass concentration (MERRA-2), simple_es: "Partículas contaminantes de quemar carbón y petróleo (modelo de computadora)", scientific_es: "Concentración másica de sulfato en superficie (MERRA-2)" }
+  name: { simple: Sulfate particles in the air (computer model), scientific: Surface sulfate mass concentration (MERRA-2), simple_es: "Partículas de sulfato en el aire (modelo de computadora)", scientific_es: "Concentración másica de sulfato en superficie (MERRA-2)" }
   definition:
-    simple: Tiny particles made mostly by power plants and industry, worked out by a computer model.
+    simple: Tiny sulfate particles in the air near the ground, worked out by a computer model.
     scientific: MERRA-2 monthly surface SO₄ mass concentration. The Simple view shows a relative scale, the surface concentration in µg/m³ times 10.
-    simple_es: "Partículas diminutas que vienen sobre todo de centrales eléctricas e industrias, calculadas por un modelo de computadora."
+    simple_es: "Partículas diminutas de sulfato en el aire cerca del suelo, calculadas por un modelo de computadora."
     scientific_es: "Concentración másica mensual de SO₄ en superficie de MERRA-2. La vista Simple usa una escala relativa: la concentración en superficie en µg/m³ por 10."
   source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   kind: other  # which published assessments speak about it (expectations.yaml)
@@ -467,7 +467,7 @@
   cross_check: power_aod
   words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
   words_es: { subject: "el aire", up: "se llena de más bruma", down: "se vuelve más despejado", changing: "está cambiando" }
-  kid_units: { scale: 100, label: "on a haze scale of 0 to 100", label_es: "en una escala de bruma de 0 a 100" }
+  kid_units: { scale: 100, label: "on the haze scale", label_es: "en la escala de bruma" }
   themes: { air: target, smoke_haze: target }
 
 - id: omi_no2
@@ -567,14 +567,14 @@
 
 - id: power_aod
   giovanni_id: null
-  power_param: AOD_55  # MERRA-2 aerosol optical depth at 550 nm, dimensionless (POWER parameter catalog)
-  name: { simple: "Haze in the air (live, computer model)", scientific: "Aerosol optical depth at 550 nm (NASA POWER, MERRA-2-based)", simple_es: "Bruma en el aire (en vivo, modelo de computadora)", scientific_es: "Profundidad óptica de aerosoles a 550 nm (NASA POWER, basada en MERRA-2)" }
+  power_param: AOD_55  # aerosol optical depth at 550 nm, dimensionless; POWER response header: sources = SYN1DEG (CERES SYN1deg, 1 x 1 degree)
+  name: { simple: "Haze in the air (live, computer model)", scientific: "Aerosol optical depth at 550 nm (NASA POWER, CERES SYN1deg)", simple_es: "Bruma en el aire (en vivo, modelo de computadora)", scientific_es: "Profundidad óptica de aerosoles a 550 nm (NASA POWER, CERES SYN1deg)" }
   definition:
     simple: How much dust, smoke and pollution blocks sunlight, from NASA's POWER service for any place you pick.
-    scientific: NASA POWER monthly AOD_55, area mean over the requested box; MERRA-2 aerosol optical depth (assimilates satellite AOD).
+    scientific: NASA POWER monthly AOD_55 (source named in the POWER response header - CERES SYN1deg, 1° × 1° grid), area mean over the requested box.
     simple_es: "Cuánto polvo, humo y contaminación tapan la luz del sol, según el servicio POWER de la NASA para cualquier lugar que elijas."
-    scientific_es: "AOD_55 mensual de NASA POWER, media de área sobre la caja solicitada; profundidad óptica de aerosoles de MERRA-2 (asimila el AOD de satélite)."
-  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2, delivered_by: NASA POWER }
+    scientific_es: "AOD_55 mensual de NASA POWER (fuente indicada en la cabecera de la respuesta de POWER: CERES SYN1deg, rejilla de 1° × 1°), media de área sobre la caja solicitada."
+  source: { instrument: CERES SYN1deg, platform: null, type: model, instrument_id: ceres_syn1deg, delivered_by: NASA POWER }
   kind: haze  # which published assessments speak about it (expectations.yaml)
   units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3, simple_es: "puntos en la escala de bruma" }
   grid_deg: 0.5
@@ -584,5 +584,5 @@
   cross_check: omi_aod
   words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
   words_es: { subject: "el aire", up: "se llena de más bruma", down: "se vuelve más despejado", changing: "está cambiando" }
-  kid_units: { scale: 100, label: "on a haze scale of 0 to 100", label_es: "en una escala de bruma de 0 a 100" }
+  kid_units: { scale: 100, label: "on the haze scale", label_es: "en la escala de bruma" }
   themes: { air: cross_check, smoke_haze: cross_check }

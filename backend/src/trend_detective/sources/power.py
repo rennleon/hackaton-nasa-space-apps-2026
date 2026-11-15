@@ -1,4 +1,4 @@
-"""Live source: NASA POWER monthly data (MERRA-2-based), for any point or box up to 10° x 10°.
+"""Live source: NASA POWER monthly data (MERRA-2 for T2M/PRECTOTCORR/RH2M; CERES SYN1deg for AOD_55), for any point or box up to 10° x 10°.
 
 Network rules: stdlib HTTP only, 60 s timeout, one retry, never raises into the engine
 (failures are logged and `fetch` returns None). Raw JSON responses are cached on disk so
@@ -254,7 +254,7 @@ class PowerSource:
             return None
         lons = [p[0] for p in coords]
         lats = [p[1] for p in coords]
-        title = f"NASA POWER monthly {param} (MERRA-2-based)"
+        title = f"NASA POWER monthly {param} ({'CERES SYN1deg' if param == 'AOD_55' else 'MERRA-2'})"  # per the POWER header sources
         if geom.kind != "point" and endpoint == "point":
             title += f"; box smaller than {MIN_REGIONAL_SPAN_DEG:g} degrees, so the grid cell at its centre was used"
         elif endpoint == "regional":

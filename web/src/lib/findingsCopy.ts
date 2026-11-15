@@ -56,7 +56,7 @@ export const FC = {
   'findings.empty.help': p('Try another question or another place.', 'Try another theme or region.'),
   'findings.otherQuestions': p('Other questions', 'Other themes'),
   'findings.readyMade': p('Ready-made places', 'Pre-loaded regions'),
-  'findings.livePlace': p('Data: NASA POWER (MERRA-2-based)'),
+  'findings.livePlace': p('Data: NASA POWER'),
   'findings.pickRegion': p('Pick a place first.', 'Pick a region first.'),
   'findings.choosePlace': p('Choose a place', 'Choose a region'),
   // cards
@@ -103,12 +103,12 @@ export const FC = {
   'sources.link': p('Where our data comes from', 'Data sources'),
   'sources.title': p('Where our data comes from', 'Data sources'),
   'sources.intro': p(
-    'Every number in this app comes from NASA. Some come from satellites. Some come from computer models.',
+    'Every measurement in this app comes from NASA. Some come from satellites. Some come from computer models. Reasons we quote come from named studies.',
     'All series are NASA products: satellite retrievals (Giovanni, GES DISC) and model reanalyses (MERRA-2, GLDAS), plus NASA POWER as a delivery service.',
   ),
   'sources.powerNote': p(
-    'NASA POWER is a delivery service. It hands us numbers from the MERRA-2 computer model.',
-    'NASA POWER is a delivery service, not an instrument: its series are MERRA-2 reanalysis values.',
+    'NASA POWER is a delivery service. It hands us numbers from NASA products.',
+    'NASA POWER is a delivery service, not an instrument: temperature, rain and humidity are MERRA-2 reanalysis values; haze (AOD_55) is CERES SYN1deg.',
   ),
   'sources.measures': p('What it measures', 'Measures'),
   'sources.how': p('How it works', 'Method'),

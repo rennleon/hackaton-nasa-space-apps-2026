@@ -70,7 +70,7 @@ export const HOW = {
   'how.s2.title': p('Ask NASA for the numbers', 'Fetch NASA data'),
   'how.s2.text': p(
     'We ask NASA for the numbers. Saved copies work with no internet.',
-    'Source chain, first that answers: a pre-loaded Giovanni CSV (Giovanni\'s own area average), then NASA POWER (MERRA-2 based; serves only its own variables), then the NASA Giovanni time-series API (saved copy first, then live, with a server-side Earthdata token). Saved copies make the demo work offline.',
+    'Source chain, first that answers: a pre-loaded Giovanni CSV (Giovanni\'s own area average), then NASA POWER (MERRA-2 for temperature, rain and humidity; CERES SYN1deg for haze; serves only its own variables), then the NASA Giovanni time-series API (saved copy first, then live, with a server-side Earthdata token). Saved copies make the demo work offline.',
   ),
   'how.s3.title': p('Clean the numbers'),
   'how.s3.text': p(
@@ -85,7 +85,7 @@ export const HOW = {
   'how.s5.title': p('Average the map squares', 'Average the grid cells'),
   'how.s5.text': p(
     'We average all the map squares inside your place. Bigger squares count more.',
-    "The product's own fixed grid cells inside the box (MERRA-2 and POWER 0.5°×0.625°, AIRS, MODIS and OMI aerosol 1°, GLDAS and OMI NO₂ 0.25°, GPM 0.1°), combined as a cos(latitude)-weighted mean. Each cell is fitted as the box series plus its own fixed offset per calendar month, estimated over the months it shares with the box, so a cell that stops reporting can neither create a trend nor shrink a real one; with every cell present this is exactly the weighted mean. A month needs at least half the cells. (Pre-loaded Giovanni CSVs arrive already averaged by Giovanni.)",
+    "The product's own fixed grid cells inside the box (MERRA-2 and POWER 0.5°×0.625°, POWER haze, AIRS, MODIS and OMI aerosol 1°, GLDAS and OMI NO₂ 0.25°, GPM 0.1°), combined as a cos(latitude)-weighted mean. Each cell is fitted as the box series plus its own fixed offset per calendar month, estimated over the months it shares with the box, so a cell that stops reporting can neither create a trend nor shrink a real one; with every cell present this is exactly the weighted mean. A month needs at least half the cells. (Pre-loaded Giovanni CSVs arrive already averaged by Giovanni.)",
   ),
   'how.s6.title': p('Use everyday units', 'Convert to student units'),
   'how.s6.text': p(

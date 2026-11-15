@@ -68,9 +68,9 @@
 - id: sens_slope
   term: { simple: typical change, scientific: Sen's slope, simple_es: "cambio típico", scientific_es: "pendiente de Sen" }
   definition:
-    simple: We compare every pair of months and take the middle value of all the changes, so one weird year can't fool us.
+    simple: We compare every pair of months and take the middle value of all the changes, so one odd year matters less.
     scientific: Median of all pairwise slopes; robust to outliers.
-    simple_es: "Comparamos cada par de meses y tomamos el valor del medio de todos los cambios, así un año raro no nos engaña."
+    simple_es: "Comparamos cada par de meses y tomamos el valor del medio de todos los cambios, así un año raro importa menos."
     scientific_es: "Mediana de todas las pendientes entre pares de puntos; robusta frente a valores atípicos."
 - id: mann_kendall
   term: { simple: up-or-down check, scientific: Mann–Kendall test (Hamed–Rao), simple_es: "revisión de sube o baja", scientific_es: "prueba de Mann–Kendall (Hamed–Rao)" }
@@ -131,9 +131,9 @@
 - id: relative_humidity
   term: { simple: humidity, scientific: relative humidity, simple_es: "humedad", scientific_es: "humedad relativa" }
   definition:
-    simple: How full of water vapour the air is, from 0% (bone dry) to 100% (it can't hold more). Warmer air can hold more, so humidity drops when air warms up.
+    simple: How full of water vapour the air is, from 0% (bone dry) to 100% (it can't hold more). Warm air can hold more water, so the same water makes warm air feel less damp.
     scientific: Ratio of water-vapour pressure to saturation vapour pressure at the air temperature.
-    simple_es: "Qué tan lleno de vapor de agua está el aire, de 0 (muy seco) a 100 (no puede tener más). El aire más cálido puede tener más, así que la humedad baja cuando el aire se calienta."
+    simple_es: "Qué tan lleno de vapor de agua está el aire, de 0 (muy seco) a 100 (no puede tener más). El aire cálido puede tener más agua, así que la misma agua hace que el aire cálido se sienta menos húmedo."
     scientific_es: "Razón entre la presión del vapor de agua y la presión de vapor de saturación a la temperatura del aire."
 - id: aod
   term: { simple: haze, scientific: aerosol optical depth, simple_es: "bruma", scientific_es: "profundidad óptica de aerosoles" }
@@ -160,9 +160,9 @@
   term: { simple: computer model estimate, scientific: model / reanalysis output, simple_es: "estimación de un modelo de computadora", scientific_es: "salida de modelo / reanálisis" }
   definition:
     simple: A computer mixed many measurements with the rules of physics to work this out. It is not a direct measurement.
-    scientific: Model or reanalysis product (e.g. MERRA-2, GLDAS); not independent of the observations it assimilates.
+    scientific: Model or reanalysis product (e.g. MERRA-2, GLDAS); not independent of the observations it uses.
     simple_es: "Una computadora mezcló muchas mediciones con las reglas de la física para calcular esto. No es una medición directa."
-    scientific_es: "Producto de modelo o reanálisis (p. ej. MERRA-2, GLDAS); no es independiente de las observaciones que asimila."
+    scientific_es: "Producto de modelo o reanálisis (p. ej. MERRA-2, GLDAS); no es independiente de las observaciones que usa."
 - id: latitude
   term: { simple: how far north or south, scientific: latitude, simple_es: "qué tan al norte o al sur", scientific_es: "latitud" }
   definition:
@@ -180,9 +180,9 @@
 - id: no2
   term: { simple: NO₂ gas, scientific: nitrogen dioxide (NO₂), simple_es: "gas NO₂", scientific_es: "dióxido de nitrógeno (NO₂)" }
   definition:
-    simple: A gas made when engines, power plants and factories burn fuel. A lot of it makes city air dirty.
+    simple: A gas made mostly when engines, power plants and factories burn fuel. A lot of it makes city air dirty.
     scientific: Tropospheric NO₂ vertical column density (molecules/cm²), a marker of combustion emissions; short-lived, so it stays near its sources.
-    simple_es: "Un gas que se produce cuando motores, centrales eléctricas y fábricas queman combustible. Mucho de este gas ensucia el aire de la ciudad."
+    simple_es: "Un gas que se produce sobre todo cuando motores, centrales eléctricas y fábricas queman combustible. Mucho de este gas ensucia el aire de la ciudad."
     scientific_es: "Densidad de columna vertical de NO₂ troposférico (moléculas/cm²), indicador de emisiones por combustión; vive poco, así que se queda cerca de sus fuentes."
 - id: instrument
   term: { simple: instrument, scientific: instrument, simple_es: "instrumento", scientific_es: "instrumento" }
@@ -209,9 +209,9 @@
   term: { simple: computer model, scientific: computer model (reanalysis), simple_es: "modelo de computadora", scientific_es: "modelo computacional (reanálisis)" }
   definition:
     simple: A computer program that works out past weather from many real measurements.
-    scientific: A numerical model that assimilates many observations into gridded fields (e.g. MERRA-2, GLDAS). It is not itself a sensor.
+    scientific: A numerical model that turns observations into gridded fields - MERRA-2 assimilates observations; GLDAS is a land model driven by observation-based inputs. It is not itself a sensor.
     simple_es: "Un programa que calcula el tiempo pasado con muchas medidas reales."
-    scientific_es: "Modelo numérico que asimila muchas observaciones en campos de malla (p. ej. MERRA-2, GLDAS). No es un sensor."
+    scientific_es: "Modelo numérico que convierte observaciones en campos de malla: MERRA-2 asimila observaciones; GLDAS es un modelo de superficie impulsado por datos basados en observaciones. No es un sensor."
 - id: second_opinion
   term: { simple: second opinion, scientific: instrument cross-check, simple_es: "segunda opinión", scientific_es: "contraste entre instrumentos" }
   definition:
@@ -223,9 +223,9 @@
   term: { simple: mixed place, scientific: mixed region, simple_es: "lugar mezclado", scientific_es: "región mezclada" }
   definition:
     simple: A box that holds very different kinds of places, like dry land and a rainy mountain. If one part goes up and another goes down, the average can look flat.
-    scientific: A box whose grid cells belong to different regimes - more than one Köppen main group, a model elevation range over 1000 m, or strongly different annual rainfall (project heuristic rules, no trend used). A temperature range alone does not count, because box means use each cell's departure from its own seasonal cycle. Averaging across regimes can cancel opposite trends.
+    scientific: A box whose grid cells belong to different regimes - more than one Köppen main group each covering at least 20% of the cells, a model elevation range over 1000 m, or strongly different annual rainfall (project heuristic rules, no trend used). A temperature range alone does not count, because box means use each cell's departure from its own seasonal cycle. Averaging across regimes can cancel opposite trends.
     simple_es: "Un cuadro con lugares muy distintos, como tierra seca y una montaña lluviosa. Si una parte sube y otra baja, el promedio puede verse plano."
-    scientific_es: "Un cuadro cuyas celdas pertenecen a regímenes distintos: más de un grupo principal de Köppen, un rango de elevación del modelo de más de 1000 m o lluvias anuales muy distintas (reglas heurísticas del proyecto, sin usar ninguna tendencia). Un rango de temperatura por sí solo no cuenta, porque las medias de la caja usan la diferencia de cada celda con su propio ciclo estacional. Promediar regímenes distintos puede anular tendencias opuestas."
+    scientific_es: "Un cuadro cuyas celdas pertenecen a regímenes distintos: más de un grupo principal de Köppen que cubra cada uno al menos el 20 % de las celdas, un rango de elevación del modelo de más de 1000 m o lluvias anuales muy distintas (reglas heurísticas del proyecto, sin usar ninguna tendencia). Un rango de temperatura por sí solo no cuenta, porque las medias de la caja usan la diferencia de cada celda con su propio ciclo estacional. Promediar regímenes distintos puede anular tendencias opuestas."
 - id: one_kind_place
   term: { simple: one kind of place, scientific: homogeneous region, simple_es: "un solo tipo de lugar", scientific_es: "región homogénea" }
   definition:
@@ -257,9 +257,9 @@
 - id: polluting_gas
   term: { simple: polluting gas, scientific: nitrogen dioxide (NO₂) pollution, simple_es: "gas contaminante", scientific_es: "contaminación por dióxido de nitrógeno (NO₂)" }
   definition:
-    simple: A gas that engines, power plants and factories release when they burn fuel. In our app it is NO₂.
+    simple: A gas released mostly when engines, power plants and factories burn fuel. In our app it is NO₂.
     scientific: Tropospheric nitrogen dioxide (NO₂), emitted mainly by combustion; satellites measure its vertical column.
-    simple_es: "Un gas que sueltan motores, centrales eléctricas y fábricas al quemar combustible. En nuestra app es el NO₂."
+    simple_es: "Un gas que sueltan sobre todo motores, centrales eléctricas y fábricas al quemar combustible. En nuestra app es el NO₂."
     scientific_es: "Dióxido de nitrógeno (NO₂) troposférico, emitido sobre todo por la combustión; los satélites miden su columna vertical."
 - id: ipcc
   term: { simple: scientists' big climate report, scientific: IPCC AR6, simple_es: "el gran informe de los científicos del clima", scientific_es: "IPCC AR6" }

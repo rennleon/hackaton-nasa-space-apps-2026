@@ -33,7 +33,7 @@ const open = (hash: string, client: DataClient = base) => {
 describe('custom place', () => {
   it('shows the shortlist in Simple view with no banned words, no season controls, and the credit', async () => {
     const { container } = open('#/shortlist?place=pt:-7.16,-78.51&theme=water')
-    expect(await screen.findByText('Data: NASA POWER (MERRA-2-based)')).toBeInTheDocument()
+    expect(await screen.findByText('Data: NASA POWER')).toBeInTheDocument()
     expect(screen.getAllByText('Your place').length).toBeGreaterThan(0)
     expect(screen.queryByText('Only one time of year')).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(0)

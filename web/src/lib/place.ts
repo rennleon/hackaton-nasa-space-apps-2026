@@ -63,7 +63,7 @@ export function placeRegion(p: Place): RegionCard {
   return {
     id: `custom_${key.replace(/[^0-9a-z.-]+/gi, '_')}`,
     name: { simple: named ?? 'Your place', scientific: named ? `${named} (${sci})` : sci },
-    description: { simple: 'The place you picked.', scientific: `${sci} (NASA POWER, MERRA-2-based).` },
+    description: { simple: 'The place you picked.', scientific: `${sci} (NASA POWER).` },
     regime: '',
     geometry: { kind: 'bbox', bbox: placeBbox(p) },
     comparison_region: null,

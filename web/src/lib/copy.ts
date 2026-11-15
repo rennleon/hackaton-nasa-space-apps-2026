@@ -79,6 +79,6 @@ export const COPY = {
   placeRejectedOther: tx("We can't use that place. Try another one.", 'The API rejected this place.'),
   periodRejected: tx("Those years don't work. Try other years.", 'The API rejected this period.'),
   noLiveService: tx('Choosing any place needs our live service. Try a ready-made place.', 'Custom places require the API (VITE_API_URL not set).'),
-  powerCredit: tx('Data: NASA POWER (MERRA-2-based)', 'Data: NASA POWER (MERRA-2-based)'),
+  powerCredit: tx('Data: NASA POWER', 'Data: NASA POWER'),
   noChart: tx('There is no chart because there is not enough data.', 'No series available (gates failed).'),
 } as const

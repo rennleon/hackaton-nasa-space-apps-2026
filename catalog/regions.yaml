@@ -81,9 +81,9 @@
     simple_es: "Cajamarca (solo las montañas altas)"
     scientific_es: "Andes del norte del Perú, núcleo de gran altura de la caja de Cajamarca (gemela solo de altura)"
   description:
-    simple: The high part of the Cajamarca box. Its map squares are nearly alike. All are high and cool. The west side is a bit drier.
+    simple: The high part of the Cajamarca box. Its map squares are more alike than the big box. All are high and cool. The west side is a bit drier.
     scientific: "Sub-box of cajamarca_highlands (79.0–77.3°W, 7.3–6.3°S) chosen from NASA POWER climatology so that every MERRA-2 cell in it has model elevation 2348–2771 m (range 423 m), annual rain 1.06–1.67 mm/day (max/min 1.6) and annual T2M 14.3–15.8 °C (range 1.5 °C); the larger box mixes cells from 147 to 3378 m. Too small for the 1° AIRS cells, so AIRS variables report that gate. Our homogeneity check still flags it as mixed on the Köppen rule alone (3 cells BSk-side, 3 Cwb-side: the drier west and wetter east straddle the B/C dryness threshold); height, temperature and the rain ratio are all within the one-kind limits. Kept as declared, not re-drawn after seeing that result."
-    simple_es: "La parte alta de la caja de Cajamarca. Sus cuadrados del mapa son casi iguales. Todos son altos y frescos. El lado oeste es un poco más seco."
+    simple_es: "La parte alta de la caja de Cajamarca. Sus cuadrados del mapa se parecen más que en la caja grande. Todos son altos y frescos. El lado oeste es un poco más seco."
     scientific_es: "Subcaja de cajamarca_highlands (79,0–77,3°O, 7,3–6,3°S) elegida con la climatología de NASA POWER para que cada celda de MERRA-2 tenga elevación del modelo de 2348–2771 m (rango 423 m), lluvia anual de 1,06–1,67 mm/día (máx/mín 1,6) y T2M anual de 14,3–15,8 °C (rango 1,5 °C); la caja mayor mezcla celdas de 147 a 3378 m. Es demasiado pequeña para las celdas de 1° de AIRS, así que las variables de AIRS informan esa puerta. Nuestra revisión de homogeneidad igual la marca como mezclada solo por la regla de Köppen (3 celdas del lado BSk, 3 del lado Cwb: el oeste más seco y el este más húmedo cruzan el umbral de aridez B/C); la altura, la temperatura y la razón de lluvia están dentro de los límites de un solo tipo. Se mantiene como se declaró, sin redibujarla tras ver ese resultado."
   regime: Andean highland
   geometry:
@@ -203,9 +203,9 @@
     simple_es: "Wisconsin"
     scientific_es: "Zona de Wisconsin, EE. UU. (rectángulo alrededor del estado)"
   description:
-    simple: A US state with farms, forests and lakes, where smoke from Canadian wildfires sometimes arrives in summer. We look at a box around the state.
+    simple: A US state with farms, forests and lakes. We look at a box around the state.
     scientific: "Bounding box of the Wisconsin state shape (W -92.9, S 42.5, E -86.8, N 47.1). Live Giovanni and NASA POWER series are averaged over the whole box (cos-latitude weighted grid cells), not masked to the state outline, so edges of neighbouring states and part of Lake Michigan are included (land-only products such as GLDAS skip water cells)."
-    simple_es: "Un estado de EE. UU. con granjas, bosques y lagos, adonde a veces llega en verano el humo de incendios de Canadá. Miramos un rectángulo alrededor del estado."
+    simple_es: "Un estado de EE. UU. con granjas, bosques y lagos. Miramos un rectángulo alrededor del estado."
     scientific_es: "Rectángulo que contiene la forma del estado de Wisconsin (O -92.9, S 42.5, E -86.8, N 47.1). Las series en vivo de Giovanni y NASA POWER se promedian sobre todo el rectángulo (celdas ponderadas por coseno de la latitud), sin recortar al contorno del estado; incluye bordes de estados vecinos y parte del lago Michigan (los productos solo de tierra, como GLDAS, omiten las celdas de agua)."
   regime: temperate continental
   geometry:

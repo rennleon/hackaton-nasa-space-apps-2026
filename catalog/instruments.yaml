@@ -76,6 +76,23 @@
   assimilates: [airs]  # AIRS radiances enter MERRA-2 from 2002-09 (Gelaro et al. 2017, Table 1)
   link: https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/
 
+- id: ceres_syn1deg
+  name: { simple: CERES SYN1deg (NASA data product), scientific: "CERES SYN1deg (Clouds and the Earth's Radiant Energy System, synoptic 1° product)", simple_es: "CERES SYN1deg (producto de datos de la NASA)", scientific_es: "CERES SYN1deg (Clouds and the Earth's Radiant Energy System, producto sinóptico de 1°)" }
+  kind: model
+  since: 2001
+  measures:
+    simple: How hazy the air is, for any place on Earth.
+    scientific: Aerosol optical depth at 550 nm on a 1° × 1° grid, as delivered by NASA POWER (parameter AOD_55; the POWER response header names SYN1DEG as the source). Valid POWER months start in 2001-01.
+    simple_es: "Qué tan brumoso está el aire, en cualquier lugar de la Tierra."
+    scientific_es: "Profundidad óptica de aerosoles a 550 nm en una rejilla de 1° × 1°, entregada por NASA POWER (parámetro AOD_55; la cabecera de la respuesta de POWER indica SYN1DEG como fuente). Los meses válidos de POWER empiezan en 2001-01."
+  how:
+    simple: A NASA data product from the CERES project. We treat it as a computer estimate, not a direct reading.
+    scientific: A gridded CERES data product from NASA Langley; we label it a computer estimate because it is not a direct single-sensor retrieval.
+    simple_es: "Un producto de datos de la NASA del proyecto CERES. Lo tratamos como una estimación de computadora, no como una lectura directa."
+    scientific_es: "Un producto de datos en rejilla de CERES del NASA Langley; lo llamamos estimación de computadora porque no es una medición directa de un solo sensor."
+  live: power
+  link: https://ceres.larc.nasa.gov/data/
+
 - id: gldas
   name: { simple: GLDAS land computer model, scientific: "GLDAS (Global Land Data Assimilation System)", simple_es: "Modelo de computadora de la tierra GLDAS", scientific_es: "GLDAS (Global Land Data Assimilation System, sistema global de asimilación de datos de superficie terrestre)" }
   kind: model

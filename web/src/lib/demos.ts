@@ -104,7 +104,7 @@ export const DEMOS: Demo[] = [
       {
         route: { screen: 'shortlist', place: DELHI, theme: 'air' },
         target: 'finding-power_aod',
-        caption: tx('Each card is one measurement. The haze card says "Sure it\'s real".', 'Scan for air: aerosol optical depth (MERRA-2 via NASA POWER) is significant over the shared window.'),
+        caption: tx('Each card is one measurement. The haze card says "Sure it\'s real".', 'Scan for air: aerosol optical depth (CERES SYN1deg via NASA POWER) is significant over the shared window.'),
       },
       {
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'power_aod' },
@@ -119,14 +119,14 @@ export const DEMOS: Demo[] = [
         target: 'source',
         caption: tx(
           'This measurement is haze in the air. A computer model worked it out.',
-          'Variable: aerosol optical depth. Source: MERRA-2 reanalysis (a model), delivered by NASA POWER.',
+          'Variable: aerosol optical depth. Source: CERES SYN1deg (a NASA data product, labelled a computer estimate), delivered by NASA POWER.',
         ),
       },
       {
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'merra2_sulfate' },
         target: 'where',
         caption: tx(
-          'Now pollution from burning coal and oil, from a computer model. It goes up in Delhi and down in the Sahara.',
+          'Now tiny sulfate particles, from a computer model. They go up in Delhi and down in the Sahara.',
           'Surface sulfate (MERRA-2): significant increase in Delhi, significant decrease near Tamanrasset, each with its own record.',
         ),
       },
