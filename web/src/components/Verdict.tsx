@@ -81,13 +81,17 @@ function Details({ result }: { result: AnalysisResult }) {
         <li>{s('result.details.years', 'We looked at {n} years of data.', '', { n: years })}</li>
         <li>{s('result.details.trendLine', 'The trend line: {slope}.', '', { slope })}</li>
         <li>
-          {s('result.details.range', 'It could be anywhere between {lo} and {hi} {unit} every 10 years.', '', {
+          {s('result.details.range', 'Every 10 years it could change {lo} to {hi} {unit}.', '', {
             lo: num(trend.ci_low),
             hi: num(trend.ci_high),
             unit: unitAfter(u.label, 2),
           })}
         </li>
-        <li>{c(agree ? 'result.details.agree' : 'result.details.disagree', agree ? COPY.checksAgree : COPY.checksDisagree)}</li>
+        <li>
+          {agree && result.verdict.label === 'significant_fragile'
+            ? c('result.details.fragile', COPY.checksFragile)
+            : c(agree ? 'result.details.agree' : 'result.details.disagree', agree ? COPY.checksAgree : COPY.checksDisagree)}
+        </li>
       </ul>
     )
   }

@@ -153,6 +153,7 @@ export function dynamicUses(): KeyUse[] {
   rc('result.gauge.cant', CERTAINTY_CANT_TELL.text, 'lib/copy.ts')
   for (const s of CERTAINTY_STEPS) rc(`result.gauge.${s.id}`, s.text, 'lib/copy.ts')
   rc('result.details.agree', COPY.checksAgree, 'lib/copy.ts')
+  rc('result.details.fragile', COPY.checksFragile, 'lib/copy.ts')
   rc('result.details.disagree', COPY.checksDisagree, 'lib/copy.ts')
   rc('result.live.down', COPY.liveDown, 'lib/copy.ts')
   rc('result.live.place', COPY.placeRejected, 'lib/copy.ts')
@@ -181,7 +182,7 @@ export function dynamicUses(): KeyUse[] {
   trust('result.trust.agreement.agrees', 'This matches what scientists found.', 'Agrees with the published assessment.')
   trust('result.trust.agreement.differs', 'This is different from what scientists found.', 'Differs from the published assessment.')
   trust('result.trust.agreement.too_soon', 'Our record is too short to compare with the scientists yet.', 'Record too short to compare with the published assessment.')
-  trust('result.trust.title', 'Tell me more: can we trust this?', 'Can we trust this? Evidence checks')
+  trust('result.trust.title', 'Can we trust this?', 'Can we trust this? Evidence checks')
   for (const [d, en] of [['upward', 'upward'], ['downward', 'downward'], ['flat', 'flat']]) out.push({ key: `result.chart.dir.${d}.simple`, en, file: 'lib/charts.ts' }, { key: `result.chart.dir.${d}.sci`, en, file: 'lib/charts.ts' })
   return out
 }

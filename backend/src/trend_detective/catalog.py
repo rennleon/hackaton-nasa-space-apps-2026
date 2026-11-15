@@ -92,6 +92,9 @@ class KidUnits(Card):
     scale: float = 1.0
     label: str
     label_es: str | None = None
+    # optional short sentence shown after a then/now pair, e.g. "The scale goes from 0 to 100."
+    range_note: str | None = None
+    range_note_es: str | None = None
 
 
 class VariableCard(Card):

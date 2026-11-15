@@ -88,7 +88,7 @@ export const FC = {
   'findings.coverage': p('Years of data', 'Record coverage'),
   'findings.timeline.aria': p('How many years of data each measurement has', 'Record coverage timeline'),
   'findings.timeline.row': p('{name}: used {from} to {to}', '{name}: used {from} to {to}'),
-  'findings.timeline.rowDrift': p('{name}: used {from} to {to}; {cut} onward left out ({note})', '{name}: used {from} to {to}; {cut} onward left out ({note})'),
+  'findings.timeline.rowDrift': p('{name}: used {from} to {to}. Left out from {cut} on ({note})', '{name}: used {from} to {to}. Left out from {cut} on ({note})'),
   'findings.timeline.used': p('years we use', 'analysis window'),
   'findings.timeline.out': p('years left out (satellite drift)', 'excluded (orbit drift)'),
   'findings.mdt': p('', 'MDT {mdt} {unit}/decade'),
@@ -124,7 +124,7 @@ export const FC = {
   'sources.kind.model': p('Computer model', 'Model / reanalysis'),
   'sources.viaPower': p('via NASA POWER'),
   'common.footer': p(
-    'Map data © OpenStreetMap contributors. Data: NASA satellite and model products via NASA Giovanni (GES DISC) and NASA POWER; results computed by our analysis engine.',
+    'Map data © OpenStreetMap contributors. Data: NASA satellites and models, via NASA Giovanni (GES DISC) and NASA POWER. Results computed by our analysis engine.',
   ),
 } as const satisfies Record<string, Pair>
 

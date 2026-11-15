@@ -98,7 +98,7 @@ function FullCharts({ result }: { result: AnalysisResult }) {
             <TermText
               text={s(
                 'result.chart.anomCaption',
-                "Now we only look at each month's {anomaly}. The orange line is the {trend}; the shade is the {confidence_range}.",
+                "Now we only look at each month's {anomaly}. The orange line is the {trend}. The shade is the {confidence_range}.",
                 '{anomaly} series ({seasonal_cycle} removed) with the {trend} and the {confidence_range}.',
               )}
               terms={{

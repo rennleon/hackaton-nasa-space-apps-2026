@@ -104,9 +104,67 @@ class VerdictInputs:
     selection: Selection | None = None  # stage 1, used only to explain the result afterwards
 
 
+MAX_WORDS = 14  # R5: a Simple-view sentence stays within this many words
+
+
+BREAK_PREFIX = "known_artifact_"
+
+
+def break_years(chips: list[Chip]) -> list[str]:
+    """Distinct years of known-break chips (code 'known_artifact_<kind>_<YYYY-MM>'), in order."""
+    return sorted({c.code.rsplit("_", 1)[-1][:4] for c in chips if c.code.startswith(BREAK_PREFIX)})
+
+
+def _join_years(years: list[str], and_word: str) -> str:
+    return years[0] if len(years) == 1 else f"{', '.join(years[:-1])} {and_word} {years[-1]}"
+
+
+def break_line(breaks: list[tuple[str, str, Text]]) -> tuple[str, str]:
+    """ONE Simple line (EN, ES) for known breaks, given (kind, 'YYYY-MM', note). A single break keeps its own note
+    (so a frozen-emissions note never says 'measured'); several breaks of one kind get a kind-aware line, mixed
+    kinds a neutral one. Never lists a sentence twice."""
+    if len(breaks) == 1:
+        n = breaks[0][2]
+        return n.simple, n.simple_es or n.simple
+    years = sorted({start[:4] for _, start, _ in breaks})
+    if {k for k, _, _ in breaks} == {"input_change"}:
+        return (f"The model's inputs changed in {_join_years(years, 'and')}.",
+                f"Los datos de entrada del modelo cambiaron en {_join_years(years, 'y')}.")
+    return (f"This data has known changes in {_join_years(years, 'and')}.",
+            f"Estos datos tienen cambios conocidos en {_join_years(years, 'y')}.")
+
+
+def _chip_break(c: Chip) -> tuple[str, str, Text]:
+    kind, start = c.code[len(BREAK_PREFIX):].rsplit("_", 1)
+    return kind, start, c.text
+
+
 def _place(region: RegionCard) -> str:
-    """Region name inside a sentence: a user-chosen place reads 'your place', not 'Your place'."""
-    return "your place" if region.id.startswith("custom") else region.name.simple
+    """Region name inside a sentence: a user-chosen place reads 'your place', not 'Your place'; 'The Amazon' -> 'the Amazon'."""
+    if region.id.startswith("custom"):
+        return "your place"
+    name = region.name.simple
+    return _lower_first(name) if name.startswith("The ") else name
+
+
+def _answer(parts: list[str], prep: str, place: str, looked: str) -> str:
+    """The headline answer as ONE short sentence (R5). `parts` are the same sentence from most to least wordy
+    (full subject, then a subject without 'in the air'), each followed by the place. Only when none fits
+    MAX_WORDS does the place move to a second, complete sentence ('We looked in <place>.')."""
+    for core in parts:
+        one = f"{core} {prep} {place}."
+        if len(one.split()) <= MAX_WORDS:
+            return one
+    return f"{parts[-1]}. {looked} {place}."
+
+
+def _per10(lead: str, amount: str, lang: str = "en") -> str:
+    """'Every 10 years it changes by about 3 points ...': a rate (not a forecast), kept in one sentence with the amount."""
+    if lang != "en":
+        return f"Cada 10 años {lead} {amount}"
+    full = f"Every 10 years {lead} by {amount}"
+    # a long kid label can push the sentence over the R5 limit: drop "by" rather than split the amount off
+    return full if len(full.split()) <= MAX_WORDS else f"Every 10 years {lead} {amount}"
 
 
 def _place_es(region: RegionCard) -> str:
@@ -192,6 +250,8 @@ def has_es(v: VariableCard) -> bool:
 def _subject(x: VerdictInputs) -> str:
     s = x.variable.words.subject
     # "dry-season afternoons" keeps the answer within the R5 sentence length
+    if x.season and s == "it":  # "summer it is changing" is not English: name the thing (all "it" cards are rainfall)
+        s = "rain"
     return f"{x.season.name.simple.replace(' season', '-season')} {s}" if x.season else s
 
 
@@ -232,6 +292,7 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     y0, y1 = x.window.start[:4], x.window.end[:4]
     region_s, region_sc = _place(x.region), x.region.name.scientific
     subj = _subject(x)
+    subs = list(dict.fromkeys([subj, subj.replace(" in the air", "")]))  # shortest last
     certainty = CERTAINTY[label]
     season_sc = f", {x.season.name.scientific} means" if x.season else ""
 
@@ -245,30 +306,32 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         adj_es = "significativo" if up else "significativa"
         region_es, region_sc_es = _place_es(x.region), x.region.name.scientific_es or region_sc
         subj_es = _subject_es(x)
+        subs_es = list(dict.fromkeys([subj_es, subj_es.replace(" en el aire", ""),
+                                      subj_es.replace(" en el aire", "").replace(" en la temporada", " en temporada")]))
         season_sc_es = f", medias de {x.season.name.scientific_es or x.season.name.scientific}" if x.season else ""
         name_sc_es = v.name.scientific_es or v.name.scientific
 
     # --- one-sentence answer
     if certainty == "sure":
-        answer_s = f"Yes, {subj} {w.verb} {phrase} in {region_s}."
+        answer_s = _answer([f"Yes, {s_} {w.verb} {phrase}" for s_ in subs], "in", region_s, "We looked in")
         answer_sc = f"Significant {direction} in {v.name.scientific}, {region_sc} ({y0}–{y1}{season_sc})."
         if es:
-            answer_es = f"Sí, {subj_es} {phrase_es} en {region_es}."
+            answer_es = _answer([f"Sí, {s_} {phrase_es}" for s_ in subs_es], "en", region_es, "Miramos en")
             answer_sc_es = f"{direction_es.capitalize()} {adj_es} en {name_sc_es}, {region_sc_es} ({y0}–{y1}{season_sc_es})."
     elif certainty == "maybe":
-        answer_s = f"Maybe. {_cap(subj)} might be {phrase} in {region_s}."
+        answer_s = "Maybe. " + _answer([f"{_cap(s_)} might be {phrase}" for s_ in subs], "in", region_s, "We looked in")
         kind = "Borderline" if label == "borderline" else "Significant but not robust"
         answer_sc = f"{kind} {direction} in {v.name.scientific}, {region_sc} ({y0}–{y1}{season_sc})."
         if es:
-            answer_es = f"Quizás {subj_es} {phrase_es} en {region_es}."
+            answer_es = _answer([f"Quizás {s_} {phrase_es}" for s_ in subs_es], "en", region_es, "Miramos en")
             kind_es = (f"{direction_es.capitalize()} en el límite" if label == "borderline"
                        else f"{direction_es.capitalize()} {adj_es} pero no robust{'o' if up else 'a'}")
             answer_sc_es = f"{kind_es} en {name_sc_es}, {region_sc_es} ({y0}–{y1}{season_sc_es})."
     else:
-        answer_s = f"Too soon to tell if {subj} {w.verb} changing in {region_s}."
+        answer_s = _answer([f"Too soon to tell if {s_} {w.verb} changing" for s_ in subs], "in", region_s, "We looked in")
         answer_sc = f"No significant trend in {v.name.scientific}, {region_sc} ({y0}–{y1}{season_sc})."
         if es:
-            answer_es = f"Aún no sabemos si {subj_es} {we.changing} en {region_es}."
+            answer_es = _answer([f"Aún no sabemos si {s_} {we.changing}" for s_ in subs_es], "en", region_es, "Miramos en")
             answer_sc_es = f"Sin tendencia significativa en {name_sc_es}, {region_sc_es} ({y0}–{y1}{season_sc_es})."
 
     # --- how much (then vs now in whole numbers), or how long to wait
@@ -302,6 +365,8 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
             how_s = f"Since {tn.year_then} it went {'up' if up else 'down'} by about {amount_en(size, tn.kid_label)}."
         else:
             how_s = f"In {tn.year_then}: about {a} {tn.kid_label}. In {tn.year_now}: about {b}."
+            if v.kid_units.range_note:
+                how_s += f" {v.kid_units.range_note}"
         how_sc = f"{slope_sc}{level_sc}."
         if es:
             lab = v.kid_units.label_es
@@ -313,6 +378,8 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
             else:
                 how_es = (f"En {tn.year_then}: {_unos_es(lab)} {kid_value_es(tn.value_then, tn.kid_scale, lab)}. "
                           f"En {tn.year_now}: {_unos_es(lab)} {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
+                if v.kid_units.range_note_es:
+                    how_es += f" {v.kid_units.range_note_es}"
             how_sc_es = f"{slope_sc_es}{level_sc_es}."
     elif certainty == "too_soon":
         # Weatherhead's n* is evaluated at the OBSERVED slope, which here is not significant: when that slope is
@@ -356,60 +423,66 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         f"{v.name.scientific}, {region_sc}, {x.window.start} to {x.window.end}{season_sc}: {slope_sc}. "
         f"Mann–Kendall (Hamed–Rao) p {fmt_p(x.p_a)}; OLS with n_eff = {x.n_eff:.0f} (r₁ = {x.r1:.2f}) p {fmt_p(x.p_b)}."
     )
-    chip_reasons_s = " ".join(c.text.simple for c in x.warning_chips)
+    breaks = [c for c in x.warning_chips if c.code.startswith(BREAK_PREFIX)]
+    others = [c for c in x.warning_chips if not c.code.startswith(BREAK_PREFIX)]
+    years = break_years(breaks)
+    brk_s, brk_es = break_line([_chip_break(c) for c in breaks]) if breaks else ("", "")
+    chip_reasons_s = " ".join(([brk_s] if years else [])
+                              + [c.text.simple for c in others])
     chip_reasons_sc = " ".join(c.text.scientific for c in x.warning_chips)
     # kid units, like the then/now line: "0.011 AOD" is "about 1 point on the haze scale", no decimals (R5)
     k10 = abs(x.slope_per_decade) * v.kid_units.scale
     per10 = (less_than_one(v.kid_units.label) if k10 < 1
-             else f"about {amount_en(round(k10), v.kid_units.label)}") + " every 10 years"
+             else f"about {amount_en(round(k10), v.kid_units.label)}")
     if es:
         sci_core_es = (
             f"{name_sc_es}, {region_sc_es}, {x.window.start} a {x.window.end}{season_sc_es}: {slope_sc_es}. "
             f"Mann–Kendall con corrección de Hamed–Rao p {fmt_p(x.p_a)}; MCO con n_eff = {x.n_eff:.0f} "
             f"(r₁ = {x.r1:.2f}) p {fmt_p(x.p_b)}."
         )
-        chip_reasons_es = " ".join(c.text.simple_es or c.text.simple for c in x.warning_chips)
+        chip_reasons_es = " ".join(([brk_es] if years else [])
+                                   + [c.text.simple_es or c.text.simple for c in others])
         chip_reasons_sc_es = " ".join(c.text.scientific_es or c.text.scientific for c in x.warning_chips)
         lab10 = v.kid_units.label_es
-        per10_es = (less_than_one_es(lab10) if k10 < 1 else about_es(round(k10), lab10)) + " cada 10 años"
+        per10_es = (less_than_one_es(lab10) if k10 < 1 else about_es(round(k10), lab10))
         ran_es = ""
         if x.checks_run:
             names = ", ".join(CHECK_NAMES_ES.get(c, c) for c in x.checks_run)
             ran_es = f" Comprobaciones de robustez hechas ({names}): ninguna contradice la tendencia."
     if label == "significant":
-        more_s = f"It changed by {per10}. It is very unlikely this is luck."
+        more_s = _per10("it changes", per10) + ". It is very unlikely this is luck."
         ran = f" Robustness checks run ({', '.join(x.checks_run)}): none contradicts the trend." if x.checks_run else ""
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}.{ran}"
         headline_sc = f"Significant {direction}"
         if es:
-            more_es = (f"Cambió {per10_es}. "
+            more_es = (_per10("cambia", per10_es, "es") + ". "
                        "Es muy poco probable que esto sea pura suerte.")
             more_sc_es = f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con α = {x.alpha}.{ran_es}"
             headline_sc_es = f"{direction_es.capitalize()} {adj_es}"
     elif label == "significant_fragile":
-        more_s = f"It changed by {per10}. But be careful. {chip_reasons_s}"
+        more_s = _per10("it changes", per10) + f". But be careful. {chip_reasons_s}"
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}, but: {chip_reasons_sc}"
         headline_sc = f"Significant {direction}, not robust"
         if es:
-            more_es = f"Cambió {per10_es}. Pero hay que tener cuidado. {chip_reasons_es}"
+            more_es = _per10("cambia", per10_es, "es") + f". Pero hay que tener cuidado. {chip_reasons_es}"
             more_sc_es = (f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con "
                           f"α = {x.alpha}, pero: {chip_reasons_sc_es}")
             headline_sc_es = f"{direction_es.capitalize()} {adj_es}, no robust{'o' if up else 'a'}"
     elif label == "borderline":
-        more_s = f"It may be changing by {per10}. One of our two checks agrees. The other does not."
+        more_s = _per10("it may change", per10) + ". One of our two checks agrees. The other does not."
         more_sc = f"{sci_core} Only one decisive test rejects no-trend at α = {x.alpha}; treat as a lead."
         headline_sc = "Borderline: tests disagree"
         if es:
-            more_es = f"Quizás cambie {per10_es}. Una de nuestras dos revisiones lo confirma. La otra no."
+            more_es = _per10("puede cambiar", per10_es, "es") + ". Una de nuestras dos revisiones lo confirma. La otra no."
             more_sc_es = (f"{sci_core_es} Solo una prueba decisiva rechaza la ausencia de tendencia con "
                           f"α = {x.alpha}; tómese como una pista.")
             headline_sc_es = "En el límite: las pruebas discrepan"
     elif label == "possibly_changing":
-        more_s = f"It may be changing by {per10}. But normal ups and downs are still bigger."
+        more_s = _per10("it may change", per10) + ". But normal ups and downs are still bigger."
         more_sc = f"{sci_core} Not significant at α = {x.alpha}."
         headline_sc = "Not significant yet"
         if es:
-            more_es = f"Quizás cambie {per10_es}. Pero los altibajos normales aún son mayores."
+            more_es = _per10("puede cambiar", per10_es, "es") + ". Pero los altibajos normales aún son mayores."
             more_sc_es = f"{sci_core_es} No significativo con α = {x.alpha}."
             headline_sc_es = "Aún no significativo"
     else:
@@ -466,7 +539,7 @@ def cant_tell(variable: VariableCard, region: RegionCard, reasons: list[Text]) -
     return Verdict(
         label="cant_tell",
         certainty="cant_tell",
-        answer=Text(simple=f"We can't answer this for {_place(region)} yet.",
+        answer=Text(simple=f"We can't answer this yet for {_place(region)}.",
                     scientific=f"{variable.name.scientific}, {region.name.scientific}: not assessable.",
                     simple_es=f"Aún no podemos responder esto para {_place_es(region)}.",
                     scientific_es=f"{variable.name.scientific_es or variable.name.scientific}, "

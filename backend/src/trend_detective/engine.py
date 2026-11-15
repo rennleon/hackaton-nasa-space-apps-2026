@@ -74,10 +74,9 @@ from .verdict import VerdictInputs, build_verdict, cant_tell, decide
 ROBUSTNESS_CODES = {
     "rests_on_few_years", "drift_changes_verdict", "drift_years_included", "cross_check_disagrees", "spatial_disagrees",
 }
-# Known breaks (action 'flag') that make a result "not robust" when the window crosses them. Only frozen model
-# inputs so far (user decision Nov 15): a trend over persisted emissions can't follow real emission changes.
-# Other flagged breaks (input changes, row anomaly) stay as warnings without changing the label.
-ROBUSTNESS_ARTIFACT_KINDS = {"frozen_emissions"}
+# Every known break with action 'flag' makes a result "not robust" when the window crosses it (user decisions
+# Nov 15): frozen model emissions, model input changes (GLDAS forcing, IMERG TRMM-to-GPM), the OMI row anomaly and
+# MODIS orbit drift. The record is kept (no cut); only "Sure it's real" drops to "Maybe, not sure yet".
 MIN_COMPARISON_YEARS = 10.0
 
 
@@ -792,7 +791,7 @@ def analyze_region(
         chips.append(hc)
 
     then_now = _then_now(p, core, var, season)
-    lowering = {f"known_artifact_{a.kind}_{a.start}" for a in flagged if a.kind in ROBUSTNESS_ARTIFACT_KINDS}
+    lowering = {f"known_artifact_{a.kind}_{a.start}" for a in flagged}
     warn = [c for c in chips if c.code in ROBUSTNESS_CODES or c.code in lowering]
     label = decide(tt.p_mk_hr, tt.p_ols, not warn, core.years_available, core.years_needed, ctx.alpha)
     verdict = build_verdict(label, VerdictInputs(

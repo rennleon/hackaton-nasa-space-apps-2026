@@ -26,7 +26,7 @@ describe('place encoding', () => {
   it('makes a custom region card', () => {
     const r = placeRegion({ kind: 'point', lat: 1, lon: 2 })
     expect(r.id.startsWith('custom_')).toBe(true)
-    expect(r.name).toEqual({ simple: 'Your place', scientific: 'Point 1, 2' })
+    expect(r.name).toEqual({ simple: 'Your place', simple_es: 'Tu lugar', scientific: 'Point 1, 2' })
   })
 })
 

@@ -335,7 +335,7 @@ def _texts(code, ar6, elev, high_up, wet, dry, years, yours: bool = True, mixed:
     if wet and not mixed:
         simple_es.append(f"Los meses más lluviosos van {_rain_span_es(wet)}.")
     if feel_es or mixed:
-        simple_es.append("Esto es una estimación de un modelo de computadora.")
+        simple_es.append("Esta es una estimación de un modelo de computadora.")
     sci_es: list[str] = []
     if code and years:
         sci_es.append(f"Köppen–Geiger {code} (reglas de Beck et al. 2018 sobre la climatología de NASA POWER "

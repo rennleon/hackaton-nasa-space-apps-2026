@@ -45,7 +45,7 @@ export function unitAfter(label: string, shown: number): string {
   return label
 }
 
-/** "+1.49 %RH per decade" (scientific) or "+1.5 on the humidity scale (0 to 100) every 10 years" (simple). */
+/** "+1.49 %RH per decade" (scientific) or "+1.5 on the humidity scale every 10 years" (simple). */
 export function formatSlope(slope: number | null, units: UnitsInfo, view: ViewMode): string {
   if (slope == null) return '—'
   const u = viewUnits(units, view)

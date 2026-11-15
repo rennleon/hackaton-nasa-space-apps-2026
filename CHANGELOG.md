@@ -29,7 +29,7 @@ for how to release and how to roll back.
   as the box average, and how many go the opposite way with a sure trend of their own (Benjamini–Hochberg
   FDR across the cells; Wilks 2016). It tests whether the box mixes opposite changes that cancel out. Counts
   only, no map; shown in "Tell me more", skipped in the scan, and never changes the verdict.
-- New pre-loaded region `cajamarca_high_only` ("Cajamarca, only the high mountains"): a highland-only twin of `cajamarca_highlands` (79.0-77.3°W, 7.3-6.3°S) where every NASA POWER (MERRA-2) cell is at model elevation 2348-2771 m, for a before/after comparison with the mixed lowland and highland box. Raw NASA data is cached under `data/cache/` so it works offline; AIRS variables report the 4-cell gate there.
+- New pre-loaded region `cajamarca_high_only` ("Cajamarca, high mountains only"): a highland-only twin of `cajamarca_highlands` (79.0-77.3°W, 7.3-6.3°S) where every NASA POWER (MERRA-2) cell is at model elevation 2348-2771 m, for a before/after comparison with the mixed lowland and highland box. Raw NASA data is cached under `data/cache/` so it works offline; AIRS variables report the 4-cell gate there.
 - "How it works" page (`#/how`): the whole data pipeline as a step-by-step flow, in both views and
   both languages.
 - "The change is bigger in some months than in others": an info chip (context only, never changes the
@@ -47,12 +47,21 @@ for how to release and how to roll back.
   ready-made places keep it working offline.
 
 ### Fixed
+- Simple view: every sentence the engine writes into a result is now at most 14 words, in English and Spanish
+  (was about 155 EN and 260 ES over); variable definitions, glossary entries and UI copy were shortened too.
+  The headline answer stays one sentence (place last; a second "We looked in …" sentence only when it can't fit),
+  amounts read "In 10 years it may change less than …", humidity amounts add "The scale goes from 0 to 100.",
+  several known breaks in one window are one line ("How this was measured changed in 2001, 2008 and 2012."),
+  and the highland-only twin is "Cajamarca, high mountains only". Shorter kid labels (humidity, soil water,
+  NO₂, carbon in Spanish) and a new glossary entry for "scale". A one-off step (model input change) in the
+  window's first month no longer counts; a lasting break (frozen emissions, row anomaly, drift) counts whenever
+  the window reaches it, so a window starting after MERRA-2's freeze is never "Sure" either. New test builds every variable × region × season verdict and checks sentence length.
 - MERRA-2 sulfate and carbon particles now carry a known break ("frozen_emissions"): MERRA-2 persists its
   anthropogenic emissions after 2008 (SO₂) / 2006 (SO₄, OC, BC), drops volcanic eruptions after 2010 and switches
   fire inventories in 2010 (Randles et al. 2017, Table 1). A window across the date gets a warning chip, so a
   "Sure it's real" there becomes "Maybe, not sure yet" (user decision).
-  Only `frozen_emissions` lowers the label; other flagged breaks stay warnings. The Delhi demo's sulfate steps
-  now explain the "Maybe" instead of showing opposite sure trends.
+  The same now applies to model input changes (GLDAS forcing 2001/2008/2012/2025, IMERG TRMM-to-GPM 2014) and
+  the OMI row anomaly (2007) and MODIS orbit drift (Terra 2020, Aqua 2022; the full record is still kept). The Delhi demo's sulfate steps now explain the "Maybe" instead of showing opposite sure trends.
 - "Since 2002 it went up by about 1 degree" for a 0.3-degree change: any change under 1 unit now reads "less than
   1", the same threshold as every other Simple amount. Spanish says "alrededor de 1 punto", never "unos 1 punto".
 - NASA POWER haze (`power_aod`) grid is 1° (SYN1deg), not 0.5°; "Where else?" units carry the kid scale.

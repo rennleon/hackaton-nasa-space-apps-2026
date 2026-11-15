@@ -39,7 +39,7 @@ describe('TrustPanel', () => {
   }
   it('groups the checks and shows second opinion, published science and the notes', () => {
     wrap(<TrustPanel result={full} />)
-    expect(screen.getByRole('heading', { name: 'Tell me more: can we trust this?' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Can we trust this?' })).toBeInTheDocument()
     expect(screen.getByText('Is the data good?')).toBeInTheDocument()
     expect(screen.getByText('Is the record long enough?')).toBeInTheDocument()
     expect(screen.getByText(/Two instruments agree on the direction/)).toBeInTheDocument()

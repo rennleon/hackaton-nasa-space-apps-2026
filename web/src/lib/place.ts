@@ -62,7 +62,7 @@ export function placeRegion(p: Place): RegionCard {
   const named = ex ? exampleName(ex) : recallPlaceName(key)
   return {
     id: `custom_${key.replace(/[^0-9a-z.-]+/gi, '_')}`,
-    name: { simple: named ?? 'Your place', scientific: named ? `${named} (${sci})` : sci },
+    name: { simple: named ?? 'Your place', scientific: named ? `${named} (${sci})` : sci, ...(named ? {} : { simple_es: 'Tu lugar' }) },
     description: { simple: 'The place you picked.', scientific: `${sci} (NASA POWER).` },
     regime: '',
     geometry: { kind: 'bbox', bbox: placeBbox(p) },

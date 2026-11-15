@@ -53,7 +53,7 @@ export const S = {
   'legend.same': p('Same thing, measured by a different instrument: {name}'),
   // sources page
   'sp.intro': p(
-    'An {instrument} is a tool that measures. A {variable} is one thing it measures, like how warm the air is.',
+    'An {instrument} is a tool that measures. A {variable} is one thing it measures. For example, how warm the air is.',
     'An {instrument} is a sensor on a satellite, or a computer model, that produces data. A {variable} is one measured quantity in it, and it is what we trend.',
   ),
   'sp.inst': p('Instrument: {name}'),

@@ -152,8 +152,8 @@ describe('start screen', () => {
     open()
     await screen.findByText('Or try a ready-made place')
     expect(screen.queryByText(/test box/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Cajamarca \((?!only the high mountains\))/)).not.toBeInTheDocument() // the twin is listed; the test box is not
-    for (const n of ['Cajamarca highlands', 'Cajamarca \\(only the high mountains\\)', 'Wisconsin', 'Delhi, India', 'Amazon rainforest near Manaus, Brazil', 'Sahara desert near Tamanrasset, Algeria']) {
+    expect(screen.queryByText(/Cajamarca \((?!high mountains only)/)).not.toBeInTheDocument() // the twin is listed; the test box is not
+    for (const n of ['Cajamarca highlands', 'Cajamarca, high mountains only', 'Wisconsin', 'Delhi, India', 'Amazon rainforest near Manaus, Brazil', 'Sahara desert near Tamanrasset, Algeria']) {
       expect(within(screen.getByRole('region', { name: /ready-made/ })).getByRole('button', { name: new RegExp(n) })).toBeInTheDocument()
     }
     await user.click((await ready()).getByRole('button', { name: /Delhi, India/ }))

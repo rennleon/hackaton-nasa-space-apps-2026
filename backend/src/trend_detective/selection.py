@@ -24,7 +24,7 @@ from .catalog import RegionCard, ThemeCard, VariableCard
 from .contract import GateCheck, Selection, SelectionCheck, Text
 from .published import PublishedMatch, expectation_check
 from .stats import ols_neff
-from .verdict import about_es, amount_en, less_than_one, less_than_one_es
+from .verdict import MAX_WORDS, about_es, amount_en, break_line, less_than_one, less_than_one_es
 
 
 def mdt_per_decade(resid_sd: float, r1: float, n_years: float, samples_per_year: int) -> float | None:
@@ -57,14 +57,17 @@ def _phrase_es(x: float, label: str) -> str:
 def _spot_en(mdt: float, label: str) -> str:
     # never "even small changes": below 1 unit can still be large for the variable (e.g. 0.8 mm/day of rain)
     if abs(mdt) < 1:
-        return f"We can see changes under {less_than_one(label).removeprefix('less than ')}. That is per 10 years."
-    return f"We can see changes from {_phrase_en(mdt, label)}. That is per 10 years."
+        return f"Every 10 years we see changes under {less_than_one(label).removeprefix('less than ')}."
+    return f"Every 10 years we see changes from {_phrase_en(mdt, label)}."
 
 
 def _spot_es(mdt: float, label: str) -> str:
     if abs(mdt) < 1:
-        return f"Vemos cambios de {less_than_one_es(label)}. Eso es cada 10 años."
-    return f"Vemos cambios desde {_phrase_es(mdt, label)}. Eso es cada 10 años."
+        return f"Cada 10 años vemos cambios menores de {less_than_one_es(label).removeprefix('menos de ')}."
+    full = f"Cada 10 años vemos cambios desde {_phrase_es(mdt, label)}."
+    # "alrededor de 1 punto" plus a long label overflows the R5 limit: "desde 1 punto" (a whole sentence) beats a
+    # clipped "vemos desde alrededor de"; only the amount 1 has the two-word "alrededor de" (others read "unos N")
+    return full if len(full.split()) <= MAX_WORDS else full.replace("desde alrededor de ", "desde ")
 
 
 def _theme_names(theme_id: str | None, variable: VariableCard, themes: dict[str, ThemeCard] | None) -> tuple[str, str]:
@@ -90,7 +93,7 @@ def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> st
             return "Este registro es lo bastante largo para ver un cambio típico."
         return "Este registro solo puede ver cambios mayores que uno típico."
     spot = _spot_es(mdt, u_simple)
-    typical = f"Un cambio típico es de {_phrase_es(expected, u_simple)}."
+    typical = f"Un cambio típico: {_phrase_es(expected, u_simple)}."
     return f"{spot} {typical} " + ("Eso basta para verlo." if ok else "Aún no podemos verlo.")
 
 
@@ -197,11 +200,12 @@ def stage1(
                                       "completitud y meses en cero."),
         ))
     if flagged:
+        one_s, one_es = break_line([(a.kind, str(a.start), a.note) for a in flagged])
         checks.append(SelectionCheck(
             code="known_breaks", status="caution",
-            detail=Text(simple=" ".join(a.note.simple for a in flagged),
+            detail=Text(simple=one_s,
                         scientific=" ".join(f"{a.start}: {a.note.scientific}" for a in flagged),
-                        simple_es=" ".join(a.note.simple_es or a.note.simple for a in flagged),
+                        simple_es=one_es,
                         scientific_es=" ".join(f"{a.start}: {a.note.scientific_es or a.note.scientific}" for a in flagged)),
         ))
     else:

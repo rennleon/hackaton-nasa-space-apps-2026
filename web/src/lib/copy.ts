@@ -44,6 +44,7 @@ export const COPY = {
   trendLine: tx('The trend line', 'Trend'),
   range: tx('It could be anywhere between', '95% range'),
   checksAgree: tx('We ran two careful checks. Both say this is real.', 'Both decisive tests agree.'),
+  checksFragile: tx('Both checks found a change. But something below makes us careful.', 'Both decisive tests agree; a robustness check lowers the label.'),
   checksDisagree: tx('We ran two careful checks. They do not both agree, so we stay careful.', 'The decisive tests do not both agree.'),
   // Choose a place (R2)
   chooseTitle: tx('Choose any place', 'Choose a place (NASA POWER)'),

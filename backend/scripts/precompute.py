@@ -22,11 +22,11 @@ from trend_detective.scan import availability_of, scan, scan_region
 EXAMPLES = [
     ("ex_delhi", 28.61, 77.21, "Delhi, India", "Delhi, India (point 28.61, 77.21)",
      "Delhi, India", "Delhi, India (punto 28,61; 77,21)"),
-    ("ex_manaus", -3.10, -60.02, "Amazon near Manaus, Brazil", "Amazon near Manaus, Brazil (point -3.10, -60.02)",
-     "Amazonía cerca de Manaos, Brasil", "Amazonía cerca de Manaos, Brasil (punto -3,10; -60,02)"),
-    ("ex_tamanrasset", 22.79, 5.52, "Sahara near Tamanrasset, Algeria",
-     "Sahara near Tamanrasset, Algeria (point 22.79, 5.52)",
-     "Sahara cerca de Tamanrasset, Argelia", "Sahara cerca de Tamanrasset, Argelia (punto 22,79; 5,52)"),
+    ("ex_manaus", -3.10, -60.02, "The Amazon near Manaus", "The Amazon near Manaus, Brazil (point -3.10, -60.02)",
+     "La Amazonía cerca de Manaos", "La Amazonía cerca de Manaos, Brasil (punto -3,10; -60,02)"),
+    ("ex_tamanrasset", 22.79, 5.52, "The Sahara near Tamanrasset",
+     "The Sahara near Tamanrasset, Algeria (point 22.79, 5.52)",
+     "El Sahara cerca de Tamanrasset", "El Sahara cerca de Tamanrasset, Argelia (punto 22,79; 5,52)"),
 ]
 WHERE_REGIONS = ["cajamarca_highlands", "cajamarca_high_only", "wisconsin"]
 

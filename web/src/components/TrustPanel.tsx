@@ -162,7 +162,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     <section className="card trust" aria-labelledby="trust-h" data-demo="trust">
       <details key={view} className="trust-details" open={!simple}>
         <summary>
-          <h3 id="trust-h">{c('result.trust.title', { simple: 'Tell me more: can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
+          <h3 id="trust-h">{c('result.trust.title', { simple: 'Can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
         </summary>
         {hard && (
           <div className="trust-head">

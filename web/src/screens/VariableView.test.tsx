@@ -38,7 +38,7 @@ describe('Variable view, Simple', () => {
     expect(screen.getByRole('list', { name: 'How sure are we?' })).toBeInTheDocument()
     expect(screen.getByText("Sure it's real").closest('li')).toHaveAttribute('aria-current', 'step')
     expect(screen.getByText(/In 2002: about 65/)).toBeInTheDocument()
-    expect(screen.getByText('Tell me more: can we trust this?')).toBeInTheDocument()
+    expect(screen.getByText('Can we trust this?')).toBeInTheDocument()
     expect(container.textContent).not.toMatch(/test box|stage 1/i)
     const text = container.textContent ?? ''
     expect(bannedIn(text)).toEqual([])

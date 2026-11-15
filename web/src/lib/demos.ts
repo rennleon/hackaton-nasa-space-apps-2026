@@ -55,7 +55,7 @@ export const DEMOS: Demo[] = [
         route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'verdict',
         caption: tx(
-          'Yes, afternoons are getting more humid. We are sure: about 66 on the humidity scale in 2002, about 69 in 2021.',
+          'Yes, afternoons are getting more humid. We are sure. About 66 on the humidity scale in 2002, about 69 in 2021.',
           'Significant increase in surface relative humidity, 2002 to 2021: +1.33 %RH per decade (95% CI +1.15 to +1.50), both decisive tests agree.',
         ),
       },
@@ -110,7 +110,7 @@ export const DEMOS: Demo[] = [
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'power_aod' },
         target: 'verdict',
         caption: tx(
-          'Yes, the air is getting hazier in Delhi. We are sure: about 59 on the haze scale in 2001, about 72 in 2025.',
+          'Yes, the air is getting hazier in Delhi. We are sure. About 59 on the haze scale in 2001, about 72 in 2025.',
           'Significant increase in AOD at 550 nm, 2001 to 2025: +0.050 per decade (95% CI +0.023 to +0.077).',
         ),
       },

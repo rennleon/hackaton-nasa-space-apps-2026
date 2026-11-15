@@ -91,7 +91,7 @@ def test_detectability_wording_never_contradicts(mdt, expected, ok):
 
 
 def test_detectability_without_reference_size():
-    assert detect_sentences(0.3, None, "degrees")[0] == "We can see changes under 1 degree. That is per 10 years."
+    assert detect_sentences(0.3, None, "degrees")[0] == "Every 10 years we see changes under 1 degree."
     assert "about 2 degrees" in detect_sentences(2.2, None, "degrees")[0]
 
 
@@ -134,9 +134,9 @@ def test_short_record_note_only_when_it_applies(cat):
 
 def test_detectability_amount_on_the_kid_scale():
     assert detect_sentences(3.1, None, "on the haze scale")[0] == (
-        "We can see changes from about 3 points on the haze scale. That is per 10 years.")
+        "Every 10 years we see changes from about 3 points on the haze scale.")
     assert detect_sentences(0.4, None, "on the haze scale")[0] == (
-        "We can see changes under 1 point on the haze scale. That is per 10 years.")
+        "Every 10 years we see changes under 1 point on the haze scale.")
 
 
 def test_stage1_detectability_scales_display_units_to_kid_units(cat):
@@ -160,7 +160,7 @@ def test_tell_me_more_amount_is_on_the_kid_scale_without_decimals(cat):
     x = _inputs(cat, -0.011, None)
     x.variable = cat.variables["power_aod"]
     v = build_verdict("possibly_changing", x)
-    assert "about 1 point on the haze scale every 10 years" in v.sentence.simple
+    assert "Every 10 years it may change by about 1 point on the haze scale." in v.sentence.simple
     assert not re.search(r"\d\.\d", v.sentence.simple) and not re.search(r"\d,\d", v.sentence.simple_es)
 
 
@@ -207,3 +207,65 @@ def test_merra2_aerosol_cards_flag_frozen_emissions(cat):
         arts = cat.variables[vid].artifacts
         assert [(a.kind, a.start, a.action) for a in arts] == [("frozen_emissions", start, "flag")]
         assert "doi:10.1175/JCLI-D-16-0609.1" in arts[0].note.scientific and arts[0].note.simple_es
+
+
+def test_flagged_artifacts_needs_data_before_the_break(cat):
+    from types import SimpleNamespace
+
+    from trend_detective.prepare import flagged_artifacts
+
+    def art(start, kind="input_change"):
+        return SimpleNamespace(action="flag", start=start, kind=kind)
+
+    var = SimpleNamespace(artifacts=[art("2002-01"), art("2005-06"), art("2021-12"), art("2022-01")])
+    w = Window(start="2002-01", end="2021-12", reason="default", years=20)
+    assert [a.start for a in flagged_artifacts(var, w)] == ["2005-06", "2021-12"]  # not the first month, not after the end
+    # a lasting period (frozen emissions, row anomaly, drift) counts even when the window starts on or after it
+    lasting = SimpleNamespace(artifacts=[art("2002-01", "frozen_emissions"), art("1999-06", "row_anomaly"),
+                                         art("2022-01", "orbit_drift")])
+    assert [a.start for a in flagged_artifacts(lasting, w)] == ["2002-01", "1999-06"]
+
+
+def test_humidity_then_now_says_the_scale_is_0_to_100(cat):
+    from trend_detective.contract import ThenNow
+    from trend_detective.verdict import build_verdict
+
+    x = _inputs(cat, 0.5, None)
+    x.variable = cat.variables["airs_rh_surf_day"]
+    x.then_now = ThenNow(year_then=2002, year_now=2021, value_then=60.4, value_now=64.2,
+                         kid_scale=1, kid_label="on the humidity scale", kid_label_es="en la escala de humedad")
+    v = build_verdict("significant", x)
+    assert v.how_much.simple.endswith("The scale goes from 0 to 100.")
+    assert v.how_much.simple_es.endswith("La escala va de 0 a 100.")
+
+
+def test_known_breaks_selection_detail_is_one_combined_line(cat):
+    from trend_detective.selection import stage1
+
+    v = next(v for v in cat.variables.values() if sum(a.action == "flag" for a in v.artifacts) >= 3)
+    r = next(iter(cat.regions.values()))
+    flagged = [a for a in v.artifacts if a.action == "flag"]
+    sel = stage1(v, r, None, [], flagged, None, None, 20.0, 12)
+    d = next(c for c in sel.checks if c.code == "known_breaks").detail
+    assert d.simple.count(".") == 1
+    assert "Small jumps" not in d.simple
+    assert all(str(a.start)[:4] in d.simple for a in flagged)
+    assert d.simple.startswith("The model's inputs changed in ") and d.simple_es.startswith("Los datos de entrada del modelo")
+    assert all(a.note.scientific in d.scientific for a in flagged)  # Scientific still lists each break
+
+
+def test_custom_place_has_spanish_name():
+    from trend_detective.verdict import _place_es
+
+    r = SimpleNamespace(id="custom_1", name=Text(simple="Your place", scientific="x", simple_es="Tu lugar"))
+    assert _place_es(r) == "tu lugar"
+
+
+def test_single_break_keeps_its_own_note_and_mixed_kinds_are_neutral():
+    from trend_detective.verdict import break_line
+
+    a = Text(simple="After 2008 the model stopped updating pollution.", scientific="s", simple_es="Tras 2008 …", scientific_es="s")
+    assert break_line([("frozen_emissions", "2009-01", a)]) == (a.simple, a.simple_es)
+    en, es = break_line([("input_change", "2001-03", a), ("frozen_emissions", "2009-01", a)])
+    assert en == "This data has known changes in 2001 and 2009."
+    assert es == "Estos datos tienen cambios conocidos en 2001 y 2009."

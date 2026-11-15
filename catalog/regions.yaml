@@ -21,7 +21,7 @@
   description:
     simple: The mountains around Cajamarca city in northern Peru, high above the sea.
     scientific: Grid-aligned box over the northern Peruvian Andes; excludes the coastal desert column west of 79°W.
-    simple_es: "Las montañas alrededor de la ciudad de Cajamarca, en el norte del Perú, muy por encima del nivel del mar."
+    simple_es: "Las montañas alrededor de la ciudad de Cajamarca, en el norte del Perú. Son muy altas."
     scientific_es: "Caja alineada con la rejilla sobre los Andes del norte del Perú; excluye la columna de desierto costero al oeste de 79°O."
   regime: Andean highland
   geometry:
@@ -76,14 +76,14 @@
 
 - id: cajamarca_high_only
   name:
-    simple: Cajamarca (only the high mountains)
+    simple: Cajamarca, high mountains only
     scientific: Northern Peruvian Andes, high-elevation core of the Cajamarca box (highland-only twin)
-    simple_es: "Cajamarca (solo las montañas altas)"
+    simple_es: "Cajamarca, solo montañas altas"
     scientific_es: "Andes del norte del Perú, núcleo de gran altura de la caja de Cajamarca (gemela solo de altura)"
   description:
     simple: The high part of the Cajamarca box. Its map squares are more alike than the big box. All are high and cool. The west side is a bit drier.
     scientific: "Sub-box of cajamarca_highlands (79.0–77.3°W, 7.3–6.3°S) chosen from NASA POWER climatology so that every MERRA-2 cell in it has model elevation 2348–2771 m (range 423 m), annual rain 1.06–1.67 mm/day (max/min 1.6) and annual T2M 14.3–15.8 °C (range 1.5 °C); the larger box mixes cells from 147 to 3378 m. Too small for the 1° AIRS cells, so AIRS variables report that gate. Our homogeneity check still flags it as mixed on the Köppen rule alone (3 cells BSk-side, 3 Cwb-side: the drier west and wetter east straddle the B/C dryness threshold); height, temperature and the rain ratio are all within the one-kind limits. Kept as declared, not re-drawn after seeing that result."
-    simple_es: "La parte alta de la caja de Cajamarca. Sus cuadrados del mapa se parecen más que en la caja grande. Todos son altos y frescos. El lado oeste es un poco más seco."
+    simple_es: "La parte alta del rectángulo de Cajamarca. Sus cuadrados del mapa se parecen más que en el rectángulo grande. Todos son altos y frescos. El lado oeste es un poco más seco."
     scientific_es: "Subcaja de cajamarca_highlands (79,0–77,3°O, 7,3–6,3°S) elegida con la climatología de NASA POWER para que cada celda de MERRA-2 tenga elevación del modelo de 2348–2771 m (rango 423 m), lluvia anual de 1,06–1,67 mm/día (máx/mín 1,6) y T2M anual de 14,3–15,8 °C (rango 1,5 °C); la caja mayor mezcla celdas de 147 a 3378 m. Es demasiado pequeña para las celdas de 1° de AIRS, así que las variables de AIRS informan esa puerta. Nuestra revisión de homogeneidad igual la marca como mezclada solo por la regla de Köppen (3 celdas del lado BSk, 3 del lado Cwb: el oeste más seco y el este más húmedo cruzan el umbral de aridez B/C); la altura, la temperatura y la razón de lluvia están dentro de los límites de un solo tipo. Se mantiene como se declaró, sin redibujarla tras ver ese resultado."
   regime: Andean highland
   geometry:
@@ -140,12 +140,12 @@
   name:
     simple: Cajamarca (test box)
     scientific: Cajamarca department box, first download (mixed coast and Andes)
-    simple_es: "Cajamarca (caja de ensayo)"
+    simple_es: "Cajamarca (rectángulo de ensayo)"
     scientific_es: "Caja del departamento de Cajamarca, primera descarga (costa y Andes mezclados)"
   description:
     simple: Our first test box. It mixes the dry coast with the mountains.
     scientific: Requested as 79.5–77.7°W, 7.8–4.5°S; on a 1° grid it returns 80–78°W, 8–4°S, mixing coastal desert and western Andean slope. Kept only because its data is already downloaded; not offered in the region list.
-    simple_es: "Nuestra primera caja de ensayo. Mezcla la costa seca con las montañas."
+    simple_es: "Nuestro primer rectángulo de ensayo. Mezcla la costa seca con las montañas."
     scientific_es: "Solicitada como 79.5–77.7°O, 7.8–4.5°S; en una rejilla de 1° devuelve 80–78°O, 8–4°S, con desierto costero y ladera andina occidental mezclados. Se conserva solo porque sus datos ya están descargados; no se ofrece en la lista de regiones."
   regime: mixed coastal desert and Andean slope
   listed: false  # comparison box only; not offered in the region list
