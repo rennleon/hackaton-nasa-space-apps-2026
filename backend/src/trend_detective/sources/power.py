@@ -252,3 +252,97 @@ class PowerSource:
                 n_cells=len(coords),
             ),
         )
+
+
+# --- long-term averages on a map ("where does it happen?"): the POWER climatology regional endpoint ---
+
+CLIMATOLOGY_BASE = "https://power.larc.nasa.gov/api/temporal/climatology/regional"
+
+# param -> units NASA POWER reports, units we show, [lat, lon] cell size in degrees, source label.
+# T2M and PRECTOTCORR are MERRA-2 (0.5 x 0.625 degree grid); AOD_55 is CERES SYN1deg (1 x 1 degree grid).
+# Checked live: all three answer on this endpoint.
+CLIMATOLOGY_PARAMS: dict[str, dict] = {
+    "T2M": {"reported": "C", "units": "°C", "cell_deg": [0.5, 0.625],
+            "source": "NASA POWER (MERRA-2 computer model), long-term average"},
+    "PRECTOTCORR": {"reported": "mm/day", "units": "mm/day", "cell_deg": [0.5, 0.625],
+                    "source": "NASA POWER (MERRA-2 computer model), long-term average"},
+    "AOD_55": {"reported": "dimensionless", "units": "", "cell_deg": [1.0, 1.0],
+               "source": "NASA POWER (CERES SYN1deg computer estimate), long-term average"},
+}
+MIN_CLIMATOLOGY_SPAN_DEG = 2.0
+
+
+def climatology_cache_path(param: str, bbox: list[float] | tuple[float, ...], cache_dir: Path | None = None) -> Path:
+    """data/cache/power/clim_regional_<P>_<W>_<S>_<E>_<N>.json, numbers as %.2f (other code shares these files)."""
+    base = Path(cache_dir) if cache_dir else default_cache_dir()
+    return base / (f"clim_regional_{param}_" + "_".join(f"{x:.2f}" for x in bbox) + ".json")
+
+
+def validate_climatology_bbox(bbox: list[float] | tuple[float, ...]) -> None:
+    validate_geometry("bbox", list(bbox))  # finite, ordered, at most 10 degrees a side
+    w, s, e, n = bbox
+    if e - w < MIN_CLIMATOLOGY_SPAN_DEG or n - s < MIN_CLIMATOLOGY_SPAN_DEG:
+        raise ValueError(f"box is too small: at least {MIN_CLIMATOLOGY_SPAN_DEG:g} degrees in each direction")
+
+
+def parse_climatology(doc: dict, param: str) -> list[list[float]]:
+    """[[lon, lat, annual value]] per grid cell; fill values and cells without an annual value are skipped."""
+    fill = float((doc.get("header") or {}).get("fill_value", -999.0))
+    cells: list[list[float]] = []
+    for f in doc.get("features") or []:
+        ann = (((f.get("properties") or {}).get("parameter") or {}).get(param) or {}).get("ANN")
+        if ann is None:
+            continue
+        v = float(ann)
+        if v == fill or v <= -990.0 or not math.isfinite(v):
+            continue
+        lon, lat = f["geometry"]["coordinates"][:2]
+        cells.append([float(lon), float(lat), round(v, 3)])
+    return cells
+
+
+def fetch_climatology(param: str, bbox: list[float] | tuple[float, ...], cache_dir: Path | None = None,
+                      offline: bool | None = None) -> dict:
+    """The long-term (annual mean) value of `param` for each grid cell in the box.
+
+    Raises LiveSourceUnavailable when NASA POWER cannot be reached (or no cache and offline) and ValueError when
+    the request itself is not servable. Returns {param, units, source, cells, cell_deg}.
+    """
+    spec = CLIMATOLOGY_PARAMS[param]
+    validate_climatology_bbox(bbox)
+    is_offline = offline if offline is not None else os.environ.get("TD_POWER_OFFLINE") == "1"
+    path = climatology_cache_path(param, bbox, cache_dir)
+    doc: dict | None = None
+    if path.exists():
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            log.warning("unreadable POWER cache file %s", path.name)
+    if doc is None:
+        if is_offline:
+            raise LiveSourceUnavailable("NASA POWER climatology is not cached and the server is offline")
+        w, s, e, n = (round(x, 2) for x in bbox)
+        url = (f"{CLIMATOLOGY_BASE}?parameters={param}&community=ag"
+               f"&longitude-min={w}&longitude-max={e}&latitude-min={s}&latitude-max={n}&format=json")
+        try:
+            doc = _http_get_json(url)
+        except PowerRequestRejected as exc:
+            raise ValueError(str(exc)) from exc
+        if "features" not in doc:
+            raise LiveSourceUnavailable("NASA POWER returned no climatology")
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(f".{os.getpid()}.tmp")
+            tmp.write_text(json.dumps(doc), encoding="utf-8")
+            os.replace(tmp, path)  # atomic: concurrent readers never see a half-written file
+        except OSError as exc:
+            log.warning("could not write POWER cache: %s", exc)
+    reported = reported_unit(doc, param)
+    if reported is not None and reported != spec["reported"]:
+        raise LiveSourceUnavailable(f"NASA POWER reported {param} in '{reported}', expected '{spec['reported']}'")
+    try:
+        cells = parse_climatology(doc, param)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise LiveSourceUnavailable(f"could not parse NASA POWER climatology: {exc}") from exc
+    return {"param": param, "units": spec["units"], "source": spec["source"], "cells": cells,
+            "cell_deg": list(spec["cell_deg"])}

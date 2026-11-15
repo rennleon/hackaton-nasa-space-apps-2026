@@ -1,10 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useData } from '../context'
 import { fromSigned, placeBbox, placeRegion, toSigned, validatePlace, wrapLon, type Place, type PlaceProblem } from '../lib/place'
 import { sizeParts, type Chosen } from '../lib/places'
 import { useStartT } from '../lib/startT'
 import type { RegionCard } from '../types/catalog'
+import { CLIMATE_LAYERS, bboxKey, layerById, type Bbox, type ClimateLayerId } from '../lib/climate'
+import { ClimateCells } from './ClimateCells'
+import { ClimateLegend, useClimateWords } from './ClimateLegend'
 import { RegionMap } from './RegionMap'
+import { useClimateGrid } from './useClimateGrid'
 import './PlaceChooser.css'
 
 type Mode = 'point' | 'box'
@@ -52,6 +56,13 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace }: Props) {
   const [vals, setVals] = useState<Fields>(EMPTY)
   const [corner, setCorner] = useState<{ lat: number; lon: number } | null>(null)
   const [mapProblem, setMapProblem] = useState<PlaceProblem | null>(null)
+  // "Where does it happen?": shade the map by a long-term average so the child picks a spot inside one colour
+  const [layerId, setLayerId] = useState<ClimateLayerId | null>(null)
+  const [view, setView] = useState<Bbox | null>(null)
+  const onViewChange = useCallback((b: Bbox) => setView((prev) => (prev && bboxKey(prev) === bboxKey(b) ? prev : b)), [])
+  const layer = layerId ? layerById(layerId) : null
+  const { grid, status } = useClimateGrid(client, layer, view)
+  const { words } = useClimateWords()
 
   const touched = FIELDS[mode].some(([k]) => vals.size[k]?.trim())
   const typed = toPlace(mode, vals)
@@ -124,6 +135,13 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace }: Props) {
           {off ? s('start.map.off', 'Choosing any place needs our live service. Try a ready-made place.', 'Custom places require the API (VITE_API_URL not set).') : help}
         </p>
       </div>
+      <div role="group" aria-label={s('start.clim.group', 'Colour the map', 'Map layer')} className="chooser-layers tabs">
+        {CLIMATE_LAYERS.map((l) => (
+          <button key={l.id} type="button" aria-pressed={layerId === l.id} onClick={() => setLayerId(layerId === l.id ? null : l.id)}>
+            {words[l.id].toggle}
+          </button>
+        ))}
+      </div>
       <RegionMap
         regions={mapRegions}
         selectedId={selectedId}
@@ -132,7 +150,11 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace }: Props) {
         onMapClick={off ? undefined : onMapClick}
         draft={draft}
         pending={corner ? [corner.lat, corner.lon] : null}
-      />
+        onViewChange={onViewChange}
+      >
+        {layer && grid && <ClimateCells layer={layer} grid={grid} />}
+      </RegionMap>
+      {layer && <ClimateLegend layer={layer} grid={grid} status={status} />}
       {mapProblem && (
         <p role="alert" className="error">
           {problemText(mapProblem)}

@@ -13,6 +13,10 @@ for how to release and how to roll back.
 - "The change is bigger in some months than in others": an info chip (context only, never changes the
   verdict) from a Welch test on the 12 per-month slopes, naming the months with the smallest and largest
   change. It compares trend sizes, so months with more noise do not make equal changes look unequal.
+- "Where does it happen?" map layers on the place chooser: shade the map by the long-term average of
+  temperature, rain or haze (NASA POWER climatology, `GET /climatology/grid`) so a spot can be picked
+  inside one colour instead of a box that mixes very different places. Precomputed windows around the
+  ready-made places keep it working offline.
 
 ### Fixed
 - Box means no longer depend on which grid cells happen to report: each cell is fitted as the box

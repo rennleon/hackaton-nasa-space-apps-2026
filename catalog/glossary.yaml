@@ -254,3 +254,10 @@
     scientific: The Intergovernmental Panel on Climate Change Sixth Assessment Report (2021), Working Group I. Its confidence words (for example high confidence, likely) are the panel's own, and are not our "how sure are we" meter.
     simple_es: "Cientos de científicos leyeron todos los estudios y anotaron en qué coinciden. Citamos lo que dicen de cada región."
     scientific_es: "Sexto Informe de Evaluación del Grupo Intergubernamental de Expertos sobre el Cambio Climático (2021), Grupo de Trabajo I. Sus palabras de confianza (por ejemplo confianza alta, probable) son las del panel y no son nuestro medidor de qué tan seguros estamos."
+- id: long_term_average
+  term: { simple: long-term average, scientific: climatological mean, simple_es: "promedio de muchos años", scientific_es: "media climatológica" }
+  definition:
+    simple: What a place is usually like, worked out from about 25 years of weather.
+    scientific: Annual mean over the NASA POWER climatology period (2001 to 2025). It describes the typical state, not a trend.
+    simple_es: "Cómo suele ser un lugar, calculado con unos 25 años de clima."
+    scientific_es: "Media anual del periodo climatológico de NASA POWER (2001 a 2025). Describe el estado típico, no una tendencia."

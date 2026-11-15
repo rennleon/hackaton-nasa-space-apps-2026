@@ -19,7 +19,7 @@ from .engine import EngineContext, analyze
 from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
-from .sources.power import validate_geometry
+from .sources.power import CLIMATOLOGY_PARAMS, fetch_climatology, validate_climatology_bbox, validate_geometry
 
 app = FastAPI(title="Earth System Trend Detective API", version=ENGINE_VERSION)
 app.add_middleware(
@@ -211,6 +211,27 @@ def _custom_analyze_cached(kind: str, c: tuple[float, ...], variable: str, start
     from .engine import analyze_region
 
     return analyze_region(ctx(), custom_region(kind, c), variable, start=start, end=end)
+
+
+# --- "where does it happen?": long-term mean on a grid, to shade the place-chooser map ---
+
+
+@lru_cache(maxsize=64)
+def _climatology_cached(param: str, box: tuple[float, ...]) -> dict:
+    return fetch_climatology(param, box)  # raises LiveSourceUnavailable (HTTP 503), which lru_cache never stores
+
+
+@app.get("/climatology/grid", dependencies=[Depends(limit_client)])
+def climatology_grid(param: str = Query(...), bbox: str = Query(...)) -> dict:
+    """Annual-mean value per NASA POWER grid cell in a 2 to 10 degree box: {param, units, source, cells, cell_deg}."""
+    if param not in CLIMATOLOGY_PARAMS:
+        raise HTTPException(422, f"param must be one of {', '.join(CLIMATOLOGY_PARAMS)}")
+    _kind, box = _parse_place(bbox, None, None)
+    try:
+        validate_climatology_bbox(box)
+        return _climatology_cached(param, box)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @app.get("/custom/scan", response_model=ScanResult, dependencies=[Depends(limit_client)])

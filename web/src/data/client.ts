@@ -1,5 +1,6 @@
 import type { AnalysisResult, ScanResult } from '../types/contract'
 import type { Place } from '../lib/place'
+import type { Bbox, ClimateGrid, ClimateParam } from '../lib/climate'
 import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types/catalog'
 
 export interface AnalyzeOptions {
@@ -26,6 +27,8 @@ export interface DataClient {
   /** Live NASA POWER data for a user-chosen place. Rejects with LiveDataUnavailable when the API is not reachable. */
   customScan(place: Place, themeId: string): Promise<ScanResult>
   customResult(place: Place, variableId: string, opts: { start?: string; end?: string }): Promise<AnalysisResult>
+  /** Long-term average per grid cell for a 2 to 10 degree box ("where does it happen?" map layer). Optional so a client without a map layer (a test fake) still type-checks; the map then shows no colours. */
+  climatology?(param: ClimateParam, bbox: Bbox): Promise<ClimateGrid>
 }
 
 /** The live API cannot be reached (or is not configured), so a custom place cannot be served. */

@@ -1,4 +1,5 @@
 import type { Place } from '../lib/place'
+import type { Bbox, ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
 import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient } from './client'
 
@@ -22,6 +23,9 @@ export class FallbackClient implements DataClient {
   glossary = () => this.either((c) => c.glossary())
   scan = (r: string, t: string) => this.either((c) => c.scan(r, t))
   result = (r: string, v: string, s?: string) => this.either((c) => c.result(r, v, s))
+
+  /** The live grid first; the precomputed windows (ready-made places) when the API is down or not configured. */
+  climatology = (p: ClimateParam, b: Bbox) => this.either((c) => (c.climatology ? c.climatology(p, b) : Promise.reject(new Error('no climate layer'))))
 
   async analyze(regionId: string, variableId: string, opts: AnalyzeOptions): Promise<AnalysisOutcome> {
     try {
