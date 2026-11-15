@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { DataClient } from './data/client'
 import type { Catalog, GlossaryTerm, Text } from './types/catalog'
-import { pick, type ViewMode } from './lib/text'
+import { type ViewMode } from './lib/text'
+import { tx, useLang } from './i18n'
 
 const STORAGE_KEY = 'trend-detective:view'
 
@@ -21,9 +22,11 @@ interface ViewCtx {
   /** pick the active register from a Text */
   t: (text: Text | string | null | undefined) => string
 }
-const ViewContext = createContext<ViewCtx>({ view: 'simple', setView: () => {}, t: (x) => pick(x, 'simple') })
+const pickText = (x: Text | string | null | undefined, view: ViewMode) => (typeof x === 'string' ? x : tx(x, view))
+const ViewContext = createContext<ViewCtx>({ view: 'simple', setView: () => {}, t: (x) => pickText(x, 'simple') })
 
 export function ViewProvider({ children, initial }: { children: ReactNode; initial?: ViewMode }) {
+  const lang = useLang() // re-render the whole tree (through this value) when the language changes
   const [view, setViewState] = useState<ViewMode>(initial ?? initialView())
   const setView = useCallback((v: ViewMode) => {
     setViewState(v)
@@ -33,7 +36,8 @@ export function ViewProvider({ children, initial }: { children: ReactNode; initi
       /* ignore */
     }
   }, [])
-  const value = useMemo(() => ({ view, setView, t: (x: Text | string | null | undefined) => pick(x, view) }), [view, setView])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `lang` is a deliberate dependency: Text objects pick their Spanish variant
+  const value = useMemo(() => ({ view, setView, t: (x: Text | string | null | undefined) => pickText(x, view) }), [view, setView, lang])
   return <ViewContext.Provider value={value}>{children}</ViewContext.Provider>
 }
 export const useView = () => useContext(ViewContext)

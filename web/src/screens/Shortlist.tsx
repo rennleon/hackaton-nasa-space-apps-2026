@@ -9,7 +9,7 @@ import { VerdictChip } from '../components/VerdictChip'
 import { Sparkline, TrendArrow } from '../components/Sparkline'
 import { classifyLiveError, LiveNotice } from '../components/LiveNotice'
 import { parsePlace, placeRegion } from '../lib/place'
-import { formatSlope } from '../lib/text'
+import { formatSlope, plainNum } from '../lib/text'
 import { availabilityOf, cleanPlaceName, directionOf, splitEntries, summarize, variableRefFromEntry } from '../lib/findings'
 import { useL, type FKey } from '../lib/findingsCopy'
 import type { Route } from '../lib/route'
@@ -302,7 +302,7 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
         <p className="muted small">
           {e.slope_per_decade != null && formatSlope(e.slope_per_decade, e.units, view)}
           {e.p_adjusted != null && <> · {l('findings.adjP', { p: e.p_adjusted.toFixed(3) })}</>}
-          {e.mdt_per_decade != null && <> · MDT {e.mdt_per_decade.toFixed(dec)} {e.units.display}/decade</>}
+          {e.mdt_per_decade != null && <> · {l('findings.mdt', { mdt: plainNum(e.mdt_per_decade, dec), unit: e.units.display })}</>}
         </p>
       )}
     </li>

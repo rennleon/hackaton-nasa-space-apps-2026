@@ -1,5 +1,5 @@
 // Translation helper for the start screen: one key per sentence, with a Simple and a Scientific English default.
-import { tx, useT, getLang } from '../i18n'
+import { tx, useT, numberLocale } from '../i18n'
 import { useView } from '../context'
 
 type Vars = Record<string, string | number>
@@ -18,4 +18,4 @@ export function useStartT() {
   return { s, view, tx: (text: Parameters<typeof tx>[0]) => tx(text, view) }
 }
 
-export const numberLocale = () => (getLang() === 'es' ? 'es' : 'en')
+export { numberLocale }

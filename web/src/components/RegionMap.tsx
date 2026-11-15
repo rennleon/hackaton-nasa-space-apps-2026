@@ -4,6 +4,7 @@ import type { LatLngBoundsExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { RegionCard } from '../types/catalog'
 import { useView } from '../context'
+import { useT } from '../i18n'
 
 const toBounds = (r: RegionCard): [[number, number], [number, number]] => {
   const [w, s, e, n] = r.geometry.bbox
@@ -48,13 +49,14 @@ interface Props {
 /** Leaflet map with each region drawn as a rectangle. Region lists next to it give the keyboard route. */
 export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending, autoFit }: Props) {
   const { t } = useView()
+  const tt = useT()
   const shown = visibleIds ? regions.filter((r) => visibleIds.includes(r.id)) : regions
   const fitSet = selectedId ? shown.filter((r) => r.id === selectedId) : shown
   const all = (fitSet.length ? fitSet : shown).flatMap(toBounds)
   const bounds: LatLngBoundsExpression = all.length ? all : [[-60, -180], [80, 180]]
   return (
     <div className={className ?? 'map'}>
-      <MapContainer bounds={bounds} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }} aria-label="Map of regions">
+      <MapContainer bounds={bounds} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }} aria-label={tt('map.aria', 'Map of regions')}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Fit bounds={bounds} enabled={autoFit !== false} />
         {onMapClick && <Clicks onClick={onMapClick} />}

@@ -6,6 +6,7 @@ const KEY = 'td.lang'
 let lang: Lang = (() => {
   try { return localStorage.getItem(KEY) === 'es' ? 'es' : 'en' } catch { return 'en' }
 })()
+if (typeof document !== 'undefined') document.documentElement.lang = lang
 const subs = new Set<() => void>()
 
 export function getLang(): Lang { return lang }
@@ -23,6 +24,8 @@ export function t(key: string, en: string, vars?: Record<string, string | number
   const s = (lang === 'es' && es[key]) || en
   return vars ? s.replace(/\{(\w+)\}/g, (_, k: string) => String(vars[k] ?? '')) : s
 }
+/** Locale for numbers and dates. Peru's team: point as decimal mark, comma for thousands. */
+export const numberLocale = (): string => (lang === 'es' ? 'es-PE' : 'en')
 /** Call inside components so they re-render when the language changes. */
 export function useT(): typeof t { useLang(); return t }
 /** Backend Text objects: Spanish variants arrive later as optional simple_es / scientific_es. */

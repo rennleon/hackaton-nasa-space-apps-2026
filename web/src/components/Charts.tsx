@@ -4,6 +4,7 @@ import { anomalyChart, chartSummary, rawChart, yearlyChart, yearlyPoints } from 
 import { COPY } from '../lib/copy'
 import { useResultCopy } from '../lib/resultCopy'
 import { Term } from './Term'
+import { TermText } from './TermText'
 import './VariableView.css'
 
 const PlotlyChart = lazy(() => import('./Plot'))
@@ -67,15 +68,14 @@ function FullCharts({ result }: { result: AnalysisResult }) {
               : s('result.chart.rawTitleSci', '', '1. Monthly values')}
           </h3>
           <p className="muted">
-            {simple ? (
-              <>
-                {s('result.chart.rawCaptionA', 'Notice the up-and-down wave: those are the')} <Term id="seasonal_cycle" />. {s('result.chart.rawCaptionB', 'Grey dots were left out of the answer.')}
-              </>
-            ) : (
-              <>
-                {s('result.chart.rawCaptionSciA', '', 'Raw monthly series; grey = outside the analysis window; shaded = excluded')} <Term id="orbit_drift" /> {s('result.chart.rawCaptionSciB', '', 'period.')}
-              </>
-            )}
+            <TermText
+              text={s(
+                'result.chart.rawCaption',
+                'Notice the up-and-down wave: that is the {seasonal_cycle}. Grey dots were left out of the answer.',
+                'Raw monthly series; grey = outside the analysis window; shaded = excluded {orbit_drift} period.',
+              )}
+              terms={{ seasonal_cycle: <Term id="seasonal_cycle" />, orbit_drift: <Term id="orbit_drift" /> }}
+            />
           </p>
         </figcaption>
         <Suspense fallback={loading}>
@@ -86,18 +86,19 @@ function FullCharts({ result }: { result: AnalysisResult }) {
         <figcaption>
           <h3>{simple ? s('result.chart.anomTitle', '2. After taking the seasons away') : s('result.chart.anomTitleSci', '', '2. Anomalies and trend')}</h3>
           <p className="muted">
-            {simple ? (
-              <>
-                {s('result.chart.anomCaptionA', "Now we only look at each month's")} <Term id="anomaly" />. {s('result.chart.anomCaptionB', 'The orange line is the')} <Term id="trend" />;{' '}
-                {s('result.chart.anomCaptionC', 'the shade is the')} <Term id="confidence_range" />.
-              </>
-            ) : (
-              <>
-                <Term id="anomaly" /> {s('result.chart.anomCaptionSciA', '', 'series (')}
-                <Term id="seasonal_cycle" /> {s('result.chart.anomCaptionSciB', '', 'removed) with the')} <Term id="trend" /> {s('result.chart.anomCaptionSciC', '', 'and the')}{' '}
-                <Term id="confidence_range" />.
-              </>
-            )}
+            <TermText
+              text={s(
+                'result.chart.anomCaption',
+                "Now we only look at each month's {anomaly}. The orange line is the {trend}; the shade is the {confidence_range}.",
+                '{anomaly} series ({seasonal_cycle} removed) with the {trend} and the {confidence_range}.',
+              )}
+              terms={{
+                anomaly: <Term id="anomaly" />,
+                seasonal_cycle: <Term id="seasonal_cycle" />,
+                trend: <Term id="trend" />,
+                confidence_range: <Term id="confidence_range" />,
+              }}
+            />
           </p>
         </figcaption>
         <Suspense fallback={loading}>
