@@ -163,6 +163,9 @@ Feature freeze: **16:00 Peru, Sun Nov 15**. After that, only R5 fixes, deploy an
 | U7 | Loading / empty / error states for live fetches | R2 | ⬜ |
 | U8 | Demo: narration matches screen, spotlight, ends on a real result (#3, #4) | R5 | ⬜ |
 | U9 | Visual refresh (contrast AA, fewer borders, self-hosted fonts); 390 px check | R5 | ⬜ if time |
+| L0 | Every UI string through `web/src/i18n` (`t()`, `tx()` for backend Text) in U1–U7 | R5 | 🟡 in the UI agents |
+| L1 | Spanish for backend text: optional `simple_es` / `scientific_es` on `Text`; Spanish in catalog YAML (names, definitions, glossary, themes, instruments, regions) and engine sentence templates (verdict, selection, gates, contrast, place) | R5 | ⬜ after Track 1 merge |
+| L2 | Spanish UI: fill `web/src/i18n/es.ts`, EN/ES toggle in the header (English default, remembered per browser), Spanish dates/numbers, R5 kid rules applied in Spanish | R5 | ⬜ after Track 2 merge |
 
 ### Track 3: people (sources, no code)
 | ID | Task | Serves | Status |
@@ -188,4 +191,8 @@ Feature freeze: **16:00 Peru, Sun Nov 15**. After that, only R5 fixes, deploy an
 |---|---|---|
 | Nov 15 00:08 | Giovanni quota + AIRS point (Cajamarca −6.5, −78.5) | ✅ HTTP 200, 3.1 s, 232 months, snapped cell in header |
 | Nov 15 00:09 | GPM, GLDAS (land + ocean), OMI NO2 (Lima), MERRA-2 M2IMNXASM T2M | ✅ all 2.4 to 3.4 s. GLDAS over ocean returns fill value (works as an availability signal) |
+| Nov 15 01:20 | NASA POWER parameter catalog | ✅ POWER serves MERRA-2 aerosol optical depth monthly (`AOD_55`) and GPM IMERG rainfall (`IMERG_PRECTOT`) |
+| Nov 15 01:40 | Giovanni hourly MERRA-2 aerosol (`M2T1NXAER_5_12_4_SO4SMASS`) at a point | ✅ 1 year in 3.6 s, 10 years (87 664 rows) in 5.4 s → sulfate and organic carbon can be live (hourly → monthly) |
+| Nov 15 01:45 | MODIS aerosol, MOPITT CO | ⛔ no live route (not in Giovanni cloud list, not in POWER) → manual export, see `docs/offline-downloads.md` |
+| Nov 15 01:15 | v2 base commit `eaf5da3` (contract, instruments catalog); 9 agents launched in parallel worktrees | 🟡 running |
 | Nov 15 00:10 | Audit of `web/public/data/results` | ⚠️ All 15 Giovanni-based results for Cajamarca highlands and Wisconsin are "No series loaded". `data/raw/` holds only 2 CSVs (cajamarca_west humidity). Only the 3 POWER variables work today |
