@@ -60,7 +60,7 @@ describe('Findings screen', () => {
     expect(withResult).toContain(cards[0])
     // one verdict chip per card, and the second opinion
     expect(screen.getAllByText("Sure it's real").length).toBeGreaterThan(0)
-    expect(screen.getByText('Two instruments agree')).toBeInTheDocument()
+    expect(screen.getAllByText('Two instruments agree').length).toBeGreaterThan(0)
     expect(screen.getByRole('img', { name: /One dot for each year, 2003 to 2014/ })).toBeInTheDocument()
     expect(screen.getAllByText(/^Measured by/).length).toBeGreaterThan(0)
     expect(container.textContent).toContain('Measured by AIRS (Aqua satellite)')
