@@ -1,0 +1,15 @@
+.sources h1 { margin-bottom: 0.4rem; }
+.src-grid { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.src-card { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; border-radius: 12px; }
+.src-card.src-model { border-style: dashed; }
+.src-head { display: flex; justify-content: space-between; align-items: start; gap: 0.5rem; }
+.src-head h2 { margin: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
+.src-kind { flex: none; font-size: 0.78rem; border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; color: var(--muted); }
+.src-meta, .src-live { margin: 0; }
+.src-live-offline { color: var(--v-maybe); font-weight: 600; }
+.src-live-giovanni, .src-live-power { color: var(--v-sure); font-weight: 600; }
+.src-card dl { margin: 0.4rem 0; display: grid; gap: 2px; }
+.src-card dt { font-weight: 700; font-size: 0.85rem; margin-top: 0.4rem; }
+.src-card dd { margin: 0; overflow-wrap: anywhere; }
+.src-vars { margin: 0; padding-left: 1.1rem; }
+@media (max-width: 720px) { .src-grid { grid-template-columns: 1fr; } }

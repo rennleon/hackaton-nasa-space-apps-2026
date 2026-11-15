@@ -72,7 +72,8 @@ describe('Shortlist, Simple', () => {
   it('shows definition, why line, compact meter and the common window', async () => {
     const { container } = open('#/shortlist?region=cajamarca_west&theme=water')
     expect(await screen.findByText('We compare every measurement over the same years: 2002 to 2021.')).toBeInTheDocument()
-    expect(screen.getAllByText(/Worth a closer look/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Recommended').length).toBeGreaterThan(0)
+    expect(container.textContent).not.toMatch(/test box|stage 1|Worth a closer look|Not a good fit/)
     expect(container.textContent).not.toMatch(/AIRS3STM|p = /)
   })
 })

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient, defaultApiUrl } from './data'
 import type { DataClient } from './data/client'
-import { DataProvider, GlossaryProvider, ViewProvider } from './context'
+import { DataProvider, GlossaryProvider, ViewProvider, useView } from './context'
+import { useL } from './lib/findingsCopy'
+import { Sources } from './screens/Sources'
+import './App.css'
 import { parseHash, toHash, type Route } from './lib/route'
 import { useAsync } from './lib/useAsync'
 import { demoById } from './lib/demos'
@@ -48,7 +51,7 @@ export default function App({ client: injected }: { client?: DataClient }) {
         <button type="button" className="brand" onClick={() => go({ screen: 'home' })}>
           <span aria-hidden="true">🌍</span> Earth System Trend Detective
         </button>
-        <ViewToggle />
+        <TopNav />
       </header>
       <main id="main">
         {cat.loading && <p className="page">Loading…</p>}
@@ -76,10 +79,30 @@ export default function App({ client: injected }: { client?: DataClient }) {
           </GlossaryProvider>
         )}
       </main>
-      <footer className="footer">
-        Map data &copy; OpenStreetMap contributors. Data: NASA satellite and model products via NASA Giovanni (GES DISC); results computed by our analysis engine. · v{__APP_VERSION__}
-      </footer>
+      <Footer />
     </ViewProvider>
+  )
+}
+
+function TopNav() {
+  const l = useL()
+  return (
+    <nav className="topnav">
+      <a href="#/sources">{l('sources.link')}</a>
+      <ViewToggle />
+    </nav>
+  )
+}
+
+function Footer() {
+  const { view } = useView()
+  const l = useL()
+  return (
+    <footer className="footer">
+      {l('common.footer')} ·{' '}
+      <a href="#/sources">{l('sources.link')}</a>
+      {view === 'scientific' && <> · v{__APP_VERSION__}</>}
+    </footer>
   )
 }
 
@@ -93,6 +116,8 @@ function Screen({ route, go }: { route: Route; go: (r: Route) => void }) {
       return <Shortlist route={route} go={goKeep} />
     case 'variable':
       return <VariableView route={route} go={goKeep} />
+    case 'sources':
+      return <Sources />
     default:
       return <Home go={go} />
   }

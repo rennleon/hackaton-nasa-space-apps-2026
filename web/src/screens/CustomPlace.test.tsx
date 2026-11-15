@@ -43,7 +43,7 @@ describe('custom place', () => {
   it('says so kindly when the live API is unreachable', async () => {
     const down = { ...base, customScan: async () => { throw new LiveDataUnavailable() } }
     open('#/shortlist?place=pt:-7.16,-78.51&theme=water', down)
-    expect(await screen.findByText(/We can't reach NASA's live data right now/)).toBeInTheDocument()
+    expect(await screen.findByText("We couldn't reach NASA right now. Try again.")).toBeInTheDocument()
   })
 
   it('chooser: typing a too-big box is refused, a good box goes to the theme picker', async () => {
