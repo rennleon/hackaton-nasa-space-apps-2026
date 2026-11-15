@@ -75,7 +75,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
         <h1 id="res-h">{placeName}</h1>
         {parentTheme && theme && (
           <p className="muted small findings-crumb">
-            {tx(parentTheme.name, view)} › {tx(theme.name, view)}
+            {tx(parentTheme.name, view)} <span aria-hidden="true">›</span> {tx(theme.name, view)}
           </p>
         )}
         {theme && <p className="findings-q">{tx(theme.question, view)}</p>}
@@ -90,6 +90,11 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
         {data && (
           <>
             {years && <p className="muted small">{l('findings.commonWindow', { start: years.start, end: years.end })}</p>}
+            {parentTheme && (
+              <p className="muted small">
+                {l('findings.subtopicNote', { parent: view === 'simple' ? tx(parentTheme.name, view).toLowerCase() : tx(parentTheme.name, view), n: summary.total })}
+              </p>
+            )}
             {available.length > 0 ? (
               <>
                 <Summary summary={summary} scan={data} />

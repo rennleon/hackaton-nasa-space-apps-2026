@@ -80,15 +80,22 @@ def dump(path: Path, obj) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
-def dump_shared_windows(ctx, out: Path, dir_id: str, region, theme_id: str, sc) -> None:
+def dump_shared_windows(ctx, out: Path, dir_id: str, region, sc, written: set[Path]) -> None:
     """Each scanned variable at the scan's shared window, exactly as the scan ran it, so a shortlist card opens
-    on its own numbers offline: `results/<dir>/<var>__win_<start>_<end>.json` (read by web StaticClient)."""
+    on its own numbers offline: `results/<dir>/<var>__win_<start>_<end>.json` (read by web StaticClient).
+
+    Several themes can share one window, so the file is theme-neutral (theme_id=None, like the API with no theme)
+    and is written once per run: a Heat window file must not say "warm nights question"."""
     if not (sc.common_window and sc.window_start and sc.window_end):
         return
     for e in sc.entries:
+        path = out / "results" / dir_id / f"{e.variable_id}__win_{sc.window_start}_{sc.window_end}.json"
+        if path in written:
+            continue
         res = analyze_region(ctx, region, e.variable_id, start=sc.window_start, end=sc.window_end,
-                             theme_id=theme_id, window_reason="common")
-        dump(out / "results" / dir_id / f"{e.variable_id}__win_{sc.window_start}_{sc.window_end}.json", res)
+                             theme_id=None, window_reason="common")
+        dump(path, res)
+        written.add(path)
 
 
 def main() -> None:
@@ -98,6 +105,7 @@ def main() -> None:
     ctx = EngineContext.from_repo()
     cat = ctx.catalog
     out: Path = args.out
+    written: set[Path] = set()  # shared-window files already written in this run
 
     dump(out / "catalog" / "regions.json", [r.model_dump(mode="json") for r in cat.regions.values()])
     dump(out / "catalog" / "themes.json", [t.model_dump(mode="json") for t in cat.themes.values()])
@@ -120,7 +128,7 @@ def main() -> None:
         for theme in cat.themes.values():
             sc = scan(ctx, region.id, theme.id, cache)
             dump(out / "results" / region.id / f"scan_{theme.id}.json", sc)
-            dump_shared_windows(ctx, out, region.id, region, theme.id, sc)
+            dump_shared_windows(ctx, out, region.id, region, sc, written)
 
     # Example places: the same results as a pre-loaded region, plus one "where else?" file per listed variable.
     listed = [v for v in cat.variables.values() if v.listed]
@@ -137,7 +145,7 @@ def main() -> None:
         for theme in cat.themes.values():
             sc = scan_region(ctx, region, theme.id)
             dump(out / "results" / region.id / f"scan_{theme.id}.json", sc)
-            dump_shared_windows(ctx, out, region.id, region, theme.id, sc)
+            dump_shared_windows(ctx, out, region.id, region, sc, written)
     generated = date.today().isoformat()
     for var in listed:
         dump(out / "where" / f"{var.id}.json",

@@ -193,6 +193,13 @@ describe('Findings screen', () => {
     if (unavailable.length > 0) expect(screen.getByText(`Not available for this place (${unavailable.length})`)).toBeInTheDocument()
   })
 
+  it('a sub-topic list says it uses its own years, and the crumb hides the arrow from screen readers', async () => {
+    const { container } = open('#/shortlist?region=wisconsin&theme=rain')
+    expect(await screen.findByText('This list uses its own years. So a card may read differently in the water list.')).toBeInTheDocument()
+    expect(bannedIn('This list uses its own years. So a card may read differently in the water list.')).toEqual([])
+    expect(container.querySelector('.findings-crumb span[aria-hidden="true"]')?.textContent).toBe('›')
+  })
+
   it('the card follows the corrected shortlist label, not the single-variable verdict, and shows its years', async () => {
     const s = v2Scan()
     const target = s.entries.find((e) => e.variable_id === 'airs_rh_surf_day')!

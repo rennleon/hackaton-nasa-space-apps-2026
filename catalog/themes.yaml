@@ -31,18 +31,18 @@
   parent: heat
   name: { simple: Hot afternoons, scientific: Daytime temperature, simple_es: "Tardes calurosas", scientific_es: "Temperatura diurna" }
   question:
-    simple: Are afternoons getting hotter here?
-    scientific: Is daytime (about 13:30 local overpass) near-surface air temperature trending in this region?
-    simple_es: "¿Aquí las tardes se están poniendo más calurosas?"
-    scientific_es: "¿Tiene tendencia la temperatura del aire cerca de la superficie de día (paso local cerca de las 13:30) en esta región?"
+    simple: Are afternoons getting hotter or cooler here?
+    scientific: Is daytime (about 13:30 local overpass) near-surface air temperature trending in this region? The NASA POWER cross-check is a whole-day (24-hour) mean.
+    simple_es: "¿Aquí las tardes se están poniendo más calurosas o más frescas?"
+    scientific_es: "¿Tiene tendencia la temperatura del aire cerca de la superficie de día (paso local cerca de las 13:30) en esta región? El contraste con NASA POWER es una media de todo el día (24 horas)."
 - id: warm_nights
   parent: heat
   name: { simple: Warm nights, scientific: Night-time temperature, simple_es: "Noches cálidas", scientific_es: "Temperatura nocturna" }
   question:
-    simple: Are nights getting warmer here?
-    scientific: Is night-time (about 01:30 local overpass) near-surface air temperature trending in this region?
-    simple_es: "¿Aquí las noches se están poniendo más cálidas?"
-    scientific_es: "¿Tiene tendencia la temperatura del aire cerca de la superficie de noche (paso local cerca de la 01:30) en esta región?"
+    simple: Are nights getting warmer or cooler here?
+    scientific: Is night-time (about 01:30 local overpass) near-surface air temperature trending in this region? The NASA POWER cross-check is a whole-day (24-hour) mean.
+    simple_es: "¿Aquí las noches se están poniendo más cálidas o más frescas?"
+    scientific_es: "¿Tiene tendencia la temperatura del aire cerca de la superficie de noche (paso local cerca de la 01:30) en esta región? El contraste con NASA POWER es una media de todo el día (24 horas)."
 - id: rain
   parent: water
   name: { simple: Rain, scientific: Precipitation, simple_es: "Lluvia", scientific_es: "Precipitación" }
@@ -71,15 +71,15 @@
   parent: air
   name: { simple: Smoke and haze, scientific: Aerosols and organic carbon, simple_es: "Humo y bruma", scientific_es: "Aerosoles y carbono orgánico" }
   question:
-    simple: Is there more smoke and haze in the air here?
+    simple: Is there more or less smoke and haze here?
     scientific: Are aerosol optical depth and organic carbon trending in this region?
-    simple_es: "¿Aquí hay más humo y bruma en el aire?"
+    simple_es: "¿Aquí hay más o menos humo y bruma?"
     scientific_es: "¿Tienen tendencia la profundidad óptica de aerosoles y el carbono orgánico en esta región?"
 - id: burning_fuel
   parent: air
-  name: { simple: Burning fuel, scientific: "Combustion pollutants (NO₂, sulfate)", simple_es: "Combustibles quemados", scientific_es: "Contaminantes de combustión (NO₂, sulfato)" }
+  name: { simple: Burning fuel, scientific: "Mostly combustion-related pollutants (NO₂, sulfate)", simple_es: "Combustibles quemados", scientific_es: "Contaminantes sobre todo de combustión (NO₂, sulfato)" }
   question:
-    simple: Is there more pollution from burning fuel here?
-    scientific: Are NO₂ and sulfate trending in this region?
-    simple_es: "¿Aquí hay más contaminación por quemar combustibles?"
-    scientific_es: "¿Tienen tendencia el NO₂ y el sulfato en esta región?"
+    simple: Is there more or less pollution here, mostly from burning fuel?
+    scientific: Are NO₂ and sulfate, which come mostly from combustion, trending in this region?
+    simple_es: "¿Aquí hay más o menos contaminación, sobre todo de quemar combustibles?"
+    scientific_es: "¿Tienen tendencia el NO₂ y el sulfato, que provienen sobre todo de la combustión, en esta región?"

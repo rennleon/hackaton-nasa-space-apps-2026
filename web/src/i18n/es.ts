@@ -226,6 +226,8 @@ const es: Record<string, string> = {
   'findings.seasonHint.scientific': 'Las variables que no declaran esta temporada se abren con todos los meses.',
   'findings.commonWindow.simple': 'Comparamos todas las medidas en los mismos años: de {start} a {end}.',
   'findings.commonWindow.scientific': 'Ventana común de {start} a {end} para todas las variables (comparación justa entre registros de distinta longitud).',
+  'findings.subtopicNote.simple': 'Esta lista usa sus propios años. Una tarjeta puede decir otra cosa en la lista de {parent}.',
+  'findings.subtopicNote.scientific': 'Escaneo del subtema: ventana común propia y familia de Benjamini–Hochberg propia ({n} variables), así que las etiquetas pueden diferir del escaneo de {parent}.',
   'findings.scanNote.simple': 'Medidas que pueden responder esta pregunta.',
   'findings.scanNote.scientific': 'Escaneo de {n} variables, α = {alpha}, ajustado por Benjamini–Hochberg (control de falsos descubrimientos).',
   'findings.summary.some.simple': '{clear} de {total} medidas muestran un cambio claro.',

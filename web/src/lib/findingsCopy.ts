@@ -34,6 +34,11 @@ export const FC = {
     'We compare every measurement over the same years: {start} to {end}.',
     'Common window {start} to {end} for all variables (fair comparison across record lengths).',
   ),
+  // sub-topic lists only: static, never depends on the results
+  'findings.subtopicNote': p(
+    'This list uses its own years. So a card may read differently in the {parent} list.',
+    'Sub-topic scan: own shared window and Benjamini–Hochberg family ({n} variables), so labels can differ from the {parent} scan.',
+  ),
   'findings.scanNote': p('Measurements that could answer this question.', 'Scan of {n} variables, α = {alpha}, Benjamini–Hochberg adjusted (false discovery control).'),
   // summary banner
   'findings.summary.some': p('{clear} of {total} measurements show a clear change.', '{clear} of {total} variables significant (both tests agree, α = {alpha}).'),
