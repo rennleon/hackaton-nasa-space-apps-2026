@@ -38,7 +38,7 @@
   since: 2004
   measures:
     simple: How hazy the air is, and how much of some polluting gases it holds.
-    scientific: Aerosol optical depth (OMAERUV), tropospheric NO₂ (OMNO2d), SO₂, ozone; daily Level-3 0.25° grids.
+    scientific: Aerosol optical depth (OMAERUV), tropospheric NO₂ (OMNO2d), SO₂, ozone; daily Level-3 grids (OMNO2d 0.25°, OMAERUVd 1°).
   how:
     simple: It looks at sunlight bouncing back from the air and sees what the air holds.
     scientific: UV-visible imaging spectrometer measuring backscattered solar radiance.

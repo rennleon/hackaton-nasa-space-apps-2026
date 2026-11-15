@@ -33,7 +33,7 @@
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
         scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
-  cross_check: null
+  cross_check: power_rh2m
   words: { subject: "afternoons", verb: are, up: "getting more humid", down: "getting less humid" }
   kid_units: { scale: 1, label: "on the humidity scale (0 to 100)" }
   themes: { water: response }
@@ -55,7 +55,7 @@
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
         scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
-  cross_check: null
+  cross_check: power_rh2m
   words: { subject: "nights", verb: are, up: "getting more humid", down: "getting less humid" }
   kid_units: { scale: 1, label: "on the humidity scale (0 to 100)" }
   themes: { water: response }
@@ -77,12 +77,12 @@
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
         scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
-  cross_check: merra2_t2m
+  cross_check: power_t2m
   words: { subject: "afternoons", verb: are, up: "getting warmer", down: "getting cooler" }
   kid_units: { scale: 1, label: "degrees" }
   reference_trend_per_decade: 0.2
   reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
-  themes: { heat: cross_check, water: driver }
+  themes: { heat: cross_check }
 
 - id: airs_t_surf_night
   giovanni_id: AIRS3STM_7_0_SurfAirTemp_D
@@ -101,14 +101,16 @@
       note:
         simple: After 2021 the satellite flew over later in the day. We leave those years out.
         scientific: Aqua ceased orbit maintenance in Jan 2022; the drifting overpass time biases the diurnal sampling.
-  cross_check: merra2_t2m
+  cross_check: power_t2m
   words: { subject: "nights", verb: are, up: "getting warmer", down: "getting cooler" }
   kid_units: { scale: 1, label: "degrees" }
   reference_trend_per_decade: 0.2
   reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
-  themes: { heat: cross_check, water: driver }
+  themes: { heat: cross_check }
 
 - id: merra2_t2m
+  # Duplicate of power_t2m (same MERRA-2 model). Kept so old links and results still load.
+  listed: false
   giovanni_id: M2TMNXSLV_5_12_4_T2M
   name: { simple: Air temperature (computer model), scientific: 2-m air temperature (MERRA-2 reanalysis) }
   definition:
@@ -135,15 +137,18 @@
   source: { instrument: GPM IMERG, platform: GPM, type: observed, instrument_id: gpm_imerg }
   units: { native: mm/hr, display: mm/day, simple: mm of rain per day, scale: 24.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.1
+  # units checked: GPM_3IMERGM_07_precipitation is mm/hr (tracker log); display mm/day = x 24
   record_start: 1998-01
   floor: 0.0
   artifacts: []
-  cross_check: merra2_precip
+  cross_check: power_precip
   words: { subject: "it", verb: is, up: "getting wetter", down: "getting drier" }
   kid_units: { scale: 1, label: "mm of rain a day" }
   themes: { water: target }
 
 - id: merra2_precip
+  # Duplicate of power_precip (same MERRA-2 model). Kept so old links and results still load.
+  listed: false
   giovanni_id: M2TMNXFLX_5_12_4_PRECTOTCORR
   name: { simple: Rainfall (computer model), scientific: Bias-corrected total precipitation (MERRA-2) }
   definition:
@@ -169,6 +174,7 @@
   source: { instrument: GLDAS, platform: null, type: model, instrument_id: gldas }
   units: { native: kg m-2, display: kg/m², simple: mm of water in the topsoil, scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.25
+  domain: land
   record_start: 2000-01
   artifacts:
     - kind: input_change
@@ -201,6 +207,7 @@
   source: { instrument: GLDAS, platform: null, type: model, instrument_id: gldas }
   units: { native: kg m-2 s-1, display: mm/day, simple: mm of water per day, scale: 86400.0, offset: 0.0, decimals: 3 }
   grid_deg: 0.25
+  domain: land
   record_start: 2000-01
   artifacts:
     - kind: input_change
@@ -225,6 +232,8 @@
   themes: { water: response }
 
 - id: modis_aqua_aod
+  # offline only: needs a Giovanni web export into data/raw/<region>/
+  listed: false
   giovanni_id: MYD08_M3_6_1_AOD_550_Dark_Target_Deep_Blue_Combined_Mean_Mean
   name: { simple: Haze in the air (Aqua satellite), scientific: Aerosol optical depth at 550 nm (MODIS-Aqua) }
   definition:
@@ -247,6 +256,8 @@
   themes: { air: target }
 
 - id: modis_terra_aod
+  # offline only: needs a Giovanni web export into data/raw/<region>/
+  listed: false
   giovanni_id: MOD08_M3_6_1_AOD_550_Dark_Target_Deep_Blue_Combined_Mean_Mean
   name: { simple: Haze in the air (Terra satellite), scientific: Aerosol optical depth at 550 nm (MODIS-Terra) }
   definition:
@@ -269,6 +280,8 @@
   themes: { air: cross_check }
 
 - id: merra2_aod
+  # Replaced by power_aod (same MERRA-2 AOD, served live by NASA POWER). Kept so old links load.
+  listed: false
   giovanni_id: M2TMNXAER_5_12_4_TOTEXTTAU
   name: { simple: Haze in the air (computer model), scientific: Total aerosol extinction AOD at 550 nm (MERRA-2) }
   definition:
@@ -285,13 +298,16 @@
   themes: { air: cross_check }
 
 - id: merra2_sulfate
-  giovanni_id: M2TMNXAER_5_12_4_SO4SMASS
+  giovanni_id: M2T1NXAER_5_12_4_SO4SMASS
   name: { simple: Pollution particles from burning coal and oil (computer model), scientific: Surface sulfate mass concentration (MERRA-2) }
   definition:
     simple: Tiny particles made mostly by power plants and industry, worked out by a computer model.
     scientific: MERRA-2 monthly surface SO₄ mass concentration.
   source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: kg m-3, display: µg/m³, simple: micrograms per cubic metre, scale: 1.0e9, offset: 0.0, decimals: 2 }
+  # hourly product (M2T1NXAER); monthly mean of hourly values; month valid with >= 90% of hours
+  # (declared before results). Units kg m-3 per MERRA-2 file spec (not checked via the API).
+  cadence: hourly
   grid_deg: 0.5
   record_start: 1980-01
   artifacts: []
@@ -301,13 +317,16 @@
   themes: { air: driver }
 
 - id: merra2_oc
-  giovanni_id: M2TMNXAER_5_12_4_OCSMASS
+  giovanni_id: M2T1NXAER_5_12_4_OCSMASS
   name: { simple: Smoke particles (computer model), scientific: Surface organic carbon mass concentration (MERRA-2) }
   definition:
     simple: Tiny particles that come mostly from fires and smoke, worked out by a computer model.
     scientific: MERRA-2 monthly surface organic carbon mass concentration.
   source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: kg m-3, display: µg/m³, simple: micrograms per cubic metre, scale: 1.0e9, offset: 0.0, decimals: 2 }
+  # hourly product (M2T1NXAER); monthly mean of hourly values; month valid with >= 90% of hours
+  # (declared before results). Units kg m-3 per MERRA-2 file spec (not checked via the API).
+  cadence: hourly
   grid_deg: 0.5
   record_start: 1980-01
   artifacts: []
@@ -317,6 +336,8 @@
   themes: { air: driver }
 
 - id: mopitt_co
+  # offline only: needs a Giovanni web export into data/raw/<region>/
+  listed: false
   giovanni_id: MOP03JM_10_RetrievedCOTotalColumnDay
   name: { simple: Smoke gas (carbon monoxide), scientific: "CO total column, daytime (MOPITT)" }
   definition:
@@ -332,6 +353,48 @@
   kid_units: { scale: 1, label: "smoke-gas units" }
   themes: { air: cross_check }
 
+# --- OMI on Aura (Giovanni cloud, DAILY grids; Air theme) ---
+# Daily values are averaged to months by the source. A month counts only with at least
+# `min_valid_days` valid days: 10 is declared here BEFORE any result is seen.
+# TODO cite: OMI "row anomaly" (from 2007) reduces valid pixels; no artifact note until a source is cited.
+- id: omi_aod
+  giovanni_id: OMAERUVd_003_FinalAerosolOpticalDepth500
+  name: { simple: Haze in the air (OMI satellite), scientific: Aerosol optical depth at 500 nm (OMI OMAERUV) }
+  definition:
+    simple: How much dust, smoke and pollution blocks sunlight. 0 is perfectly clear; 1 is very hazy.
+    scientific: OMI/Aura near-UV aerosol optical depth at 500 nm (OMAERUVd V003), daily 1° grid, averaged to months.
+  source: { instrument: OMI, platform: Aura, type: observed, instrument_id: omi }
+  units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3 }
+  cadence: daily
+  min_valid_days: 10  # declared before results
+  grid_deg: 1.0  # OMAERUVd is 1.0 x 1.0 degree (CMR collection title); the brief said 0.25, that is OMNO2d
+  record_start: 2004-10  # CMR collection start 2004-10-01
+  artifacts: []
+  cross_check: power_aod
+  words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
+  kid_units: { scale: 100, label: "on a haze scale of 0 to 100" }
+  themes: { air: target }
+
+- id: omi_no2
+  giovanni_id: OMNO2d_003_ColumnAmountNO2TropCloudScreened
+  name: { simple: Pollution gas NO₂ (OMI satellite), scientific: "Tropospheric NO₂ column, cloud-screened (OMI OMNO2d)" }
+  definition:
+    simple: A gas made when engines and factories burn fuel. Satellites count how much of it floats above a place.
+    scientific: OMI/Aura tropospheric NO₂ vertical column, cloud-screened (OMNO2d V003), daily 0.25° grid, averaged to months.
+  source: { instrument: OMI, platform: Aura, type: observed, instrument_id: omi }
+  units: { native: molecules/cm², display: 10¹⁵ molecules/cm², simple: units of pollution gas, scale: 1.0e-15, offset: 0.0, decimals: 2 }
+  cadence: daily
+  min_valid_days: 10  # declared before results
+  grid_deg: 0.25
+  record_start: 2004-10  # CMR collection start 2004-10-01
+  floor: 0.0
+  artifacts: []
+  cross_check: null  # no second NO₂ source in the catalog
+  words: { subject: "the pollution gas NO₂", verb: is, up: "going up", down: "going down" }
+  # display is in 10^15 units; x10 gives whole numbers that can show a change (about 10 in a clean area, 50+ in a city)
+  kid_units: { scale: 10, label: "on a pollution-gas scale" }
+  themes: { air: target }
+
 # --- NASA POWER (live, any region up to 10° x 10°; MERRA-2-based; no login) ---
 - id: power_t2m
   giovanni_id: null
@@ -345,12 +408,12 @@
   grid_deg: 0.5
   record_start: 1981-01
   artifacts: []
-  cross_check: null
+  cross_check: airs_t_surf_day  # different instrument; compare direction only (snapshot vs daily mean)
   reference_trend_per_decade: 0.2
   reference_source: "≈0.2 °C per decade, global mean surface warming since the 1970s (NASA GISS)"
   words: { subject: "the air", verb: is, up: "getting warmer", down: "getting cooler" }
   kid_units: { scale: 1, label: "degrees" }
-  themes: { heat: cross_check }
+  themes: { heat: target }
 
 - id: power_precip
   giovanni_id: null
@@ -365,7 +428,7 @@
   record_start: 1981-01
   floor: 0.0
   artifacts: []
-  cross_check: null
+  cross_check: gpm_precip
   words: { subject: "it", verb: is, up: "getting wetter", down: "getting drier" }
   kid_units: { scale: 1, label: "mm of rain a day" }
   themes: { water: cross_check }
@@ -382,7 +445,25 @@
   grid_deg: 0.5
   record_start: 1981-01
   artifacts: []
-  cross_check: null
+  cross_check: airs_rh_surf_day
   words: { subject: "the air", verb: is, up: "getting more humid", down: "getting less humid" }
   kid_units: { scale: 1, label: "on the humidity scale (0 to 100)" }
   themes: { water: response }
+
+- id: power_aod
+  giovanni_id: null
+  power_param: AOD_55  # MERRA-2 aerosol optical depth at 550 nm, dimensionless (POWER parameter catalog)
+  name: { simple: "Haze in the air (live, computer model)", scientific: "Aerosol optical depth at 550 nm (NASA POWER, MERRA-2-based)" }
+  definition:
+    simple: How much dust, smoke and pollution blocks sunlight, from NASA's POWER service for any place you pick.
+    scientific: NASA POWER monthly AOD_55, area mean over the requested box; MERRA-2 aerosol optical depth (assimilates satellite AOD).
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2, delivered_by: NASA POWER }
+  units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3 }
+  grid_deg: 0.5
+  record_start: 2001-01  # verified: POWER monthly AOD_55 is fill (-999) through 2000, first valid month 2001-01 (two points, Nov 2026)
+  floor: 0.0
+  artifacts: []
+  cross_check: omi_aod
+  words: { subject: "the air", verb: is, up: "getting hazier", down: "getting clearer" }
+  kid_units: { scale: 100, label: "on a haze scale of 0 to 100" }
+  themes: { air: cross_check }

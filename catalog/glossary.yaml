@@ -127,3 +127,23 @@
   definition:
     simple: How far a place is east or west of a line through London.
     scientific: Angular distance east (+) or west (−) of the prime meridian, in degrees.
+- id: no2
+  term: { simple: NO₂ gas, scientific: nitrogen dioxide (NO₂) }
+  definition:
+    simple: A gas made when engines, power plants and factories burn fuel. A lot of it makes city air dirty.
+    scientific: Tropospheric NO₂ vertical column density (molecules/cm²), a marker of combustion emissions; short-lived, so it stays near its sources.
+- id: instrument
+  term: { simple: space camera, scientific: instrument }
+  definition:
+    simple: A tool on a satellite that measures one kind of thing, like heat, rain or haze.
+    scientific: A sensor on a satellite platform (e.g. AIRS on Aqua, OMI on Aura) that produces a data product.
+- id: second_opinion
+  term: { simple: second opinion, scientific: instrument cross-check }
+  definition:
+    simple: We ask a second, different source about the same thing. If both say the same, we trust it more.
+    scientific: The same quantity from an independent instrument or product over the shared years; direction is compared, not size.
+- id: clear_days
+  term: { simple: clear days, scientific: valid days per month }
+  definition:
+    simple: Some satellites only see well on days without clouds. A month counts only if it has enough clear days.
+    scientific: Daily products are averaged to months only when the month has at least the declared minimum number of valid days.
