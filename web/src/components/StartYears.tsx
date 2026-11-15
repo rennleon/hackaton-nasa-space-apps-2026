@@ -12,8 +12,8 @@ const M = { l: 66, r: 14, t: 14, b: 44 }
 const R = 5.5
 
 type Class = NonNullable<AnalysisResult['start_years']>['classification']
-const CLASS_ICON: Record<Class, IconName> = { holds: 'check', mostly: 'info', depends: 'caution' }
-const CLASS_TONE: Record<Class, string> = { holds: 'sy-holds', mostly: 'sy-mostly', depends: 'sy-depends' }
+const CLASS_ICON: Record<Class, IconName> = { holds: 'check', mostly: 'info', unclear: 'info', depends: 'caution' }
+const CLASS_TONE: Record<Class, string> = { holds: 'sy-holds', mostly: 'sy-mostly', unclear: 'sy-mostly', depends: 'sy-depends' }
 
 const yearOf = (p: StartYearPoint) => Number(p.start.slice(0, 4))
 
@@ -42,18 +42,24 @@ export function StartYears({ result }: { result: AnalysisResult }) {
   const unit = result.variable.units.display
   const dec = Math.max(result.variable.units.decimals, 1)
 
+  // Simple and Scientific say the same thing: the DIRECTION (sign) per start year. Only a start year that is sure in
+  // the opposite direction raises the alarm; signs flipping around a near-zero trend are noise ("unclear").
   const headline =
     cls === 'holds'
-      ? s('startyears.holds', 'We tried starting in other years. The answer stays the same.', 'Every start year keeps the sign of the declared-window trend.')
+      ? s('startyears.holds', 'We tried other start years. The change always points the same way.', 'Every start year keeps the sign of the declared-window trend.')
       : cls === 'mostly'
-        ? s('startyears.mostly', 'We tried starting in other years. The answer mostly stays the same.', 'Most start years keep the sign of the declared-window trend.')
-        : s('startyears.depends', 'The answer changes with the start year. Be careful.', 'The sign depends on the start year. Read the trend with caution.')
+        ? s('startyears.mostly', 'We tried other start years. The change mostly points the same way.', 'Most start years keep the sign of the declared-window trend; none is significant with the opposite sign.')
+        : cls === 'unclear'
+          ? s('startyears.unclear', 'Other start years point different ways. None of them is sure.', 'The sign varies with the start year, but no start year is significant with the opposite sign.')
+          : s('startyears.depends', 'Some start years surely point the other way. Be careful.', 'At least one start year is significant with the opposite sign. Read the trend with caution.')
   const classWord =
     cls === 'holds'
       ? s('startyears.cl.holds', '', 'holds (all start years share the sign)')
       : cls === 'mostly'
-        ? s('startyears.cl.mostly', '', 'mostly (at least 75% share the sign)')
-        : s('startyears.cl.depends', '', 'depends (fewer than 75% share the sign)')
+        ? s('startyears.cl.mostly', '', 'mostly (at least 75% share the sign, none significant opposite)')
+        : cls === 'unclear'
+          ? s('startyears.cl.unclear', '', 'unclear (signs vary, none significant opposite)')
+          : s('startyears.cl.depends', '', 'depends (a start year is significant with the opposite sign)')
 
   // y range: slopes (and their 95% ranges in the Scientific view); always contains zero
   const vals = pts.flatMap((p) => (simple ? [p.slope_per_decade] : [p.slope_per_decade, p.ci_low, p.ci_high]))

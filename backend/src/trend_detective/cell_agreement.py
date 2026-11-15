@@ -25,18 +25,21 @@ from .timeutil import calendar_month
 
 MIN_CELLS = 2
 
-# Project rule (declared before any result is seen): "agree" when at least 80% of the cells go the box's way
-# and no opposite cell is sure; "mixed" when any opposite cell is sure, or fewer than 60% go the box's way;
-# "mostly" otherwise.
+# Project rule: "mixed" (the alarm: parts may cancel out) needs an opposite cell that is SURE after BH-FDR;
+# when the box trend is near zero about half the cells point the other way by chance, which is noise.
+# Otherwise: at least 80% share the box's sign -> "agree"; at least 60% -> "mostly"; fewer -> "unclear"
+# (cells point different ways, none surely opposite).
 AGREE_SHARE = 0.8
 MIXED_SHARE = 0.6
 
 
 def classify(n_cells: int, n_same_sign: int, n_opposite_sure: int) -> str:
-    share = n_same_sign / n_cells
-    if n_opposite_sure >= 1 or share < MIXED_SHARE:
+    if n_opposite_sure >= 1:
         return "mixed"
-    return "agree" if share >= AGREE_SHARE else "mostly"
+    share = n_same_sign / n_cells
+    if share >= AGREE_SHARE:
+        return "agree"
+    return "mostly" if share >= MIXED_SHARE else "unclear"
 
 
 def _complete(p: Prepared, season: Season | None) -> bool:

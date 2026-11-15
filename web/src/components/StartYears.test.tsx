@@ -18,20 +18,23 @@ const panel = (classification: StartYearSensitivity['classification'], slopes: [
     points, n_starts: points.length, classification,
     n_same_sign: points.filter((p) => Math.sign(p.slope_per_decade) === 1).length,
     n_significant: points.filter((p) => p.significant).length,
+    n_opposite_sure: points.filter((p) => p.significant && Math.sign(p.slope_per_decade) === -1).length,
   }
 }
 const FIX: Record<StartYearSensitivity['classification'], StartYearSensitivity> = {
   holds: panel('holds', [[1.5, true], [1.4, true], [1.6, true], [1.2, false]]),
   mostly: panel('mostly', [[1.5, true], [1.4, true], [1.1, false], [-0.2, false]]),
+  unclear: panel('unclear', [[0.3, false], [0.1, false], [-0.2, false], [-0.4, false]]),
   depends: panel('depends', [[1.5, true], [0.4, false], [-0.9, false], [-1.2, true]]),
 }
 const withPanel = (c: keyof typeof FIX): AnalysisResult => ({ ...base, start_years: FIX[c] })
 
 describe('StartYears (Simple)', () => {
   it.each([
-    ['holds', 'We tried starting in other years. The answer stays the same.'],
-    ['mostly', 'We tried starting in other years. The answer mostly stays the same.'],
-    ['depends', 'The answer changes with the start year. Be careful.'],
+    ['holds', 'We tried other start years. The change always points the same way.'],
+    ['mostly', 'We tried other start years. The change mostly points the same way.'],
+    ['unclear', 'Other start years point different ways. None of them is sure.'],
+    ['depends', 'Some start years surely point the other way. Be careful.'],
   ] as const)('says one short sentence for "%s", with an icon', (c, sentence) => {
     const { container } = wrap(<StartYears result={withPanel(c)} />)
     expect(screen.getByRole('heading', { name: 'What if we start in another year?' })).toBeInTheDocument()
@@ -39,7 +42,7 @@ describe('StartYears (Simple)', () => {
     expect(container.querySelector('.sy-answer svg')).not.toBeNull()
   })
 
-  it.each(['holds', 'mostly', 'depends'] as const)('uses no banned words for "%s" and shows no numbers in the chart', (c) => {
+  it.each(['holds', 'mostly', 'unclear', 'depends'] as const)('uses no banned words for "%s" and shows no numbers in the chart', (c) => {
     const { container } = wrap(<StartYears result={withPanel(c)} />)
     expect(bannedIn(container.textContent ?? ''), container.textContent ?? '').toEqual([])
     // the chart axis in the Simple view is words, not numbers (no negatives, no decimals)

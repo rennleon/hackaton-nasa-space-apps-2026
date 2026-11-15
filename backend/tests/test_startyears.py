@@ -57,6 +57,14 @@ def test_sign_flips_with_start_year_depends():
     assert sy.n_same_sign < sy.n_starts * 0.75
 
 
+def test_noise_around_zero_is_unclear_not_an_alarm():
+    p = _prep(lambda t: np.zeros_like(t))  # seasonal cycle + white noise only, no trend
+    sy = start_year_sensitivity(p, _declared_slope(p))
+    assert sy is not None
+    assert sy.n_opposite_sure == 0
+    assert sy.classification in ("holds", "mostly", "unclear")
+
+
 def test_short_window_has_no_panel():
     # 15.5 years: only the declared start fits (2001-01 would leave 14.5 years)
     p = _prep(lambda t: 0.08 * (t - 2000), end="2015-06")
@@ -73,7 +81,8 @@ def test_partial_first_year_starts_in_the_next_january_and_keeps_end_month():
 def test_classify_thresholds():
     assert classify(10, 10) == "holds"
     assert classify(8, 10) == "mostly"
-    assert classify(7, 10) == "depends"
+    assert classify(7, 10) == "unclear"  # signs vary but none is sure: noise, not an alarm
+    assert classify(9, 10, 1) == "depends"  # a start year surely points the other way
 
 
 def _ctx(slope=0.8, end="2024-12"):

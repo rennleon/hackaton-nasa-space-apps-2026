@@ -95,7 +95,13 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     const vars = { n: x.n_cells, k: x.n_same_sign, m: x.n_opposite, sure: x.n_opposite_sure, sq: '{sq}' }
     const word = s('result.trust.cells.sq', 'map squares', 'grid cells')
     const verdictWord =
-      x.verdict === 'agree' ? s('result.trust.cells.vAgree', '', 'agree') : x.verdict === 'mostly' ? s('result.trust.cells.vMostly', '', 'mostly agree') : s('result.trust.cells.vMixed', '', 'mixed')
+      x.verdict === 'agree'
+        ? s('result.trust.cells.vAgree', '', 'agree')
+        : x.verdict === 'mostly'
+          ? s('result.trust.cells.vMostly', '', 'mostly agree')
+          : x.verdict === 'unclear'
+            ? s('result.trust.cells.vUnclear', '', 'unclear')
+            : s('result.trust.cells.vMixed', '', 'mixed')
     const text = !simple
       ? s('result.trust.cells.count', '', 'Cells with the box\'s sign of slope: {k} of {n}. Opposite: {m}, of which {sure} significant (Benjamini–Hochberg FDR, α = 0.05).', vars)
       : x.verdict === 'agree' && x.n_same_sign === x.n_cells
@@ -104,10 +110,12 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
           ? t('result.trust.cells.agree', 'We checked {n} {sq} in your box. {k} go the same way.', vars)
           : x.verdict === 'mostly'
             ? t('result.trust.cells.mostly', 'We checked {n} {sq} in your box. {k} go the same way. A few do not.', vars)
-            : t('result.trust.cells.mixed', 'We checked {n} {sq} in your box. Parts of your box go opposite ways. They may cancel out.', vars)
+            : x.verdict === 'unclear'
+              ? t('result.trust.cells.unclear', 'We checked {n} {sq} in your box. They point different ways. None of them is sure.', vars)
+              : t('result.trust.cells.mixed', 'We checked {n} {sq} in your box. Some surely go the other way. They may cancel out.', vars)
     return {
       key: 'cells',
-      status: x.verdict === 'agree' ? 'pass' : x.verdict === 'mixed' ? 'caution' : 'info',
+      status: x.verdict === 'agree' ? 'pass' : x.verdict === 'mixed' ? 'caution' : 'info', // unclear/mostly: information, not an alarm
       text: '',
       extra: (
         <>
@@ -115,7 +123,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
           {!simple && (
             <span className="muted small">
               {' '}
-              {s('result.trust.cells.rule', '', 'Result: {verdict}. Agree: at least 80% of cells share the box\'s sign and no opposite cell is sure. Mixed: an opposite cell is sure, or under 60% share it.', { verdict: verdictWord })}{' '}
+              {s('result.trust.cells.rule', '', 'Result: {verdict}. Mixed: an opposite cell is significant. Otherwise agree (at least 80% share the box\'s sign), mostly (60–80%) or unclear (under 60%).', { verdict: verdictWord })}{' '}
               <a href="https://doi.org/10.1175/BAMS-D-15-00267.1" target="_blank" rel="noreferrer">
                 {s('result.trust.cells.ref', '', 'Wilks (2016), Bull. Amer. Meteor. Soc. 97(12):2263–2273')}
               </a>

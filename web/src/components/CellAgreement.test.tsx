@@ -52,8 +52,16 @@ describe('TrustPanel: do the parts of the box agree?', () => {
   it('mixed: says the parts may cancel out, and is a caution', () => {
     const { container } = wrap(withCells({ n_cells: 8, n_same_sign: 4, n_opposite: 4, n_opposite_sure: 2, verdict: 'mixed' }))
     const g = group(container)!
-    expect(g.textContent).toContain('Parts of your box go opposite ways. They may cancel out.')
+    expect(g.textContent).toContain('Some surely go the other way. They may cancel out.')
     expect(g.querySelector('li')).toHaveClass('trust-caution')
+  })
+
+  it('unclear: cells point different ways but none is sure, so no alarm', () => {
+    const { container } = wrap(withCells({ n_cells: 21, n_same_sign: 9, n_opposite: 12, n_opposite_sure: 0, verdict: 'unclear' }))
+    const g = group(container)!
+    expect(g.textContent).toContain('They point different ways. None of them is sure.')
+    expect(g.textContent).not.toMatch(/cancel/)
+    expect(g.querySelector('li')).not.toHaveClass('trust-caution')
   })
 
   it('Simple copy: no banned words, whole numbers, at most 12 words per sentence', () => {
@@ -62,6 +70,7 @@ describe('TrustPanel: do the parts of the box agree?', () => {
       { n_cells: 12, n_same_sign: 11, n_opposite: 1, n_opposite_sure: 0, verdict: 'agree' },
       { n_cells: 10, n_same_sign: 7, n_opposite: 3, n_opposite_sure: 0, verdict: 'mostly' },
       { n_cells: 8, n_same_sign: 4, n_opposite: 4, n_opposite_sure: 2, verdict: 'mixed' },
+      { n_cells: 21, n_same_sign: 9, n_opposite: 12, n_opposite_sure: 0, verdict: 'unclear' },
     ] as CellAgreement[]) {
       const { container, unmount } = wrap(withCells(ca))
       const text = group(container)!.querySelector('li')!.textContent!.replace(/^[^:]*: /, '')

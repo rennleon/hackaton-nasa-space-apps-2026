@@ -303,7 +303,7 @@ export interface CellAgreement {
   n_same_sign: number;
   n_opposite: number;
   n_opposite_sure: number;
-  verdict: "agree" | "mostly" | "mixed";
+  verdict: "agree" | "mostly" | "unclear" | "mixed";
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -328,7 +328,8 @@ export interface StartYearSensitivity {
   n_starts: number;
   n_same_sign: number;
   n_significant: number;
-  classification: "holds" | "mostly" | "depends";
+  n_opposite_sure: number;
+  classification: "holds" | "mostly" | "unclear" | "depends";
 }
 /**
  * The same trend machinery re-run with the window starting in January of `start`'s year.

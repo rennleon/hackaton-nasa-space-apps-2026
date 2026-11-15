@@ -207,7 +207,8 @@ class StartYearSensitivity(Model):
     n_starts: int
     n_same_sign: int  # starts whose slope has the same sign as the declared window's slope
     n_significant: int
-    classification: Literal["holds", "mostly", "depends"]
+    n_opposite_sure: int = 0  # starts significant with the opposite sign (the only thing that makes it "depends")
+    classification: Literal["holds", "mostly", "unclear", "depends"]
 
 
 class CellAgreement(Model):
@@ -217,7 +218,7 @@ class CellAgreement(Model):
     n_same_sign: int  # cells whose own slope has the sign of the box slope
     n_opposite: int  # n_cells - n_same_sign
     n_opposite_sure: int  # opposite-sign cells that are significant after Benjamini-Hochberg FDR across the cells
-    verdict: Literal["agree", "mostly", "mixed"]
+    verdict: Literal["agree", "mostly", "unclear", "mixed"]
 
 
 class Robustness(Model):

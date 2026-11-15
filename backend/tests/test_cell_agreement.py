@@ -115,7 +115,7 @@ def test_scan_skips_the_check():
 
 
 @pytest.mark.parametrize("same,sure,verdict", [
-    (10, 0, "agree"), (8, 0, "agree"), (7, 0, "mostly"), (6, 0, "mostly"), (5, 0, "mixed"), (10, 1, "mixed"),
+    (10, 0, "agree"), (8, 0, "agree"), (7, 0, "mostly"), (6, 0, "mostly"), (5, 0, "unclear"), (10, 1, "mixed"),
 ])
 def test_classification_rule(same, sure, verdict):
     assert classify(10, same, sure) == verdict

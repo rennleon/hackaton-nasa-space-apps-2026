@@ -23,6 +23,7 @@
           "enum": [
             "agree",
             "mostly",
+            "unclear",
             "mixed"
           ],
           "title": "Verdict",
@@ -842,10 +843,16 @@
           "title": "N Significant",
           "type": "integer"
         },
+        "n_opposite_sure": {
+          "default": 0,
+          "title": "N Opposite Sure",
+          "type": "integer"
+        },
         "classification": {
           "enum": [
             "holds",
             "mostly",
+            "unclear",
             "depends"
           ],
           "title": "Classification",
@@ -857,6 +864,7 @@
         "n_starts",
         "n_same_sign",
         "n_significant",
+        "n_opposite_sure",
         "classification"
       ],
       "title": "StartYearSensitivity",

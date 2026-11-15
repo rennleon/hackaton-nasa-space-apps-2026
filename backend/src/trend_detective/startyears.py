@@ -16,15 +16,19 @@ from .prepare import Prepared, window_years
 from .stats import trend_tests
 from .timeutil import month_index, month_to_float, year_of
 
-# Project choices (not from the literature): the share of start years that must keep the declared
-# slope's sign for "mostly". All of them keeping it is "holds"; fewer than this is "depends".
+# Project choices (not from the literature). The alarm ("depends") needs a start year that is SURE in the
+# opposite direction: when the declared trend is near zero, about half the start years flip sign by chance,
+# and that is noise, not a warning. Otherwise: all keep the sign -> "holds"; at least MOSTLY_SHARE -> "mostly";
+# fewer -> "unclear" (signs vary, none surely opposite).
 MOSTLY_SHARE = 0.75
 
 
-def classify(n_same_sign: int, n_starts: int) -> str:
+def classify(n_same_sign: int, n_starts: int, n_opposite_sure: int = 0) -> str:
+    if n_opposite_sure >= 1:
+        return "depends"
     if n_same_sign == n_starts:
         return "holds"
-    return "mostly" if n_same_sign >= MOSTLY_SHARE * n_starts else "depends"
+    return "mostly" if n_same_sign >= MOSTLY_SHARE * n_starts else "unclear"
 
 
 def start_year_sensitivity(
@@ -64,7 +68,8 @@ def start_year_sensitivity(
     if len(points) < 2:
         return None
     same = sum(1 for q in points if np.sign(q.slope_per_decade) == np.sign(declared_slope_per_year))
+    opp_sure = sum(1 for q in points if q.significant and np.sign(q.slope_per_decade) == -np.sign(declared_slope_per_year))
     return StartYearSensitivity(
-        points=points, n_starts=len(points), n_same_sign=same,
-        n_significant=sum(q.significant for q in points), classification=classify(same, len(points)),
+        points=points, n_starts=len(points), n_same_sign=same, n_opposite_sure=opp_sure,
+        n_significant=sum(q.significant for q in points), classification=classify(same, len(points), opp_sure),
     )
