@@ -92,6 +92,14 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
   - NASA POWER (power.larc.nasa.gov) is approved, for development and at app runtime.
   - Commits on a feature branch are approved (never on `main`, no push).
   - The hosting choice is deferred until the requirements are done.
+- User decisions (Nov 15, v2):
+  - Giovanni cloud API (api.giovanni.earthdata.nasa.gov) approved at app runtime with the user's Earthdata token
+    (server-side only, `backend/.env`, never in the browser or the repo). NASA POWER stays the no-login fallback.
+  - Open-Meteo geocoding approved for place search (browser, typed text only).
+  - Moved out of the parking lot: three example points (Delhi, Amazon near Manaus, Sahara near Tamanrasset) and a
+    "Where else?" strip (same variable's verdict across the ready-made places). Trend map stays parked.
+  - Spanish as a second UI language (EN/ES toggle, English default; submission materials stay in English).
+  - v2 work lives on `feat/v2-live-data`. Progress and resources: `docs/data-integration-tracker.md`.
 - Never invent a citation. Every "expected to change because…" line needs a source someone opened and checked.
 - When reporting status, list each requirement R1–R6 as done, partial or not started, with what the user should
   click to see it.
