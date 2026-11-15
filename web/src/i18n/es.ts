@@ -683,7 +683,7 @@ const es: Record<string, string> = {
   'how.s5.title.scientific': 'Promediar las celdas de la rejilla',
   'how.s5.text.simple': 'Promediamos todos los cuadros del mapa dentro de tu lugar. Los cuadros más grandes cuentan más.',
   'how.s5.text.scientific':
-    'Las celdas fijas propias del producto dentro del cuadro (MERRA-2 y POWER 0,5°×0,625°; AIRS, MODIS y OMI 1°; GLDAS 0,25°; GPM 0,1°), combinadas con una media ponderada por cos(latitud). El ciclo estacional de cada celda se quita antes de promediar y se devuelve el del cuadro, así que una celda que falta en algunos meses no puede crear una tendencia falsa. Un mes necesita al menos la mitad de las celdas.',
+    'Las celdas fijas propias del producto dentro del cuadro (MERRA-2 y POWER 0,5°×0,625°; AIRS, MODIS y aerosoles de OMI 1°; GLDAS y NO₂ de OMI 0,25°; GPM 0,1°), combinadas con una media ponderada por cos(latitud). El ciclo estacional de cada celda se quita antes de promediar y se devuelve el del cuadro, así que una celda que falta en algunos meses no puede crear una tendencia falsa. Un mes necesita al menos la mitad de las celdas.',
   'how.s6.title.simple': 'Usamos unidades de todos los días',
   'how.s6.title.scientific': 'Convertir a unidades de estudiante',
   'how.s6.text.simple': 'Pasamos a unidades que conoces, como grados y milímetros de lluvia al día.',

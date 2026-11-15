@@ -85,7 +85,7 @@ export const HOW = {
   'how.s5.title': p('Average the map squares', 'Average the grid cells'),
   'how.s5.text': p(
     'We average all the map squares inside your place. Bigger squares count more.',
-    "The product's own fixed grid cells inside the box (MERRA-2 and POWER 0.5°×0.625°, AIRS, MODIS and OMI 1°, GLDAS 0.25°, GPM 0.1°), combined as a cos(latitude)-weighted mean. Each cell's own seasonal cycle is removed before averaging and the box's cycle added back, so a cell missing in some months cannot create a false trend. A month needs at least half the cells.",
+    "The product's own fixed grid cells inside the box (MERRA-2 and POWER 0.5°×0.625°, AIRS, MODIS and OMI aerosol 1°, GLDAS and OMI NO₂ 0.25°, GPM 0.1°), combined as a cos(latitude)-weighted mean. Each cell's own seasonal cycle is removed before averaging and the box's cycle added back, so a cell missing in some months cannot create a false trend. A month needs at least half the cells.",
   ),
   'how.s6.title': p('Use everyday units', 'Convert to student units'),
   'how.s6.text': p(

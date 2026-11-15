@@ -16,7 +16,12 @@ function Arrow() {
 /** A wavy series (seasons included) becomes a calmer line with a slight slope once the seasons are taken out. */
 function SeasonsPicture() {
   const h = useH()
-  const wave = 'M4 40 C16 8 28 8 40 40 S64 72 76 40 S100 8 112 40 S136 72 148 40 S172 8 184 40'
+  // the same slow rise as the "after" line, hidden under a big seasonal swing
+  const wave = 'M' + Array.from({ length: 61 }, (_, i) => {
+    const x = 4 + i * 3
+    const y = 50 - (x - 4) * 0.07 - 24 * Math.sin(((x - 4) / 36) * Math.PI)
+    return `${x.toFixed(1)} ${y.toFixed(1)}`
+  }).join(' L')
   return (
     <figure className="how-pic">
       <svg viewBox="0 0 400 80" role="img" aria-label={h('how.pic.label')} focusable="false" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
