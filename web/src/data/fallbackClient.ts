@@ -1,4 +1,5 @@
 import type { Place } from '../lib/place'
+import type { Bbox, ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
 import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient } from './client'
 
@@ -23,14 +24,15 @@ export class FallbackClient implements DataClient {
   scan = (r: string, t: string) => this.either((c) => c.scan(r, t))
   result = (r: string, v: string, s?: string) => this.either((c) => c.result(r, v, s))
 
+  /** The live grid first; the precomputed windows (ready-made places) when the API is down or not configured. */
+  climatology = (p: ClimateParam, b: Bbox) => this.either((c) => (c.climatology ? c.climatology(p, b) : Promise.reject(new Error('no climate layer'))))
+
   async analyze(regionId: string, variableId: string, opts: AnalyzeOptions): Promise<AnalysisOutcome> {
     try {
       return await this.api.analyze(regionId, variableId, opts)
     } catch {
-      // No static twin for a custom period: serve the default (or season) result and say so.
-      const res = await this.fallback.result(regionId, variableId, opts.seasonId)
-      const custom = Boolean(opts.start || opts.end)
-      return custom ? { ...res, customPeriodUnavailable: true } : res
+      // The static twin holds the shared windows; any other custom period gets the default (or season) result and a flag.
+      return this.fallback.analyze(regionId, variableId, opts)
     }
   }
 
@@ -50,10 +52,14 @@ export class FallbackClient implements DataClient {
    */
   customScan = (p: Place, t: string) =>
     exampleAt(p) ? this.fallback.customScan(p, t).catch(() => this.live((c) => c.customScan(p, t))) : this.live((c) => c.customScan(p, t))
-  customResult = (p: Place, v: string, o: { start?: string; end?: string }) => {
+  customResult = async (p: Place, v: string, o: { start?: string; end?: string }) => {
     const apiFirst = () => this.live((c) => c.customResult(p, v, o))
     if (!exampleAt(p)) return apiFirst()
-    if (o.start || o.end) return apiFirst().catch(() => this.fallback.customResult(p, v, o))
-    return this.fallback.customResult(p, v, o).catch(apiFirst)
+    // Example points: precomputed files first (the default, and each shortlist card's shared window), so the demo
+    // numbers match and no live computation or rate-limit token is spent. A period with no file (the static client
+    // flags it) goes to the API; if that fails too, the flagged default is shown with its notice.
+    const pre: AnalysisOutcome | null = await this.fallback.customResult(p, v, o).catch(() => null)
+    if (pre && !pre.customPeriodUnavailable) return pre
+    return apiFirst().catch((err) => (pre ? pre : Promise.reject(err)))
   }
 }

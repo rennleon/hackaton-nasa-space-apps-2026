@@ -18,7 +18,7 @@ function v2Scan(): ScanResult {
   const years = Array.from({ length: 12 }, (_, i) => ({ year: 2003 + i, anomaly: i * 0.5 + (i % 2), in_window: true }))
   return {
     ...s,
-    place: { ar6_region_code: null, ar6_region_name: null, climate_group: null, climate_code: null, high_up: true, elevation_m_model: null, wet_months: [], dry_months: [], text: { simple: 'Your place is high up and fairly dry.', scientific: 'Highland, dry.' } },
+    place: { ar6_region_code: null, ar6_region_name: null, climate_group: null, climate_code: null, high_up: true, elevation_m_model: null, wet_months: [], dry_months: [], text: { simple: 'Your place is high up and fairly dry.', scientific: 'Highland, dry.' }, homogeneity: null },
     entries: s.entries.map((e) =>
       e.variable_id === 'airs_rh_surf_day'
         ? {
@@ -86,11 +86,115 @@ describe('Findings screen', () => {
     expect(bannedIn(container.textContent ?? '')).toEqual([])
   })
 
+  it('lays out the redesigned page: back link, theme chip, real place facts, count tiles, how strip, years of data card', async () => {
+    const user = userEvent.setup()
+    const scan = v2Scan()
+    const rich: ScanResult = { ...scan, place: { ...scan.place!, climate_group: 'temperate', climate_code: 'Cfb', elevation_m_model: 2092, wet_months: [1, 2, 3, 4] } }
+    const { container } = open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => rich })
+    await screen.findByText(/\d of \d measurements? shows? a clear change\./)
+    // a way back, and the question as a chip
+    expect(screen.getByRole('button', { name: 'Pick a different place' })).toBeInTheDocument()
+    expect(container.querySelector('.theme-chip')?.textContent).toBe('Water')
+    // facts: only what the scan carries, in kid words (climate, height, rainy months) plus the size of the box
+    const facts = container.querySelector('dl[aria-label="About this place"]')!
+    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
+    expect(shown).toMatchObject({ Climate: 'Mild', Height: 'High above the sea', 'Rainy months': 'January – April' })
+    expect(shown.Area).toMatch(/^About [\d,]+ × [\d,]+ km$/)
+    expect(screen.getByText('All but the area come from a computer model estimate.')).toBeInTheDocument()
+    // a tile per certainty level that is present: number plus icon plus words
+    const tiles = [...container.querySelectorAll('.summary-tiles li')]
+    expect(tiles.length).toBeGreaterThan(0)
+    tiles.forEach((t) => {
+      expect(t.querySelector('svg')).not.toBeNull()
+      expect(t.textContent).toMatch(/^\d+(Sure it's real|Maybe, not sure yet|Too soon to tell|We can't tell here)$/)
+    })
+    // the method strip sits after the summary, and the years of data are a visible card (not collapsed)
+    expect(screen.getByRole('heading', { level: 2, name: 'How we worked this out' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /Get the data/ })[0]).toHaveAttribute('href', '#/how?stage=get')
+    expect(container.querySelector('details.coverage')).toBeNull()
+    expect(container.querySelector('.timeline')).not.toBeNull()
+    // the form row keeps its instant apply: a year typed changes the route, no Update button
+    expect(screen.queryByRole('button', { name: 'Update' })).toBeNull()
+    await user.type(screen.getByLabelText('From'), '2005')
+    await waitFor(() => expect(window.location.hash).toMatch(/start=2005/))
+  })
+
+  it('a mixed box shows "Mixed" and no box-average height or rainy months', async () => {
+    const scan = v2Scan()
+    const mixedRich: ScanResult = {
+      ...scan,
+      place: {
+        ...scan.place!, climate_group: 'temperate', climate_code: 'Cfb', elevation_m_model: 2092, high_up: true, wet_months: [1, 2, 3, 4],
+        homogeneity: { kind: 'mixed', n_cells: 54, climate_groups: { B: 42, C: 7 }, precip_min: 0.04, precip_max: 2.42, t2m_min: 8.4, t2m_max: 25.5, elev_min: 0, elev_max: 3843, reasons: [], suggestions: [], text: { simple: 'This box mixes different kinds of places.', scientific: 'Mixed.' } },
+      },
+    }
+    const { container } = open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => mixedRich })
+    await screen.findByText(/\d of \d measurements? shows? a clear change\./)
+    const facts = container.querySelector('dl[aria-label="About this place"]')!
+    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
+    expect(shown.Climate).toBe('Mixed')
+    expect(shown).not.toHaveProperty('Height')
+    expect(shown).not.toHaveProperty('Rainy months')
+  })
+
   it('a whole card opens the result', async () => {
     const user = userEvent.setup()
     open('#/shortlist?region=cajamarca_west&theme=water')
     await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
     await waitFor(() => expect(window.location.hash).toMatch(/^#\/variable\?.*variable=airs_rh_surf_day/))
+  })
+
+  it('a card opens the result on the same years it used (the shared window), so both give one answer', async () => {
+    const user = userEvent.setup()
+    const s = scanFile('cajamarca_west', 'water')
+    const shared = { ...base, scan: async () => ({ ...s, common_window: true, window_start: '2002-09', window_end: '2021-12' }) }
+    open('#/shortlist?region=cajamarca_west&theme=water', shared)
+    await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
+    await waitFor(() => expect(window.location.hash).toMatch(/start=2002-09&end=2021-12/))
+  })
+
+  it('shows the "one kind of place?" panel under the place text, and a part opens the shortlist for that box', async () => {
+    const user = userEvent.setup()
+    const t = (simple: string, scientific = simple) => ({ simple, scientific })
+    const mixed = (): ScanResult => {
+      const s = v2Scan()
+      return {
+        ...s,
+        place: {
+          ...s.place!,
+          homogeneity: {
+            kind: 'mixed', n_cells: 54, climate_groups: { B: 42, C: 7 }, precip_min: 0.04, precip_max: 2.42, t2m_min: 8.4, t2m_max: 25.5, elev_min: 0, elev_max: 3843,
+            reasons: [{ code: 'rain', text: t('Some parts get much more rain than others.') }],
+            suggestions: [{ bbox: [-78.12, -8.25, -76.56, -6.25], name: t('the high, cool part'), n_cells: 12 }],
+            text: t('This box mixes different kinds of places. Their changes can cancel out.'),
+          },
+        },
+      }
+    }
+    open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => mixed() })
+    expect(await screen.findByText('Mixed place')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Try just the high, cool part' }))
+    await waitFor(() => expect(window.location.hash).toBe('#/shortlist?place=box:-78.12,-8.25,-76.56,-6.25&theme=water'))
+  })
+
+  it('with a season picked, a card does not hand over its all-months window', async () => {
+    const user = userEvent.setup()
+    const s = scanFile('cajamarca_west', 'water')
+    const shared = { ...base, scan: async () => ({ ...s, common_window: true, window_start: '2002-09', window_end: '2021-12' }) }
+    open('#/shortlist?region=cajamarca_west&theme=water&season=dry', shared)
+    await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
+    await waitFor(() => expect(window.location.hash).toMatch(/season=dry/))
+    expect(window.location.hash).not.toMatch(/start=/)
+  })
+
+  it('a start year typed on the shortlist is kept, and the end stays open (not the shared window end)', async () => {
+    const user = userEvent.setup()
+    const s = scanFile('cajamarca_west', 'water')
+    const shared = { ...base, scan: async () => ({ ...s, common_window: true, window_start: '2002-09', window_end: '2021-12' }) }
+    open('#/shortlist?region=cajamarca_west&theme=water&start=2005', shared)
+    await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
+    await waitFor(() => expect(window.location.hash).toMatch(/start=2005/))
+    expect(window.location.hash).not.toMatch(/end=/)
   })
 
   it('shows the loading state, then the cards', async () => {
@@ -140,6 +244,13 @@ describe('Findings screen', () => {
     if (unavailable.length > 0) expect(screen.getByText(`Not available for this place (${unavailable.length})`)).toBeInTheDocument()
   })
 
+  it('a sub-topic list says it uses its own years, and the crumb hides the arrow from screen readers', async () => {
+    const { container } = open('#/shortlist?region=wisconsin&theme=rain')
+    expect(await screen.findByText('This list uses its own years. So a card may read differently in the water list.')).toBeInTheDocument()
+    expect(bannedIn('This list uses its own years. So a card may read differently in the water list.')).toEqual([])
+    expect(container.querySelector('.findings-crumb span[aria-hidden="true"]')?.textContent).toBe('›')
+  })
+
   it('the card follows the corrected shortlist label, not the single-variable verdict, and shows its years', async () => {
     const s = v2Scan()
     const target = s.entries.find((e) => e.variable_id === 'airs_rh_surf_day')!
@@ -175,14 +286,15 @@ describe('Where our data comes from', () => {
     expect(links).toHaveLength(2) // header and footer
     await user.click(links[0])
     expect(await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })).toBeInTheDocument()
-    const airs = screen.getByRole('heading', { level: 2, name: 'Instrument: AIRS' }).closest('li')!
+    const airs = screen.getByRole('heading', { level: 3, name: 'AIRS' }).closest('li')!
     expect(within(airs).getByText('Satellite: Aqua')).toBeInTheDocument()
-    expect(within(airs).getByText('Variables from this instrument:')).toBeInTheDocument()
+    expect(within(airs).getByText(/^Variables · \d+$/)).toBeInTheDocument()
     expect(within(airs).getByRole('link', { name: 'Afternoon humidity' })).toHaveAttribute('href', expect.stringMatching(/^#\/variable\?.*variable=airs_rh_surf_day/))
     expect(within(airs).getByText(/Rides on Aqua|Since 2002/)).toBeInTheDocument()
     expect(within(airs).getByText('Fresh from NASA when you ask')).toBeInTheDocument()
-    expect(screen.getByText(/NASA POWER is a delivery service/)).toBeInTheDocument()
-    expect(screen.getByText(/is a tool that measures/)).toBeInTheDocument()
+    expect(screen.getByText(/A delivery service\. It gives us numbers/)).toBeInTheDocument()
+    expect(screen.getByText('A tool that measures.')).toBeInTheDocument()
+    expect(within(airs).getByRole('link', { name: /NASA page about AIRS/ })).toHaveAttribute('target', '_blank')
     expect(bannedIn(document.querySelector('.sources')!.textContent ?? '')).toEqual([])
   })
 
@@ -195,14 +307,17 @@ describe('Where our data comes from', () => {
       const owners = sections.filter((sec) => sec.querySelector(`a[href*="variable=${v.id}"]`))
       expect(owners.map((o) => o.id), v.id).toEqual([`inst-${v.source.instrument_id}`])
     }
-    // an instrument is a section heading, never a variable link
-    expect(screen.getByRole('heading', { level: 2, name: 'Not used yet' })).toBeInTheDocument()
-    for (const name of ['Instrument: MODIS', 'Instrument: MOPITT']) {
+    // an instrument is a card heading, never a variable link
+    const off = screen.getByRole('heading', { level: 2, name: 'Not used yet' }).closest('section')!
+    expect(within(off).getByText(/cannot ask for it online yet/)).toBeInTheDocument()
+    for (const name of ['MODIS', 'MOPITT']) {
       const card = screen.getByRole('heading', { level: 3, name }).closest('li')!
+      expect(off).toContainElement(card)
       expect(card.querySelector('.src-vars')).toBeNull()
-      expect(within(card).getByText(/cannot fetch it live/)).toBeInTheDocument()
     }
-    expect(screen.getByRole('heading', { level: 2, name: 'Instrument: MERRA-2' }).closest('li')).toHaveTextContent('Computer model')
+    expect(screen.getByRole('heading', { level: 2, name: 'Satellite instruments' })).toBeInTheDocument()
+    const models = screen.getByRole('heading', { level: 2, name: 'Computer models' }).closest('section')!
+    expect(within(models).getByRole('heading', { level: 3, name: 'MERRA-2' }).closest('li')).toHaveTextContent('Computer model')
   })
 
   it('Scientific keeps the hierarchy', async () => {
@@ -210,7 +325,7 @@ describe('Where our data comes from', () => {
     open('#/sources')
     await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })
     await user.click(screen.getByRole('button', { name: 'Scientific' }))
-    const airs = screen.getByRole('heading', { level: 2, name: 'Instrument: AIRS' }).closest('li')!
+    const airs = screen.getByRole('heading', { level: 3, name: 'AIRS' }).closest('li')!
     expect(within(airs).getByRole('link', { name: /Surface relative humidity \(daytime/ })).toBeInTheDocument()
   })
 })

@@ -5,6 +5,8 @@ import { DataProvider, GlossaryProvider, ViewProvider, useView } from './context
 import { useL } from './lib/findingsCopy'
 import { useT } from './i18n'
 import { Sources } from './screens/Sources'
+import { HowItWorks } from './screens/HowItWorks'
+import { useH } from './lib/howCopy'
 import './App.css'
 import { parseHash, toHash, type Route } from './lib/route'
 import { useAsync } from './lib/useAsync'
@@ -12,6 +14,7 @@ import { demoById, prepareDemo } from './lib/demos'
 import type { Catalog } from './types/catalog'
 import { ViewToggle } from './components/ViewToggle'
 import { LangToggle } from './components/LangToggle'
+import { ThemeToggle } from './components/ThemeToggle'
 import { Home } from './screens/Home'
 import { ThemePicker } from './screens/ThemePicker'
 import { Shortlist } from './screens/Shortlist'
@@ -52,10 +55,15 @@ export default function App({ client: injected }: { client?: DataClient }) {
         {t('app.skip', 'Skip to content')}
       </a>
       <header className="topbar">
-        <button type="button" className="brand" onClick={() => go({ screen: 'home' })}>
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: '-4px', marginRight: 6 }}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></svg>{t('app.title', 'Earth System Trend Detective')}
-        </button>
-        <TopNav />
+        <div className="topbar-in">
+          <button type="button" className="brand" onClick={() => go({ screen: 'home' })}>
+            <span className="brand-logo" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" /></svg>
+            </span>
+            {t('app.title', 'Earth System Trend Detective')}
+          </button>
+          <TopNav screen={route.screen} />
+        </div>
       </header>
       <main id="main">
         {cat.loading && <p className="page">{t('app.loading', 'Loading…')}</p>}
@@ -88,13 +96,21 @@ export default function App({ client: injected }: { client?: DataClient }) {
   )
 }
 
-function TopNav() {
+function TopNav({ screen }: { screen: Route['screen'] }) {
   const l = useL()
+  const h = useH()
+  const t = useT()
   return (
-    <nav className="topnav">
-      <a href="#/sources">{l('sources.link')}</a>
+    <nav className="topnav" aria-label={t('app.nav.label', 'Main')}>
+      <a className="topnav-link" href="#/how" aria-current={screen === 'how' ? 'page' : undefined}>
+        {h('how.link')}
+      </a>
+      <a className="topnav-link" href="#/sources" aria-current={screen === 'sources' ? 'page' : undefined}>
+        {l('sources.link')}
+      </a>
       <ViewToggle />
       <LangToggle />
+      <ThemeToggle />
     </nav>
   )
 }
@@ -102,11 +118,17 @@ function TopNav() {
 function Footer() {
   const { view } = useView()
   const l = useL()
+  const h = useH()
   return (
     <footer className="footer">
-      {l('common.footer')} ·{' '}
-      <a href="#/sources">{l('sources.link')}</a>
-      {view === 'scientific' && <> · v{__APP_VERSION__}</>}
+      <div className="footer-in">
+        <p>{l('common.footer')}</p>
+        <div className="footer-links">
+          <a href="#/how">{h('how.link')}</a>
+          <a href="#/sources">{l('sources.link')}</a>
+          {view === 'scientific' && <span className="mono">v{__APP_VERSION__}</span>}
+        </div>
+      </div>
     </footer>
   )
 }
@@ -121,6 +143,8 @@ function Screen({ route, go }: { route: Route; go: (r: Route) => void }) {
       return <Shortlist route={route} go={goKeep} />
     case 'variable':
       return <VariableView route={route} go={goKeep} />
+    case 'how':
+      return <HowItWorks />
     case 'sources':
       return <Sources />
     default:

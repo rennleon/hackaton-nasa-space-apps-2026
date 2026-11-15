@@ -92,6 +92,9 @@ class KidUnits(Card):
     scale: float = 1.0
     label: str
     label_es: str | None = None
+    # optional short sentence shown after a then/now pair, e.g. "The scale goes from 0 to 100."
+    range_note: str | None = None
+    range_note_es: str | None = None
 
 
 class VariableCard(Card):
@@ -121,6 +124,13 @@ class VariableCard(Card):
     kid_units: KidUnits
     themes: dict[str, Role]
 
+    def units_info(self) -> UnitsInfo:
+        """Display units plus the Simple view's kid scale, so the front end never pairs a kid label with a
+        display-unit number (0.031 AOD is 3 points on the haze scale, not 'under 1 point')."""
+        return self.units.info().model_copy(update={
+            "kid_scale": self.kid_units.scale, "kid_label": self.kid_units.label,
+            "kid_label_es": self.kid_units.label_es})
+
     def ref(self) -> VariableRef:
         return VariableRef(
             id=self.id,
@@ -129,7 +139,7 @@ class VariableCard(Card):
             definition=self.definition,
             source_type=self.source.type,
             instrument=self.source.instrument,
-            units=self.units.info(),
+            units=self.units_info(),
             instrument_id=self.source.instrument_id,
             platform=self.source.platform,
             delivered_by=self.source.delivered_by,
@@ -228,6 +238,7 @@ class ThemeCard(Card):
     id: str
     name: Text
     question: Text
+    parent: str | None = None  # a sub-topic names its top-level theme (one level only)
 
 
 class GlossaryTerm(Card):
@@ -279,6 +290,17 @@ class Catalog(BaseModel):
             for t in v.themes:
                 if t not in self.themes:
                     raise ValueError(f"{v.id}: unknown theme {t}")
+        for t in self.themes.values():
+            if not t.parent:
+                continue
+            parent = self.themes.get(t.parent)
+            if parent is None:
+                raise ValueError(f"{t.id}: unknown parent theme {t.parent}")
+            if parent.parent:
+                raise ValueError(f"{t.id}: parent {t.parent} is itself a sub-topic (one level only)")
+            for v in self.variables.values():
+                if t.id in v.themes and t.parent not in v.themes:
+                    raise ValueError(f"{v.id}: in sub-topic {t.id} but not in its parent theme {t.parent}")
         for inst in self.instruments.values():
             for a in inst.assimilates:
                 if a not in self.instruments:

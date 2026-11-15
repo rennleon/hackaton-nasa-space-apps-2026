@@ -1,0 +1,22 @@
+/* "What if we start in another year?" panel. Dots: filled = sure, ring = not sure; never colour alone. */
+.start-years { margin-top: 1.2rem; overflow-wrap: anywhere; }
+.start-years h3 { margin: 0 0 0.5rem; }
+.sy-answer { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 0.4rem; font-weight: 700; }
+.sy-answer .icon { flex: none; margin-top: 2px; }
+.sy-holds .icon { color: var(--v-sure); }
+.sy-mostly .icon { color: var(--v-soon); }
+.sy-depends .icon { color: var(--v-maybe); }
+.sy-count { margin: 0 0 0.6rem; }
+.sy-details > summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.sy-details > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.sy-figure { margin: 0.8rem 0 0.4rem; background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--radius-md); box-shadow: none; }
+.sy-chart { width: 100%; max-width: 560px; height: auto; display: block; }
+.sy-chart .sy-zero { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.sy-chart .sy-tick, .sy-chart .sy-axis { fill: var(--muted); font-size: 14px; font-family: var(--font-mono); }
+.sy-chart .sy-ci { stroke: var(--accent); stroke-width: 1.5; opacity: 0.7; }
+.sy-dot { stroke: var(--accent); stroke-width: 2; }
+.sy-sure { fill: var(--accent); }
+.sy-unsure { fill: var(--surface); }
+.sy-legend { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 0.4rem; font-size: 0.875rem; }
+.sy-key { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px; background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--radius-pill); }
+.sy-ref { margin-top: 0.6rem; }

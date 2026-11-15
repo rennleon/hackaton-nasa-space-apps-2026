@@ -9,15 +9,15 @@
   platform: Aqua
   since: 2002
   measures:
-    simple: How warm and how damp the air is near the ground, by day and by night.
+    simple: How warm and damp the air is near the ground, day and night.
     scientific: Surface air temperature, surface relative humidity and many profile fields, twice daily (≈13:30 and ≈01:30 local overpass), Level-3 monthly 1° grid.
-    simple_es: "Qué tan cálido y qué tan húmedo está el aire cerca del suelo, de día y de noche."
+    simple_es: "Qué tan cálido y húmedo está el aire cerca del suelo, día y noche."
     scientific_es: "Temperatura del aire en superficie, humedad relativa en superficie y muchos campos de perfil, dos veces al día (pasadas de ≈13:30 y ≈01:30 hora local), rejilla mensual de nivel 3 a 1°."
   how:
     simple: It reads the heat glow of the air from space, twice a day. The satellite now passes over a bit later each year.
-    scientific: "Hyperspectral infrared sounder (2378 channels); retrievals from cloud-cleared radiances. Aqua is in free drift, so its local crossing time is slowly moving later (NASA Aqua mission page, https://science.nasa.gov/mission/aqua/); the nominal crossing is 13:30 ascending and 01:30 descending (AIRS V7 Level 3 Product User Guide, Section 1.5)."
+    scientific: "Hyperspectral infrared sounder (2378 channels). Aqua is in free drift, so its local crossing time is slowly moving later (NASA Aqua mission page, https://science.nasa.gov/mission/aqua/); the nominal crossing is 13:30 ascending and 01:30 descending (AIRS V7 Level 3 Product User Guide, Section 1.5)."
     simple_es: "Lee el brillo de calor del aire desde el espacio, dos veces al día. Ahora el satélite pasa un poco más tarde cada año."
-    scientific_es: "Sondeador hiperespectral de infrarrojos (2378 canales); recuperaciones a partir de radiancias sin nubes. Aqua está en deriva libre, así que su hora local de cruce se va retrasando poco a poco (página de la misión Aqua de la NASA, https://science.nasa.gov/mission/aqua/); el cruce nominal es a las 13:30 en ascenso y a las 01:30 en descenso (AIRS V7 Level 3 Product User Guide, Sección 1.5)."
+    scientific_es: "Sondeador hiperespectral de infrarrojos (2378 canales). Aqua está en deriva libre, así que su hora local de cruce se va retrasando poco a poco (página de la misión Aqua de la NASA, https://science.nasa.gov/mission/aqua/); el cruce nominal es a las 13:30 en ascenso y a las 01:30 en descenso (AIRS V7 Level 3 Product User Guide, Sección 1.5)."
   live: giovanni
   link: https://airs.jpl.nasa.gov/
 
@@ -34,7 +34,7 @@
   how:
     simple: Many satellites watch clouds and rain, and rain gauges on the ground check them.
     scientific: "Passive-microwave estimates intercalibrated to the combined radar-radiometer (CORRA) of the TRMM and GPM core satellites; infrared estimates calibrated to the microwave ones; Final Run bias-adjusted with GPCC gauges."
-    simple_es: "Muchos satélites vigilan las nubes y la lluvia, y pluviómetros en el suelo los revisan."
+    simple_es: "Muchos satélites vigilan las nubes y la lluvia. Pluviómetros en el suelo los revisan."
     scientific_es: "Estimaciones de microondas pasivas intercalibradas con el radar-radiómetro combinado (CORRA) de los satélites núcleo de TRMM y GPM; estimaciones infrarrojas calibradas con las de microondas; corrida final ajustada con pluviómetros de GPCC."
   live: giovanni
   link: https://gpm.nasa.gov/data/imerg
@@ -50,9 +50,9 @@
     simple_es: "Qué tan brumoso está el aire y cuánto hay de algunos gases contaminantes."
     scientific_es: "Profundidad óptica de aerosoles (OMAERUV), NO₂ troposférico (OMNO2d), SO₂, ozono; rejillas diarias de nivel 3 (OMNO2d 0.25°, OMAERUVd 1°)."
   how:
-    simple: It looks at sunlight bouncing back from the air and sees what the air holds. It passes over at about 1:45 in the afternoon. Since 2007, part of its view has been blocked.
+    simple: It watches sunlight bounce back from the air and sees what the air holds. It passes over at about 1:45 in the afternoon. Since 2007, part of its view has been blocked.
     scientific: "UV-visible imaging spectrometer measuring backscattered solar radiance. Local equator crossing 13:45 (ascending); science data from 1 Oct 2004 (OMNO2 README, Section 2.1). Since 25 June 2007 the row anomaly blocks part of the view, now about half of the 60 positions (Torres et al. 2018, doi:10.5194/amt-11-2701-2018)."
-    simple_es: "Mira la luz del sol que rebota en el aire y ve lo que el aire contiene. Pasa a eso de la 1:45 de la tarde. Desde 2007, una parte de su vista está tapada."
+    simple_es: "Mira la luz del sol que rebota en el aire y ve qué contiene. Pasa a eso de la 1:45 de la tarde. Desde 2007, una parte de su vista está tapada."
     scientific_es: "Espectrómetro de imágenes ultravioleta-visible que mide la radiancia solar retrodispersada. Cruce local del ecuador a las 13:45 (ascendente); datos científicos desde el 1 de octubre de 2004 (README de OMNO2, Sección 2.1). Desde el 25 de junio de 2007 la anomalía de filas tapa parte de la vista, hoy cerca de la mitad de las 60 posiciones (Torres et al. 2018, doi:10.5194/amt-11-2701-2018)."
   live: giovanni
   # aura.gsfc.nasa.gov/omi.html redirects to a page that does not mention OMI; the OMNO2 README was opened (sources-checked.md 4)
@@ -65,7 +65,7 @@
   measures:
     simple: Past weather everywhere on Earth, like temperature, rain, damp air and haze.
     scientific: Global atmospheric reanalysis (0.5° × 0.625°), assimilating satellite, station, balloon and aircraft observations, incl. aerosol optical depth.
-    simple_es: "El tiempo del pasado en toda la Tierra, como la temperatura, la lluvia, el aire húmedo y la bruma."
+    simple_es: "El tiempo del pasado en toda la Tierra. Por ejemplo temperatura, lluvia, humedad y bruma."
     scientific_es: "Reanálisis atmosférico global (0.5° × 0.625°) que asimila observaciones de satélite, estaciones, globos y aviones, incluida la profundidad óptica de aerosoles."
   how:
     simple: A computer rebuilds past weather from millions of real measurements.
@@ -76,19 +76,36 @@
   assimilates: [airs]  # AIRS radiances enter MERRA-2 from 2002-09 (Gelaro et al. 2017, Table 1)
   link: https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/
 
+- id: ceres_syn1deg
+  name: { simple: CERES SYN1deg (NASA data product), scientific: "CERES SYN1deg (Clouds and the Earth's Radiant Energy System, synoptic 1° product)", simple_es: "CERES SYN1deg (producto de datos de la NASA)", scientific_es: "CERES SYN1deg (Clouds and the Earth's Radiant Energy System, producto sinóptico de 1°)" }
+  kind: model
+  since: 2001
+  measures:
+    simple: How hazy the air is, for any place on Earth.
+    scientific: Aerosol optical depth at 550 nm on a 1° × 1° grid, as delivered by NASA POWER (parameter AOD_55; the POWER response header names SYN1DEG as the source). Valid POWER months start in 2001-01.
+    simple_es: "Qué tan brumoso está el aire, en cualquier lugar de la Tierra."
+    scientific_es: "Profundidad óptica de aerosoles a 550 nm en una rejilla de 1° × 1°, entregada por NASA POWER (parámetro AOD_55; la cabecera de la respuesta de POWER indica SYN1DEG como fuente). Los meses válidos de POWER empiezan en 2001-01."
+  how:
+    simple: A NASA data product from the CERES project. We treat it as a computer estimate, not a direct reading.
+    scientific: A gridded CERES data product from NASA Langley; we label it a computer estimate because it is not a direct single-sensor retrieval.
+    simple_es: "Un producto de datos de la NASA del proyecto CERES. Lo tratamos como una estimación de computadora, no como una lectura directa."
+    scientific_es: "Un producto de datos en rejilla de CERES del NASA Langley; lo llamamos estimación de computadora porque no es una medición directa de un solo sensor."
+  live: power
+  link: https://ceres.larc.nasa.gov/data/
+
 - id: gldas
   name: { simple: GLDAS land computer model, scientific: "GLDAS (Global Land Data Assimilation System)", simple_es: "Modelo de computadora de la tierra GLDAS", scientific_es: "GLDAS (Global Land Data Assimilation System, sistema global de asimilación de datos de superficie terrestre)" }
   kind: model
   since: 2000
   measures:
-    simple: How wet the ground is, how much water goes back into the air, and snow.
+    simple: How wet the ground is, how much water returns to the air, and snow.
     scientific: "GLDAS 2.1 (Noah 3.6 land-surface model), monthly 0.25° grid; soil moisture, evapotranspiration, snow water equivalent, runoff. Land only. Forcing is a mix of model analyses and observation-based data (GDAS, GPCP precipitation, AGRMET radiation), so it is not homogeneous."
-    simple_es: "Qué tan mojado está el suelo, cuánta agua vuelve al aire y cuánta nieve hay."
+    simple_es: "Qué tan mojado está el suelo, cuánta agua vuelve al aire y la nieve."
     scientific_es: "GLDAS 2.1 (modelo de superficie terrestre Noah 3.6), rejilla mensual de 0.25°; humedad del suelo, evapotranspiración, equivalente en agua de la nieve, escorrentía. Solo tierra. El forzamiento mezcla análisis de modelos y datos basados en observaciones (GDAS, precipitación GPCP, radiación AGRMET), así que no es homogéneo."
   how:
     simple: A computer works out how wet the ground is from rain, sun and weather.
     scientific: Offline land-surface model forced by observation-based meteorology and precipitation.
-    simple_es: "Una computadora calcula qué tan mojado está el suelo con la lluvia, el sol y el tiempo."
+    simple_es: "Una computadora calcula qué tan mojado está el suelo usando lluvia, sol y tiempo."
     scientific_es: "Modelo de superficie terrestre sin acoplar, forzado con meteorología y precipitación basadas en observaciones."
   live: giovanni
   link: https://ldas.gsfc.nasa.gov/gldas
@@ -124,7 +141,7 @@
   how:
     simple: It looks at heat and sunlight from below and spots the smoky gas.
     scientific: Gas-correlation radiometer in thermal and near infrared.
-    simple_es: "Mira el calor y la luz del sol desde abajo y detecta el gas del humo."
+    simple_es: "Mira el calor y la luz del sol desde abajo. Así detecta el gas del humo."
     scientific_es: "Radiómetro de correlación de gas en el infrarrojo térmico y cercano."
   live: offline
   link: https://www2.acom.ucar.edu/mopitt

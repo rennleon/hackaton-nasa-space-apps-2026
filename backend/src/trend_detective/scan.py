@@ -160,9 +160,11 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
     for var, role in members:
         if cw:
             r = analyze_region(ctx, region, var.id, start=cw[0], end=cw[1], theme_id=theme_id,
-                               window_reason="common", failed_fetches=failed)
+                               window_reason="common", failed_fetches=failed, with_start_years=False,
+                               with_cell_agreement=False)
         else:
-            r = analyze_region(ctx, region, var.id, theme_id=theme_id, failed_fetches=failed)
+            r = analyze_region(ctx, region, var.id, theme_id=theme_id, failed_fetches=failed,
+                               with_start_years=False, with_cell_agreement=False)
         results.append((var, role, r))
 
     ps = [_p_decisive(r) for _, _, r in results]
@@ -197,7 +199,7 @@ def scan_region(ctx: EngineContext, region: RegionCard, theme_id: str) -> ScanRe
             variable_id=var.id, name=var.name, role=role, source_type=var.source.type,
             shortlist_label=short, verdict_label=label,
             slope_per_decade=r.trend.slope_per_decade if r.trend else None,
-            units=var.units.info(), p_decisive=ps[i], p_adjusted=p_adj,
+            units=var.units_info(), p_decisive=ps[i], p_adjusted=p_adj,
             worth_investigating=bool(sel and sel.worth_investigating),
             mdt_per_decade=sel.mdt_per_decade if sel else None,
             why=why,

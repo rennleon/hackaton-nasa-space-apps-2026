@@ -1,6 +1,7 @@
 import type { AnalysisResult, ScanResult } from '../types/contract'
 import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types/catalog'
 import type { Place } from '../lib/place'
+import type { Bbox, ClimateGrid, ClimateParam } from '../lib/climate'
 import { getJson, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
 
 function qs(params: Record<string, string | undefined>) {
@@ -46,6 +47,9 @@ export class ApiClient implements DataClient {
   }
   customScan(place: Place, themeId: string) {
     return getJson<ScanResult>(`${this.base}/custom/scan?theme=${encodeURIComponent(themeId)}&${placeQuery(place)}`)
+  }
+  climatology(param: ClimateParam, bbox: Bbox) {
+    return getJson<ClimateGrid>(`${this.base}/climatology/grid?param=${encodeURIComponent(param)}&bbox=${bbox.join(',')}`)
   }
   customResult(place: Place, variableId: string, opts: { start?: string; end?: string }) {
     const extra = [opts.start ? `start=${opts.start}` : '', opts.end ? `end=${opts.end}` : ''].filter(Boolean).join('&')

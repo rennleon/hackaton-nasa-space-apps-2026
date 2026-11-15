@@ -17,6 +17,7 @@ import numpy as np
 
 from . import ENGINE_VERSION
 from .catalog import Catalog, RegionCard, VariableCard
+from .cell_agreement import cell_agreement
 from .contract import (
     AnalysisResult,
     Chip,
@@ -54,16 +55,28 @@ from .published import match as published_match
 from .robustness import leave_one_year_out
 from .selection import stage1
 from .sources import GiovanniBoxTooLarge, LiveSourceUnavailable, SourceChain
+from .sources.base import UnitMismatch
 from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
 from .sources.power import PowerSource
-from .stats import TrendTests, seasonal_mk, trend_tests, years_to_detect
+from .startyears import start_year_sensitivity
+from .stats import (
+    SeasonSlopes,
+    TrendTests,
+    seasonal_mk,
+    seasonal_slope_homogeneity,
+    trend_tests,
+    years_to_detect,
+)
 from .timeutil import from_index, month_index, month_to_float
 from .verdict import VerdictInputs, build_verdict, cant_tell, decide
 
 ROBUSTNESS_CODES = {
     "rests_on_few_years", "drift_changes_verdict", "drift_years_included", "cross_check_disagrees", "spatial_disagrees",
 }
+# Every known break with action 'flag' makes a result "not robust" when the window crosses it (user decisions
+# Nov 15): frozen model emissions, model input changes (GLDAS forcing, IMERG TRMM-to-GPM), the OMI row anomaly and
+# MODIS orbit drift. The record is kept (no cut); only "Sure it's real" drops to "Maybe, not sure yet".
 MIN_COMPARISON_YEARS = 10.0
 
 
@@ -126,6 +139,35 @@ class Core:
     z_c: float | None
     years_needed: float | None
     years_available: float
+    homogeneity: SeasonSlopes | None = None  # is the trend the same size in every calendar month?
+
+
+MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+MONTH_ABBR_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+
+
+def _season_differs_chip(core: Core, var: VariableCard, alpha: float) -> Chip | None:
+    """Info chip when the per-month trend sizes differ (Welch test on 12 monthly slopes; context only)."""
+    h = core.homogeneity
+    if h is None or h.p >= alpha:
+        return None
+    u, d = var.units.display, max(var.units.decimals, 1)
+    hi_m = max(h.slope_per_year, key=lambda m: h.slope_per_year[m])
+    lo_m = min(h.slope_per_year, key=lambda m: h.slope_per_year[m])
+    hi, lo = h.slope_per_year[hi_m] * 10, h.slope_per_year[lo_m] * 10
+    rng_en = f"from {lo:+.{d}f} {u} per decade in {MONTH_ABBR[lo_m - 1]} to {hi:+.{d}f} in {MONTH_ABBR[hi_m - 1]}"
+    rng_es = f"de {lo:+.{d}f} {u} por década en {MONTH_ABBR_ES[lo_m - 1]} a {hi:+.{d}f} en {MONTH_ABBR_ES[hi_m - 1]}"
+    return Chip(
+        code="trend_differs_by_season", severity="info",
+        text=Text(
+            simple="The change is bigger in some months than in others.",
+            scientific=f"Trend size differs between calendar months (Welch test on the 12 monthly slopes, "
+                       f"F = {h.f:.2f}, p = {h.p:.3g}): {rng_en}. The headline rate is an average over the year.",
+            simple_es="El cambio es mayor en algunos meses que en otros.",
+            scientific_es=f"El tamaño de la tendencia difiere entre meses (prueba de Welch sobre las 12 pendientes "
+                          f"mensuales, F = {h.f:.2f}, p = {h.p:.3g}): {rng_es}. La tasa principal es un promedio del año.",
+        ),
+    )
 
 
 def _core_monthly(p: Prepared) -> Core:
@@ -136,7 +178,9 @@ def _core_monthly(p: Prepared) -> Core:
     except Exception:  # noqa: BLE001 - context-only test; never block the analysis
         p_c, z_c = None, None
     yn = years_to_detect(tt.resid_sd, tt.slope_per_year, tt.r1, 12)
-    return Core(tt, t, y, np.floor(t).astype(int), p_c, z_c, yn, p.window.years)
+    cal = np.array([int(m[5:7]) for m in p.months_window])
+    homog = seasonal_slope_homogeneity(t, y, cal)  # context only: is the change the same size in every month?
+    return Core(tt, t, y, np.floor(t).astype(int), p_c, z_c, yn, p.window.years, homog)
 
 
 def _core_season(p: Prepared, months: list[int]) -> Core:
@@ -249,6 +293,16 @@ def _fetch_failed_gate(exc: Exception) -> GateCheck:
                 scientific_es=f"Zona demasiado grande para el límite de solicitudes de esta fuente: {exc}",
             ),
         )
+    if isinstance(exc, UnitMismatch):  # a catalog error, not an outage: say so instead of "try again"
+        return GateCheck(
+            code="unit_mismatch", passed=False,
+            detail=Text(
+                simple="We can't use this data yet. Its units are not what we expected.",
+                scientific=f"Unit check failed (catalog card and source disagree): {exc}",
+                simple_es="Aún no podemos usar estos datos. Sus unidades no son las esperadas.",
+                scientific_es=f"Falló la comprobación de unidades (la ficha del catálogo y la fuente no coinciden): {exc}",
+            ),
+        )
     return GateCheck(
         code="fetch_failed", passed=False,
         detail=Text(
@@ -269,7 +323,7 @@ def _fetch(
         return None, failed[variable_id]
     try:
         return ctx.series(variable_id, region), None
-    except GiovanniBoxTooLarge as exc:  # never an outage: the answer is the same every time, so report it
+    except (GiovanniBoxTooLarge, UnitMismatch) as exc:  # never an outage: the same answer every time, so report it
         if failed is not None:
             failed[variable_id] = exc
         return None, exc
@@ -382,15 +436,33 @@ def _contrast_text(
     return Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es)
 
 
-def _only_one(other: VariableCard, detail: str, detail_es: str | None = None) -> Comparison:
+# Why the second source can't be compared, in kid words. Each says what happened, never "only one
+# instrument has data" when the other one does have data that failed our checks. "Source", not "instrument":
+# the partner can be a model (MERRA-2).
+_ONLY_ONE_WHY: dict[str, tuple[str, str]] = {
+    "unreachable": ("We couldn't reach the other source, {i}, right now.",
+                    "No pudimos conectar con la otra fuente, {i}, en este momento."),
+    "no_data": ("The other source, {i}, has no data for this place.",
+                "La otra fuente, {i}, no tiene datos para este lugar."),
+    "short": ("The other source, {i}, shares too few years with this one.",
+              "La otra fuente, {i}, comparte muy pocos años con esta."),
+    "quality": ("The other source, {i}, has data here, but it failed our checks.",
+                "La otra fuente, {i}, tiene datos aquí, pero no pasó nuestras revisiones."),
+    "error": ("We couldn't compare with the other source, {i}.",
+              "No pudimos comparar con la otra fuente, {i}."),
+}
+
+
+def _only_one(other: VariableCard, detail: str, detail_es: str | None = None, why: str = "error") -> Comparison:
     """No second opinion available. The numeric fields are placeholders; `outcome` says so."""
+    en, es = (w.format(i=other.source.instrument) for w in _ONLY_ONE_WHY[why])
     return Comparison(
         against=other.id, slope_per_decade=0.0, same_sign=False, significant=False,
         outcome="only_one", against_instrument=other.source.instrument,
-        text=Text(simple="Only one instrument has data for this place.",
+        text=Text(simple=en,
                   scientific=f"No usable {other.name.scientific} series ({other.source.instrument}) to compare with: "
                              f"{detail}",
-                  simple_es="Solo un instrumento tiene datos para este lugar.",
+                  simple_es=es,
                   scientific_es=f"No hay una serie utilizable de {other.name.scientific_es or other.name.scientific} "
                                 f"({other.source.instrument}) con la cual comparar: {detail_es or detail}"),
     )
@@ -415,9 +487,9 @@ def contrast_instruments(
     except LiveSourceUnavailable as exc:  # detail path: a partner outage never fails the whole page
         s2, err = None, exc
     if err is not None:
-        return _only_one(other, *_unavailable_detail(err))
+        return _only_one(other, *_unavailable_detail(err), why="unreachable")
     if s2 is None or not np.isfinite(s2.values).any():
-        return _only_one(other, "no data for this place.", "no hay datos para este lugar.")
+        return _only_one(other, "no data for this place.", "no hay datos para este lugar.", why="no_data")
     try:
         w2 = resolve_window(s2, other)
         start = max(window.start, w2.start, key=month_index)
@@ -425,13 +497,14 @@ def contrast_instruments(
         years = window_years(start, end) if month_index(end) >= month_index(start) else 0.0
         if years < MIN_COMPARISON_YEARS:
             return _only_one(other, f"the two series share only {years:.1f} years (minimum {MIN_COMPARISON_YEARS:.0f}).",
-                             f"las dos series comparten solo {years:.1f} años (mínimo {MIN_COMPARISON_YEARS:.0f}).")
+                             f"las dos series comparten solo {years:.1f} años (mínimo {MIN_COMPARISON_YEARS:.0f}).",
+                             why="short")
         win = Window(start=start, end=end, reason="user", years=round(years, 2))
         p1, p2 = prepare(series, win), prepare(s2, win)
         months = season.months if season else None
         bad = [c.detail for c in quality(p2, other, months) if not c.passed]
         if bad:
-            return _only_one(other, bad[0].scientific, bad[0].scientific_es)
+            return _only_one(other, bad[0].scientific, bad[0].scientific_es, why="quality")
         c1, c2 = _core(p1, season), _core(p2, season)
     except ValueError as exc:
         return _only_one(other, f"{exc}.", f"{exc}.")
@@ -476,12 +549,14 @@ def analyze(
     with_robustness: bool = True,
     theme_id: str | None = None,
     window_reason: str = "user",
+    with_start_years: bool = True,
 ) -> AnalysisResult:
     """Analyse a catalog region. See analyze_region for ad-hoc regions (e.g. drawn on the map)."""
     if region_id not in ctx.catalog.regions:
         raise KeyError(f"unknown region {region_id}")
     return analyze_region(ctx, ctx.catalog.regions[region_id], variable_id, start, end, season_id,
-                          with_robustness, theme_id, window_reason)
+                          with_robustness, theme_id, window_reason,
+                          with_start_years=with_start_years)
 
 
 def analyze_region(
@@ -495,8 +570,12 @@ def analyze_region(
     theme_id: str | None = None,
     window_reason: str = "user",
     failed_fetches: dict[str, Exception] | None = None,
+    with_start_years: bool = True,
+    with_cell_agreement: bool = True,
 ) -> AnalysisResult:
-    """`failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
+    """`with_start_years=False`: skip the start-year sensitivity panel (the scan runs many variables and does not show it).
+    `with_cell_agreement=False` (the scan) skips the per-cell check, which reads and tests every grid cell.
+    `failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
     `fetch_failed` gate instead of raising `LiveSourceUnavailable`; the dict maps variable id to the error."""
     cat = ctx.catalog
     if variable_id not in cat.variables:
@@ -581,7 +660,8 @@ def analyze_region(
     else:
         sel_t, sel_y, f = p.t_window, p.anomalies_window, 12
     pub = published_match(cat, region, var)  # known before the trend: AR6 entry for this place and variable
-    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f, published=pub)
+    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f, published=pub,
+                       themes=cat.themes)
     # Until a verdict exists the finding says "too soon"; the final return replaces it with the real agreement.
     pub_finding, pub_context = published_for_result(cat, region, var, m=pub)
     common = dict(
@@ -645,7 +725,8 @@ def analyze_region(
         if other is not None and not same_source:
             rob.cross_check = contrast_instruments(ctx, var, other, region, window, series, season, tt, failed_fetches)
             cc = rob.cross_check
-            if cc.outcome != "only_one":
+            # listed as a check that supports the trend only when the partner points the same way
+            if cc.outcome != "only_one" and cc.same_sign:
                 checks_run.append("cross-check source")
             # the partner is sure over its overlap and points the other way from the HEADLINE (not overlap vs overlap)
             if cc.outcome == "disagree" and base_sig:
@@ -659,6 +740,16 @@ def analyze_region(
                               scientific_es=f"El contraste {other.name.scientific_es or other.name.scientific} tiene el "
                                             f"signo opuesto ({cc.slope_per_decade:+g} por década)."),
                 ))
+        if with_cell_agreement and region.geometry.kind != "point":
+            try:  # context only: never block the analysis
+                kind = series.provenance.source_kind if series.provenance else None
+                cells = ctx.sources.cell_series(var, region, kind)
+                if cells:
+                    rob.cell_agreement = cell_agreement(
+                        cells, var, series.provenance, window, season, tt.slope_per_year,
+                        lambda pc: _core(pc, season).tt, ctx.alpha)
+            except Exception:  # noqa: BLE001
+                rob.cell_agreement = None
         if region.comparison_region:
             comp = cat.regions[region.comparison_region]
             rob.spatial = _compare(ctx, var, comp, window, season, tt.slope_per_year, comp.id)
@@ -687,16 +778,21 @@ def analyze_region(
             if sm2:
                 chips.append(Chip(
                     code="excluded_years_unusual", severity="info",
-                    text=Text(simple=f"The left-out years look unusual from {sm2[:4]}, which fits the satellite drift.",
+                    text=Text(simple=f"The left-out years look unusual from {sm2[:4]}, which may fit the satellite drift.",
                               scientific=f"Post-window anomalies depart from the fitted trend from {sm2} "
                                          "(consistent with the documented artifact).",
-                              simple_es=f"Los años que dejamos fuera se ven raros desde {sm2[:4]}. Encaja con el desvío del satélite.",
+                              simple_es=f"Los años que dejamos fuera se ven raros desde {sm2[:4]}. Puede encajar con el desvío del satélite.",
                               scientific_es=f"Las anomalías posteriores a la ventana se apartan de la tendencia ajustada "
                                             f"desde {sm2} (coherente con el artefacto documentado)."),
                 ))
 
+    hc = _season_differs_chip(core, var, ctx.alpha)
+    if hc:
+        chips.append(hc)
+
     then_now = _then_now(p, core, var, season)
-    warn = [c for c in chips if c.code in ROBUSTNESS_CODES]
+    lowering = {f"known_artifact_{a.kind}_{a.start}" for a in flagged}
+    warn = [c for c in chips if c.code in ROBUSTNESS_CODES or c.code in lowering]
     label = decide(tt.p_mk_hr, tt.p_ols, not warn, core.years_available, core.years_needed, ctx.alpha)
     verdict = build_verdict(label, VerdictInputs(
         variable=var, region=region, window=window, season=season,
@@ -712,7 +808,8 @@ def analyze_region(
     if core.p_c is not None:
         tests.append(SignificanceTest(name="seasonal_mk", p=float(core.p_c), statistic=_r(core.z_c), decisive=False))
     # C3: the same AR6 entry stage 1 used, now compared with our verdict (never causal wording).
-    pub_final, _ = published_for_result(cat, region, var, verdict.label, tt.slope_per_year * 10, m=pub)
+    pub_final, _ = published_for_result(cat, region, var, verdict.label, tt.slope_per_year * 10, m=pub,
+                                        window=(int(window.start[:4]), int(window.end[:4])))
     return AnalysisResult(
         **{**common, "published": pub_final},
         season_series=[YearPoint(year=int(y), anomaly=_r(a)) for y, a in zip(core.years, core.y)] if season else None,
@@ -729,4 +826,6 @@ def analyze_region(
         chips=chips,
         verdict=verdict,
         then_now=then_now,
+        # context only (the verdict above stays on the declared window); not for declared seasons
+        start_years=start_year_sensitivity(p, tt.slope_per_year, ctx.alpha) if with_start_years and not season else None,
     )

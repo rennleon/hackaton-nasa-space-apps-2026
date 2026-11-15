@@ -132,7 +132,7 @@ export function WhereElse({ variableId, route, go }: { variableId: string; route
       <h3 id="where-h">{t('where.title', 'Where else?')}</h3>
       <p className="muted">
         {view === 'simple'
-          ? t('where.lead.simple', 'The same measurement in other places.')
+          ? t('where.lead.simple', 'The same measurement in other places. Each one uses its own years.')
           : t('where.lead.scientific', 'The same variable analysed separately in the ready-made places.')}
       </p>
       {both && (

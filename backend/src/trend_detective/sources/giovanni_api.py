@@ -8,8 +8,9 @@ The reply is CSV: 13 `key,value` header lines (unit, undef, snapped cell centre 
 
 * One point per call. A box is answered by calling every grid-cell centre of the product inside
   the box (cell size from the card, MERRA-2 is 0.5 x 0.625 degrees) and taking a cos(latitude)
-  weighted mean over the cells that have data. A month counts only if at least half of the
-  cells have a valid value. Too many calls -> `GiovanniBoxTooLarge` (never silent sub-sampling).
+  weighted mean over the cells that have data, averaging each cell's departure from its own seasonal
+  cycle so that cells dropping in and out cannot create a trend (`base.area_mean`). A month counts
+  only if at least half of the cells have a valid value. Too many calls -> `GiovanniBoxTooLarge` (never silent sub-sampling).
 * The header's lat/lon is the snapped cell centre; we check it lies inside the requested box.
 * Missing data is the header's `undef` (-9999, -9999.9, -1.26765e+30, 1e+15 ...): read as NaN.
   Land-only products (GLDAS) over the sea are all `undef`, which we report as "no data here".
@@ -38,7 +39,6 @@ import json
 import logging
 import math
 import os
-import re
 import threading
 import time
 import urllib.error
@@ -53,7 +53,7 @@ import numpy as np
 
 from ..catalog import RegionCard, VariableCard
 from ..contract import Provenance
-from .base import LiveSourceUnavailable, RawSeries
+from .base import CellSeries, LiveSourceUnavailable, RawSeries, UnitMismatch, area_mean, normalize_unit
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class GiovanniBoxTooLarge(LiveSourceUnavailable):
     """The box needs more API calls than allowed. Say so; do not sub-sample the cells."""
 
 
-class GiovanniUnitMismatch(LiveSourceUnavailable):
+class GiovanniUnitMismatch(UnitMismatch):
     """The CSV unit differs from the catalog card's native unit: refuse rather than mislabel."""
 
 
@@ -206,13 +206,6 @@ def parse_timeseries(text: str) -> ParsedTimeseries:
         header=header, stamps=stamps, values=vals, unit=header["unit"], undef=undef, lat=lat, lon=lon,
         lat_res=_float(header.get("lat_resolution")) or 0.0, lon_res=_float(header.get("lon_resolution")) or 0.0,
     )
-
-
-def normalize_unit(u: str) -> str:
-    u = re.sub(r"[\s^]", "", u or "").lower().replace("²", "2").replace("³", "3")  # cm^2 and cm² are the same unit
-    if u in ("", "1", "none", "dimensionless", "-", "unitless"):
-        return "1"
-    return "%" if u in ("%", "percent", "pct") else u  # AIRS humidity says 'percent' where the card says '%'
 
 
 def check_unit(variable: VariableCard, csv_unit: str) -> None:
@@ -560,6 +553,51 @@ class GiovanniApiSource:
             (self._all_fill.add if raw is None and meta.get("all_fill") else self._all_fill.discard)(str(path))
         return raw
 
+    def cell_series(self, variable: VariableCard, region: RegionCard) -> list[CellSeries] | None:
+        """The per-cell monthly series a box mean is built from, read from the cell cache only (never the
+        network). None for a point, a box of one cell, or when any cell is not cached."""
+        gid = variable.giovanni_id
+        geom = region.geometry
+        if not gid or geom.kind == "point":
+            return None
+        points = plan_cells(variable, region)
+        if len(points) < 2:
+            return None
+        end_year = self.end_year or last_complete_year()
+        if variable.record_end:
+            end_year = min(end_year, int(variable.record_end[:4]))
+        chunks = plan_chunks(variable.cadence, variable.record_start, end_year)
+        out: list[CellSeries] = []
+        seen: set[tuple[float, float]] = set()
+        for la, lo in points:
+            if self.offline:
+                texts = self._offline_texts(gid, la, lo)
+            else:
+                hits = [self._read(self.cache_path(gid, la, lo, ch)) for ch in chunks]
+                if any(h is None for h in hits):
+                    return None
+                texts = [h for h in hits if h]
+            parsed = [parse_timeseries(t) for t in texts if t.strip()]
+            if not parsed:
+                continue
+            for p in parsed:
+                check_unit(variable, p.unit)
+            stamps = [s for p in parsed for s in p.stamps]
+            values = np.concatenate([p.values for p in parsed])
+            if len(parsed) > 1:  # same de-duplication as _fetch_cells
+                _, first = np.unique(np.array(stamps[::-1]), return_index=True)
+                keep = np.sort(len(stamps) - 1 - first)
+                stamps, values = [stamps[i] for i in keep], values[keep]
+            p0 = parsed[0]
+            key = (round(p0.lat, 4), round(p0.lon, 4))
+            if not self._inside(p0, geom.bbox) or key in seen:
+                continue
+            seen.add(key)
+            months, vals = to_months(stamps, values, variable.cadence, variable.min_valid_days)
+            if np.isfinite(vals).any():
+                out.append(CellSeries(p0.lat, p0.lon, months, vals))
+        return out or None
+
     def all_fill(self, variable: VariableCard, region: RegionCard) -> bool:
         """The last fetch of this series got an answer for every cell, and all of it was fill (undef)."""
         with self._lock:
@@ -626,7 +664,7 @@ class GiovanniApiSource:
                 continue
             used.append(cell)
 
-        # 3. a box: weighted mean over valid cells, month by month
+        # 3. a box: weighted mean over valid cells, month by month (each cell compared with its own seasonal cycle)
         seen: set[tuple[float, float]] = set()
         unique: list[_Cell] = []
         for c in used:  # two requests may snap to the same cell: count it once
@@ -638,24 +676,10 @@ class GiovanniApiSource:
             # every cell answered, none had a value: fill only (not the same as a cell that was never fetched)
             meta["all_fill"] = bool(unique) and all(c.parsed is not None for c in unique)
             return None
-        months = sorted({m for c in unique for m in c.months})
-        index = {m: i for i, m in enumerate(months)}
-        num = np.zeros(len(months))
-        den = np.zeros(len(months))
-        cnt = np.zeros(len(months))
-        for c in unique:
-            if c.parsed is None:
-                continue
-            w = math.cos(math.radians(c.parsed.lat))
-            for m, v in zip(c.months, c.values):
-                if math.isfinite(v):
-                    i = index[m]
-                    num[i] += w * v
-                    den[i] += w
-                    cnt[i] += 1
-        total = len(unique)
-        ok = (cnt >= 1) & (cnt >= MIN_CELL_SHARE * total)
-        vals = np.where(ok, num / np.where(den > 0, den, 1.0), np.nan)
+        # Composition-robust cos(latitude) mean: cells missing in some months cannot fake a trend (base.area_mean).
+        months, vals = area_mean(
+            [(c.parsed.lat, c.months, c.values) for c in unique if c.parsed is not None],
+            n_total=len(unique), min_share=MIN_CELL_SHARE)
         if not np.isfinite(vals).any():
             return None
         got = next(c for c in unique if c.parsed is not None and np.isfinite(c.values).any())

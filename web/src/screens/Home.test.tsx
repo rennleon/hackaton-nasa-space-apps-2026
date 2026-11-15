@@ -114,7 +114,11 @@ describe('useGeocodeSearch', () => {
 
 describe('start screen', () => {
   const open = () => render(<App client={client} />)
-  const ready = async () => within(await screen.findByRole('region', { name: /ready-made/ }))
+  /** the ready-made cards live in their own tab */
+  const ready = async () => {
+    await userEvent.setup().click(await screen.findByRole('tab', { name: 'Ready-made places' }))
+    return within(screen.getByRole('tabpanel'))
+  }
 
   it('searches by name, keeps the real name, shows the questions, and opens the findings', async () => {
     const fetchMock = vi.fn(async () => reply([CAJAMARCA]))
@@ -147,14 +151,14 @@ describe('start screen', () => {
     expect(await screen.findByText('No place found', undefined, { timeout: 3000 })).toBeInTheDocument()
   })
 
-  it('shows five ready-made places and never the hidden test box', async () => {
+  it('shows six ready-made places and never the hidden test box', async () => {
     const user = userEvent.setup()
     open()
-    await screen.findByText('Or try a ready-made place')
+    await ready()
     expect(screen.queryByText(/test box/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Cajamarca \(/)).not.toBeInTheDocument()
-    for (const n of ['Cajamarca highlands', 'Wisconsin', 'Delhi, India', 'Amazon rainforest near Manaus, Brazil', 'Sahara desert near Tamanrasset, Algeria']) {
-      expect(within(screen.getByRole('region', { name: /ready-made/ })).getByRole('button', { name: new RegExp(n) })).toBeInTheDocument()
+    expect(screen.queryByText(/Cajamarca \((?!high mountains only)/)).not.toBeInTheDocument() // the twin is listed; the test box is not
+    for (const n of ['Cajamarca highlands', 'Cajamarca, high mountains only', 'Wisconsin', 'Delhi, India', 'Amazon rainforest near Manaus, Brazil', 'Sahara desert near Tamanrasset, Algeria']) {
+      expect(within(screen.getByRole('tabpanel')).getByRole('button', { name: new RegExp(n) })).toBeInTheDocument()
     }
     await user.click((await ready()).getByRole('button', { name: /Delhi, India/ }))
     await user.click(await screen.findByRole('button', { name: /Heat/ }))
@@ -184,6 +188,28 @@ describe('start screen', () => {
     expect(await screen.findByRole('heading', { name: 'Where you are' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Water/ }))
     await waitFor(() => expect(window.location.hash).toBe('#/shortlist?place=pt:-12.05,-77.04&theme=water'))
+  })
+
+  it('is a wizard: tabs in step 1, then the questions in step 2, and back to the tab we came from', async () => {
+    const user = userEvent.setup()
+    open()
+    const tabs = await screen.findAllByRole('tab')
+    expect(tabs.map((t) => t.textContent)).toEqual(['Search', 'Ready-made places', 'On the map', 'Coordinates'])
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText('Pick a place').closest('li')).toHaveAttribute('aria-current', 'step')
+    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]) // roving tabindex
+    tabs[0].focus()
+    await user.keyboard('{ArrowRight}')
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
+    expect(tabs[1]).toHaveFocus()
+    await user.click(within(screen.getByRole('tabpanel')).getByRole('button', { name: /Wisconsin/ }))
+    const heading = await screen.findByRole('heading', { name: 'Wisconsin' })
+    expect(heading).toHaveFocus()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    expect(screen.getByText('Ask a question').closest('li')).toHaveAttribute('aria-current', 'step')
+    await user.click(screen.getByRole('button', { name: 'Pick a different place' }))
+    expect(await screen.findByRole('tab', { name: 'Ready-made places', selected: true })).toHaveFocus()
+    expect(screen.queryByText('What do you want to know?')).not.toBeInTheDocument()
   })
 
   it('uses no banned words in the Simple view, before and after choosing a place', async () => {

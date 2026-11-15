@@ -1,6 +1,6 @@
 import type { AnalysisResult } from '../types/contract'
 import { VERDICT_META } from '../lib/labels'
-import { formatP } from '../lib/text'
+import { formatP, unitAfter, viewUnits } from '../lib/text'
 import { Badge } from './Badge'
 import { VerdictGauge } from './VerdictGauge'
 import { COPY } from '../lib/copy'
@@ -65,11 +65,12 @@ function Details({ result }: { result: AnalysisResult }) {
     ) : null
   }
   const units = result.variable.units
-  const dec = units.decimals + 1
-  const num = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${fmt(Math.abs(n), Math.max(units.decimals, 1))}`
+  const u = viewUnits(units, view) // Simple: kid scale and label, the same scale as the then/now line
+  const dec = units.decimals + 1 // Scientific only: display units, one more decimal than the card
+  const num = (n: number) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${fmt(Math.abs(n * u.scale), u.decimals)}`
   const slope = s('result.slope', '{n} {unit} every 10 years', '{n} {unit} per decade', {
     n: num(trend.slope_per_decade),
-    unit: view === 'simple' ? units.simple : units.display,
+    unit: unitAfter(u.label, Number(num(trend.slope_per_decade).replace('−', '-'))),
   })
   if (view === 'simple') {
     const decisive = tests.filter((x) => x.decisive)
@@ -80,13 +81,17 @@ function Details({ result }: { result: AnalysisResult }) {
         <li>{s('result.details.years', 'We looked at {n} years of data.', '', { n: years })}</li>
         <li>{s('result.details.trendLine', 'The trend line: {slope}.', '', { slope })}</li>
         <li>
-          {s('result.details.range', 'It could be anywhere between {lo} and {hi} {unit} every 10 years.', '', {
-            lo: fmt(trend.ci_low, dec),
-            hi: fmt(trend.ci_high, dec),
-            unit: units.simple,
+          {s('result.details.range', 'Every 10 years it could change {lo} to {hi} {unit}.', '', {
+            lo: num(trend.ci_low),
+            hi: num(trend.ci_high),
+            unit: unitAfter(u.label, 2),
           })}
         </li>
-        <li>{c(agree ? 'result.details.agree' : 'result.details.disagree', agree ? COPY.checksAgree : COPY.checksDisagree)}</li>
+        <li>
+          {agree && result.verdict.label === 'significant_fragile'
+            ? c('result.details.fragile', COPY.checksFragile)
+            : c(agree ? 'result.details.agree' : 'result.details.disagree', agree ? COPY.checksAgree : COPY.checksDisagree)}
+        </li>
       </ul>
     )
   }

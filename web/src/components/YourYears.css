@@ -1,0 +1,26 @@
+/* "You picked these years" box: dashed on purpose, it marks a user-chosen window that is not the declared reference. */
+.your-years {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  padding: 0.9rem 1.1rem;
+  margin: 0.75rem 0;
+}
+.your-years-title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-head);
+  letter-spacing: -0.02em;
+}
+.your-years-rows {
+  list-style: none;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.your-years-rows li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import type { AnalysisResult } from '../types/contract'
-import { yearlyChart, yearlyPoints } from './charts'
+import { anomalyChart, rawChart, yearlyChart, yearlyPoints } from './charts'
 import { setLang } from '../i18n'
 
 const dry = JSON.parse(readFileSync('src/fixtures/airs_rh_surf_day__dry.json', 'utf8')) as AnalysisResult
@@ -55,5 +55,46 @@ describe('yearly chart (R3, season bug)', () => {
     const c = yearlyChart(r, 'simple')
     expect(c.layout.annotations?.[0]?.text).toBe('Satellite drift: years left out')
     expect(c.layout.shapes).toHaveLength(1)
+  })
+})
+
+describe('kid scale on the charts', () => {
+  const haze: AnalysisResult = {
+    ...all,
+    variable: { ...all.variable, units: { ...all.variable.units, display: 'AOD', simple: 'points on the haze scale', decimals: 3, kid_scale: 100, kid_label: 'on the haze scale', kid_label_es: null } },
+    then_now: null,
+  } as AnalysisResult
+  const ys = (d: unknown) => (d as { y: number[] }).y
+  const same = (a: number[], b: number[], k: number) => {
+    expect(a.length).toBe(b.length)
+    a.forEach((v, i) => expect(v).toBeCloseTo(b[i] * k, 9))
+  }
+  it('rawChart scales every trace x100 in Simple, not in Scientific', () => {
+    const sci = rawChart(haze, 'scientific')
+    const sim = rawChart(haze, 'simple')
+    sci.data.forEach((d, i) => same(ys(sim.data[i]), ys(d), 100))
+    expect(ys(sci.data[0])).toEqual(haze.series!.filter((p) => p.in_window && p.value != null).map((p) => p.value))
+    expect((sim.layout.yaxis as { title: { text: string } }).title.text).toBe('points on the haze scale')
+  })
+  it('anomalyChart scales the dots, band and trend x100 in Simple, not in Scientific', () => {
+    const sci = anomalyChart(haze, 'scientific')
+    const sim = anomalyChart(haze, 'simple')
+    expect(sim.data.length).toBe(sci.data.length)
+    expect(sim.data.some((d) => (d as { fill?: string }).fill === 'tonexty')).toBe(true)
+    sci.data.forEach((d, i) => same(ys(sim.data[i]), ys(d), 100))
+    expect((sim.layout.yaxis as { title: { text: string } }).title.text).toBe('Difference from normal (points on the haze scale)')
+  })
+  it('yearlyChart scales the dots and trend line x100 in Simple, not in Scientific', () => {
+    const sci = yearlyChart(haze, 'scientific')
+    const sim = yearlyChart(haze, 'simple')
+    same(ys(sim.data[0]), ys(sci.data[0]), 100)
+    expect(ys(sci.data[0])).toEqual(yearlyPoints(haze).filter((p) => p.in_window).map((p) => p.anomaly))
+  })
+  it('yearlyChart falls back to the then_now scale when units has no kid fields', () => {
+    const old = { ...all, variable: { ...all.variable, units: { ...all.variable.units, kid_label: null } }, then_now: { ...all.then_now!, kid_scale: 10 } } as AnalysisResult
+    const sim = yearlyChart(old, 'simple')
+    const first = yearlyPoints(old).find((p) => p.in_window)!
+    const off = old.then_now!.value_then - (old.trend!.fit.find((p) => Number(p.t.slice(0, 4)) === old.then_now!.year_then) ?? old.trend!.fit[0]).trend
+    expect(ys(sim.data[0])[0]).toBeCloseTo((first.anomaly + off) * 10, 6)
   })
 })

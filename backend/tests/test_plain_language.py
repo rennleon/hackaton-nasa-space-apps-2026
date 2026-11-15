@@ -177,7 +177,7 @@ def test_spanish_verdict_words_and_numbers(outputs):
             text = v["how_much"]["simple_es"]
             assert not re.search(r"\d\.\d|-\d", text), text
         if v["certainty"] == "too_soon" and "años más" in v["how_much"]["simple_es"]:
-            assert re.search(r"Necesitamos mirar unos \d+ años más\.", v["how_much"]["simple_es"])
+            assert re.search(r"Si sigue así, lo sabríamos en unos \d+ años más\.", v["how_much"]["simple_es"])
 
 
 def test_rests_on_few_years_chip_names_at_most_three_years(ctx, monkeypatch):

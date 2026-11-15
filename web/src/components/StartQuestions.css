@@ -1,13 +1,16 @@
-.start-questions { padding: 1.3rem 1.5rem; scroll-margin-top: 80px; box-shadow: var(--shadow), 0 0 0 2px var(--accent); }
-.start-questions:focus { outline: none; }
-.sq-head { display: flex; justify-content: space-between; gap: 1rem; align-items: start; flex-wrap: wrap; }
-.sq-eyebrow { margin: 0; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.sq-head h2 { margin: 0.1rem 0; }
+.start-questions { display: grid; gap: 1.2rem; }
+.sq-head { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; }
 .sq-head p { margin: 0; }
-.sq-ask { margin: 1.1rem 0 0.6rem; }
-.sq-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr)); gap: 1rem; }
-.sq-card { width: 100%; height: 100%; text-align: left; font: inherit; background: var(--surface-2); color: var(--text); border: 0; border-radius: var(--radius); padding: 1rem 1.2rem; cursor: pointer; display: grid; gap: 0.25rem; align-content: start; transition: box-shadow 0.15s, transform 0.15s; }
-.sq-card:hover { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); transform: translateY(-2px); }
-.sq-icon { color: var(--trend); display: inline-flex; }
-.sq-name { font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; }
+.sq-place { font-size: clamp(1.7rem, 1.2rem + 2vw, 2.2rem); line-height: 1.1; margin: 0.25rem 0; }
+.sq-place:focus { outline: none; }
+.sq-place:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.sq-ask { margin: 0; font-size: 1.1rem; font-family: var(--font-body); letter-spacing: 0; }
+.sq-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: 0.8rem; }
+/* the card is the <li>: the main button and the sub-topic row sit one under the other inside it (no nested buttons) */
+.sq-grid > li { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding-bottom: 1rem; transition: border-color 0.15s; }
+.sq-grid > li:hover, .sq-grid > li:focus-within { border-color: var(--accent); }
+.sq-grid > li .subtopics { padding: 0.4rem 1.3rem 0; }
+.sq-card { width: 100%; flex: 1; min-height: 44px; text-align: left; font: inherit; background: transparent; color: var(--text); border: 0; border-radius: var(--radius); padding: 1.3rem 1.3rem 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+.sq-card:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.sq-name { font-family: var(--font-head); font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
 .sq-q { color: var(--muted); }

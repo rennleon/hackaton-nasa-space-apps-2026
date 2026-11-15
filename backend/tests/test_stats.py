@@ -131,3 +131,19 @@ def test_persistence_correction_inflates_p() -> None:
         assert r.r1 > 0.6 and r.n_eff < 120
         ratios.append(r.p_ols >= naive)
     assert all(ratios)
+
+
+def test_season_slopes_equal_slopes_unequal_noise_not_flagged() -> None:
+    """Equal slopes with winter noise 5x summer noise must not look unequal (the van Belle-Hughes trap)."""
+    from trend_detective.stats import seasonal_slope_homogeneity
+
+    rng = np.random.default_rng(3)
+    years = 22
+    t = np.repeat(np.arange(years), 12).astype(float) + np.tile(np.arange(12) / 12, years)
+    cal = np.tile(np.arange(1, 13), years)
+    sd = np.where((cal <= 3) | (cal >= 10), 1.0, 0.2)
+    flagged = [seasonal_slope_homogeneity(t, 0.05 * t + rng.normal(0, 1, t.size) * sd, cal).p < 0.05
+               for _ in range(300)]
+    assert np.mean(flagged) < 0.10  # nominal 5%
+    differ = np.where(cal <= 6, 0.1, 0.0) * t + rng.normal(0, 1, t.size) * sd
+    assert seasonal_slope_homogeneity(t, differ, cal).p < 0.001

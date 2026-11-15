@@ -50,7 +50,8 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
   "then vs now" ("In 2003 a normal afternoon was this damp; in 2021 it was this damp") over a slope.
 - **"How sure are we" as a picture**: a three-step meter with words: "Sure it's real" / "Maybe, not sure yet" /
   "Too soon to tell". Never colour alone; always icon + word.
-- **Not significant is never "no change"**: say "Too soon to tell. We need to watch for about N more years."
+- **Not significant is never "no change"**: say "Too soon to tell. If it keeps going like this, we'd know in about N
+  more years." (an estimate at the observed rate, never a promise)
 - **Comparisons kids know**: one familiar comparison per result where it is honest (for example, "about as much
   warmer as moving from X to Y"). Never invent a comparison the numbers don't support.
 - **Simple chart by default**: one dot per year (yearly average of the de-seasonalised values) plus one arrow or
@@ -72,7 +73,8 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
   expect change, fitness (coverage, monthly, cells, no known break), and the minimum detectable trend from noise
   and persistence. The significance scan is a result, never a selection rule.
 - Drift: cut 2022 onward only for variables sensitive to the satellite's pass time (AIRS surface humidity and
-  temperature, clouds); other Aqua and Terra series keep the full record with a warning.
+  temperature, clouds); other Aqua and Terra series keep the full record with a warning, and a window across the
+  drift date is never "Sure it's real" (user decision Nov 15).
 - Never write "caused by", "proves" or "no change".
 
 ## Data rules
@@ -100,6 +102,11 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
     "Where else?" strip (same variable's verdict across the ready-made places). Trend map stays parked.
   - Spanish as a second UI language (EN/ES toggle, English default; submission materials stay in English).
   - v2 work lives on `feat/v2-live-data`. Progress and resources: `docs/data-integration-tracker.md`.
+- Known breaks (Nov 15): when the window crosses any flagged break (frozen model emissions, model input changes,
+  OMI row anomaly, MODIS orbit drift), "Sure it's real" drops to "Maybe, not sure yet". The record is still kept.
+- Release v2.0.0 (Nov 15): PR #2 squash-merged into `main` and tagged. Work for the next version lives on
+  `feat/v3` (branched from `v2.0.0`); `feat/v2-live-data` is merged and frozen. Add changes under
+  `## [Unreleased]` in `CHANGELOG.md`; release with `npm run release` (see RELEASING.md).
 - Never invent a citation. Every "expected to change because…" line needs a source someone opened and checked.
 - When reporting status, list each requirement R1–R6 as done, partial or not started, with what the user should
   click to see it.

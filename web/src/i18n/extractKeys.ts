@@ -5,6 +5,7 @@ import { join, relative } from 'node:path'
 import ts from 'typescript'
 import { FC } from '../lib/findingsCopy'
 import { S } from '../lib/sourceLabels'
+import { HOW } from '../lib/howCopy'
 import { COPY, CERTAINTY_CANT_TELL, CERTAINTY_STEPS } from '../lib/copy'
 import { SHORTLIST_META, VERDICT_META } from '../lib/labels'
 import { DEMOS } from '../lib/demos'
@@ -138,6 +139,7 @@ const both = (key: string, p: Pair, suffix: [string, string], file: string): Key
 export function dynamicUses(): KeyUse[] {
   const out: KeyUse[] = []
   // useL: bare key when both registers read the same, else `.simple` / `.scientific`
+  for (const [k, p] of Object.entries(HOW)) out.push(...both(k, p, ['simple', 'scientific'], 'lib/howCopy.ts'))
   for (const [k, p] of Object.entries(FC)) {
     out.push(...both(k, p, ['simple', 'scientific'], 'lib/findingsCopy.ts'))
   }
@@ -151,6 +153,7 @@ export function dynamicUses(): KeyUse[] {
   rc('result.gauge.cant', CERTAINTY_CANT_TELL.text, 'lib/copy.ts')
   for (const s of CERTAINTY_STEPS) rc(`result.gauge.${s.id}`, s.text, 'lib/copy.ts')
   rc('result.details.agree', COPY.checksAgree, 'lib/copy.ts')
+  rc('result.details.fragile', COPY.checksFragile, 'lib/copy.ts')
   rc('result.details.disagree', COPY.checksDisagree, 'lib/copy.ts')
   rc('result.live.down', COPY.liveDown, 'lib/copy.ts')
   rc('result.live.place', COPY.placeRejected, 'lib/copy.ts')
@@ -175,11 +178,11 @@ export function dynamicUses(): KeyUse[] {
   trust('result.trust.cross.same_direction_one_unsure', 'Both point the same way. One is not sure yet.', 'Same direction; only one instrument is significant.')
   trust('result.trust.cross.disagree', 'The two instruments disagree.', 'The two instruments disagree on the direction.')
   trust('result.trust.cross.both_unsure', 'Neither instrument is sure yet.', 'Neither instrument shows a significant trend.')
-  trust('result.trust.cross.only_one', 'Only one instrument sees this place.', 'Only one instrument covers this place.')
+  trust('result.trust.cross.only_one', 'We could not compare with a second source here.', 'No usable second-source series to compare with here.')
   trust('result.trust.agreement.agrees', 'This matches what scientists found.', 'Agrees with the published assessment.')
   trust('result.trust.agreement.differs', 'This is different from what scientists found.', 'Differs from the published assessment.')
   trust('result.trust.agreement.too_soon', 'Our record is too short to compare with the scientists yet.', 'Record too short to compare with the published assessment.')
-  trust('result.trust.title', 'Tell me more: can we trust this?', 'Can we trust this? Evidence checks')
+  trust('result.trust.title', 'Can we trust this?', 'Can we trust this? Evidence checks')
   for (const [d, en] of [['upward', 'upward'], ['downward', 'downward'], ['flat', 'flat']]) out.push({ key: `result.chart.dir.${d}.simple`, en, file: 'lib/charts.ts' }, { key: `result.chart.dir.${d}.sci`, en, file: 'lib/charts.ts' })
   return out
 }

@@ -33,7 +33,7 @@ const open = (hash: string, client: DataClient = base) => {
 describe('custom place', () => {
   it('shows the shortlist in Simple view with no banned words, no season controls, and the credit', async () => {
     const { container } = open('#/shortlist?place=pt:-7.16,-78.51&theme=water')
-    expect(await screen.findByText('Data: NASA POWER (MERRA-2-based)')).toBeInTheDocument()
+    expect(await screen.findByText('Data: NASA POWER')).toBeInTheDocument()
     expect(screen.getAllByText('Your place').length).toBeGreaterThan(0)
     expect(screen.queryByText('Only one time of year')).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(0)
@@ -49,7 +49,8 @@ describe('custom place', () => {
   it('chooser: typing a too-big box is refused, a good box shows the questions and opens the shortlist', async () => {
     const user = userEvent.setup()
     open('#/')
-    await user.click(await screen.findByRole('button', { name: 'Draw a box' }))
+    await user.click(await screen.findByRole('tab', { name: 'Coordinates' }))
+    await user.click(screen.getByRole('button', { name: 'A box' }))
     const side = (name: string, kind: 'Number' | 'Which') => screen.getByLabelText(new RegExp(`${name} edge.*: ${kind}`))
     // Kids type sizes and pick a side: -80 is 80 West, -20 is 20 South, -70 is 70 West, -5 is 5 South.
     const fill = async (name: string, size: string, option: string) => {
@@ -65,7 +66,7 @@ describe('custom place', () => {
     expect(screen.getByRole('button', { name: 'Use these numbers' })).toBeDisabled()
     await fill('South', '12', 'South')
     await user.click(screen.getByRole('button', { name: 'Use these numbers' }))
-    expect(screen.getByText(/Your box is about/)).toBeInTheDocument()
+    expect(await screen.findByText(/This area is about/)).toBeInTheDocument()
     await user.click(await screen.findByRole('button', { name: /Water/ }))
     await waitFor(() => expect(window.location.hash).toBe('#/shortlist?place=box:-80,-12,-70,-5&theme=water'))
   })

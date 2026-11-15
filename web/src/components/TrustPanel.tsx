@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { AnalysisResult, Comparison, Text } from '../types/contract'
 import { fmt, useResultCopy } from '../lib/resultCopy'
 import { Term } from './Term'
+import { TermText } from './TermText'
 import { Icon, type IconName } from './ResultIcons'
 import './VariableView.css'
 
@@ -36,7 +37,7 @@ function outcomeOf(c: Comparison): Outcome {
  * Replaces the old "Why we looked at this" list, so "the change is real" and "hard to spot with this record" read together.
  */
 export function TrustPanel({ result }: { result: AnalysisResult }) {
-  const { s, c, bx, view } = useResultCopy()
+  const { s, c, t, bx, view } = useResultCopy()
   const simple = view === 'simple'
   const sel = result.selection
   const statusWord = (st: Status) =>
@@ -65,7 +66,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     same_direction_one_unsure: { simple: 'Both point the same way. One is not sure yet.', scientific: 'Same direction; only one instrument is significant.' },
     disagree: { simple: 'The two instruments disagree.', scientific: 'The two instruments disagree on the direction.' },
     both_unsure: { simple: 'Neither instrument is sure yet.', scientific: 'Neither instrument shows a significant trend.' },
-    only_one: { simple: 'Only one instrument sees this place.', scientific: 'Only one instrument covers this place.' },
+    only_one: { simple: 'We could not compare with a second source here.', scientific: 'No usable second-source series to compare with here.' },
   }
   const second: Row[] =
     cc && ccOutcome
@@ -86,6 +87,54 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
         ]
       : []
 
+  const ca = result.robustness?.cell_agreement ?? null
+  const cells: Row[] = ca ? [cellRow(ca)] : []
+
+  // One sentence per verdict, with "map squares" (grid cells) linked to the glossary. Keys stay literal for the i18n check.
+  function cellRow(x: NonNullable<typeof ca>): Row {
+    const vars = { n: x.n_cells, k: x.n_same_sign, m: x.n_opposite, sure: x.n_opposite_sure, sq: '{sq}' }
+    const word = s('result.trust.cells.sq', 'map squares', 'grid cells')
+    const verdictWord =
+      x.verdict === 'agree'
+        ? s('result.trust.cells.vAgree', '', 'agree')
+        : x.verdict === 'mostly'
+          ? s('result.trust.cells.vMostly', '', 'mostly agree')
+          : x.verdict === 'unclear'
+            ? s('result.trust.cells.vUnclear', '', 'unclear')
+            : s('result.trust.cells.vMixed', '', 'mixed')
+    const text = !simple
+      ? s('result.trust.cells.count', '', 'Cells with the box\'s sign of slope: {k} of {n}. Opposite: {m}, of which {sure} significant (Benjamini–Hochberg FDR, α = 0.05).', vars)
+      : x.verdict === 'agree' && x.n_same_sign === x.n_cells
+        ? t('result.trust.cells.agreeAll', 'We checked {n} {sq} in your box. All go the same way.', vars)
+        : x.verdict === 'agree'
+          ? t('result.trust.cells.agree', 'We checked {n} {sq} in your box. {k} go the same way.', vars)
+          : x.verdict === 'mostly'
+            ? t('result.trust.cells.mostly', 'We checked {n} {sq} in your box. {k} go the same way. A few do not.', vars)
+            : x.verdict === 'unclear'
+              ? t('result.trust.cells.unclear', 'We checked {n} {sq} in your box. They point different ways. None of them is sure.', vars)
+              : t('result.trust.cells.mixed', 'We checked {n} {sq} in your box. Some surely go the other way. They may cancel out.', vars)
+    return {
+      key: 'cells',
+      status: x.verdict === 'agree' ? 'pass' : x.verdict === 'mixed' ? 'caution' : 'info', // unclear/mostly: information, not an alarm
+      text: '',
+      extra: (
+        <>
+          <TermText text={text} terms={{ sq: <Term id="grid_cell">{word}</Term> }} />
+          {!simple && (
+            <span className="muted small">
+              {' '}
+              {s('result.trust.cells.rule', '', 'Result: {verdict}. Mixed: an opposite cell is significant. Otherwise agree (at least 80% share the box\'s sign), mostly (60–80%) or unclear (under 60%).', { verdict: verdictWord })}{' '}
+              <a href="https://doi.org/10.1175/BAMS-D-15-00267.1" target="_blank" rel="noreferrer">
+                {s('result.trust.cells.ref', '', 'Wilks (2016), Bull. Amer. Meteor. Soc. 97(12):2263–2273')}
+              </a>
+              .
+            </span>
+          )}
+        </>
+      ),
+    }
+  }
+
   const pub = result.published
   const agreeText: Record<NonNullable<NonNullable<typeof pub>['agreement']>, { st: Status; text: Text }> = {
     agrees: { st: 'pass', text: { simple: 'This matches what scientists found.', scientific: 'Agrees with the published assessment.' } },
@@ -98,6 +147,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     { id: 'quality', icon: 'data', title: s('result.trust.quality', 'Is the data good?', 'Data quality'), rows: quality },
     { id: 'record', icon: 'record', title: s('result.trust.record', 'Is the record long enough?', 'Long enough record'), rows: record },
     { id: 'second', icon: 'pair', title: s('result.trust.second', 'Does another instrument agree?', 'Second opinion'), rows: second },
+    { id: 'cells', icon: 'data', title: s('result.trust.cells', 'Do the parts of your box agree?', 'Agreement between cells'), rows: cells },
   ] as Group[]).filter((g) => g.rows.length > 0 || g.id === 'record')
 
   const na = s('result.trust.na', '', 'n/a')
@@ -112,7 +162,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     <section className="card trust" aria-labelledby="trust-h" data-demo="trust">
       <details key={view} className="trust-details" open={!simple}>
         <summary>
-          <h3 id="trust-h">{c('result.trust.title', { simple: 'Tell me more: can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
+          <h3 id="trust-h">{c('result.trust.title', { simple: 'Can we trust this?', scientific: 'Can we trust this? Evidence checks' })}</h3>
         </summary>
         {hard && (
           <div className="trust-head">
@@ -134,7 +184,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
                   <span>
                     <span className="visually-hidden">{statusWord(row.status)}: </span>
                     {row.text}
-                    {row.extra && <> {row.extra}</>}
+                    {row.extra && <>{row.text ? ' ' : ''}{row.extra}</>}
                   </span>
                 </li>
               ))}

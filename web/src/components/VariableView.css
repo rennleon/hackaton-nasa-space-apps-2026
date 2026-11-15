@@ -50,3 +50,20 @@
 /* charts */
 .chart-main { box-shadow: var(--shadow), 0 0 0 2px var(--hairline); }
 .charts figure, .chart-main { overflow: hidden; }
+
+/* result page surfaces, matching the findings list: hairline-edged cards, display headings, round inputs */
+.variable { display: flex; flex-direction: column; gap: 1.2rem; max-width: 1200px; }
+.variable > * { min-width: 0; margin-top: 0; margin-bottom: 0; }
+.variable h1 { font-size: clamp(2rem, 1.3rem + 3vw, 3.1rem); }
+.variable > .muted, .variable > p { margin: 0; }
+.variable .controls { margin: 0; padding: 1rem; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); box-shadow: var(--shadow); }
+.variable .period input { background: var(--surface); border: 1px solid var(--hairline); min-height: 2.9rem; padding: 0 0.85rem; font-family: var(--font-mono); }
+.variable .period input:focus-visible { border-color: var(--accent); outline: 3px solid var(--focus); outline-offset: 1px; }
+.variable .card, .variable figure { border: 1px solid var(--hairline); border-radius: var(--radius); box-shadow: var(--shadow); }
+.variable .chart-main { box-shadow: var(--shadow); }
+.variable .chart-summary { border-radius: var(--radius-md); }
+.variable .verdict h2 { font-family: var(--font-head); }
+@media (max-width: 720px) {
+  .variable { gap: 1rem; }
+  .variable .controls { padding: 0.8rem; }
+}

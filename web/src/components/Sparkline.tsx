@@ -5,6 +5,8 @@ import './Sparkline.css'
 const W = 120
 const H = 38
 const PAD = 4
+/** The wide form fills a card: the same dots and line on a 4:1 canvas, so the dots stay round. */
+const WIDE = { w: 320, h: 80, pad: 10, r: 2.6 }
 
 /** Least-squares line through the dots, only used to draw the line (the verdict comes from the engine). */
 function fit(pts: { x: number; y: number }[]): { a: number; b: number } | null {
@@ -19,7 +21,7 @@ function fit(pts: { x: number; y: number }[]): { a: number; b: number } | null {
 }
 
 /** One dot per year plus one line. Dots outside the analysis window are hollow. */
-export function Sparkline({ series, label }: { series: YearPoint[]; label: string }) {
+export function Sparkline({ series, label, wide = false }: { series: YearPoint[]; label: string; wide?: boolean }) {
   const pts = [...series].sort((p, q) => p.year - q.year)
   if (pts.length < 2) return null
   const x0 = pts[0].year
@@ -30,17 +32,20 @@ export function Sparkline({ series, label }: { series: YearPoint[]; label: strin
     y0 -= 1
     y1 += 1
   }
-  const X = (x: number) => PAD + ((x - x0) / (x1 - x0 || 1)) * (W - 2 * PAD)
-  const Y = (y: number) => H - PAD - ((y - y0) / (y1 - y0)) * (H - 2 * PAD)
+  const w = wide ? WIDE.w : W
+  const h = wide ? WIDE.h : H
+  const pad = wide ? WIDE.pad : PAD
+  const X = (x: number) => pad + ((x - x0) / (x1 - x0 || 1)) * (w - 2 * pad)
+  const Y = (y: number) => h - pad - ((y - y0) / (y1 - y0)) * (h - 2 * pad)
   const inside = pts.filter((q) => q.in_window).map((q) => ({ x: q.year, y: q.anomaly }))
   const line = fit(inside)
   const lx0 = inside.length ? inside[0].x : x0
   const lx1 = inside.length ? inside[inside.length - 1].x : x1
   return (
-    <svg className="spark" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label} preserveAspectRatio="none">
+    <svg className={wide ? 'spark spark-wide' : 'spark'} viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} preserveAspectRatio={wide ? undefined : 'none'}>
       {line && <line className="spark-line" x1={X(lx0)} y1={Y(line.a + line.b * lx0)} x2={X(lx1)} y2={Y(line.a + line.b * lx1)} />}
       {pts.map((q) => (
-        <circle key={q.year} className={q.in_window ? 'spark-dot' : 'spark-dot spark-out'} cx={X(q.year)} cy={Y(q.anomaly)} r={1.9} />
+        <circle key={q.year} className={q.in_window ? 'spark-dot' : 'spark-dot spark-out'} cx={X(q.year)} cy={Y(q.anomaly)} r={wide ? WIDE.r : 1.9} />
       ))}
     </svg>
   )

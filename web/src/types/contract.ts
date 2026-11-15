@@ -22,6 +22,7 @@ export interface AnalysisResult {
   detectability: Detectability | null;
   robustness: Robustness;
   chips: Chip[];
+  start_years: StartYearSensitivity | null;
   published: PublishedFinding | null;
   published_context: PublishedFinding[];
   verdict: Verdict;
@@ -76,6 +77,9 @@ export interface UnitsInfo {
   display: string;
   simple: string;
   decimals: number;
+  kid_scale: number;
+  kid_label: string | null;
+  kid_label_es: string | null;
 }
 /**
  * Where the series came from. Live sources fill the same fields.
@@ -259,6 +263,7 @@ export interface Robustness {
   drift_label_with_late_years: string | null;
   cross_check: Comparison | null;
   spatial: Comparison | null;
+  cell_agreement: CellAgreement | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -290,6 +295,20 @@ export interface Comparison {
   text: Text | null;
 }
 /**
+ * Do the grid cells inside a box go the way the box average goes? (Counts only, no map.)
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "CellAgreement".
+ */
+
+export interface CellAgreement {
+  n_cells: number;
+  n_same_sign: number;
+  n_opposite: number;
+  n_opposite_sure: number;
+  verdict: "agree" | "mostly" | "unclear" | "mixed";
+}
+/**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
  * via the `definition` "Chip".
  */
@@ -298,6 +317,37 @@ export interface Chip {
   code: string;
   severity: "info" | "warning";
   text: Text;
+}
+/**
+ * Does the answer hold if the window starts in a different year? Context only: the headline
+ * verdict stays on the declared window (Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1).
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "StartYearSensitivity".
+ */
+
+export interface StartYearSensitivity {
+  points: StartYearPoint[];
+  n_starts: number;
+  n_same_sign: number;
+  n_significant: number;
+  n_opposite_sure: number;
+  classification: "holds" | "mostly" | "unclear" | "depends";
+}
+/**
+ * The same trend machinery re-run with the window starting in January of `start`'s year.
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "StartYearPoint".
+ */
+
+export interface StartYearPoint {
+  start: string;
+  years: number;
+  slope_per_decade: number;
+  ci_low: number;
+  ci_high: number;
+  significant: boolean;
 }
 /**
  * A checked statement from published science (e.g. IPCC AR6 regional assessment) for this place.
@@ -387,5 +437,51 @@ export interface PlaceProfile {
   wet_months: number[];
   dry_months: number[];
   text: Text | null;
+  homogeneity: Homogeneity | null;
+}
+/**
+ * "Is this one kind of place?" From long-term means only (never a trend), before any trend is computed.
+ * The rules are PROJECT HEURISTICS (the concept follows Hosking & Wallis 1993); the literature gives no thresholds.
+ *
+ * This interface was referenced by `ScanResult`'s JSON-Schema
+ * via the `definition` "Homogeneity".
+ */
+
+export interface Homogeneity {
+  kind: "one_kind" | "mixed" | "single_spot";
+  reasons: HomogeneityReason[];
+  n_cells: number;
+  precip_min: number | null;
+  precip_max: number | null;
+  t2m_min: number | null;
+  t2m_max: number | null;
+  elev_min: number | null;
+  elev_max: number | null;
+  climate_groups: {
+    [k: string]: number;
+  };
+  suggestions: HomogeneitySuggestion[];
+  text: Text;
+}
+/**
+ * This interface was referenced by `ScanResult`'s JSON-Schema
+ * via the `definition` "HomogeneityReason".
+ */
+
+export interface HomogeneityReason {
+  code: "climate_groups" | "elevation" | "rain" | "temperature";
+  text: Text;
+}
+/**
+ * A smaller box inside a mixed one that is itself one kind of place.
+ *
+ * This interface was referenced by `ScanResult`'s JSON-Schema
+ * via the `definition` "HomogeneitySuggestion".
+ */
+
+export interface HomogeneitySuggestion {
+  bbox: number[];
+  name: Text;
+  n_cells: number;
 }
 

@@ -77,11 +77,19 @@ def resolve_window(
     return Window(start=first, end=end_m, reason=reason, years=round(window_years(first, end_m), 2))
 
 
+# A step (one-off change in the inputs) only matters with data on both sides of it. The other flagged kinds
+# (frozen emissions, row anomaly, orbit drift) start a period that lasts, so any window reaching it is affected.
+STEP_ARTIFACT_KINDS = {"input_change"}
+
+
 def flagged_artifacts(variable: VariableCard, window: Window) -> list:
-    """Known breaks (action 'flag') whose date falls inside the window."""
+    """Known breaks (action 'flag') that affect the window: a step needs data before it (a step in the first month
+    has none); a lasting period counts whenever the window reaches its start. Never a break after the window's end."""
+    s, e = month_index(window.start), month_index(window.end)
     return [
         a for a in variable.artifacts
-        if a.action == "flag" and month_index(window.start) <= month_index(a.start) <= month_index(window.end)
+        if a.action == "flag" and month_index(a.start) <= e
+        and (s < month_index(a.start) if a.kind in STEP_ARTIFACT_KINDS else True)
     ]
 
 

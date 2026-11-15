@@ -47,6 +47,11 @@ class UnitsInfo(Model):
     display: str
     simple: str
     decimals: int
+    # The Simple view's scale: kid value = display value * kid_scale, read with kid_label ("on the haze scale").
+    # `simple` names the DISPLAY unit, so a Simple-view amount must use these, never `simple` with a kid number.
+    kid_scale: float = 1.0
+    kid_label: str | None = None
+    kid_label_es: str | None = None
 
 
 class VariableRef(Model):
@@ -188,11 +193,45 @@ class Comparison(Model):
     text: Text | None = None  # one plain sentence for each view
 
 
+class StartYearPoint(Model):
+    """The same trend machinery re-run with the window starting in January of `start`'s year."""
+
+    start: str  # YYYY-MM
+    years: float  # length of the shortened window
+    slope_per_decade: float
+    ci_low: float
+    ci_high: float
+    significant: bool  # both persistence-aware tests agree at alpha
+
+
+class StartYearSensitivity(Model):
+    """Does the answer hold if the window starts in a different year? Context only: the headline
+    verdict stays on the declared window (Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1)."""
+
+    points: list[StartYearPoint]
+    n_starts: int
+    n_same_sign: int  # starts whose slope has the same sign as the declared window's slope
+    n_significant: int
+    n_opposite_sure: int = 0  # starts significant with the opposite sign (the only thing that makes it "depends")
+    classification: Literal["holds", "mostly", "unclear", "depends"]
+
+
+class CellAgreement(Model):
+    """Do the grid cells inside a box go the way the box average goes? (Counts only, no map.)"""
+
+    n_cells: int  # cells with enough data in the window
+    n_same_sign: int  # cells whose own slope has the sign of the box slope
+    n_opposite: int  # n_cells - n_same_sign
+    n_opposite_sure: int  # opposite-sign cells that are significant after Benjamini-Hochberg FDR across the cells
+    verdict: Literal["agree", "mostly", "unclear", "mixed"]
+
+
 class Robustness(Model):
     leave_one_year_out: LeaveOneYearOut | None = None
     drift_label_with_late_years: str | None = None
     cross_check: Comparison | None = None
     spatial: Comparison | None = None
+    cell_agreement: CellAgreement | None = None  # boxes only, variable page only (the scan skips it)
 
 
 class SelectionCheck(Model):
@@ -227,7 +266,7 @@ class Verdict(Model):
     label: Label
     certainty: Certainty  # the three-step "how sure are we" meter (+ can't tell)
     answer: Text  # one-sentence answer, shown first
-    how_much: Text  # simple: then vs now in whole numbers, or "watch for about N more years"
+    how_much: Text  # simple: then vs now in whole numbers, or "if it keeps going like this, we'd know in about N years"
     headline: Text
     sentence: Text
     notes: list[Text] = Field(default_factory=list)
@@ -251,6 +290,37 @@ class PublishedFinding(Model):
     partial: bool = False  # the statement holds for parts of the region, so "differs" is never claimed
 
 
+class HomogeneityReason(Model):
+    code: Literal["climate_groups", "elevation", "rain", "temperature"]
+    text: Text
+
+
+class HomogeneitySuggestion(Model):
+    """A smaller box inside a mixed one that is itself one kind of place."""
+
+    bbox: list[float]  # [W, S, E, N], 2 decimals
+    name: Text  # "the high, cool part"
+    n_cells: int
+
+
+class Homogeneity(Model):
+    """"Is this one kind of place?" From long-term means only (never a trend), before any trend is computed.
+    The rules are PROJECT HEURISTICS (the concept follows Hosking & Wallis 1993); the literature gives no thresholds."""
+
+    kind: Literal["one_kind", "mixed", "single_spot"]
+    reasons: list[HomogeneityReason] = Field(default_factory=list)
+    n_cells: int
+    precip_min: float | None = None  # annual mean, mm/day (NASA POWER climatology, MERRA-2)
+    precip_max: float | None = None
+    t2m_min: float | None = None  # annual mean, degrees C
+    t2m_max: float | None = None
+    elev_min: float | None = None  # model-grid elevation, m
+    elev_max: float | None = None
+    climate_groups: dict[str, int] = Field(default_factory=dict)  # Koppen main group letter -> number of cells
+    suggestions: list[HomogeneitySuggestion] = Field(default_factory=list)
+    text: Text
+
+
 class PlaceProfile(Model):
     """What kind of place this is, from facts known before any trend (long-term means, elevation, maps)."""
 
@@ -263,6 +333,7 @@ class PlaceProfile(Model):
     wet_months: list[int] = Field(default_factory=list)
     dry_months: list[int] = Field(default_factory=list)
     text: Text | None = None  # "Your place is dry and hot, high in the mountains."
+    homogeneity: Homogeneity | None = None  # "Is this one kind of place?" (boxes only; None when unknown)
 
 
 class AnalysisResult(Model):
@@ -286,6 +357,7 @@ class AnalysisResult(Model):
     detectability: Detectability | None = None
     robustness: Robustness = Field(default_factory=Robustness)
     chips: list[Chip] = Field(default_factory=list)
+    start_years: StartYearSensitivity | None = None  # context only; None for seasons and when no trend was computed
     published: PublishedFinding | None = None  # what scientists found here, for the MEAN we tested
     published_context: list[PublishedFinding] = Field(default_factory=list)  # extremes, Scientific view only
     verdict: Verdict

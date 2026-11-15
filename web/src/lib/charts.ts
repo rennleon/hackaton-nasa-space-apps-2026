@@ -1,6 +1,6 @@
 import type { Data, Layout } from 'plotly.js'
 import type { AnalysisResult, YearPoint } from '../types/contract'
-import { formatYm, type ViewMode } from './text'
+import { formatYm, unitAfter, viewUnits, type ViewMode } from './text'
 import { COPY } from './copy'
 import { fmt, sv } from './resultCopy'
 import { getLang, tx } from '../i18n'
@@ -27,7 +27,13 @@ function leftOutText(r: AnalysisResult, view: ViewMode): string {
 }
 
 function unitLabel(r: AnalysisResult, view: ViewMode) {
-  return view === 'simple' ? r.variable.units.simple : r.variable.units.display
+  const u = viewUnits(r.variable.units, view)
+  return view === 'simple' ? unitAfter(u.label, 2) : u.label // an axis has no number beside it: plural
+}
+
+/** Multiplier for plotted values: the Simple view plots kid-scale numbers to match its kid-unit axis label. */
+function valueScale(r: AnalysisResult, view: ViewMode) {
+  return viewUnits(r.variable.units, view).scale
 }
 
 /** Chart 1: raw monthly values, months outside the window greyed, excluded drift period shaded. */
@@ -36,10 +42,11 @@ export function rawChart(r: AnalysisResult, view: ViewMode): ChartSpec {
   const inW = series.filter((p) => p.in_window && p.value != null)
   const outW = series.filter((p) => !p.in_window && p.value != null)
   const season = r.season?.months
+  const k = valueScale(r, view)
   const data: Data[] = [
     {
       x: inW.map((p) => day(p.t)),
-      y: inW.map((p) => p.value),
+      y: inW.map((p) => p.value! * k),
       type: 'scatter',
       mode: 'lines+markers',
       name: sv(view, 'result.chart.used', 'Used in the answer', 'In analysis window'),
@@ -49,7 +56,7 @@ export function rawChart(r: AnalysisResult, view: ViewMode): ChartSpec {
     },
     {
       x: outW.map((p) => day(p.t)),
-      y: outW.map((p) => p.value),
+      y: outW.map((p) => p.value! * k),
       type: 'scatter',
       mode: 'markers',
       name: sv(view, 'result.chart.out', 'Left out', 'Outside window'),
@@ -61,7 +68,7 @@ export function rawChart(r: AnalysisResult, view: ViewMode): ChartSpec {
     const sm = inW.filter((p) => season.includes(Number(p.t.slice(5, 7))))
     data.push({
       x: sm.map((p) => day(p.t)),
-      y: sm.map((p) => p.value),
+      y: sm.map((p) => p.value! * k),
       type: 'scatter',
       mode: 'markers',
       name: tx(r.season!.name, view),
@@ -88,14 +95,14 @@ export function rawChart(r: AnalysisResult, view: ViewMode): ChartSpec {
 }
 
 /** The 95% likely-range band: two lines filled between, with an outline so the legend swatch is visible. */
-function bandTraces(r: AnalysisResult, view: ViewMode): Data[] {
+function bandTraces(r: AnalysisResult, view: ViewMode, k = 1): Data[] {
   const fit = r.trend?.fit ?? []
   const fx = fit.map((f) => day(f.t))
   const outline = { color: 'rgba(217,72,15,0.55)', width: 1 }
   return [
-    { x: fx, y: fit.map((f) => f.high), type: 'scatter', mode: 'lines', line: outline, showlegend: false, hoverinfo: 'skip' },
+    { x: fx, y: fit.map((f) => f.high * k), type: 'scatter', mode: 'lines', line: outline, showlegend: false, hoverinfo: 'skip' },
     {
-      x: fx, y: fit.map((f) => f.low), type: 'scatter', mode: 'lines', line: outline, fill: 'tonexty',
+      x: fx, y: fit.map((f) => f.low * k), type: 'scatter', mode: 'lines', line: outline, fill: 'tonexty',
       fillcolor: 'rgba(217,72,15,0.28)', name: sv(view, 'result.chart.band', 'Likely range', '95% band'), hoverinfo: 'skip',
     },
   ]
@@ -105,24 +112,25 @@ function bandTraces(r: AnalysisResult, view: ViewMode): Data[] {
 export function anomalyChart(r: AnalysisResult, view: ViewMode): ChartSpec {
   const fit = r.trend?.fit ?? []
   const fx = fit.map((f) => day(f.t))
+  const k = valueScale(r, view)
   const data: Data[] = []
   if (r.season_series && r.season_series.length) {
     data.push({
       x: r.season_series.map((p) => `${p.year}-07-01`),
-      y: r.season_series.map((p) => p.anomaly),
+      y: r.season_series.map((p) => p.anomaly * k),
       type: 'scatter', mode: 'markers+lines', name: sv(view, 'result.chart.eachYear', 'Each year', 'Seasonal mean anomaly'),
       marker: { size: 7, color: BLUE }, line: { color: BLUE, width: 1 },
     })
   } else {
     const pts = (r.series ?? []).filter((p) => p.in_window && p.anomaly != null)
     data.push({
-      x: pts.map((p) => day(p.t)), y: pts.map((p) => p.anomaly), type: 'scatter', mode: 'markers',
+      x: pts.map((p) => day(p.t)), y: pts.map((p) => p.anomaly! * k), type: 'scatter', mode: 'markers',
       name: sv(view, 'result.chart.eachMonth', 'Each month', 'Monthly anomaly'), marker: { size: 4, color: BLUE, opacity: 0.7 },
       hovertemplate: '%{x|%b %Y}: %{y:.2f}<extra></extra>',
     })
   }
   if (fit.length) {
-    data.push(...bandTraces(r, view), { x: fx, y: fit.map((f) => f.trend), type: 'scatter', mode: 'lines', name: sv(view, 'result.chart.trend', 'Trend'), line: { color: ORANGE, width: 3 } })
+    data.push(...bandTraces(r, view, k), { x: fx, y: fit.map((f) => f.trend * k), type: 'scatter', mode: 'lines', name: sv(view, 'result.chart.trend', 'Trend'), line: { color: ORANGE, width: 3 } })
   }
   return {
     data,
@@ -182,8 +190,9 @@ export function yearlyChart(r: AnalysisResult, view: ViewMode): ChartSpec {
   const fit = r.trend?.fit ?? []
   const seasonName = r.season ? tx(r.season.name, view) : null
   const off = simple ? levelOffset(r) : null
-  const scale = simple && off != null ? (r.then_now?.kid_scale ?? 1) : 1
-  const lvl = (anomaly: number) => (off == null ? anomaly : (anomaly + off) * scale)
+  // 1 in the Scientific view. Simple: the kid scale; data without the new unit fields falls back to the then_now scale (its axis label)
+  const scale = !simple ? 1 : r.variable.units.kid_label ? (r.variable.units.kid_scale ?? 1) : (r.then_now?.kid_scale ?? 1)
+  const lvl = (anomaly: number) => (off == null ? anomaly : anomaly + off) * scale
   const all = [...inY, ...outY].map((p) => lvl(p.anomaly))
   const span = all.length ? Math.max(...all) - Math.min(...all) : 10
   const tickfmt = span >= 4 ? ',.0f' : ',.1f'

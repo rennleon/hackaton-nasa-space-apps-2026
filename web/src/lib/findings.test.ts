@@ -4,7 +4,7 @@ import { FC } from './findingsCopy'
 import { bannedIn } from './copy.test'
 import type { ScanEntry, VariableRef } from '../types/contract'
 
-const units = { display: 'x', simple: 'x', decimals: 1 }
+const units = { display: 'x', simple: 'x', decimals: 1, kid_scale: 1, kid_label: null, kid_label_es: null }
 const entry = (id: string, label: ScanEntry['shortlist_label'], verdict: ScanEntry['verdict_label'], p: number | null, extra: Partial<ScanEntry> = {}): ScanEntry => ({
   variable_id: id, name: { simple: id, scientific: id }, role: 'target', source_type: 'observed', shortlist_label: label, verdict_label: verdict,
   slope_per_decade: p == null ? null : 1, units, p_decisive: p, p_adjusted: p, reason: null, worth_investigating: true, mdt_per_decade: null, why: { simple: '', scientific: '' },

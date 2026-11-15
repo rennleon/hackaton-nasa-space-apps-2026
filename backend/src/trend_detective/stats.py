@@ -157,6 +157,61 @@ def seasonal_mk(values: np.ndarray, period: int = 12) -> tuple[float, float]:
     return float(res.p), float(res.z)
 
 
+@dataclass
+class SeasonSlopes:
+    """Per-calendar-month trend sizes and a test that they are equal (context only)."""
+
+    f: float
+    p: float
+    slope_per_year: dict[int, float]  # calendar month -> OLS slope of that month's anomalies
+
+
+def seasonal_slope_homogeneity(
+    t: np.ndarray, y: np.ndarray, cal: np.ndarray, min_years: int = 8
+) -> SeasonSlopes | None:
+    """Is the trend the same SIZE in every calendar month? Context only; never decides a verdict.
+
+    One OLS slope per calendar month (that month's anomalies against time) with its standard error,
+    then Welch's heteroscedastic test of equal means (Welch, B.L. 1951, "On the comparison of several
+    mean values: an alternative approach", Biometrika 38:330-336) applied to the 12 slopes, so months
+    with more noise count less without making equal slopes look unequal. (A test on Mann-Kendall
+    scores, such as van Belle & Hughes, compares strength of evidence instead, and flags equal slopes
+    whenever noise differs between seasons.) Calibration checked by simulation: about 5% false alarms
+    with equal slopes, unequal seasonal noise or month-to-month persistence (tests/test_stats.py).
+    Returns None when a month has fewer than `min_years` values.
+    """
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    cal = np.asarray(cal)
+    b, var, nu, months = [], [], [], []
+    for m in range(1, 13):
+        sel = (cal == m) & np.isfinite(t) & np.isfinite(y)
+        n = int(sel.sum())
+        if n < min_years:
+            return None
+        tt, yy = t[sel], y[sel]
+        tc = tt - tt.mean()
+        sxx = float(np.sum(tc**2))
+        if sxx <= 0:
+            return None
+        bk = float(np.sum(tc * (yy - yy.mean())) / sxx)
+        s2 = float(np.sum((yy - yy.mean() - bk * tc) ** 2) / (n - 2))
+        if s2 <= 0:
+            return None
+        b.append(bk)
+        var.append(s2 / sxx)
+        nu.append(n - 2)
+        months.append(m)
+    k = len(b)
+    bb, w, nu_a = np.array(b), 1.0 / np.array(var), np.array(nu, dtype=float)
+    big_w = w.sum()
+    mean_w = float(np.sum(w * bb) / big_w)
+    lam = float(np.sum((1 - w / big_w) ** 2 / nu_a))
+    f = float(np.sum(w * (bb - mean_w) ** 2) / (k - 1) / (1 + 2 * (k - 2) / (k * k - 1) * lam))
+    p = float(sps.f.sf(f, k - 1, (k * k - 1) / (3 * lam)))
+    return SeasonSlopes(f=f, p=p, slope_per_year=dict(zip(months, b)))
+
+
 def years_to_detect(
     resid_sd: float, slope_per_year: float, r1: float, samples_per_year: int
 ) -> float | None:

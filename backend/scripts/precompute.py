@@ -22,13 +22,13 @@ from trend_detective.scan import availability_of, scan, scan_region
 EXAMPLES = [
     ("ex_delhi", 28.61, 77.21, "Delhi, India", "Delhi, India (point 28.61, 77.21)",
      "Delhi, India", "Delhi, India (punto 28,61; 77,21)"),
-    ("ex_manaus", -3.10, -60.02, "Amazon near Manaus, Brazil", "Amazon near Manaus, Brazil (point -3.10, -60.02)",
-     "Amazonía cerca de Manaos, Brasil", "Amazonía cerca de Manaos, Brasil (punto -3,10; -60,02)"),
-    ("ex_tamanrasset", 22.79, 5.52, "Sahara near Tamanrasset, Algeria",
-     "Sahara near Tamanrasset, Algeria (point 22.79, 5.52)",
-     "Sahara cerca de Tamanrasset, Argelia", "Sahara cerca de Tamanrasset, Argelia (punto 22,79; 5,52)"),
+    ("ex_manaus", -3.10, -60.02, "The Amazon near Manaus", "The Amazon near Manaus, Brazil (point -3.10, -60.02)",
+     "La Amazonía cerca de Manaos", "La Amazonía cerca de Manaos, Brasil (punto -3,10; -60,02)"),
+    ("ex_tamanrasset", 22.79, 5.52, "The Sahara near Tamanrasset",
+     "The Sahara near Tamanrasset, Algeria (point 22.79, 5.52)",
+     "El Sahara cerca de Tamanrasset", "El Sahara cerca de Tamanrasset, Argelia (punto 22,79; 5,52)"),
 ]
-WHERE_REGIONS = ["cajamarca_highlands", "wisconsin"]
+WHERE_REGIONS = ["cajamarca_highlands", "cajamarca_high_only", "wisconsin"]
 
 
 def example_regions():
@@ -65,7 +65,7 @@ def where_entry(region, kind: str, res, var) -> dict:
         "slope_per_decade": tr.slope_per_decade if tr else None,
         "ci_low": tr.ci_low if tr else None,
         "ci_high": tr.ci_high if tr else None,
-        "units": var.units.info().model_dump(mode="json"),
+        "units": var.units_info().model_dump(mode="json"),
         "window_start": res.window.start if res.window else None,
         "window_end": res.window.end if res.window else None,
         "availability": availability_of(res),
@@ -80,6 +80,24 @@ def dump(path: Path, obj) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
+def dump_shared_windows(ctx, out: Path, dir_id: str, region, sc, written: set[Path]) -> None:
+    """Each scanned variable at the scan's shared window, exactly as the scan ran it, so a shortlist card opens
+    on its own numbers offline: `results/<dir>/<var>__win_<start>_<end>.json` (read by web StaticClient).
+
+    Several themes can share one window, so the file is theme-neutral (theme_id=None, like the API with no theme)
+    and is written once per run: a Heat window file must not say "warm nights question"."""
+    if not (sc.common_window and sc.window_start and sc.window_end):
+        return
+    for e in sc.entries:
+        path = out / "results" / dir_id / f"{e.variable_id}__win_{sc.window_start}_{sc.window_end}.json"
+        if path in written:
+            continue
+        res = analyze_region(ctx, region, e.variable_id, start=sc.window_start, end=sc.window_end,
+                             theme_id=None, window_reason="common")
+        dump(path, res)
+        written.add(path)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, default=repo_root() / "web" / "public" / "data")
@@ -87,6 +105,7 @@ def main() -> None:
     ctx = EngineContext.from_repo()
     cat = ctx.catalog
     out: Path = args.out
+    written: set[Path] = set()  # shared-window files already written in this run
 
     dump(out / "catalog" / "regions.json", [r.model_dump(mode="json") for r in cat.regions.values()])
     dump(out / "catalog" / "themes.json", [t.model_dump(mode="json") for t in cat.themes.values()])
@@ -107,7 +126,9 @@ def main() -> None:
                      analyze(ctx, region.id, var.id, season_id=s.id))
             print(f"{region.id:22s} {var.id:22s} {res.verdict.label}")
         for theme in cat.themes.values():
-            dump(out / "results" / region.id / f"scan_{theme.id}.json", scan(ctx, region.id, theme.id, cache))
+            sc = scan(ctx, region.id, theme.id, cache)
+            dump(out / "results" / region.id / f"scan_{theme.id}.json", sc)
+            dump_shared_windows(ctx, out, region.id, region, sc, written)
 
     # Example places: the same results as a pre-loaded region, plus one "where else?" file per listed variable.
     listed = [v for v in cat.variables.values() if v.listed]
@@ -122,7 +143,9 @@ def main() -> None:
             where[var.id].append(where_entry(region, "example", res, var))
             print(f"{region.id:22s} {var.id:22s} {res.verdict.label}")
         for theme in cat.themes.values():
-            dump(out / "results" / region.id / f"scan_{theme.id}.json", scan_region(ctx, region, theme.id))
+            sc = scan_region(ctx, region, theme.id)
+            dump(out / "results" / region.id / f"scan_{theme.id}.json", sc)
+            dump_shared_windows(ctx, out, region.id, region, sc, written)
     generated = date.today().isoformat()
     for var in listed:
         dump(out / "where" / f"{var.id}.json",

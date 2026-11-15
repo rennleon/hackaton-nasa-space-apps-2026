@@ -167,7 +167,9 @@ describe('language toggle', () => {
     expect(screen.getByText('Detective de Tendencias del Sistema Tierra')).toBeInTheDocument()
     expect(screen.getByText('Saltar al contenido')).toBeInTheDocument()
     expect(screen.queryByText('Skip to content')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: 'Lugares ya preparados' }))
     expect(screen.getAllByText(/Delhi, India/).length).toBeGreaterThan(0)
+    expect(screen.getByRole('tab', { name: 'En el mapa' })).toBeInTheDocument()
     unmount()
 
     // a new visit starts in Spanish: the choice lives in the browser

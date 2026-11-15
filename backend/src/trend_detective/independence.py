@@ -38,7 +38,7 @@ def independence_note(a: VariableCard, b: VariableCard, catalog: Catalog) -> Tex
                 simple="These two partly share data, so they are not fully separate checks.",
                 scientific=f"{detail_en} The two series are therefore not fully independent: agreement is weaker "
                            "evidence than between two separate instruments, so compare the direction only.",
-                simple_es="Estos dos comparten parte de sus datos, así que no son revisiones del todo separadas.",
+                simple_es="Estos dos comparten parte de sus datos. No son revisiones del todo separadas.",
                 scientific_es=f"{detail_es} Por eso las dos series no son del todo independientes: que coincidan es "
                               "una evidencia más débil que entre dos instrumentos separados, así que se compara solo la dirección.",
             )

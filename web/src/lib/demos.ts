@@ -55,7 +55,7 @@ export const DEMOS: Demo[] = [
         route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'verdict',
         caption: tx(
-          'Yes, afternoons are getting more humid. We are sure: about 66 on the humidity scale in 2002, about 69 in 2021.',
+          'Yes, afternoons are getting more humid. We are sure. About 66 on the humidity scale in 2002, about 69 in 2021.',
           'Significant increase in surface relative humidity, 2002 to 2021: +1.33 %RH per decade (95% CI +1.15 to +1.50), both decisive tests agree.',
         ),
       },
@@ -79,8 +79,8 @@ export const DEMOS: Demo[] = [
         route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'where',
         caption: tx(
-          'Where else? Only Cajamarca says "Sure it\'s real". The other four places say "Too soon to tell".',
-          'The same variable in the other four ready-made places, each analysed separately over 2002 to 2021: none is significant.',
+          'Only Cajamarca says "Sure it\'s real". Four places say "Too soon to tell". The high-mountain box has too few map squares to tell.',
+          'The same variable in the other ready-made places, each analysed separately over 2002 to 2021: none of the four other places is significant, and the highland-only box cannot be tested (2 AIRS cells; the gate needs 4).',
         ),
       },
     ],
@@ -104,13 +104,13 @@ export const DEMOS: Demo[] = [
       {
         route: { screen: 'shortlist', place: DELHI, theme: 'air' },
         target: 'finding-power_aod',
-        caption: tx('Each card is one measurement. The haze card says "Sure it\'s real".', 'Scan for air: aerosol optical depth (MERRA-2 via NASA POWER) is significant over the shared window.'),
+        caption: tx('Each card is one measurement. The haze card says "Sure it\'s real".', 'Scan for air: aerosol optical depth (CERES SYN1deg via NASA POWER) is significant over the shared window.'),
       },
       {
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'power_aod' },
         target: 'verdict',
         caption: tx(
-          'Yes, the air is getting hazier in Delhi. We are sure: about 59 on the haze scale in 2001, about 72 in 2025.',
+          'Yes, the air is getting hazier in Delhi. We are sure. About 59 on the haze scale in 2001, about 72 in 2025.',
           'Significant increase in AOD at 550 nm, 2001 to 2025: +0.050 per decade (95% CI +0.023 to +0.077).',
         ),
       },
@@ -119,21 +119,25 @@ export const DEMOS: Demo[] = [
         target: 'source',
         caption: tx(
           'This measurement is haze in the air. A computer model worked it out.',
-          'Variable: aerosol optical depth. Source: MERRA-2 reanalysis (a model), delivered by NASA POWER.',
+          'Variable: aerosol optical depth. Source: CERES SYN1deg (a NASA data product, labelled a computer estimate), delivered by NASA POWER.',
+        ),
+      },
+      {
+        // MERRA-2 persists its emissions after 2008 (Randles et al. 2017), so this series is never "sure" across it
+        route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'merra2_sulfate' },
+        target: 'verdict',
+        caption: tx(
+          'Now tiny sulfate particles, from a computer model. Here it says "Maybe, not sure yet".',
+          'Surface sulfate (MERRA-2), Delhi: significant but not robust, because the window crosses a known break in the model inputs.',
         ),
       },
       {
         route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'merra2_sulfate' },
         target: 'where',
         caption: tx(
-          'Now pollution from burning coal and oil, from a computer model. It goes up in Delhi and down in the Sahara.',
-          'Surface sulfate (MERRA-2): significant increase in Delhi, significant decrease near Tamanrasset, each with its own record.',
+          'Why? After 2008 the model stopped updating pollution. Good detectives check how data is made.',
+          'MERRA-2 persists anthropogenic emissions after 2008 (Randles et al. 2017, Table 1), so no place gets a robust result for this series.',
         ),
-      },
-      {
-        route: { screen: 'variable', place: DELHI, theme: 'air', variable: 'merra2_sulfate' },
-        target: 'where-both',
-        caption: tx('Look at this sentence. Different places can change in different ways.', 'Opposite directions in two places, each with both tests agreeing.'),
       },
     ],
   },

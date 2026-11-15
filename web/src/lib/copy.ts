@@ -34,7 +34,7 @@ export const COPY = {
   yearsOfData: (n: number): Text => tx(`We looked at ${n} years of data.`, `${n} years of data in the window.`),
   chartTitle: tx('One dot for every year', 'Yearly means and trend'),
   chartCaption: tx(
-    'Each dot is one year. The orange line shows where things are heading. Grey rings were left out.',
+    'Each dot is one year. The orange line shows where things are heading.',
     'Yearly means of the de-seasonalised values with the Sen trend line. Open circles are outside the window.',
   ),
   chartDotsIn: tx('Used in the answer', 'In window'),
@@ -44,6 +44,7 @@ export const COPY = {
   trendLine: tx('The trend line', 'Trend'),
   range: tx('It could be anywhere between', '95% range'),
   checksAgree: tx('We ran two careful checks. Both say this is real.', 'Both decisive tests agree.'),
+  checksFragile: tx('Both checks found a change. But something below makes us careful.', 'Both decisive tests agree; a robustness check lowers the label.'),
   checksDisagree: tx('We ran two careful checks. They do not both agree, so we stay careful.', 'The decisive tests do not both agree.'),
   // Choose a place (R2)
   chooseTitle: tx('Choose any place', 'Choose a place (NASA POWER)'),
@@ -79,6 +80,6 @@ export const COPY = {
   placeRejectedOther: tx("We can't use that place. Try another one.", 'The API rejected this place.'),
   periodRejected: tx("Those years don't work. Try other years.", 'The API rejected this period.'),
   noLiveService: tx('Choosing any place needs our live service. Try a ready-made place.', 'Custom places require the API (VITE_API_URL not set).'),
-  powerCredit: tx('Data: NASA POWER (MERRA-2-based)', 'Data: NASA POWER (MERRA-2-based)'),
+  powerCredit: tx('Data: NASA POWER', 'Data: NASA POWER'),
   noChart: tx('There is no chart because there is not enough data.', 'No series available (gates failed).'),
 } as const

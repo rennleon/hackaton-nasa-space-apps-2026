@@ -19,13 +19,41 @@ export function plainNum(n: number, decimals: number): string {
   return n.toLocaleString(numberLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
-/** "+1.49 %RH per decade" (scientific) or "+1.49 percentage points every 10 years" (simple). */
+/**
+ * Units for a number in this view. Simple: the kid scale (display value * kid_scale, read with the kid label, e.g.
+ * 0.031 AOD -> 3.1 "on the haze scale"), the same scale as the then/now line and the Simple chart. Scientific: display
+ * units. Never pair `units.simple` with a kid-scaled number or a kid label with a display number.
+ */
+export function viewUnits(units: UnitsInfo, view: ViewMode): { scale: number; label: string; decimals: number } {
+  if (view !== 'simple' || !units.kid_label) return { scale: 1, label: view === 'simple' ? units.simple : units.display, decimals: Math.max(units.decimals, 1) }
+  const scale = units.kid_scale ?? 1
+  const label = (getLang() === 'es' ? units.kid_label_es : null) ?? units.kid_label
+  return { scale, label, decimals: Math.max(1, units.decimals - Math.round(Math.log10(scale))) }
+}
+
+/**
+ * A unit label as it reads right after a number. Mirrors the backend amount_en / amount_es: a kid label that starts
+ * with "on " / "en " gets "point(s)" / "punto(s)" in front ("1.1 points on the haze scale"); "degrees" is "degree" for 1.
+ * Pass the number shown; a label with no number beside it (an axis title) can pass 2 for the plural.
+ */
+export function unitAfter(label: string, shown: number): string {
+  const one = Math.abs(shown) === 1
+  if (label.startsWith('on ')) return `point${one ? '' : 's'} ${label}`
+  if (label.startsWith('en ')) return `punto${one ? '' : 's'} ${label}`
+  if (one && label === 'degrees') return 'degree'
+  if (one && label === 'grados') return 'grado'
+  return label
+}
+
+/** "+1.49 %RH per decade" (scientific) or "+1.5 on the humidity scale every 10 years" (simple). */
 export function formatSlope(slope: number | null, units: UnitsInfo, view: ViewMode): string {
   if (slope == null) return '—'
-  const num = signed(slope, Math.max(units.decimals, 1))
+  const u = viewUnits(units, view)
+  const num = signed(slope * u.scale, u.decimals)
+  const shown = Number(num.replace('−', '-').replace('+', ''))
   return view === 'simple'
-    ? t('result.slope.simple', '{n} {unit} every 10 years', { n: num, unit: units.simple })
-    : t('result.slope.sci', '{n} {unit} per decade', { n: num, unit: units.display })
+    ? t('result.slope.simple', '{n} {unit} every 10 years', { n: num, unit: unitAfter(u.label, shown) })
+    : t('result.slope.sci', '{n} {unit} per decade', { n: num, unit: u.label })
 }
 
 export function formatP(p: number): string {

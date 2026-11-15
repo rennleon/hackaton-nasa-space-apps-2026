@@ -81,6 +81,16 @@ def limit_client(request: Request) -> None:
     per_ip.take(client_ip(request))
 
 
+# The map's colour layer asks again on every pan, so it gets its own, roomier bucket: panning must never use up
+# the tokens a child needs for the next scan (TD_MAP_PER_MIN, TD_MAP_BURST; 0 turns it off).
+map_ip = Buckets(_env("TD_MAP_PER_MIN", 60), _env("TD_MAP_BURST", 30))
+
+
+def limit_map(request: Request) -> None:
+    """FastAPI dependency for `/climatology/grid`."""
+    map_ip.take(client_ip(request))
+
+
 def counts_as_live(fn: Callable) -> Callable:
     """Put under @lru_cache: the budget is spent only when a computation really runs (a cache miss)."""
 

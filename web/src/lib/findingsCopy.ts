@@ -14,6 +14,28 @@ const p = (simple: string, scientific = simple): Pair => ({ simple, scientific }
 export const FC = {
   // header and edit bar
   'findings.eyebrow': p('Findings for this place'),
+  'findings.back': p('Pick a different place'),
+  'findings.facts.aria': p('About this place'),
+  'findings.facts.climate': p('Climate'),
+  'findings.facts.height': p('Height'),
+  'findings.facts.wet': p('Rainy months', 'Wet months'),
+  'findings.facts.area': p('Area'),
+  'findings.facts.areaValue': p('About {w} × {h} km', '≈ {w} × {h} km'),
+  'findings.facts.mixed': p('Mixed'),
+  'findings.facts.areaPin': p('Area we look at'),
+  'findings.facts.areaShape': p('Box around it', 'Bounding box'),
+  'findings.facts.areaPinValue': p('A square about {w} × {h} km', '1 NASA POWER grid cell, drawn ≈ {w} × {h} km'),
+  'findings.facts.mixedMean': p('Mixed', 'Mixed (box-mean class {code})'),
+  'findings.facts.cards': p('Measurements'),
+  'findings.facts.highUp': p('High above the sea', 'High up'),
+  'findings.facts.elev': p('{m} m', '{m} m (model grid)'),
+  'findings.facts.model': p('All but the area come from a computer model estimate.', 'All but the area: model climatology (NASA POWER, MERRA-2 based).'),
+  'findings.climate.tropical': p('Warm all year', 'Tropical'),
+  'findings.climate.dry': p('Dry'),
+  'findings.climate.temperate': p('Mild', 'Temperate'),
+  'findings.climate.cold': p('Cold winters', 'Cold'),
+  'findings.climate.polar': p('Very cold', 'Polar'),
+  'findings.tiles.aria': p('How sure we are about each measurement', 'Number of variables at each label'),
   'findings.edit': p('Edit'),
   'findings.editLabel': p('Change your choices', 'Change region, theme, period or season'),
   'findings.chip.place': p('Place', 'Region'),
@@ -34,6 +56,11 @@ export const FC = {
     'We compare every measurement over the same years: {start} to {end}.',
     'Common window {start} to {end} for all variables (fair comparison across record lengths).',
   ),
+  // sub-topic lists only: static, never depends on the results
+  'findings.subtopicNote': p(
+    'This list uses its own years. So a card may read differently in the {parent} list.',
+    'Sub-topic scan: own shared window and Benjamini–Hochberg family ({n} variables), so labels can differ from the {parent} scan.',
+  ),
   'findings.scanNote': p('Measurements that could answer this question.', 'Scan of {n} variables, α = {alpha}, Benjamini–Hochberg adjusted (false discovery control).'),
   // summary banner
   'findings.summary.some': p('{clear} of {total} measurements show a clear change.', '{clear} of {total} variables significant (both tests agree, α = {alpha}).'),
@@ -51,7 +78,7 @@ export const FC = {
   'findings.empty.help': p('Try another question or another place.', 'Try another theme or region.'),
   'findings.otherQuestions': p('Other questions', 'Other themes'),
   'findings.readyMade': p('Ready-made places', 'Pre-loaded regions'),
-  'findings.livePlace': p('Data: NASA POWER (MERRA-2-based)'),
+  'findings.livePlace': p('Data: NASA POWER'),
   'findings.pickRegion': p('Pick a place first.', 'Pick a region first.'),
   'findings.choosePlace': p('Choose a place', 'Choose a region'),
   // cards
@@ -62,7 +89,7 @@ export const FC = {
   'findings.second.same_direction_one_unsure': p('Same direction, one not sure yet', 'Same direction, only one significant'),
   'findings.second.disagree': p('They disagree', 'Opposite directions, both significant'),
   'findings.second.both_unsure': p("They don't tell the same story yet", 'No agreement: neither significant, or only one significant with opposite sign'),
-  'findings.second.only_one': p('Only one instrument here'),
+  'findings.second.only_one': p('No second source to compare'),
   'findings.heading.up': p('Heading up', 'Trend up'),
   'findings.heading.down': p('Heading down', 'Trend down'),
   'findings.heading.flat': p('Staying level', 'Flat'),
@@ -83,7 +110,7 @@ export const FC = {
   'findings.coverage': p('Years of data', 'Record coverage'),
   'findings.timeline.aria': p('How many years of data each measurement has', 'Record coverage timeline'),
   'findings.timeline.row': p('{name}: used {from} to {to}', '{name}: used {from} to {to}'),
-  'findings.timeline.rowDrift': p('{name}: used {from} to {to}; {cut} onward left out ({note})', '{name}: used {from} to {to}; {cut} onward left out ({note})'),
+  'findings.timeline.rowDrift': p('{name}: used {from} to {to}. Left out from {cut} on ({note})', '{name}: used {from} to {to}. Left out from {cut} on ({note})'),
   'findings.timeline.used': p('years we use', 'analysis window'),
   'findings.timeline.out': p('years left out (satellite drift)', 'excluded (orbit drift)'),
   'findings.mdt': p('', 'MDT {mdt} {unit}/decade'),
@@ -98,12 +125,12 @@ export const FC = {
   'sources.link': p('Where our data comes from', 'Data sources'),
   'sources.title': p('Where our data comes from', 'Data sources'),
   'sources.intro': p(
-    'Every number in this app comes from NASA. Some come from satellites. Some come from computer models.',
+    'Every measurement in this app comes from NASA. Some come from satellites. Some come from computer models. Reasons we quote come from named studies.',
     'All series are NASA products: satellite retrievals (Giovanni, GES DISC) and model reanalyses (MERRA-2, GLDAS), plus NASA POWER as a delivery service.',
   ),
   'sources.powerNote': p(
-    'NASA POWER is a delivery service. It hands us numbers from the MERRA-2 computer model.',
-    'NASA POWER is a delivery service, not an instrument: its series are MERRA-2 reanalysis values.',
+    'NASA POWER is a delivery service. It hands us numbers from NASA products.',
+    'NASA POWER is a delivery service, not an instrument: temperature, rain and humidity are MERRA-2 reanalysis values; haze (AOD_55) is CERES SYN1deg.',
   ),
   'sources.measures': p('What it measures', 'Measures'),
   'sources.how': p('How it works', 'Method'),
@@ -119,7 +146,7 @@ export const FC = {
   'sources.kind.model': p('Computer model', 'Model / reanalysis'),
   'sources.viaPower': p('via NASA POWER'),
   'common.footer': p(
-    'Map data © OpenStreetMap contributors. Data: NASA satellite and model products via NASA Giovanni (GES DISC) and NASA POWER; results computed by our analysis engine.',
+    'Map data © OpenStreetMap contributors. Data: NASA satellites and models, via NASA Giovanni (GES DISC) and NASA POWER. Results computed by our analysis engine.',
   ),
 } as const satisfies Record<string, Pair>
 

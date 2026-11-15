@@ -38,7 +38,7 @@ describe('Variable view, Simple', () => {
     expect(screen.getByRole('list', { name: 'How sure are we?' })).toBeInTheDocument()
     expect(screen.getByText("Sure it's real").closest('li')).toHaveAttribute('aria-current', 'step')
     expect(screen.getByText(/In 2002: about 65/)).toBeInTheDocument()
-    expect(screen.getByText('Tell me more: can we trust this?')).toBeInTheDocument()
+    expect(screen.getByText('Can we trust this?')).toBeInTheDocument()
     expect(container.textContent).not.toMatch(/test box|stage 1/i)
     const text = container.textContent ?? ''
     expect(bannedIn(text)).toEqual([])
@@ -46,9 +46,34 @@ describe('Variable view, Simple', () => {
 
   it('too soon: shows the years-to-watch sentence', async () => {
     const { container } = open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&season=dry')
-    expect(await screen.findByText('We need to watch for about 30 more years.')).toBeInTheDocument()
+    expect(await screen.findByText("If it keeps going like this, we'd know in about 30 more years.")).toBeInTheDocument()
     expect(screen.getByText('Too soon to tell').closest('li')).toHaveAttribute('aria-current', 'step')
     expect(bannedIn(container.textContent ?? '')).toEqual([])
+  })
+
+  it('opened from a card: asks for the card\'s exact months, says the years match, offers all the years', async () => {
+    const asked: unknown[] = []
+    window.location.hash = '#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&start=2002-09&end=2021-12'
+    render(<App client={{ ...client, analyze: async (_r, v, o) => { asked.push(o); return fixture(v) } }} />)
+    expect(await screen.findByTestId('same-years-note')).toHaveTextContent('Same years as the list.')
+    expect(asked[0]).toEqual({ start: '2002-09', end: '2021-12', seasonId: undefined })
+    expect(screen.getByRole('button', { name: 'Use all the years we have' })).toBeInTheDocument()
+  })
+
+  it('typed-in years: labelled as your years, with the all-years answer beside it', async () => {
+    const { container } = open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&start=2010&end=2020')
+    const box = await screen.findByTestId('your-years')
+    expect(box).toHaveTextContent('You picked these years.')
+    expect(box).toHaveTextContent(/Your years \(\d{4} to \d{4}\):/)
+    expect(await screen.findByText(/All the years we have/)).toBeInTheDocument()
+    expect(box).toHaveTextContent('Picking years after looking can fool us. Trust all the years more.')
+    expect(bannedIn(container.textContent ?? '')).toEqual([])
+  })
+
+  it('a card\'s shared window is not "your years"', async () => {
+    open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&start=2002-09&end=2021-12')
+    await screen.findByTestId('same-years-note')
+    expect(screen.queryByTestId('your-years')).toBeNull()
   })
 
   it('cannot tell: distinct state', async () => {
@@ -60,7 +85,7 @@ describe('Variable view, Simple', () => {
   it('Scientific view keeps the numbers', async () => {
     const user = userEvent.setup()
     open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day')
-    await screen.findByRole('heading', { level: 2 })
+    await screen.findByRole('heading', { level: 2, name: /afternoons are getting more humid/i })
     await user.click(screen.getByRole('button', { name: 'Scientific' }))
     await waitFor(() => expect(screen.getAllByText(/Sen's slope \+1\.48 %RH per decade/).length).toBeGreaterThan(0))
     expect(screen.getByText('Can we trust this? Evidence checks')).toBeInTheDocument()

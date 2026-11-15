@@ -1,5 +1,45 @@
 {
   "$defs": {
+    "CellAgreement": {
+      "description": "Do the grid cells inside a box go the way the box average goes? (Counts only, no map.)",
+      "properties": {
+        "n_cells": {
+          "title": "N Cells",
+          "type": "integer"
+        },
+        "n_same_sign": {
+          "title": "N Same Sign",
+          "type": "integer"
+        },
+        "n_opposite": {
+          "title": "N Opposite",
+          "type": "integer"
+        },
+        "n_opposite_sure": {
+          "title": "N Opposite Sure",
+          "type": "integer"
+        },
+        "verdict": {
+          "enum": [
+            "agree",
+            "mostly",
+            "unclear",
+            "mixed"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "n_cells",
+        "n_same_sign",
+        "n_opposite",
+        "n_opposite_sure",
+        "verdict"
+      ],
+      "title": "CellAgreement",
+      "type": "object"
+    },
     "Chip": {
       "properties": {
         "code": {
@@ -581,13 +621,25 @@
             }
           ],
           "default": null
+        },
+        "cell_agreement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CellAgreement"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "leave_one_year_out",
         "drift_label_with_late_years",
         "cross_check",
-        "spatial"
+        "spatial",
+        "cell_agreement"
       ],
       "title": "Robustness",
       "type": "object"
@@ -730,6 +782,94 @@
       "title": "SignificanceTest",
       "type": "object"
     },
+    "StartYearPoint": {
+      "description": "The same trend machinery re-run with the window starting in January of `start`'s year.",
+      "properties": {
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "years": {
+          "title": "Years",
+          "type": "number"
+        },
+        "slope_per_decade": {
+          "title": "Slope Per Decade",
+          "type": "number"
+        },
+        "ci_low": {
+          "title": "Ci Low",
+          "type": "number"
+        },
+        "ci_high": {
+          "title": "Ci High",
+          "type": "number"
+        },
+        "significant": {
+          "title": "Significant",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "start",
+        "years",
+        "slope_per_decade",
+        "ci_low",
+        "ci_high",
+        "significant"
+      ],
+      "title": "StartYearPoint",
+      "type": "object"
+    },
+    "StartYearSensitivity": {
+      "description": "Does the answer hold if the window starts in a different year? Context only: the headline\nverdict stays on the declared window (Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1).",
+      "properties": {
+        "points": {
+          "items": {
+            "$ref": "#/$defs/StartYearPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "n_starts": {
+          "title": "N Starts",
+          "type": "integer"
+        },
+        "n_same_sign": {
+          "title": "N Same Sign",
+          "type": "integer"
+        },
+        "n_significant": {
+          "title": "N Significant",
+          "type": "integer"
+        },
+        "n_opposite_sure": {
+          "default": 0,
+          "title": "N Opposite Sure",
+          "type": "integer"
+        },
+        "classification": {
+          "enum": [
+            "holds",
+            "mostly",
+            "unclear",
+            "depends"
+          ],
+          "title": "Classification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "points",
+        "n_starts",
+        "n_same_sign",
+        "n_significant",
+        "n_opposite_sure",
+        "classification"
+      ],
+      "title": "StartYearSensitivity",
+      "type": "object"
+    },
     "Text": {
       "additionalProperties": false,
       "description": "One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English\nwhen they are missing, so they stay optional in the schema (existing consumers keep compiling).",
@@ -870,12 +1010,44 @@
         "decimals": {
           "title": "Decimals",
           "type": "integer"
+        },
+        "kid_scale": {
+          "default": 1.0,
+          "title": "Kid Scale",
+          "type": "number"
+        },
+        "kid_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kid Label"
+        },
+        "kid_label_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kid Label Es"
         }
       },
       "required": [
         "display",
         "simple",
-        "decimals"
+        "decimals",
+        "kid_scale",
+        "kid_label",
+        "kid_label_es"
       ],
       "title": "UnitsInfo",
       "type": "object"
@@ -1269,6 +1441,17 @@
       "title": "Chips",
       "type": "array"
     },
+    "start_years": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StartYearSensitivity"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "published": {
       "anyOf": [
         {
@@ -1312,6 +1495,7 @@
     "detectability",
     "robustness",
     "chips",
+    "start_years",
     "published",
     "published_context",
     "verdict"

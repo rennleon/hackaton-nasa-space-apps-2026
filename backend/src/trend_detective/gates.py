@@ -162,12 +162,12 @@ def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None
             detail=Text(
                 simple="It hardly ever rains here, so monthly numbers can't show a trend."
                 if frac > MAX_ZERO_MONTH_SHARE
-                else "The values are not stuck at zero.",
+                else "Fewer than 30 in 100 months are zero.",
                 scientific=f"{frac:.1%} of months in the window are at or below {zero_level:g} "
                 f"(maximum {MAX_ZERO_MONTH_SHARE:.0%}; ties make Mann–Kendall and Sen's slope degenerate).",
                 simple_es="Aquí casi nunca llueve. Los números mensuales no pueden mostrar un cambio."
                 if frac > MAX_ZERO_MONTH_SHARE
-                else "Los valores no se quedan pegados en cero.",
+                else "Menos de 30 de cada 100 meses están en cero.",
                 scientific_es=f"{frac:.1%} de los meses de la ventana están en o por debajo de {zero_level:g} "
                 f"(máximo {MAX_ZERO_MONTH_SHARE:.0%}; los empates vuelven degeneradas la prueba de Mann–Kendall "
                 "y la pendiente de Sen).",

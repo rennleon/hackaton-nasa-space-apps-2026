@@ -7,7 +7,7 @@ import { anomalyChart, chartSummary, rawChart } from './charts'
 import type { ScanEntry, AnalysisResult } from '../types/contract'
 import type { VariableCard } from '../types/catalog'
 
-const units = { display: '%RH', simple: 'percentage points', decimals: 2 }
+const units = { display: '%RH', simple: 'percentage points', decimals: 2, kid_scale: 1, kid_label: null, kid_label_es: null }
 
 describe('route', () => {
   it('round-trips', () => {
@@ -29,6 +29,7 @@ describe('text', () => {
     expect(formatSlope(1.486, units, 'scientific')).toBe('+1.49 %RH per decade')
     expect(formatSlope(-0.5, units, 'simple')).toBe('−0.50 percentage points every 10 years')
     expect(formatSlope(null, units, 'simple')).toBe('—')
+    expect(formatSlope(-0.011, { display: 'AOD', simple: 'points on the haze scale', decimals: 3, kid_scale: 100, kid_label: 'on the haze scale', kid_label_es: null }, 'simple')).toBe('−1.1 points on the haze scale every 10 years')
   })
   it('formats p and months', () => {
     expect(formatP(0.0000004)).toBe('< 0.001')
@@ -70,8 +71,8 @@ describe('sortEntries', () => {
 
 const result: AnalysisResult = {
   schema_version: '1', engine_version: 't', region: { id: 'r', name: { simple: 'r', scientific: 'r' } },
-  season: null, season_series: null, seasonal_share: null, selection: null, yearly_series: null, then_now: null, tests: [], persistence: null, detectability: null,
-  robustness: { leave_one_year_out: null, drift_label_with_late_years: null, cross_check: null, spatial: null }, chips: [],
+  season: null, season_series: null, seasonal_share: null, selection: null, start_years: null, yearly_series: null, then_now: null, tests: [], persistence: null, detectability: null,
+  robustness: { leave_one_year_out: null, drift_label_with_late_years: null, cross_check: null, spatial: null, cell_agreement: null }, chips: [],
   variable: { id: 'v', giovanni_id: 'g', name: { simple: 'v', scientific: 'v' }, definition: { simple: '', scientific: '' }, source_type: 'observed', instrument: 'X', units, instrument_id: null, platform: null, delivered_by: null, cell_deg: null },
   provenance: null, window: { start: '2002-09', end: '2003-01', reason: 'drift_cut', years: 0.4 },
   gates: { passed: true, checks: [] }, published: null, published_context: [],

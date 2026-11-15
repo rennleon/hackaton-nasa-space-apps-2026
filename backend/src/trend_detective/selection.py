@@ -20,10 +20,11 @@ import math
 
 import numpy as np
 
-from .catalog import RegionCard, VariableCard
+from .catalog import RegionCard, ThemeCard, VariableCard
 from .contract import GateCheck, Selection, SelectionCheck, Text
 from .published import PublishedMatch, expectation_check
 from .stats import ols_neff
+from .verdict import MAX_WORDS, about_es, amount_en, break_line, less_than_one, less_than_one_es
 
 
 def mdt_per_decade(resid_sd: float, r1: float, n_years: float, samples_per_year: int) -> float | None:
@@ -43,23 +44,56 @@ def kid_amount_es(x: float) -> str:
     return "menos de 1" if abs(x) < 1 else f"unos {round(abs(x))}"
 
 
-THEME_ES = {"heat": "el calor", "water": "el agua", "air": "el aire"}  # kid names of the themes (themes.yaml)
+# Amounts here are already on the kid scale (display value x kid_units.scale) and `label` is the kid label
+# (kid_units.label), so "0.031 AOD" reads "about 3 points on the haze scale", never "under 1 point".
+def _phrase_en(x: float, label: str) -> str:
+    return less_than_one(label) if abs(x) < 1 else f"about {amount_en(round(abs(x)), label)}"
+
+
+def _phrase_es(x: float, label: str) -> str:
+    return less_than_one_es(label) if abs(x) < 1 else about_es(round(abs(x)), label)
+
+
+def _spot_en(mdt: float, label: str) -> str:
+    # never "even small changes": below 1 unit can still be large for the variable (e.g. 0.8 mm/day of rain)
+    if abs(mdt) < 1:
+        return f"Every 10 years we see changes under {less_than_one(label).removeprefix('less than ')}."
+    return f"Every 10 years we see changes from {_phrase_en(mdt, label)}."
+
+
+def _spot_es(mdt: float, label: str) -> str:
+    if abs(mdt) < 1:
+        return f"Cada 10 años vemos cambios menores de {less_than_one_es(label).removeprefix('menos de ')}."
+    full = f"Cada 10 años vemos cambios desde {_phrase_es(mdt, label)}."
+    # "alrededor de 1 punto" plus a long label overflows the R5 limit: "desde 1 punto" (a whole sentence) beats a
+    # clipped "vemos desde alrededor de"; only the amount 1 has the two-word "alrededor de" (others read "unos N")
+    return full if len(full.split()) <= MAX_WORDS else full.replace("desde alrededor de ", "desde ")
+
+
+def _theme_names(theme_id: str | None, variable: VariableCard, themes: dict[str, ThemeCard] | None) -> tuple[str, str]:
+    """Kid names (EN, ES), lower-cased, for the question check. They come from the theme cards (themes.yaml);
+    with no theme asked for, the variable's top-level questions. Falls back to the raw id without a catalog."""
+    themes = themes or {}
+    if theme_id:
+        ids = [theme_id]
+    else:  # every sub-topic folds into its parent, so the sentence names each main question once
+        ids = list(dict.fromkeys((themes[i].parent or i) if i in themes else i for i in variable.themes))
+    en = [themes[i].name.simple.lower() if i in themes else i for i in ids]
+    es = [(themes[i].name.simple_es or themes[i].name.simple).lower() if i in themes else i for i in ids]
+    return ", ".join(en), ", ".join(es)
 
 
 def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> str:
     """Spanish twin of detect_sentences (same decisions, same rounding rules)."""
     if expected is None:
-        if abs(mdt) < 1:
-            return "Podemos ver incluso cambios pequeños."
-        return f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
+        return _spot_es(mdt, u_simple)
     ok = mdt <= abs(expected)
     if kid_amount_es(mdt) == kid_amount_es(expected):
         if ok:
             return "Este registro es lo bastante largo para ver un cambio típico."
         return "Este registro solo puede ver cambios mayores que uno típico."
-    spot = ("Podemos ver incluso cambios pequeños." if abs(mdt) < 1
-            else f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años.")
-    typical = f"Un cambio típico es de {kid_amount_es(expected)} {u_simple}."
+    spot = _spot_es(mdt, u_simple)
+    typical = f"Un cambio típico: {_phrase_es(expected, u_simple)}."
     return f"{spot} {typical} " + ("Eso basta para verlo." if ok else "Aún no podemos verlo.")
 
 
@@ -70,19 +104,16 @@ def detect_sentences(mdt: float, expected: float | None, u_simple: str) -> tuple
     tracker #6). Amounts are shown only when the rounded amounts differ, so they can't read "less than 1 ...
     less than 1. Not enough"."""
     if expected is None:
-        if abs(mdt) < 1:
-            return "We can spot even small changes.", None
-        return f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.", None
+        return _spot_en(mdt, u_simple), None
     ok = mdt <= abs(expected)
     if kid_amount(mdt) == kid_amount(expected):
         if ok:
             return "This record is long enough to spot a typical change.", ok
         return "This record can only spot changes bigger than a typical one.", ok
-    spot = ("We can spot even small changes." if abs(mdt) < 1
-            else f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.")
+    spot = _spot_en(mdt, u_simple)
     if ok:
-        return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. That's enough to see it.", ok
-    return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. We can't see that yet.", ok
+        return f"{spot} A typical change is {_phrase_en(expected, u_simple)}. That's enough to see it.", ok
+    return f"{spot} A typical change is {_phrase_en(expected, u_simple)}. We can't see that yet.", ok
 
 
 def noise_of(t: np.ndarray, y: np.ndarray) -> tuple[float, float]:
@@ -102,20 +133,24 @@ def stage1(
     n_years: float,
     samples_per_year: int,
     published: PublishedMatch | None = None,
+    themes: dict[str, ThemeCard] | None = None,
 ) -> Selection:
     """`published`: the AR6 entry for this place and variable (published.match). Used for check (b) only when the
-    region card has no cited expectation of its own. Only facts known before the trend go in here."""
+    region card has no cited expectation of its own. Only facts known before the trend go in here.
+    `themes`: the catalog's theme cards, so the question check can use their kid names."""
     checks: list[SelectionCheck] = []
 
     # (a) question
     if theme_id is None or theme_id in variable.themes:
-        themes = ", ".join(variable.themes) if theme_id is None else theme_id
+        theme_list = ", ".join(variable.themes) if theme_id is None else theme_id
+        roles = ", ".join(variable.themes.values()) if theme_id is None else variable.themes[theme_id]
+        name_en, name_es = _theme_names(theme_id, variable, themes)
         checks.append(SelectionCheck(
             code="question", status="pass",
-            detail=Text(simple=f"It helps answer the {themes} question.",
-                        scientific=f"Member of theme(s): {themes} (role: {', '.join(variable.themes.values())}).",
-                        simple_es=f"Ayuda a responder la pregunta sobre {THEME_ES.get(theme_id, theme_id) if theme_id else 'este tema'}.",
-                        scientific_es=f"Pertenece al tema o temas: {themes} (rol: {', '.join(variable.themes.values())})."),
+            detail=Text(simple=f"It helps answer the {name_en} question.",
+                        scientific=f"Member of theme(s): {theme_list} (role: {roles}).",
+                        simple_es=f"Ayuda a responder la pregunta «{name_es}».",
+                        scientific_es=f"Pertenece al tema o temas: {theme_list} (rol: {roles})."),
         ))
     else:
         checks.append(SelectionCheck(
@@ -150,9 +185,9 @@ def stage1(
     if failed:
         checks.append(SelectionCheck(
             code="fitness", status="fail",
-            detail=Text(simple="; ".join(c.detail.simple.rstrip(".") for c in failed) + ".",
+            detail=Text(simple=" ".join(c.detail.simple for c in failed),  # one sentence per failed check (R5: short sentences)
                         scientific=" ".join(c.detail.scientific for c in failed),
-                        simple_es="; ".join((c.detail.simple_es or c.detail.simple).rstrip(".") for c in failed) + ".",
+                        simple_es=" ".join(c.detail.simple_es or c.detail.simple for c in failed),
                         scientific_es=" ".join(c.detail.scientific_es or c.detail.scientific for c in failed)),
         ))
     else:
@@ -165,20 +200,25 @@ def stage1(
                                       "completitud y meses en cero."),
         ))
     if flagged:
+        one_s, one_es = break_line([(a.kind, str(a.start), a.note) for a in flagged])
         checks.append(SelectionCheck(
             code="known_breaks", status="caution",
-            detail=Text(simple=" ".join(a.note.simple for a in flagged),
+            detail=Text(simple=one_s,
                         scientific=" ".join(f"{a.start}: {a.note.scientific}" for a in flagged),
-                        simple_es=" ".join(a.note.simple_es or a.note.simple for a in flagged),
+                        simple_es=one_es,
                         scientific_es=" ".join(f"{a.start}: {a.note.scientific_es or a.note.scientific}" for a in flagged)),
         ))
     else:
         checks.append(SelectionCheck(
             code="known_breaks", status="pass",
-            detail=Text(simple="No known instrument or input changes in these years.",
-                        scientific="No catalogued artifact dates inside the window.",
-                        simple_es="El instrumento y sus datos no tuvieron cambios conocidos en estos años.",
-                        scientific_es="Ninguna fecha de artefacto catalogada cae dentro de la ventana."),
+            # say what we checked (our own list), not that no change exists
+            detail=Text(simple="Our list has no changes to how this was measured in these years.",
+                        scientific="No catalogued artifact dates inside the window (our catalog's list of known "
+                                   "instrument and input changes; not an exhaustive audit).",
+                        simple_es="Nuestra lista no tiene cambios en cómo se midió esto en estos años.",
+                        scientific_es="Ninguna fecha de artefacto catalogada cae dentro de la ventana (la lista de "
+                                      "cambios conocidos de instrumento y datos de entrada de nuestro catálogo; "
+                                      "no es una auditoría exhaustiva)."),
         ))
 
     # (d) detectability
@@ -189,6 +229,8 @@ def stage1(
         sigma, phi = noise_of(t, y)
         mdt = mdt_per_decade(sigma, phi, n_years, samples_per_year)
     u, d = variable.units, variable.units.decimals
+    k = variable.kid_units  # the Simple view speaks in kid units, so its amounts are scaled the same way
+    k_es = k.label_es or k.label
     if mdt is None:
         checks.append(SelectionCheck(
             code="detectability", status="caution",
@@ -198,20 +240,19 @@ def stage1(
                         scientific_es="MDT no calculable (datos insuficientes)."),
         ))
     elif expected is None:
-        simple, _ = detect_sentences(mdt, None, u.simple)
-        u_es = u.simple_es or u.simple
+        simple, _ = detect_sentences(mdt * k.scale, None, k.label)
         checks.append(SelectionCheck(
             code="detectability", status="pass",
             detail=Text(simple=simple,
                         scientific=f"MDT ≈ {mdt:.{d}f} {u.display} per decade over {n_years:.1f} years "
                                    "(no reference trend size recorded).",
-                        simple_es=detect_sentences_es(mdt, None, u_es),
+                        simple_es=detect_sentences_es(mdt * k.scale, None, k_es),
                         scientific_es=f"MDT ≈ {mdt:.{d}f} {u.display} por década en {n_years:.1f} años "
                                       "(sin tamaño de tendencia de referencia registrado)."),
         ))
     else:
-        simple, ok = detect_sentences(mdt, expected, u.simple)
-        simple_es = detect_sentences_es(mdt, expected, u.simple_es or u.simple)
+        simple, ok = detect_sentences(mdt * k.scale, expected * k.scale, k.label)
+        simple_es = detect_sentences_es(mdt * k.scale, expected * k.scale, k_es)
         ref = exp.source if exp else (variable.reference_source or "reference")
         checks.append(SelectionCheck(
             code="detectability", status="pass" if ok else "fail",
