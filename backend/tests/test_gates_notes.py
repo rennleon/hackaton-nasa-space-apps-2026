@@ -91,7 +91,7 @@ def test_detectability_wording_never_contradicts(mdt, expected, ok):
 
 
 def test_detectability_without_reference_size():
-    assert "small changes" in detect_sentences(0.3, None, "degrees")[0]
+    assert detect_sentences(0.3, None, "degrees")[0] == "We can see changes under 1 degree. That is per 10 years."
     assert "about 2 degrees" in detect_sentences(2.2, None, "degrees")[0]
 
 

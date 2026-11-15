@@ -39,6 +39,28 @@ def kid_amount(x: float) -> str:
     return "less than 1" if abs(x) < 1 else f"about {round(abs(x))}"
 
 
+def _one(u: str) -> str:
+    """Singular unit after '1' ('1 degree', '1 point on ...', '1 unit of ...')."""
+    for plural, one in (("degrees", "degree"), ("points", "point"), ("units", "unit"), ("grados", "grado"),
+                        ("puntos", "punto"), ("unidades", "unidad")):
+        if u.startswith(plural):
+            return one + u[len(plural):]
+    return u
+
+
+def _spot_en(mdt: float, u_simple: str) -> str:
+    # never "even small changes": below 1 unit can still be large for the variable (e.g. 0.8 mm/day of rain)
+    if abs(mdt) < 1:
+        return f"We can see changes under 1 {_one(u_simple)}. That is per 10 years."
+    return f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years."
+
+
+def _spot_es(mdt: float, u_simple: str) -> str:
+    if abs(mdt) < 1:
+        return f"Vemos cambios de menos de 1 {_one(u_simple)}. Eso es cada 10 años."
+    return f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
+
+
 def kid_amount_es(x: float) -> str:
     return "menos de 1" if abs(x) < 1 else f"unos {round(abs(x))}"
 
@@ -59,13 +81,13 @@ def _theme_names(theme_id: str | None, variable: VariableCard, themes: dict[str,
 def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> str:
     """Spanish twin of detect_sentences (same decisions, same rounding rules)."""
     if expected is None:
-        return f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
+        return _spot_es(mdt, u_simple)
     ok = mdt <= abs(expected)
     if kid_amount_es(mdt) == kid_amount_es(expected):
         if ok:
             return "Este registro es lo bastante largo para ver un cambio típico."
         return "Este registro solo puede ver cambios mayores que uno típico."
-    spot = f"El cambio más pequeño que vemos: {kid_amount_es(mdt)} {u_simple}. Eso es cada 10 años."
+    spot = _spot_es(mdt, u_simple)
     typical = f"Un cambio típico es de {kid_amount_es(expected)} {u_simple}."
     return f"{spot} {typical} " + ("Eso basta para verlo." if ok else "Aún no podemos verlo.")
 
@@ -77,14 +99,13 @@ def detect_sentences(mdt: float, expected: float | None, u_simple: str) -> tuple
     tracker #6). Amounts are shown only when the rounded amounts differ, so they can't read "less than 1 ...
     less than 1. Not enough"."""
     if expected is None:
-        # never "even small changes": below 1 unit can still be large for the variable (e.g. 0.8 mm/day of rain)
-        return f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years.", None
+        return _spot_en(mdt, u_simple), None
     ok = mdt <= abs(expected)
     if kid_amount(mdt) == kid_amount(expected):
         if ok:
             return "This record is long enough to spot a typical change.", ok
         return "This record can only spot changes bigger than a typical one.", ok
-    spot = f"The smallest change we can see: {kid_amount(mdt)} {u_simple}. That is per 10 years."
+    spot = _spot_en(mdt, u_simple)
     if ok:
         return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. That's enough to see it.", ok
     return f"{spot} A typical change is {kid_amount(expected)} {u_simple}. We can't see that yet.", ok
