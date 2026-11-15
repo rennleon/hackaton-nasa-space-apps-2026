@@ -5,6 +5,7 @@ import { DataProvider, GlossaryProvider, ViewProvider } from '../context'
 import { HttpError, LiveDataUnavailable, detailText, type DataClient } from '../data/client'
 import { StaticClient } from '../data/staticClient'
 import { fromSigned, toSigned } from '../lib/place'
+import { CoordsForm } from './CoordsForm'
 import { PlaceChooser } from './PlaceChooser'
 import { LiveNotice, classifyLiveError } from './LiveNotice'
 
@@ -40,27 +41,38 @@ describe('sign helpers', () => {
   })
 })
 
-describe('PlaceChooser signs', () => {
+describe('CoordsForm signs', () => {
   it('turns South and West into negative numbers', async () => {
     const user = userEvent.setup()
     const onPlace = vi.fn()
-    wrap(<PlaceChooser regions={[]} chosen={null} onPlace={onPlace} />)
+    wrap(<CoordsForm onPlace={onPlace} />)
     await user.type(screen.getByLabelText(/Latitude \(north–south\): Number/), '7.16')
     await user.selectOptions(screen.getByLabelText(/Latitude \(north–south\): Which/), 'South')
     await user.type(screen.getByLabelText(/Longitude \(east–west\): Number/), '78.51')
     await user.selectOptions(screen.getByLabelText(/Longitude \(east–west\): Which/), 'West')
     await user.click(screen.getByRole('button', { name: 'Use these numbers' }))
-    expect(onPlace).toHaveBeenCalledWith({ kind: 'point', lat: -7.16, lon: -78.51 }, false)
+    expect(onPlace).toHaveBeenCalledWith({ kind: 'point', lat: -7.16, lon: -78.51 })
   })
-  it('a map click fills the numbers and reports the place', async () => {
+  it('starts with the numbers of a place already drawn', () => {
+    wrap(<CoordsForm initial={{ kind: 'point', lat: -7.16, lon: -78.51 }} onPlace={vi.fn()} />)
+    expect(screen.getByLabelText(/Latitude \(north–south\): Number/)).toHaveValue(7.16)
+    expect(screen.getByLabelText(/Latitude \(north–south\): Which/)).toHaveValue('minus')
+    expect(screen.getByRole('button', { name: 'Use these numbers' })).toBeEnabled()
+  })
+  it('is disabled with a note when no API is configured', () => {
+    wrap(<CoordsForm onPlace={vi.fn()} />, new StaticClient())
+    expect(screen.getByText(/needs our live service/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Use these numbers' })).toBeDisabled()
+    expect(screen.getByLabelText(/Latitude \(north–south\): Number/)).toBeDisabled()
+  })
+})
+
+describe('PlaceChooser', () => {
+  it('a map click reports the place', () => {
     const onPlace = vi.fn()
     wrap(<PlaceChooser regions={[]} chosen={null} onPlace={onPlace} />)
     act(() => click?.(-7.164, -78.514))
-    expect(await screen.findByLabelText(/Latitude \(north–south\): Number/)).toHaveValue(7.16)
-    expect(screen.getByLabelText(/Latitude \(north–south\): Which/)).toHaveValue('minus')
-    expect(onPlace).toHaveBeenCalledWith({ kind: 'point', lat: -7.16, lon: -78.51 }, true)
-    act(() => click?.(10, 20))
-    expect(screen.getByLabelText(/Latitude \(north–south\): Which/)).toHaveValue('plus')
+    expect(onPlace).toHaveBeenCalledWith({ kind: 'point', lat: -7.16, lon: -78.51 })
   })
   it('says how big a pin is, and that it is a square', () => {
     wrap(<PlaceChooser regions={[]} chosen={{ kind: 'place', place: { kind: 'point', lat: 0, lon: -60 }, name: null, viaMap: true }} onPlace={vi.fn()} />)
@@ -76,11 +88,10 @@ describe('PlaceChooser signs', () => {
       expect(onPlace).not.toHaveBeenCalled()
     })
   })
-  it('is disabled with a note when no API is configured', () => {
-    wrap(<PlaceChooser regions={[]} chosen={null} onPlace={vi.fn()} />, new StaticClient())
+  it('shows the action next to the tools, and a note when no API is configured', () => {
+    wrap(<PlaceChooser regions={[]} chosen={null} onPlace={vi.fn()} action={<button type="button">Use this spot</button>} />, new StaticClient())
     expect(screen.getByText(/needs our live service/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Use these numbers' })).toBeDisabled()
-    expect(screen.getByLabelText(/Latitude \(north–south\): Number/)).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Use this spot' })).toBeInTheDocument()
   })
   it('shows the scientific note', () => {
     wrap(<PlaceChooser regions={[]} chosen={null} onPlace={vi.fn()} />, new StaticClient(), 'scientific')
