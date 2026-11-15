@@ -90,3 +90,27 @@ def test_unknown_keys_are_rejected(cat):
     data["unexpected"] = 1
     with pytest.raises(ValidationError):
         VariableCard(**data)
+
+
+def _text_objects(obj, path=""):
+    if isinstance(obj, dict):
+        if isinstance(obj.get("simple"), str) and isinstance(obj.get("scientific"), str):
+            yield path, obj
+            return
+        for k, v in obj.items():
+            yield from _text_objects(v, f"{path}.{k}")
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from _text_objects(v, f"{path}[{i}]")
+
+
+def test_every_text_field_in_the_catalog_has_both_spanish_versions(cat):
+    missing = [p for p, t in _text_objects(cat.model_dump()) if not t.get("simple_es") or not t.get("scientific_es")]
+    assert not missing, missing[:10]
+
+
+def test_every_variable_has_spanish_words_units_and_label(cat):
+    for v in cat.variables.values():
+        assert v.words_es and v.words_es.subject and v.words_es.up and v.words_es.down and v.words_es.changing, v.id
+        assert v.kid_units.label_es, v.id
+        assert v.units.simple_es, v.id

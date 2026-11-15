@@ -47,12 +47,13 @@ export interface VariableCard {
   name: Text
   definition: Text
   source: { instrument: string; platform?: string; type: 'observed' | 'model' }
-  units: { native: string; display: string; simple: string; scale: number; offset: number; decimals: number }
+  units: { native: string; display: string; simple: string; scale: number; offset: number; decimals: number; simple_es?: string | null }
   grid_deg: number
   record_start: string // YYYY-MM
   artifacts: VariableArtifact[]
   cross_check: string | null
   words: { subject?: string; up: string; down: string }
+  words_es?: { subject: string; up: string; down: string; changing: string } | null
   kid_units?: unknown
   power_param?: string | null
   reference_trend_per_decade?: number | null

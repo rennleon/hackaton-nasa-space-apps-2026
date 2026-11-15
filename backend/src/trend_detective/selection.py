@@ -38,6 +38,30 @@ def kid_amount(x: float) -> str:
     return "less than 1" if abs(x) < 1 else f"about {round(abs(x))}"
 
 
+def kid_amount_es(x: float) -> str:
+    return "menos de 1" if abs(x) < 1 else f"unos {round(abs(x))}"
+
+
+THEME_ES = {"heat": "el calor", "water": "el agua", "air": "el aire"}  # kid names of the themes (themes.yaml)
+
+
+def detect_sentences_es(mdt: float, expected: float | None, u_simple: str) -> str:
+    """Spanish twin of detect_sentences (same decisions, same rounding rules)."""
+    if expected is None:
+        if abs(mdt) < 1:
+            return "Podemos ver incluso cambios pequeños."
+        return f"Podemos ver cambios de {kid_amount_es(mdt)} {u_simple} o más cada 10 años."
+    ok = mdt <= abs(expected)
+    if kid_amount_es(mdt) == kid_amount_es(expected):
+        if ok:
+            return "Este registro es lo bastante largo para ver un cambio típico."
+        return "Este registro solo puede ver cambios mayores que uno típico."
+    spot = ("Podemos ver incluso cambios pequeños." if abs(mdt) < 1
+            else f"Podemos ver cambios de {kid_amount_es(mdt)} {u_simple} o más cada 10 años.")
+    typical = f"Un cambio típico es de {kid_amount_es(expected)} {u_simple}."
+    return f"{spot} {typical} " + ("Eso basta para verlo." if ok else "Aún no podemos verlo.")
+
+
 def detect_sentences(mdt: float, expected: float | None, u_simple: str) -> tuple[str, bool | None]:
     """Simple-view detectability text, and whether a typical change is detectable (None: no reference size).
 
@@ -85,12 +109,16 @@ def stage1(
         checks.append(SelectionCheck(
             code="question", status="pass",
             detail=Text(simple=f"It helps answer the {themes} question.",
-                        scientific=f"Member of theme(s): {themes} (role: {', '.join(variable.themes.values())})."),
+                        scientific=f"Member of theme(s): {themes} (role: {', '.join(variable.themes.values())}).",
+                        simple_es=f"Ayuda a responder la pregunta sobre {THEME_ES.get(theme_id, theme_id) if theme_id else 'este tema'}.",
+                        scientific_es=f"Pertenece al tema o temas: {themes} (rol: {', '.join(variable.themes.values())})."),
         ))
     else:
         checks.append(SelectionCheck(
             code="question", status="fail",
-            detail=Text(simple="It doesn't help answer this question.", scientific=f"Not in theme {theme_id}."),
+            detail=Text(simple="It doesn't help answer this question.", scientific=f"Not in theme {theme_id}.",
+                        simple_es="No ayuda a responder esta pregunta.",
+                        scientific_es=f"No pertenece al tema {theme_id}."),
         ))
 
     # (b) expectation
@@ -98,13 +126,17 @@ def stage1(
     if exp:
         checks.append(SelectionCheck(
             code="expectation", status="pass",
-            detail=Text(simple=exp.reason.simple, scientific=f"{exp.reason.scientific} Source: {exp.source}"),
+            detail=Text(simple=exp.reason.simple, scientific=f"{exp.reason.scientific} Source: {exp.source}",
+                        simple_es=exp.reason.simple_es,
+                        scientific_es=f"{exp.reason.scientific_es or exp.reason.scientific} Fuente: {exp.source}"),
         ))
     else:
         checks.append(SelectionCheck(
             code="expectation", status="caution",
             detail=Text(simple="We haven't found a published study that expects a change here yet.",
-                        scientific="No cited published expectation recorded for this variable and region."),
+                        scientific="No cited published expectation recorded for this variable and region.",
+                        simple_es="Aún no hemos encontrado un estudio publicado que espere un cambio aquí.",
+                        scientific_es="No hay una expectativa publicada y citada para esta variable y región."),
         ))
 
     # (c) fitness + known breaks
@@ -113,25 +145,34 @@ def stage1(
         checks.append(SelectionCheck(
             code="fitness", status="fail",
             detail=Text(simple="; ".join(c.detail.simple.rstrip(".") for c in failed) + ".",
-                        scientific=" ".join(c.detail.scientific for c in failed)),
+                        scientific=" ".join(c.detail.scientific for c in failed),
+                        simple_es="; ".join((c.detail.simple_es or c.detail.simple).rstrip(".") for c in failed) + ".",
+                        scientific_es=" ".join(c.detail.scientific_es or c.detail.scientific for c in failed)),
         ))
     else:
         checks.append(SelectionCheck(
             code="fitness", status="pass",
             detail=Text(simple="The data covers this place well enough and for long enough.",
-                        scientific="Coverage, grid cells, record length, completeness and zero-month checks pass."),
+                        scientific="Coverage, grid cells, record length, completeness and zero-month checks pass.",
+                        simple_es="Los datos cubren bien este lugar y durante suficiente tiempo.",
+                        scientific_es="Se cumplen las comprobaciones de cobertura, celdas, longitud del registro, "
+                                      "completitud y meses en cero."),
         ))
     if flagged:
         checks.append(SelectionCheck(
             code="known_breaks", status="caution",
             detail=Text(simple=" ".join(a.note.simple for a in flagged),
-                        scientific=" ".join(f"{a.start}: {a.note.scientific}" for a in flagged)),
+                        scientific=" ".join(f"{a.start}: {a.note.scientific}" for a in flagged),
+                        simple_es=" ".join(a.note.simple_es or a.note.simple for a in flagged),
+                        scientific_es=" ".join(f"{a.start}: {a.note.scientific_es or a.note.scientific}" for a in flagged)),
         ))
     else:
         checks.append(SelectionCheck(
             code="known_breaks", status="pass",
             detail=Text(simple="No known instrument or input changes in these years.",
-                        scientific="No catalogued artifact dates inside the window."),
+                        scientific="No catalogued artifact dates inside the window.",
+                        simple_es="El instrumento y sus datos no tuvieron cambios conocidos en estos años.",
+                        scientific_es="Ninguna fecha de artefacto catalogada cae dentro de la ventana."),
         ))
 
     # (d) detectability
@@ -146,18 +187,25 @@ def stage1(
         checks.append(SelectionCheck(
             code="detectability", status="caution",
             detail=Text(simple="We couldn't work out how big a change this record can detect.",
-                        scientific="MDT not computable (insufficient data)."),
+                        scientific="MDT not computable (insufficient data).",
+                        simple_es="No pudimos calcular qué tan grande debe ser un cambio para verlo con este registro.",
+                        scientific_es="MDT no calculable (datos insuficientes)."),
         ))
     elif expected is None:
         simple, _ = detect_sentences(mdt, None, u.simple)
+        u_es = u.simple_es or u.simple
         checks.append(SelectionCheck(
             code="detectability", status="pass",
             detail=Text(simple=simple,
                         scientific=f"MDT ≈ {mdt:.{d}f} {u.display} per decade over {n_years:.1f} years "
-                                   "(no reference trend size recorded)."),
+                                   "(no reference trend size recorded).",
+                        simple_es=detect_sentences_es(mdt, None, u_es),
+                        scientific_es=f"MDT ≈ {mdt:.{d}f} {u.display} por década en {n_years:.1f} años "
+                                      "(sin tamaño de tendencia de referencia registrado)."),
         ))
     else:
         simple, ok = detect_sentences(mdt, expected, u.simple)
+        simple_es = detect_sentences_es(mdt, expected, u.simple_es or u.simple)
         ref = exp.source if exp else (variable.reference_source or "reference")
         checks.append(SelectionCheck(
             code="detectability", status="pass" if ok else "fail",
@@ -165,6 +213,9 @@ def stage1(
                 simple=simple,
                 scientific=(f"MDT ≈ {mdt:.{d}f} {u.display}/decade over {n_years:.1f} yr vs expected "
                             f"{abs(expected):.{d}f} ({ref}): {'detectable' if ok else 'not detectable'}."),
+                simple_es=simple_es,
+                scientific_es=(f"MDT ≈ {mdt:.{d}f} {u.display}/década en {n_years:.1f} años frente a "
+                               f"{abs(expected):.{d}f} esperado ({ref}): {'detectable' if ok else 'no detectable'}."),
             ),
         ))
 

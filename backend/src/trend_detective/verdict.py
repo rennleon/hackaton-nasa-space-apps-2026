@@ -28,6 +28,19 @@ METER_WORDS: dict[str, str] = {
     "too_soon": "Too soon to tell",
     "cant_tell": "We can't tell here",
 }
+METER_WORDS_ES: dict[str, str] = {
+    "sure": "Seguro que es real",
+    "maybe": "Quizás, aún no estamos seguros",
+    "too_soon": "Es muy pronto para saberlo",
+    "cant_tell": "No podemos saberlo aquí",
+}
+# Names of the robustness checks (engine.checks_run) in Spanish, for the scientific sentence.
+CHECK_NAMES_ES: dict[str, str] = {
+    "leave-one-year-out": "omitir un año a la vez",
+    "drift years included": "incluir los años con deriva",
+    "cross-check source": "fuente de contraste",
+    "neighbouring box": "caja vecina",
+}
 
 
 def decide(
@@ -94,6 +107,34 @@ def _place(region: RegionCard) -> str:
     return "your place" if region.id.startswith("custom") else region.name.simple
 
 
+def _place_es(region: RegionCard) -> str:
+    """Spanish region name inside a sentence ('en tu lugar', 'en Cajamarca (zona alta)')."""
+    if region.id.startswith("custom"):
+        return "tu lugar"
+    name = region.name.simple_es or region.name.simple
+    return _lower_first(name) if name.split(" ")[0] in ("Las", "Los", "La", "El") else name
+
+
+def _subject_es(x: VerdictInputs) -> str:
+    """Spanish subject with its season: 'las tardes en la temporada de lluvias'."""
+    s = x.variable.words_es.subject  # type: ignore[union-attr]
+    if not x.season:
+        return s
+    name = x.season.name.simple_es or x.season.name.simple
+    art = "la" if name.startswith(("temporada", "época", "estación")) else "el"
+    return f"{s} en {art} {name}"
+
+
+def kid_value_es(value: float, scale: float, label: str) -> str:
+    """Whole number with its label, never negative (R5): -3 degrees -> '3 grados bajo cero'."""
+    n = round(value * scale)
+    return f"{abs(n)} {label} bajo cero" if n < 0 else f"{n} {label}"
+
+
+def has_es(v: VariableCard) -> bool:
+    return v.words_es is not None and v.kid_units.label_es is not None and v.units.simple_es is not None
+
+
 def _subject(x: VerdictInputs) -> str:
     s = x.variable.words.subject
     return f"{s} in the {x.season.name.simple}" if x.season else s
@@ -119,6 +160,11 @@ def short_record_note(label: Label, x: VerdictInputs) -> list[Text]:
                    f"{expected:.{d}f}), but the observed |slope| {observed:.{d}f} {v.units.display}/decade "
                    "exceeds the expected size, so both decisive tests can still reject no-trend. "
                    "This explains the result; it does not change selection or the label.",
+        simple_es="Este registro es corto para un cambio típico. Pero este cambio es mayor que el típico, así que aún lo vemos.",
+        scientific_es=f"La detectabilidad de la etapa 1 no se cumple (MDT ≈ {mdt:.{d}f} {v.units.display}/década frente a "
+                      f"{expected:.{d}f} esperado), pero la |pendiente| observada, {observed:.{d}f} {v.units.display}/década, "
+                      "supera el tamaño esperado, así que las dos pruebas decisivas aún pueden rechazar la ausencia de tendencia. "
+                      "Esto explica el resultado; no cambia la selección ni la etiqueta.",
     )]
 
 
@@ -135,28 +181,58 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     certainty = CERTAINTY[label]
     season_sc = f", {x.season.name.scientific} means" if x.season else ""
 
+    # Spanish parts (all None when the card has no Spanish words yet)
+    es = has_es(v)
+    answer_es = answer_sc_es = how_es = how_sc_es = more_es = more_sc_es = headline_sc_es = None
+    if es:
+        we = v.words_es
+        phrase_es = we.up if up else we.down
+        direction_es = "aumento" if up else "disminución"
+        adj_es = "significativo" if up else "significativa"
+        region_es, region_sc_es = _place_es(x.region), x.region.name.scientific_es or region_sc
+        subj_es = _subject_es(x)
+        season_sc_es = f", medias de {x.season.name.scientific_es or x.season.name.scientific}" if x.season else ""
+        name_sc_es = v.name.scientific_es or v.name.scientific
+        u_es = v.units.simple_es
+
     # --- one-sentence answer
     if certainty == "sure":
         answer_s = f"Yes, {subj} {w.verb} {phrase} in {region_s}."
         answer_sc = f"Significant {direction} in {v.name.scientific}, {region_sc} ({y0}–{y1}{season_sc})."
+        if es:
+            answer_es = f"Sí, {subj_es} {phrase_es} en {region_es}."
+            answer_sc_es = f"{direction_es.capitalize()} {adj_es} en {name_sc_es}, {region_sc_es} ({y0}–{y1}{season_sc_es})."
     elif certainty == "maybe":
         answer_s = f"Maybe. {_cap(subj)} might be {phrase} in {region_s}."
         kind = "Borderline" if label == "borderline" else "Significant but not robust"
         answer_sc = f"{kind} {direction} in {v.name.scientific}, {region_sc} ({y0}–{y1}{season_sc})."
+        if es:
+            answer_es = f"Quizás {subj_es} {phrase_es} en {region_es}."
+            kind_es = (f"{direction_es.capitalize()} en el límite" if label == "borderline"
+                       else f"{direction_es.capitalize()} {adj_es} pero no robust{'o' if up else 'a'}")
+            answer_sc_es = f"{kind_es} en {name_sc_es}, {region_sc_es} ({y0}–{y1}{season_sc_es})."
     else:
         answer_s = f"Too soon to tell if {subj} {w.verb} changing in {region_s}."
         answer_sc = f"No significant trend in {v.name.scientific}, {region_sc} ({y0}–{y1}{season_sc})."
+        if es:
+            answer_es = f"Aún no sabemos si {subj_es} {we.changing} en {region_es}."
+            answer_sc_es = f"Sin tendencia significativa en {name_sc_es}, {region_sc_es} ({y0}–{y1}{season_sc_es})."
 
     # --- how much (then vs now in whole numbers), or how long to wait
     slope_sc = (
         f"Sen's slope {x.slope_per_decade:+.{d}f} {v.units.display} per decade "
         f"(95% CI {x.ci_low:+.{d}f} to {x.ci_high:+.{d}f}), {x.window.start} to {x.window.end}"
     )
+    slope_sc_es = (
+        f"Pendiente de Sen {x.slope_per_decade:+.{d}f} {v.units.display} por década "
+        f"(IC 95 % {x.ci_low:+.{d}f} a {x.ci_high:+.{d}f}), {x.window.start} a {x.window.end}"
+    )
     tn = x.then_now
     level_sc = (
         f"; fitted level {tn.value_then:.{d}f} → {tn.value_now:.{d}f} {v.units.display} ({tn.year_then}→{tn.year_now})"
         if tn else ""
     )
+    level_sc_es = level_sc.replace("fitted level", "nivel ajustado")
     if certainty in ("sure", "maybe") and tn:
         a, b = kid_number(tn.value_then, tn.kid_scale), kid_number(tn.value_now, tn.kid_scale)
         if a == b:
@@ -165,18 +241,37 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
         else:
             how_s = f"In {tn.year_then}: about {a} {tn.kid_label}. In {tn.year_now}: about {b}."
         how_sc = f"{slope_sc}{level_sc}."
+        if es:
+            lab = v.kid_units.label_es
+            if a == b:
+                one_es = "grado" if lab == "grados" else lab
+                how_es = f"Desde {tn.year_then} cambió menos de 1 {one_es}."
+            else:
+                how_es = (f"En {tn.year_then}: unos {kid_value_es(tn.value_then, tn.kid_scale, lab)}. "
+                          f"En {tn.year_now}: unos {kid_value_es(tn.value_now, tn.kid_scale, lab)}.")
+            how_sc_es = f"{slope_sc_es}{level_sc_es}."
     elif certainty == "too_soon":
         if x.years_needed is not None and x.years_needed > x.years_available:
             more = math.ceil(x.years_needed - x.years_available)
             how_s = f"We need to watch for about {more} more years."
             how_sc = (f"{slope_sc}. Years to detection ≈ {x.years_needed:.0f} vs {x.years_available:.0f} "
                       "available (Weatherhead et al. 1998).")
+            if es:
+                how_es = f"Necesitamos mirar unos {more} años más."
+                how_sc_es = (f"{slope_sc_es}. Años hasta la detección ≈ {x.years_needed:.0f} frente a "
+                             f"{x.years_available:.0f} disponibles (Weatherhead et al. 1998).")
         else:
             how_s = "The normal ups and downs are still bigger than the change."
             how_sc = f"{slope_sc}. Not significant at α = {x.alpha}."
+            if es:
+                how_es = "Los altibajos normales aún son mayores que el cambio."
+                how_sc_es = f"{slope_sc_es}. No significativo con α = {x.alpha}."
     else:
         how_s = f"From {y0} to {y1} it changed a little each year."
         how_sc = f"{slope_sc}."
+        if es:
+            how_es = f"De {y0} a {y1} cambió un poco cada año."
+            how_sc_es = f"{slope_sc_es}."
 
     # --- "Tell me more" sentence
     sci_core = (
@@ -186,28 +281,66 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
     chip_reasons_s = " ".join(c.text.simple for c in x.warning_chips)
     chip_reasons_sc = " ".join(c.text.scientific for c in x.warning_chips)
     per10 = f"about {amount} {v.units.simple} every 10 years"
+    if es:
+        sci_core_es = (
+            f"{name_sc_es}, {region_sc_es}, {x.window.start} a {x.window.end}{season_sc_es}: {slope_sc_es}. "
+            f"Mann–Kendall con corrección de Hamed–Rao p {fmt_p(x.p_a)}; MCO con n_eff = {x.n_eff:.0f} "
+            f"(r₁ = {x.r1:.2f}) p {fmt_p(x.p_b)}."
+        )
+        chip_reasons_es = " ".join(c.text.simple_es or c.text.simple for c in x.warning_chips)
+        chip_reasons_sc_es = " ".join(c.text.scientific_es or c.text.scientific for c in x.warning_chips)
+        per10_es = f"unos {amount} {u_es} cada 10 años"
+        ran_es = ""
+        if x.checks_run:
+            names = ", ".join(CHECK_NAMES_ES.get(c, c) for c in x.checks_run)
+            ran_es = f" Se hicieron comprobaciones de robustez ({names}) y todas se cumplen."
     if label == "significant":
         more_s = f"From {y0} to {y1} it changed by {per10}. A change this steady is very unlikely to be luck."
         ran = f" Robustness checks run ({', '.join(x.checks_run)}) pass." if x.checks_run else ""
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}.{ran}"
         headline_sc = f"Significant {direction}"
+        if es:
+            more_es = (f"De {y0} a {y1} cambió {per10_es}. "
+                       "Es muy poco probable que un cambio tan constante sea pura suerte.")
+            more_sc_es = f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con α = {x.alpha}.{ran_es}"
+            headline_sc_es = f"{direction_es.capitalize()} {adj_es}"
     elif label == "significant_fragile":
         more_s = f"From {y0} to {y1} it changed by {per10}. But be careful. {chip_reasons_s}"
         more_sc = f"{sci_core} Both decisive tests reject no-trend at α = {x.alpha}, but: {chip_reasons_sc}"
         headline_sc = f"Significant {direction}, not robust"
+        if es:
+            more_es = f"De {y0} a {y1} cambió {per10_es}. Pero hay que tener cuidado. {chip_reasons_es}"
+            more_sc_es = (f"{sci_core_es} Las dos pruebas decisivas rechazan la ausencia de tendencia con "
+                          f"α = {x.alpha}, pero: {chip_reasons_sc_es}")
+            headline_sc_es = f"{direction_es.capitalize()} {adj_es}, no robust{'o' if up else 'a'}"
     elif label == "borderline":
         more_s = f"It may be changing by {per10}. One of our two checks agrees. The other does not."
         more_sc = f"{sci_core} Only one decisive test rejects no-trend at α = {x.alpha}; treat as a lead."
         headline_sc = "Borderline: tests disagree"
+        if es:
+            more_es = f"Quizás cambie {per10_es}. Una de nuestras dos revisiones lo confirma. La otra no."
+            more_sc_es = (f"{sci_core_es} Solo una prueba decisiva rechaza la ausencia de tendencia con "
+                          f"α = {x.alpha}; tómese como una pista.")
+            headline_sc_es = "En el límite: las pruebas discrepan"
     elif label == "possibly_changing":
         more_s = f"It may be changing by {per10}. But normal ups and downs are still bigger."
         more_sc = f"{sci_core} Not significant at α = {x.alpha}."
         headline_sc = "Not significant yet"
+        if es:
+            more_es = f"Quizás cambie {per10_es}. Pero los altibajos normales aún son mayores."
+            more_sc_es = f"{sci_core_es} No significativo con α = {x.alpha}."
+            headline_sc_es = "Aún no significativo"
     else:
         more_s = "Normal ups and downs are bigger than any change so far. That does not mean nothing is changing."
         more_sc = (f"{sci_core} Not significant at α = {x.alpha}; record short relative to detection time. "
                    "Absence of evidence is not evidence of no trend.")
         headline_sc = "No detectable trend"
+        if es:
+            more_es = ("Los altibajos normales son mayores que cualquier cambio hasta ahora. "
+                       "Eso no quiere decir que nada cambie.")
+            more_sc_es = (f"{sci_core_es} No significativo con α = {x.alpha}; registro corto respecto del tiempo de "
+                          "detección. La ausencia de evidencia no es evidencia de ausencia de tendencia.")
+            headline_sc_es = "Sin tendencia detectable"
 
     notes: list[Text] = []
     if x.p_c is not None and x.p_c < x.alpha and not (x.p_a < x.alpha and x.p_b < x.alpha):
@@ -215,33 +348,50 @@ def build_verdict(label: Label, x: VerdictInputs) -> Verdict:
             simple="A quicker check sees a change. Slow swings can fool it, so we don't trust it alone.",
             scientific=f"Seasonal Mann–Kendall p {fmt_p(x.p_c)} ignores autocorrelation and is not decisive; "
                        "it may reflect multi-year variability.",
+            simple_es="Una revisión más rápida ve un cambio. Los vaivenes lentos pueden engañarla, "
+                      "así que no confiamos solo en ella.",
+            scientific_es=f"El Mann–Kendall estacional, p {fmt_p(x.p_c)}, ignora la autocorrelación y no es decisivo; "
+                          "puede reflejar variabilidad de varios años.",
         ))
     notes.extend(short_record_note(label, x))
     if v.source.type == "model":
         notes.append(Text(
             simple="This is a computer model estimate, not a direct measurement.",
             scientific="Model/reanalysis output; agreement with other products is not independent evidence.",
+            simple_es="Esta es una estimación de un modelo de computadora, no una medición directa.",
+            scientific_es="Salida de modelo/reanálisis; la coincidencia con otros productos no es evidencia independiente.",
         ))
     return Verdict(
         label=label,
         certainty=certainty,
-        answer=Text(simple=answer_s, scientific=answer_sc),
-        how_much=Text(simple=how_s, scientific=how_sc),
-        headline=Text(simple=METER_WORDS[certainty], scientific=headline_sc),
-        sentence=Text(simple=more_s, scientific=more_sc),
+        answer=Text(simple=answer_s, scientific=answer_sc, simple_es=answer_es, scientific_es=answer_sc_es),
+        how_much=Text(simple=how_s, scientific=how_sc, simple_es=how_es, scientific_es=how_sc_es),
+        headline=Text(simple=METER_WORDS[certainty], scientific=headline_sc,
+                      simple_es=METER_WORDS_ES[certainty], scientific_es=headline_sc_es),
+        sentence=Text(simple=more_s, scientific=more_sc, simple_es=more_es, scientific_es=more_sc_es),
         notes=notes,
     )
 
 
 def cant_tell(variable: VariableCard, region: RegionCard, reasons: list[Text]) -> Verdict:
-    first = reasons[0] if reasons else Text(simple="We don't have enough data.", scientific="Not assessable.")
+    first = reasons[0] if reasons else Text(
+        simple="We don't have enough data.", scientific="Not assessable.",
+        simple_es="No tenemos suficientes datos.", scientific_es="No evaluable.",
+    )
     rsc = " ".join(r.scientific for r in reasons)
+    rsc_es = " ".join(r.scientific_es or r.scientific for r in reasons)
+    first_es = first.simple_es or first.simple
     return Verdict(
         label="cant_tell",
         certainty="cant_tell",
         answer=Text(simple=f"We can't answer this for {_place(region)} yet.",
-                    scientific=f"{variable.name.scientific}, {region.name.scientific}: not assessable."),
-        how_much=Text(simple=first.simple, scientific=rsc),
-        headline=Text(simple=METER_WORDS["cant_tell"], scientific="Not assessable"),
-        sentence=Text(simple=first.simple, scientific=f"Failed gates. {rsc}"),
+                    scientific=f"{variable.name.scientific}, {region.name.scientific}: not assessable.",
+                    simple_es=f"Aún no podemos responder esto para {_place_es(region)}.",
+                    scientific_es=f"{variable.name.scientific_es or variable.name.scientific}, "
+                                  f"{region.name.scientific_es or region.name.scientific}: no evaluable."),
+        how_much=Text(simple=first.simple, scientific=rsc, simple_es=first_es, scientific_es=rsc_es),
+        headline=Text(simple=METER_WORDS["cant_tell"], scientific="Not assessable",
+                      simple_es=METER_WORDS_ES["cant_tell"], scientific_es="No evaluable"),
+        sentence=Text(simple=first.simple, scientific=f"Failed gates. {rsc}",
+                      simple_es=first_es, scientific_es=f"Comprobaciones no superadas. {rsc_es}"),
     )

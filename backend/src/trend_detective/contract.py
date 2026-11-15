@@ -27,10 +27,15 @@ class Model(BaseModel):
 
 
 class Text(Model):
-    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
+    """One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English
+    when they are missing, so they stay optional in the schema (existing consumers keep compiling)."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=False)
 
     simple: str
     scientific: str
+    simple_es: str | None = None
+    scientific_es: str | None = None
 
 
 class RegionRef(Model):

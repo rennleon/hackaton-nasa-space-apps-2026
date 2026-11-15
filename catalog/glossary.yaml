@@ -3,162 +3,226 @@
 # The front end underlines a term and shows the definition for the active view.
 
 - id: trend
-  term: { simple: trend, scientific: linear trend }
+  term: { simple: trend, scientific: linear trend, simple_es: "tendencia", scientific_es: "tendencia lineal" }
   definition:
     simple: A slow, steady change over many years, like a path that keeps going uphill or downhill.
     scientific: The average rate of change over the analysis window, estimated as a straight-line slope.
+    simple_es: "Un cambio lento y constante durante muchos años, como un camino que sigue subiendo o bajando."
+    scientific_es: "Tasa media de cambio en la ventana de análisis, estimada como la pendiente de una recta."
 - id: seasonal_cycle
-  term: { simple: seasons, scientific: seasonal cycle }
+  term: { simple: seasons, scientific: seasonal cycle, simple_es: "estaciones", scientific_es: "ciclo estacional" }
   definition:
     simple: The ups and downs that happen every year, like summer being warmer than winter.
     scientific: The mean annual cycle, estimated as each calendar month's long-term mean over the window.
+    simple_es: "Los altibajos que pasan cada año, como el verano que es más cálido que el invierno."
+    scientific_es: "Ciclo anual medio, estimado como la media de largo plazo de cada mes del calendario en la ventana."
 - id: anomaly
-  term: { simple: difference from normal, scientific: anomaly }
+  term: { simple: difference from normal, scientific: anomaly, simple_es: "diferencia con lo normal", scientific_es: "anomalía" }
   definition:
     simple: How much a month was above or below what is normal for that month.
     scientific: Value minus that calendar month's climatological mean (the seasonal cycle removed).
+    simple_es: "Cuánto estuvo un mes por encima o por debajo de lo normal para ese mes."
+    scientific_es: "Valor menos la media climatológica de ese mes del calendario (ciclo estacional eliminado)."
 - id: per_decade
-  term: { simple: every 10 years, scientific: per decade }
+  term: { simple: every 10 years, scientific: per decade, simple_es: "cada 10 años", scientific_es: "por década" }
   definition:
     simple: How much the value changes in 10 years if the trend keeps going.
     scientific: Slope expressed in units per 10 years.
+    simple_es: "Cuánto cambia el valor en 10 años si la tendencia sigue igual."
+    scientific_es: "Pendiente expresada en unidades por 10 años."
 - id: significant
-  term: { simple: real change, scientific: statistically significant }
+  term: { simple: real change, scientific: statistically significant, simple_es: "cambio real", scientific_es: "estadísticamente significativo" }
   definition:
     simple: A change so big and steady that it is very unlikely to be just luck.
     scientific: Both persistence-aware tests reject the no-trend hypothesis at α = 0.05 (two-sided).
+    simple_es: "Un cambio tan grande y constante que es muy poco probable que sea solo suerte."
+    scientific_es: "Las dos pruebas que tienen en cuenta la persistencia rechazan la hipótesis de no tendencia con α = 0.05 (bilateral)."
 - id: not_detectable_yet
-  term: { simple: not clear yet, scientific: not significant }
+  term: { simple: not clear yet, scientific: not significant, simple_es: "aún no está claro", scientific_es: "no significativo" }
   definition:
     simple: We can't tell yet. The normal ups and downs are bigger than the change. It does NOT mean nothing is changing.
     scientific: Insufficient evidence to reject the no-trend hypothesis; this is not evidence of no trend.
+    simple_es: "Aún no podemos saberlo. Los altibajos normales son mayores que el cambio. NO quiere decir que nada cambie."
+    scientific_es: "Evidencia insuficiente para rechazar la hipótesis de no tendencia; esto no es evidencia de que no haya tendencia."
 - id: p_value
-  term: { simple: luck score, scientific: p-value }
+  term: { simple: luck score, scientific: p-value, simple_es: "puntaje de suerte", scientific_es: "valor p" }
   definition:
     simple: How easily pure luck could make a pattern like this. Small numbers mean luck is a poor explanation.
     scientific: Probability of a result at least this extreme if there were no trend. It is not the probability that the trend is real.
+    simple_es: "Qué tan fácil sería que la pura suerte hiciera un patrón así. Un número pequeño quiere decir que la suerte explica poco."
+    scientific_es: "Probabilidad de un resultado al menos así de extremo si no hubiera tendencia. No es la probabilidad de que la tendencia sea real."
 - id: confidence_range
-  term: { simple: likely range, scientific: 95% confidence interval }
+  term: { simple: likely range, scientific: 95% confidence interval, simple_es: "rango probable", scientific_es: "intervalo de confianza del 95 %" }
   definition:
     simple: The span where the true change probably sits. A narrow range means we are more sure.
     scientific: Interval for Sen's slope from the (persistence-corrected) Mann–Kendall variance at the 95% level.
+    simple_es: "El tramo donde probablemente está el cambio verdadero. Un rango angosto quiere decir que estamos más seguros."
+    scientific_es: "Intervalo de la pendiente de Sen a partir de la varianza de Mann–Kendall (corregida por persistencia) al nivel del 95 %."
 - id: persistence
-  term: { simple: memory, scientific: lag-1 autocorrelation }
+  term: { simple: memory, scientific: lag-1 autocorrelation, simple_es: "memoria", scientific_es: "autocorrelación de rezago 1" }
   definition:
     simple: When one month partly remembers the month before, like wet soil staying wet. It makes patterns look stronger than they are.
     scientific: Correlation between consecutive detrended anomalies (r₁); used to reduce the effective sample size.
+    simple_es: "Cuando un mes recuerda un poco al mes anterior, como el suelo mojado que sigue mojado. Hace que los patrones parezcan más fuertes de lo que son."
+    scientific_es: "Correlación entre anomalías consecutivas sin tendencia (r₁); se usa para reducir el tamaño efectivo de la muestra."
 - id: sens_slope
-  term: { simple: typical change, scientific: Sen's slope }
+  term: { simple: typical change, scientific: Sen's slope, simple_es: "cambio típico", scientific_es: "pendiente de Sen" }
   definition:
     simple: We compare every pair of months and take the middle value of all the changes, so one weird year can't fool us.
     scientific: Median of all pairwise slopes; robust to outliers.
+    simple_es: "Comparamos cada par de meses y tomamos el valor del medio de todos los cambios, así un año raro no nos engaña."
+    scientific_es: "Mediana de todas las pendientes entre pares de puntos; robusta frente a valores atípicos."
 - id: mann_kendall
-  term: { simple: up-or-down check, scientific: Mann–Kendall test (Hamed–Rao) }
+  term: { simple: up-or-down check, scientific: Mann–Kendall test (Hamed–Rao), simple_es: "revisión de sube o baja", scientific_es: "prueba de Mann–Kendall (Hamed–Rao)" }
   definition:
     simple: Counts how often later months are higher than earlier ones. If it happens far more than by chance, something is changing.
     scientific: Rank-based trend test; the Hamed–Rao variant corrects its variance for autocorrelation.
+    simple_es: "Cuenta cuántas veces los meses más nuevos son más altos que los más viejos. Si pasa mucho más que por azar, algo está cambiando."
+    scientific_es: "Prueba de tendencia basada en rangos; la variante de Hamed–Rao corrige su varianza por autocorrelación."
 - id: ols_neff
-  term: { simple: straight-line check, scientific: OLS t-test with effective sample size }
+  term: { simple: straight-line check, scientific: OLS t-test with effective sample size, simple_es: "revisión de la línea recta", scientific_es: "prueba t de MCO con tamaño efectivo de muestra" }
   definition:
     simple: Draws the best straight line through the data and checks if it really tilts, while remembering that months are not fully separate.
     scientific: Least-squares slope t-test with n_eff = n(1 − r₁)/(1 + r₁).
+    simple_es: "Dibuja la mejor línea recta entre los datos y mira si de verdad se inclina, recordando que los meses no son del todo independientes."
+    scientific_es: "Prueba t de la pendiente de mínimos cuadrados con n_eff = n(1 − r₁)/(1 + r₁)."
 - id: years_to_detect
-  term: { simple: years needed, scientific: years to detection }
+  term: { simple: years needed, scientific: years to detection, simple_es: "años necesarios", scientific_es: "años hasta la detección" }
   definition:
     simple: How many years of data we would need to be sure about a change this size.
     scientific: Weatherhead et al. (1998) estimate for 95% confidence and 90% power, given noise and autocorrelation.
+    simple_es: "Cuántos años de datos necesitaríamos para estar seguros de un cambio de este tamaño."
+    scientific_es: "Estimación de Weatherhead et al. (1998) para 95 % de confianza y 90 % de potencia, según el ruido y la autocorrelación."
 - id: observed
-  term: { simple: measured, scientific: observation }
+  term: { simple: measured, scientific: observation, simple_es: "medido", scientific_es: "observación" }
   definition:
     simple: Measured directly by an instrument, here a satellite.
     scientific: Retrieved from satellite measurements.
+    simple_es: "Medido directamente por un instrumento, aquí un satélite."
+    scientific_es: "Obtenido a partir de mediciones de satélite."
 - id: model
-  term: { simple: computer model, scientific: model / reanalysis }
+  term: { simple: computer model, scientific: model / reanalysis, simple_es: "modelo de computadora", scientific_es: "modelo / reanálisis" }
   definition:
     simple: Worked out by a computer that mixes measurements with the laws of physics. Useful, but not a separate measurement.
     scientific: Model or reanalysis output; shares inputs with other products, so agreement is weaker evidence.
+    simple_es: "Calculado por una computadora que mezcla mediciones con las leyes de la física. Es útil, pero no es una medición aparte."
+    scientific_es: "Salida de modelo o reanálisis; comparte datos de entrada con otros productos, así que la coincidencia es una evidencia más débil."
 - id: orbit_drift
-  term: { simple: satellite drift, scientific: orbit drift }
+  term: { simple: satellite drift, scientific: orbit drift, simple_es: "desvío del satélite", scientific_es: "deriva orbital" }
   definition:
     simple: The satellite slowly started passing over later in the day, which can fake a change.
     scientific: Aqua stopped orbit maintenance in 2022; its equator-crossing time drifted later, biasing diurnal sampling.
+    simple_es: "El satélite empezó a pasar poco a poco más tarde en el día, y eso puede fingir un cambio."
+    scientific_es: "Aqua dejó de mantener su órbita en 2022; su hora de cruce del ecuador se retrasó y sesgó el muestreo diurno."
 - id: grid_cell
-  term: { simple: map square, scientific: grid cell }
+  term: { simple: map square, scientific: grid cell, simple_es: "cuadrado del mapa", scientific_es: "celda de la rejilla" }
   definition:
     simple: The data comes as squares on a map. Bigger squares show less detail.
     scientific: One cell of the dataset's spatial grid (e.g. 1° × 1°).
+    simple_es: "Los datos vienen en cuadrados sobre un mapa. Los cuadrados más grandes muestran menos detalle."
+    scientific_es: "Una celda de la rejilla espacial del conjunto de datos (p. ej. 1° × 1°)."
 - id: false_discovery
-  term: { simple: lucky hits, scientific: false discovery rate (Benjamini–Hochberg) }
+  term: { simple: lucky hits, scientific: false discovery rate (Benjamini–Hochberg), simple_es: "aciertos por suerte", scientific_es: "tasa de falsos descubrimientos (Benjamini–Hochberg)" }
   definition:
     simple: If you check many things, a few will look changed just by luck. We correct for that.
     scientific: Benjamini–Hochberg adjustment of p-values across all variables scanned for a region (q = 0.05).
+    simple_es: "Si revisas muchas cosas, unas pocas parecerán distintas solo por suerte. Lo corregimos."
+    scientific_es: "Ajuste de Benjamini–Hochberg de los valores p de todas las variables exploradas en una región (q = 0.05)."
 - id: relative_humidity
-  term: { simple: humidity, scientific: relative humidity }
+  term: { simple: humidity, scientific: relative humidity, simple_es: "humedad", scientific_es: "humedad relativa" }
   definition:
     simple: How full of water vapour the air is, from 0% (bone dry) to 100% (it can't hold more). Warmer air can hold more, so humidity drops when air warms up.
     scientific: Ratio of water-vapour pressure to saturation vapour pressure at the air temperature.
+    simple_es: "Qué tan lleno de vapor de agua está el aire, de 0 (muy seco) a 100 (no puede tener más). El aire más cálido puede tener más, así que la humedad baja cuando el aire se calienta."
+    scientific_es: "Razón entre la presión del vapor de agua y la presión de vapor de saturación a la temperatura del aire."
 - id: aod
-  term: { simple: haze, scientific: aerosol optical depth }
+  term: { simple: haze, scientific: aerosol optical depth, simple_es: "bruma", scientific_es: "profundidad óptica de aerosoles" }
   definition:
     simple: How much dust, smoke and pollution block sunlight.
     scientific: Vertically integrated aerosol extinction at 550 nm (unitless).
+    simple_es: "Cuánto polvo, humo y contaminación tapan la luz del sol."
+    scientific_es: "Extinción de aerosoles integrada verticalmente a 550 nm (sin unidades)."
 - id: certainty
-  term: { simple: how sure we are, scientific: certainty level }
+  term: { simple: how sure we are, scientific: certainty level, simple_es: "qué tan seguros estamos", scientific_es: "nivel de certeza" }
   definition:
     simple: "Sure it's real: two careful checks agree. Maybe: they don't agree yet. Too soon to tell: we need more years."
     scientific: "Mapped from the verdict label: significant → sure; fragile or borderline → maybe; not significant → too soon."
+    simple_es: "Seguro que es real: dos revisiones cuidadosas coinciden. Quizás: aún no coinciden. Es muy pronto para saberlo: necesitamos más años."
+    scientific_es: "Asignado a partir de la etiqueta del veredicto: significativo → seguro; frágil o límite → quizás; no significativo → muy pronto."
 - id: worth_investigating
-  term: { simple: worth a look, scientific: worth investigating (stage 1) }
+  term: { simple: worth a look, scientific: worth investigating (stage 1), simple_es: "vale la pena mirarlo", scientific_es: "vale la pena investigarlo (etapa 1)" }
   definition:
     simple: We checked this measurement can answer the question here, before looking at the answer.
     scientific: Passes the stage-1 checks (question, fitness, detectability) before any trend is computed.
+    simple_es: "Revisamos que esta medición puede responder la pregunta aquí, antes de mirar la respuesta."
+    scientific_es: "Supera las comprobaciones de la etapa 1 (pregunta, aptitud, detectabilidad) antes de calcular cualquier tendencia."
 - id: computer_model_estimate
-  term: { simple: computer model estimate, scientific: model / reanalysis output }
+  term: { simple: computer model estimate, scientific: model / reanalysis output, simple_es: "estimación de un modelo de computadora", scientific_es: "salida de modelo / reanálisis" }
   definition:
     simple: A computer mixed many measurements with the rules of physics to work this out. It is not a direct measurement.
     scientific: Model or reanalysis product (e.g. MERRA-2, GLDAS); not independent of the observations it assimilates.
+    simple_es: "Una computadora mezcló muchas mediciones con las reglas de la física para calcular esto. No es una medición directa."
+    scientific_es: "Producto de modelo o reanálisis (p. ej. MERRA-2, GLDAS); no es independiente de las observaciones que asimila."
 - id: latitude
-  term: { simple: how far north or south, scientific: latitude }
+  term: { simple: how far north or south, scientific: latitude, simple_es: "qué tan al norte o al sur", scientific_es: "latitud" }
   definition:
     simple: How far a place is from the middle line of the Earth, going north or south.
     scientific: Angular distance north (+) or south (−) of the equator, in degrees.
+    simple_es: "Qué tan lejos está un lugar de la línea del medio de la Tierra, hacia el norte o hacia el sur."
+    scientific_es: "Distancia angular al norte (+) o al sur (−) del ecuador, en grados."
 - id: longitude
-  term: { simple: how far east or west, scientific: longitude }
+  term: { simple: how far east or west, scientific: longitude, simple_es: "qué tan al este o al oeste", scientific_es: "longitud" }
   definition:
     simple: How far a place is east or west of a line through London.
     scientific: Angular distance east (+) or west (−) of the prime meridian, in degrees.
+    simple_es: "Qué tan lejos está un lugar al este o al oeste de una línea que pasa por Londres."
+    scientific_es: "Distancia angular al este (+) o al oeste (−) del meridiano de Greenwich, en grados."
 - id: no2
-  term: { simple: NO₂ gas, scientific: nitrogen dioxide (NO₂) }
+  term: { simple: NO₂ gas, scientific: nitrogen dioxide (NO₂), simple_es: "gas NO₂", scientific_es: "dióxido de nitrógeno (NO₂)" }
   definition:
     simple: A gas made when engines, power plants and factories burn fuel. A lot of it makes city air dirty.
     scientific: Tropospheric NO₂ vertical column density (molecules/cm²), a marker of combustion emissions; short-lived, so it stays near its sources.
+    simple_es: "Un gas que se produce cuando motores, centrales eléctricas y fábricas queman combustible. Mucho de este gas ensucia el aire de la ciudad."
+    scientific_es: "Densidad de columna vertical de NO₂ troposférico (moléculas/cm²), indicador de emisiones por combustión; vive poco, así que se queda cerca de sus fuentes."
 - id: instrument
-  term: { simple: instrument, scientific: instrument }
+  term: { simple: instrument, scientific: instrument, simple_es: "instrumento", scientific_es: "instrumento" }
   definition:
     simple: A tool that measures. Some sit on satellites and look down at the Earth.
     scientific: A sensor on a satellite platform (e.g. AIRS on Aqua, OMI on Aura), or a computer model (MERRA-2, GLDAS), that produces a data product holding many variables.
+    simple_es: "Una herramienta que mide. Algunas van en satélites y miran la Tierra."
+    scientific_es: "Sensor en una plataforma satelital (p. ej. AIRS en Aqua, OMI en Aura), o un modelo computacional (MERRA-2, GLDAS), que genera un producto de datos con muchas variables."
 - id: variable
-  term: { simple: variable, scientific: variable }
+  term: { simple: variable, scientific: variable, simple_es: "variable", scientific_es: "variable" }
   definition:
     simple: One thing an instrument measures, like how warm the air is or how much rain falls.
     scientific: One measured quantity inside a data product (e.g. surface air temperature). It is what we test for a trend.
+    simple_es: "Una cosa que mide un instrumento, como el calor del aire o la lluvia."
+    scientific_es: "Una magnitud medida dentro de un producto de datos (p. ej. la temperatura del aire en superficie). Es lo que analizamos en busca de una tendencia."
 - id: satellite
-  term: { simple: satellite, scientific: satellite }
+  term: { simple: satellite, scientific: satellite, simple_es: "satélite", scientific_es: "satélite" }
   definition:
     simple: A machine that circles the Earth high up in space. It carries instruments.
     scientific: A spacecraft in orbit that carries one or more instruments (e.g. Aqua, Terra, Aura).
+    simple_es: "Una máquina que da vueltas a la Tierra en el espacio. Lleva instrumentos."
+    scientific_es: "Nave en órbita que lleva uno o más instrumentos (p. ej. Aqua, Terra, Aura)."
 - id: computer_model
-  term: { simple: computer model, scientific: computer model (reanalysis) }
+  term: { simple: computer model, scientific: computer model (reanalysis), simple_es: "modelo de computadora", scientific_es: "modelo computacional (reanálisis)" }
   definition:
     simple: A computer program that works out past weather from many real measurements.
     scientific: A numerical model that assimilates many observations into gridded fields (e.g. MERRA-2, GLDAS). It is not itself a sensor.
+    simple_es: "Un programa que calcula el tiempo pasado con muchas medidas reales."
+    scientific_es: "Modelo numérico que asimila muchas observaciones en campos de malla (p. ej. MERRA-2, GLDAS). No es un sensor."
 - id: second_opinion
-  term: { simple: second opinion, scientific: instrument cross-check }
+  term: { simple: second opinion, scientific: instrument cross-check, simple_es: "segunda opinión", scientific_es: "contraste entre instrumentos" }
   definition:
     simple: We ask a second, different source about the same thing. If both say the same, we trust it more.
     scientific: The same quantity from an independent instrument or product over the shared years; direction is compared, not size.
+    simple_es: "Le preguntamos lo mismo a una segunda fuente distinta. Si las dos dicen lo mismo, confiamos más."
+    scientific_es: "La misma magnitud medida por un instrumento o producto independiente en los años compartidos; se compara la dirección, no el tamaño."
 - id: clear_days
-  term: { simple: clear days, scientific: valid days per month }
+  term: { simple: clear days, scientific: valid days per month, simple_es: "días despejados", scientific_es: "días válidos por mes" }
   definition:
     simple: Some satellites only see well on days without clouds. A month counts only if it has enough clear days.
     scientific: Daily products are averaged to months only when the month has at least the declared minimum number of valid days.
+    simple_es: "Algunos satélites solo ven bien en días sin nubes. Un mes cuenta solo si tiene suficientes días despejados."
+    scientific_es: "Los productos diarios se promedian a meses solo cuando el mes tiene al menos el mínimo declarado de días válidos."

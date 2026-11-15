@@ -427,7 +427,9 @@ def analyze_region(
         chips.append(Chip(
             code="area_is_bounding_box", severity="info",
             text=Text(simple="We use the rectangle around this place. It includes some land and lake nearby.",
-                      scientific="NASA POWER mean over the shape's bounding box (includes neighbouring areas)."),
+                      scientific="NASA POWER mean over the shape's bounding box (includes neighbouring areas).",
+                      simple_es="Usamos el rectángulo que rodea este lugar. Incluye algo de tierra y lagos cercanos.",
+                      scientific_es="Media de NASA POWER sobre la caja envolvente de la forma (incluye áreas vecinas)."),
         ))
     if window.reason == "drift_cut":
         art = next(a for a in var.artifacts if a.action == "end_window_before")
@@ -440,7 +442,11 @@ def analyze_region(
             code="drift_years_included", severity="warning",
             text=Text(simple=f"This period includes years after {art.start[:4]} that may be affected by satellite drift.",
                       scientific=f"Window includes data from {art.start} onwards affected by {art.kind}: "
-                                 f"{art.note.scientific}"),
+                                 f"{art.note.scientific}",
+                      simple_es=f"Este periodo incluye años después de {art.start[:4]} que pueden estar afectados "
+                                "por el desvío del satélite.",
+                      scientific_es=f"La ventana incluye datos desde {art.start} afectados por {art.kind}: "
+                                    f"{art.note.scientific_es or art.note.scientific}"),
         ))
 
     if season:
@@ -459,7 +465,9 @@ def analyze_region(
     try:
         core = _core(p, season)
     except ValueError as exc:
-        detail = Text(simple="there isn't enough usable data here", scientific=f"Analysis not possible: {exc}.")
+        detail = Text(simple="There isn't enough usable data here.", scientific=f"Analysis not possible: {exc}.",
+                      simple_es="Aquí no hay suficientes datos utilizables.",
+                      scientific_es=f"Análisis no posible: {exc}.")
         return AnalysisResult(**common, chips=chips, verdict=cant_tell(var, region, [detail]))
 
     tt = core.tt
@@ -472,10 +480,15 @@ def analyze_region(
         checks_run.append("leave-one-year-out")
         if base_sig and loyo.flip_years:
             yrs = ", ".join(str(y) for y in loyo.flip_years)
+            # R5: the plain sentence names at most 3 years; the scientific one keeps the full list
+            shown = ", ".join(str(y) for y in loyo.flip_years[:3])
+            extra = len(loyo.flip_years) - 3
             chips.append(Chip(
                 code="rests_on_few_years", severity="warning",
-                text=Text(simple=f"The answer changes if we leave out {yrs}.",
-                          scientific=f"Leave-one-year-out changes sign or significance when dropping {yrs}."),
+                text=Text(simple=f"The answer changes if we leave out {shown}" + (f" and {extra} more." if extra > 0 else "."),
+                          scientific=f"Leave-one-year-out changes sign or significance when dropping {yrs}.",
+                          simple_es=f"La respuesta cambia si dejamos fuera {shown}" + (f" y {extra} más." if extra > 0 else "."),
+                          scientific_es=f"Al omitir un año a la vez, el signo o la significancia cambian al quitar {yrs}."),
             ))
         if window.reason == "drift_cut" and start is None and end is None:
             pf = prepare(series, full_window(series))
@@ -489,7 +502,9 @@ def analyze_region(
                     chips.append(Chip(
                         code="drift_changes_verdict", severity="warning",
                         text=Text(simple="The answer changes if we include the years after the satellite drifted.",
-                                  scientific=f"Including post-{window.end[:4]} data changes the label to {lab_full}."),
+                                  scientific=f"Including post-{window.end[:4]} data changes the label to {lab_full}.",
+                                  simple_es="La respuesta cambia si incluimos los años en que el satélite se desvió.",
+                                  scientific_es=f"Incluir datos posteriores a {window.end[:4]} cambia la etiqueta a {lab_full}."),
                     ))
             except ValueError:
                 pass
@@ -507,7 +522,11 @@ def analyze_region(
                     code="cross_check_disagrees", severity="warning",
                     text=Text(simple=f"A second source ({other.name.simple.lower()}) shows the opposite direction.",
                               scientific=f"Cross-check {other.name.scientific} has the opposite sign "
-                                         f"({cc.slope_per_decade:+g} per decade)."),
+                                         f"({cc.slope_per_decade:+g} per decade).",
+                              simple_es=f"Una segunda fuente ({(other.name.simple_es or other.name.simple).lower()}) "
+                                        "muestra la dirección contraria.",
+                              scientific_es=f"El contraste {other.name.scientific_es or other.name.scientific} tiene el "
+                                            f"signo opuesto ({cc.slope_per_decade:+g} por década)."),
                 ))
         if region.comparison_region:
             comp = cat.regions[region.comparison_region]
@@ -518,7 +537,10 @@ def analyze_region(
                 chips.append(Chip(
                     code="spatial_disagrees", severity="warning",
                     text=Text(simple=f"The neighbouring area ({comp.name.simple}) shows the opposite direction.",
-                              scientific=f"Comparison region {comp.name.scientific} has the opposite sign."),
+                              scientific=f"Comparison region {comp.name.scientific} has the opposite sign.",
+                              simple_es=f"El área vecina ({comp.name.simple_es or comp.name.simple}) muestra la dirección contraria.",
+                              scientific_es=f"La región de comparación {comp.name.scientific_es or comp.name.scientific} "
+                                            "tiene el signo opuesto."),
                 ))
 
     # Breaks are checked only at catalogued artifact dates (no generic change-point test,
@@ -536,7 +558,10 @@ def analyze_region(
                     code="excluded_years_unusual", severity="info",
                     text=Text(simple=f"The left-out years look unusual from {sm2[:4]}, which fits the satellite drift.",
                               scientific=f"Post-window anomalies depart from the fitted trend from {sm2} "
-                                         "(consistent with the documented artifact)."),
+                                         "(consistent with the documented artifact).",
+                              simple_es=f"Los años que dejamos fuera se ven raros desde {sm2[:4]}. Encaja con el desvío del satélite.",
+                              scientific_es=f"Las anomalías posteriores a la ventana se apartan de la tendencia ajustada "
+                                            f"desde {sm2} (coherente con el artefacto documentado)."),
                 ))
 
     then_now = _then_now(p, core, var, season)

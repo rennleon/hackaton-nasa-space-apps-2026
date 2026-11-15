@@ -237,6 +237,34 @@ def _climatology(src: P.PowerSource, param: str, kind: str, bbox: list[float]):
 MONTH_NAMES = [calendar.month_name[m] for m in range(1, 13)]
 
 
+MONTH_NAMES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre",
+                  "octubre", "noviembre", "diciembre"]
+
+
+def _rain_span_es(months: list[int]) -> str:
+    """'de diciembre a marzo' for a circular run of consecutive months."""
+    s = set(months)
+    start = next(m for m in months if ((m - 2) % 12) + 1 not in s)
+    end = next(m for m in months if (m % 12) + 1 not in s)
+    return f"de {MONTH_NAMES_ES[start - 1]} a {MONTH_NAMES_ES[end - 1]}"
+
+
+def _simple_feel_es(code: str | None) -> str | None:
+    if not code:
+        return None
+    if code == "Af":
+        return "cálido y lluvioso todo el año"
+    if code[0] == "A":
+        return "cálido, con una época de lluvia y otra seca"
+    if code[0] == "B":
+        return ("muy seco" if code[1] == "W" else "seco") + (" y cálido" if code[2] == "h" else " y fresco")
+    if code[0] == "C":
+        return "templado, ni muy caliente ni muy frío"
+    if code[0] == "D":
+        return "frío, con un invierno largo y frío"
+    return "muy frío todo el año"
+
+
 def _rain_span(months: list[int]) -> str:
     """'December to March' for a circular run of consecutive months."""
     s = set(months)
@@ -286,7 +314,34 @@ def _texts(code, ar6, elev, high_up, wet, dry, years) -> Text | None:
         return None
     if not simple:
         simple = ["We could not tell what kind of place this is."]
-    return Text(simple=" ".join(simple), scientific="; ".join(sci) + "." if sci else "No place facts available.")
+    # Spanish twin, built from the same facts
+    feel_es = _simple_feel_es(code)
+    simple_es: list[str] = []
+    if feel_es:
+        simple_es.append(f"Tu lugar es {feel_es}.")
+    if high_up:
+        simple_es.append("Está en un lugar alto, sobre el nivel del mar.")
+    if wet:
+        simple_es.append(f"La mayor parte de la lluvia cae {_rain_span_es(wet)}.")
+    if feel_es:
+        simple_es.append("Esto es una estimación de un modelo de computadora.")
+    sci_es: list[str] = []
+    if code and years:
+        sci_es.append(f"Köppen–Geiger {code} (reglas de Beck et al. 2018 sobre la climatología de NASA POWER "
+                      f"{years[0]}–{years[1]}, basada en MERRA-2)")
+    if ar6:
+        sci_es.append(f"región IPCC AR6 {ar6[0]} ({ar6[1]})")
+    if elev is not None:
+        sci_es.append(f"elevación de la rejilla del modelo {elev:.0f} m" + (" (zona alta: 1500 m o más)" if high_up else ""))
+    if wet:
+        sci_es.append(f"meses húmedos {_rain_span_es(wet)}, meses secos {_rain_span_es(dry)} (medias mensuales de largo plazo)")
+    if not simple_es:
+        simple_es = ["No pudimos saber qué tipo de lugar es."]
+    return Text(
+        simple=" ".join(simple), scientific="; ".join(sci) + "." if sci else "No place facts available.",
+        simple_es=" ".join(simple_es),
+        scientific_es="; ".join(sci_es) + "." if sci_es else "No hay datos del lugar disponibles.",
+    )
 
 
 # ---------------------------------------------------------------- entry point
