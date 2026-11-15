@@ -40,7 +40,7 @@
 
 /* the journey: one line down the page, a stop per step */
 .how-journey { max-width: 720px; margin: 1.4rem auto 0; }
-.how-band { position: relative; padding-bottom: 1.2rem; scroll-margin-top: calc(var(--how-top, 3.5rem) + 5rem); }
+.how-band { position: relative; padding-bottom: 1.2rem; scroll-margin-top: calc(var(--how-top, 3.5rem) + 7rem); }
 .how-band::before { content: ''; position: absolute; left: calc(var(--rail-x) - 2px); top: 0; bottom: 0; width: 4px; background: color-mix(in srgb, var(--band) 55%, var(--hairline)); }
 .how-band:first-child::before { top: 1.25rem; }
 .how-milestone { position: relative; display: flex; align-items: center; min-height: 2.5rem; margin: 0 0 0.9rem; padding-left: var(--rail-gap); font-family: var(--font-head); font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; }
