@@ -177,3 +177,10 @@ def test_unit_mismatch_is_refused():
     doc = {**REG, "parameters": {"T2M": {"units": "K"}}}
     with pytest.raises(UnitMismatch):
         FakeSource(doc).fetch(CAT.variables["power_t2m"], region())
+
+
+def test_cell_series_one_per_grid_point_and_none_for_a_point():
+    src = FakeSource(REG)
+    cells = src.cell_series(CAT.variables["power_t2m"], region())
+    assert len(cells) == len(REG["features"]) and all(len(c.months) == 36 for c in cells)
+    assert src.cell_series(CAT.variables["power_t2m"], region(kind="point", bbox=(-78.5, -7.2, -78.5, -7.2))) is None

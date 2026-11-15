@@ -27,7 +27,7 @@ import numpy as np
 
 from ..catalog import RegionCard, VariableCard
 from ..contract import Provenance
-from .base import LiveSourceUnavailable, RawSeries, area_mean, check_unit
+from .base import CellSeries, LiveSourceUnavailable, RawSeries, area_mean, check_unit
 
 log = logging.getLogger(__name__)
 
@@ -202,6 +202,27 @@ class PowerSource:
         return doc, url
 
     # -- SeriesSource -----------------------------------------------------
+    def cell_series(self, variable: VariableCard, region: RegionCard) -> list[CellSeries] | None:
+        """The grid points of a regional response, one series each (same parse as `fetch`, same cache file).
+        None for a point, a box answered by its centre point, or when the response is not cached."""
+        param = variable.power_param
+        geom = region.geometry
+        if not param or geom.kind == "point":
+            return None
+        endpoint, c = self._plan(geom.kind, geom.bbox)
+        if endpoint != "regional":
+            return None
+        loaded = self._load(endpoint, param, c, FIRST_YEAR, self.end_year or last_complete_year())
+        if loaded is None:
+            return None
+        try:
+            points = parse_power_points(loaded[0], param)
+        except (KeyError, TypeError, ValueError):
+            return None
+        out = [CellSeries(lat, lon, list(v), np.array(list(v.values()), dtype=np.float64))
+               for lon, lat, v in points]
+        return out if len(out) >= 2 else None
+
     def fetch(self, variable: VariableCard, region: RegionCard) -> RawSeries | None:
         param = variable.power_param
         if not param:

@@ -259,6 +259,7 @@ export interface Robustness {
   drift_label_with_late_years: string | null;
   cross_check: Comparison | null;
   spatial: Comparison | null;
+  cell_agreement: CellAgreement | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -288,6 +289,20 @@ export interface Comparison {
   window_start: string | null;
   window_end: string | null;
   text: Text | null;
+}
+/**
+ * Do the grid cells inside a box go the way the box average goes? (Counts only, no map.)
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "CellAgreement".
+ */
+
+export interface CellAgreement {
+  n_cells: number;
+  n_same_sign: number;
+  n_opposite: number;
+  n_opposite_sure: number;
+  verdict: "agree" | "mostly" | "mixed";
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema

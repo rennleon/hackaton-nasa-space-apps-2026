@@ -17,6 +17,7 @@ import numpy as np
 
 from . import ENGINE_VERSION
 from .catalog import Catalog, RegionCard, VariableCard
+from .cell_agreement import cell_agreement
 from .contract import (
     AnalysisResult,
     Chip,
@@ -544,9 +545,11 @@ def analyze_region(
     theme_id: str | None = None,
     window_reason: str = "user",
     failed_fetches: dict[str, Exception] | None = None,
+    with_cell_agreement: bool = True,
 ) -> AnalysisResult:
     """`failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
-    `fetch_failed` gate instead of raising `LiveSourceUnavailable`; the dict maps variable id to the error."""
+    `fetch_failed` gate instead of raising `LiveSourceUnavailable`; the dict maps variable id to the error.
+    `with_cell_agreement=False` (the scan) skips the per-cell check, which reads and tests every grid cell."""
     cat = ctx.catalog
     if variable_id not in cat.variables:
         raise KeyError(f"unknown variable {variable_id}")
@@ -708,6 +711,16 @@ def analyze_region(
                               scientific_es=f"El contraste {other.name.scientific_es or other.name.scientific} tiene el "
                                             f"signo opuesto ({cc.slope_per_decade:+g} por década)."),
                 ))
+        if with_cell_agreement and region.geometry.kind != "point":
+            try:  # context only: never block the analysis
+                kind = series.provenance.source_kind if series.provenance else None
+                cells = ctx.sources.cell_series(var, region, kind)
+                if cells:
+                    rob.cell_agreement = cell_agreement(
+                        cells, var, series.provenance, window, season, tt.slope_per_year,
+                        lambda pc: _core(pc, season).tt, ctx.alpha)
+            except Exception:  # noqa: BLE001
+                rob.cell_agreement = None
         if region.comparison_region:
             comp = cat.regions[region.comparison_region]
             rob.spatial = _compare(ctx, var, comp, window, season, tt.slope_per_year, comp.id)
