@@ -1,0 +1,49 @@
+/* Guided tour: dim, spotlight, note. The page behind is for looking only (the shield blocks clicks, not scrolling). */
+.demo-root { position: fixed; inset: 0; z-index: 3000; pointer-events: none; }
+.demo-shield { position: fixed; inset: 0; pointer-events: auto; background: transparent; }
+.demo-dim { position: fixed; inset: 0; background: rgb(4 10 24 / 0.66); pointer-events: none; }
+.demo-spot {
+  position: fixed;
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 0 0 100vmax rgb(4 10 24 / 0.66), 0 0 0 3px var(--accent);
+  pointer-events: none;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+.demo-tip {
+  position: fixed;
+  box-sizing: border-box;
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  pointer-events: auto;
+  padding: 1rem 1.2rem 0.9rem;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent);
+  transition: top 0.25s ease, left 0.25s ease;
+}
+.demo-tip p { margin: 0 0 0.55rem; }
+.demo-title { font-family: var(--font-head); font-weight: 700; color: var(--accent); font-size: 0.95rem; }
+.demo-text { font-size: 1.05rem; line-height: 1.45; }
+.demo-dots { display: flex; gap: 6px; list-style: none; margin: 0.2rem 0 0.2rem; padding: 0; }
+.demo-dots li { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--accent); box-sizing: border-box; }
+.demo-dots li.is-done { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+.demo-dots li.is-on { background: var(--accent); transform: scale(1.25); }
+.demo-count { margin: 0 0 0.6rem; }
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+.demo-auto { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; cursor: pointer; }
+.demo-auto input { width: 1.1rem; height: 1.1rem; }
+
+/* Phone: the note is a bottom sheet, kept short so the lit-up part of the page stays visible above it. */
+@media (max-width: 599px) {
+  .demo-tip { padding: 0.7rem 0.9rem 0.6rem; }
+  .demo-text { font-size: 1rem; line-height: 1.4; }
+  .demo-tip p { margin-bottom: 0.4rem; }
+  .demo-count { display: none; }
+  .demo-auto { margin-top: 0.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-spot, .demo-tip { transition: none; }
+  .demo-dots li.is-on { transform: none; }
+}

@@ -58,6 +58,7 @@ describe('coverage', () => {
 const entry = (id: string, label: ScanEntry['shortlist_label'], p: number | null): ScanEntry => ({
   variable_id: id, name: { simple: id, scientific: id }, role: 'target', source_type: 'observed', shortlist_label: label,
   verdict_label: 'cant_tell', slope_per_decade: 0, units, p_decisive: p, p_adjusted: p, reason: null, worth_investigating: true, mdt_per_decade: null, why: { simple: '', scientific: '' },
+  availability: 'available', instrument_id: null, yearly_series: null, cross_check: null,
 })
 
 describe('sortEntries', () => {
@@ -71,9 +72,9 @@ const result: AnalysisResult = {
   schema_version: '1', engine_version: 't', region: { id: 'r', name: { simple: 'r', scientific: 'r' } },
   season: null, season_series: null, seasonal_share: null, selection: null, yearly_series: null, then_now: null, tests: [], persistence: null, detectability: null,
   robustness: { leave_one_year_out: null, drift_label_with_late_years: null, cross_check: null, spatial: null }, chips: [],
-  variable: { id: 'v', giovanni_id: 'g', name: { simple: 'v', scientific: 'v' }, definition: { simple: '', scientific: '' }, source_type: 'observed', instrument: 'X', units },
+  variable: { id: 'v', giovanni_id: 'g', name: { simple: 'v', scientific: 'v' }, definition: { simple: '', scientific: '' }, source_type: 'observed', instrument: 'X', units, instrument_id: null, platform: null, delivered_by: null, cell_deg: null },
   provenance: null, window: { start: '2002-09', end: '2003-01', reason: 'drift_cut', years: 0.4 },
-  gates: { passed: true, checks: [] },
+  gates: { passed: true, checks: [] }, published: null, published_context: [],
   series: ['2002-09', '2002-10', '2002-11', '2002-12', '2003-01', '2003-02'].map((t, i) => ({ t, value: 60 + i, anomaly: i - 2, in_window: i < 5 })),
   trend: { slope_per_decade: 1.5, ci_low: 1, ci_high: 2, fit: [{ t: '2002-09', trend: 0, low: -1, high: 1 }, { t: '2003-01', trend: 1, low: 0, high: 2 }] },
   verdict: { label: 'significant', certainty: 'sure', answer: { simple: 'a', scientific: 'a' }, how_much: { simple: 'h', scientific: 'h' }, headline: { simple: 'h', scientific: 'h' }, sentence: { simple: 's', scientific: 's' }, notes: [] },

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import math
 import os
+import threading
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -21,6 +23,7 @@ from .contract import (
     Comparison,
     Detectability,
     FitPoint,
+    GateCheck,
     Gates,
     MonthPoint,
     Persistence,
@@ -33,7 +36,8 @@ from .contract import (
     Window,
     YearPoint,
 )
-from .gates import bbox_chip, fitness, no_data, quality, step_month
+from .gates import bbox_chip, fitness, near_bound_chip, no_data, quality, step_month
+from .independence import independence_note
 from .ingest import MonthlySeries, to_monthly
 from .prepare import (
     Prepared,
@@ -45,9 +49,12 @@ from .prepare import (
     season_means,
     window_years,
 )
+from .published import for_result as published_for_result
+from .published import match as published_match
 from .robustness import leave_one_year_out
 from .selection import stage1
-from .sources import SourceChain
+from .sources import GiovanniBoxTooLarge, LiveSourceUnavailable, SourceChain
+from .sources.giovanni_api import GiovanniApiSource
 from .sources.giovanni_csv import GiovanniCsvSource
 from .sources.power import PowerSource
 from .stats import TrendTests, seasonal_mk, trend_tests, years_to_detect
@@ -69,12 +76,17 @@ def _r(x: float | None, nd: int = 4) -> float | None:
     return None if x is None or not math.isfinite(x) else round(float(x), nd)
 
 
+CACHE_SIZE = 512  # per context: a public deployment must not grow memory without limit
+
+
 @dataclass
 class EngineContext:
     catalog: Catalog
     sources: SourceChain
     alpha: float = 0.05
-    _cache: dict = field(default_factory=dict)
+    cache_size: int = CACHE_SIZE
+    _cache: OrderedDict = field(default_factory=OrderedDict)
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     @classmethod
     def from_repo(cls, root: Path | None = None) -> EngineContext:
@@ -82,17 +94,26 @@ class EngineContext:
         sources = SourceChain([
             GiovanniCsvSource(root / "data" / "raw"),
             PowerSource(cache_dir=root / "data" / "cache" / "power"),
+            GiovanniApiSource(cache_dir=root / "data" / "cache" / "giovanni"),
         ])
         return cls(Catalog.load(root / "catalog"), sources)
 
     def series(self, variable_id: str, region: RegionCard | str) -> MonthlySeries | None:
         r = self.catalog.regions[region] if isinstance(region, str) else region
         key = (variable_id, r.id, tuple(r.geometry.bbox))
-        if key not in self._cache:
-            v = self.catalog.variables[variable_id]
-            raw = self.sources.fetch(v, r)
-            self._cache[key] = to_monthly(raw, v) if raw is not None else None
-        return self._cache[key]
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+                return self._cache[key]
+        v = self.catalog.variables[variable_id]
+        raw = self.sources.fetch(v, r)  # outside the lock: live fetches take seconds and run in parallel
+        out = to_monthly(raw, v) if raw is not None else None
+        with self._lock:
+            self._cache[key] = out
+            self._cache.move_to_end(key)
+            while len(self._cache) > self.cache_size:
+                self._cache.popitem(last=False)
+        return out
 
 
 @dataclass
@@ -163,7 +184,7 @@ def _then_now(p: Prepared, core: Core, var: VariableCard, season: Season | None)
     return ThenNow(
         year_then=math.floor(t0), value_then=_r(level + tt.intercept + tt.slope_per_year * t0),
         year_now=math.floor(t1), value_now=_r(level + tt.intercept + tt.slope_per_year * t1),
-        kid_scale=var.kid_units.scale, kid_label=var.kid_units.label,
+        kid_scale=var.kid_units.scale, kid_label=var.kid_units.label, kid_label_es=var.kid_units.label_es,
     )
 
 
@@ -217,6 +238,234 @@ def _compare(
     )
 
 
+def _fetch_failed_gate(exc: Exception) -> GateCheck:
+    if isinstance(exc, GiovanniBoxTooLarge):  # deterministic (same box, same answer): its own honest gate
+        return GateCheck(
+            code="box_too_large", passed=False,
+            detail=Text(
+                simple="This area is too big for this measurement. Pick a smaller area or a point.",
+                scientific=f"Area too large for this source's request limit: {exc}",
+                simple_es="Esta zona es demasiado grande para esta medición. Elige una zona más pequeña o un punto.",
+                scientific_es=f"Zona demasiado grande para el límite de solicitudes de esta fuente: {exc}",
+            ),
+        )
+    return GateCheck(
+        code="fetch_failed", passed=False,
+        detail=Text(
+            simple="We could not reach NASA's data service just now. Try again in a minute.",
+            scientific=f"Live data source unavailable: {exc}",
+            simple_es="No pudimos conectar con el servicio de datos de la NASA ahora. Prueba otra vez en un minuto.",
+            scientific_es=f"Fuente de datos en vivo no disponible: {exc}",
+        ),
+    )
+
+
+def _fetch(
+    ctx: EngineContext, variable_id: str, region: RegionCard, failed: dict[str, Exception] | None
+) -> tuple[MonthlySeries | None, Exception | None]:
+    """Fetch a series. With `failed` given (the scan), an unreachable live source is recorded
+    instead of raised, and a failure already recorded is not retried. Never cached as 'no data'."""
+    if failed is not None and variable_id in failed:
+        return None, failed[variable_id]
+    try:
+        return ctx.series(variable_id, region), None
+    except GiovanniBoxTooLarge as exc:  # never an outage: the answer is the same every time, so report it
+        if failed is not None:
+            failed[variable_id] = exc
+        return None, exc
+    except LiveSourceUnavailable as exc:
+        if failed is None:
+            raise
+        failed[variable_id] = exc
+        return None, exc
+
+
+def _p_weak(tt: TrendTests) -> float:
+    return max(float(tt.p_mk_hr), float(tt.p_ols))
+
+
+def _who(other: VariableCard) -> tuple[str, str]:
+    """How a partner is named in the Simple view (EN, ES); a computer model says so."""
+    inst = other.source.instrument
+    return (f"the {inst} model", f"el modelo {inst}") if other.source.type == "model" else (inst, inst)
+
+
+def _contrast_text(
+    outcome: str, var: VariableCard, other: VariableCard, c1: Core, c2: Core, sig1: bool, sig2: bool,
+    start: str, end: str, base: TrendTests, base_sig: bool, window: Window,
+) -> Text:
+    """Both views compare the partner with the HEADLINE (full-window) result, over the years both cover.
+    The Simple sentence names those years and says which of the two is sure."""
+    s1, s2 = c1.tt.slope_per_year * 10, c2.tt.slope_per_year * 10
+    same = bool(np.sign(c2.tt.slope_per_year) == np.sign(base.slope_per_year))
+    y0, y1 = start[:4], end[:4]
+    who, who_es = _who(other)
+    rel, rel_es = ("the same direction", "la misma dirección") if same else (
+        "the opposite direction", "la dirección contraria")
+    head = f"From {y0} to {y1}, {who} shows {rel}."
+    head_es = f"De {y0} a {y1}, {who_es} muestra {rel_es}."
+    if outcome == "agree":
+        tail, tail_es = "It is sure too.", "También está seguro."
+    elif outcome == "disagree":
+        tail, tail_es = "It is sure.", "Está seguro."
+    elif outcome == "same_direction_one_unsure":
+        if sig2:  # the partner is the sure one; the headline is not
+            tail, tail_es = "It is sure. Our main result is not sure yet.", \
+                "Está seguro. Nuestro resultado principal aún no lo está."
+        else:
+            tail, tail_es = "It is not sure yet. Our main result is sure.", \
+                "Aún no está seguro. Nuestro resultado principal sí lo está."
+    else:  # both_unsure: the partner is not sure, and it is either opposite or the headline is not sure either
+        tail, tail_es = ("Neither is sure yet.", "Ninguno está seguro aún.") if same else (
+            "It is not sure yet.", "Aún no está seguro.")
+    simple, simple_es = f"{head} {tail}", f"{head_es} {tail_es}"
+
+    def sure(b: bool) -> str:
+        return "significant" if b else "not significant"
+
+    def sure_es(b: bool) -> str:
+        return "significativo" if b else "no significativo"
+
+    sign_en = "the same sign as" if same else "the opposite sign to"
+    sign_es = "el mismo signo que" if same else "el signo opuesto a"
+    verdicts = {
+        "agree": f"The partner is significant at 0.05 over the overlap with {sign_en} the headline, and the headline "
+                 "is significant: the instruments agree.",
+        "disagree": f"The partner is significant at 0.05 over the overlap with {sign_en} the headline: "
+                    "the instruments disagree.",
+        "same_direction_one_unsure": f"Same sign as the headline, but only the {'partner' if sig2 else 'headline'} "
+                                     "is significant at 0.05.",
+        "both_unsure": ("Same sign as the headline, but neither is significant at 0.05." if same else
+                        "The partner is not significant at 0.05 over the overlap and has the opposite sign to "
+                        "the headline.") + " No contrast to report.",
+    }
+    verdicts_es = {
+        "agree": f"El contraste es significativo a 0,05 en el solapamiento con {sign_es} el titular, y el titular "
+                 "es significativo: los instrumentos coinciden.",
+        "disagree": f"El contraste es significativo a 0,05 en el solapamiento con {sign_es} el titular: "
+                    "los instrumentos no coinciden.",
+        "same_direction_one_unsure": f"Mismo signo que el titular, pero solo {'el contraste' if sig2 else 'el titular'} "
+                                     "es significativo a 0,05.",
+        "both_unsure": ("Mismo signo que el titular, pero ninguno es significativo a 0,05." if same else
+                        "El contraste no es significativo a 0,05 en el solapamiento y tiene el signo opuesto al "
+                        "titular.") + " No hay contraste que informar.",
+    }
+    sci = (
+        f"Overlapping window {start} to {end}, same place, each series de-seasonalised over that window. "
+        f"{var.source.instrument} ({var.name.scientific}): {s1:+.3g} {var.units.display} per decade, "
+        f"p = {_p_weak(c1.tt):.3g}. "
+        f"{other.source.instrument} ({other.name.scientific}): {s2:+.3g} {other.units.display} per decade, "
+        f"p = {_p_weak(c2.tt):.3g} (p is the weaker of the two decisive tests). "
+        f"Headline, full window {window.start} to {window.end}: {base.slope_per_year * 10:+.3g} {var.units.display} "
+        f"per decade, {sure(base_sig)}. {verdicts[outcome]}"
+    )
+    name_es = lambda v: v.name.scientific_es or v.name.scientific
+    sci_es = (
+        f"Ventana común {start} a {end}, mismo lugar, cada serie sin ciclo estacional sobre esa ventana. "
+        f"{var.source.instrument} ({name_es(var)}): {s1:+.3g} {var.units.display} por década, "
+        f"p = {_p_weak(c1.tt):.3g}. "
+        f"{other.source.instrument} ({name_es(other)}): {s2:+.3g} {other.units.display} por década, "
+        f"p = {_p_weak(c2.tt):.3g} (p es la más débil de las dos pruebas decisivas). "
+        f"Titular, ventana completa {window.start} a {window.end}: {base.slope_per_year * 10:+.3g} "
+        f"{var.units.display} por década, {sure_es(base_sig)}. {verdicts_es[outcome]}"
+    )
+    ids = {var.source.instrument_id, other.source.instrument_id}
+    if "airs" in ids and len(ids) == 2:
+        sci += (" AIRS is a snapshot at about 1:30 (day or night pass), the other series is a daily mean: "
+                "compare the direction only, not the size.")
+        sci_es += (" AIRS es una instantánea hacia la 1:30 (pasada de día o de noche), la otra serie es un promedio "
+                   "diario: compare solo la dirección, no el tamaño.")
+    if var.grid_deg != other.grid_deg:
+        sci += f" The grid cells differ ({var.grid_deg}° vs {other.grid_deg}°), so the footprints differ."
+        sci_es += (f" Las celdas de la rejilla difieren ({var.grid_deg}° frente a {other.grid_deg}°), "
+                   "así que las huellas difieren.")
+    return Text(simple=simple, scientific=sci, simple_es=simple_es, scientific_es=sci_es)
+
+
+def _only_one(other: VariableCard, detail: str, detail_es: str | None = None) -> Comparison:
+    """No second opinion available. The numeric fields are placeholders; `outcome` says so."""
+    return Comparison(
+        against=other.id, slope_per_decade=0.0, same_sign=False, significant=False,
+        outcome="only_one", against_instrument=other.source.instrument,
+        text=Text(simple="Only one instrument has data for this place.",
+                  scientific=f"No usable {other.name.scientific} series ({other.source.instrument}) to compare with: "
+                             f"{detail}",
+                  simple_es="Solo un instrumento tiene datos para este lugar.",
+                  scientific_es=f"No hay una serie utilizable de {other.name.scientific_es or other.name.scientific} "
+                                f"({other.source.instrument}) con la cual comparar: {detail_es or detail}"),
+    )
+
+
+def _unavailable_detail(exc: Exception) -> tuple[str, str]:
+    if isinstance(exc, GiovanniBoxTooLarge):
+        return ("the area is too big for this measurement.", "la zona es demasiado grande para esta medición.")
+    return (f"the live source could not be reached ({exc}).", f"no se pudo conectar con la fuente en vivo ({exc}).")
+
+
+def contrast_instruments(
+    ctx: EngineContext, var: VariableCard, other: VariableCard, region: RegionCard, window: Window,
+    series: MonthlySeries, season: Season | None, base: TrendTests, failed: dict[str, Exception] | None = None,
+) -> Comparison:
+    """A5: the same quantity from another instrument, over the years both series cover in this place.
+    Both series are re-tested on that overlap only (a fair test of each); they are never merged into one
+    number. The outcome relates the partner to the HEADLINE result (`base`, over `window`): the overlap is
+    only where the two are compared, never a replacement for the headline."""
+    try:
+        s2, err = _fetch(ctx, other.id, region, failed) if other.listed else (None, None)
+    except LiveSourceUnavailable as exc:  # detail path: a partner outage never fails the whole page
+        s2, err = None, exc
+    if err is not None:
+        return _only_one(other, *_unavailable_detail(err))
+    if s2 is None or not np.isfinite(s2.values).any():
+        return _only_one(other, "no data for this place.", "no hay datos para este lugar.")
+    try:
+        w2 = resolve_window(s2, other)
+        start = max(window.start, w2.start, key=month_index)
+        end = min(window.end, w2.end, key=month_index)
+        years = window_years(start, end) if month_index(end) >= month_index(start) else 0.0
+        if years < MIN_COMPARISON_YEARS:
+            return _only_one(other, f"the two series share only {years:.1f} years (minimum {MIN_COMPARISON_YEARS:.0f}).",
+                             f"las dos series comparten solo {years:.1f} años (mínimo {MIN_COMPARISON_YEARS:.0f}).")
+        win = Window(start=start, end=end, reason="user", years=round(years, 2))
+        p1, p2 = prepare(series, win), prepare(s2, win)
+        months = season.months if season else None
+        bad = [c.detail for c in quality(p2, other, months) if not c.passed]
+        if bad:
+            return _only_one(other, bad[0].scientific, bad[0].scientific_es)
+        c1, c2 = _core(p1, season), _core(p2, season)
+    except ValueError as exc:
+        return _only_one(other, f"{exc}.", f"{exc}.")
+    sig1, sig2 = _sig(c1.tt, ctx.alpha), _sig(c2.tt, ctx.alpha)
+    base_sig = _sig(base, ctx.alpha)
+    same = bool(np.sign(c2.tt.slope_per_year) == np.sign(base.slope_per_year))  # partner vs the HEADLINE
+    if sig2 and not same:
+        outcome = "disagree"
+    elif sig2 and base_sig:
+        outcome = "agree"
+    elif (sig2 or base_sig) and same:
+        outcome = "same_direction_one_unsure"
+    else:  # the partner is not sure and either points the other way or the headline is not sure either
+        outcome = "both_unsure"
+    return Comparison(
+        against=other.id, slope_per_decade=_r(c2.tt.slope_per_year * 10, 6), same_sign=same, significant=sig2,
+        outcome=outcome, against_instrument=other.source.instrument, window_start=start, window_end=end,
+        text=_with_independence(_contrast_text(outcome, var, other, c1, c2, sig1, sig2, start, end, base, base_sig, window),
+                                independence_note(var, other, ctx.catalog)),
+    )
+
+
+def _with_independence(text: Text, note: Text | None) -> Text:
+    """Append the 'partly share data' note (e.g. MERRA-2 assimilates AIRS) so a second opinion is never oversold."""
+    if note is None:
+        return text
+    def join(a: str | None, b: str | None) -> str | None:
+        return f"{a} {b}" if a and b else (a or b)
+    return Text(
+        simple=join(text.simple, note.simple) or "", scientific=join(text.scientific, note.scientific) or "",
+        simple_es=join(text.simple_es, note.simple_es), scientific_es=join(text.scientific_es, note.scientific_es),
+    )
+
+
 def analyze(
     ctx: EngineContext,
     region_id: str,
@@ -245,7 +494,10 @@ def analyze_region(
     with_robustness: bool = True,
     theme_id: str | None = None,
     window_reason: str = "user",
+    failed_fetches: dict[str, Exception] | None = None,
 ) -> AnalysisResult:
+    """`failed_fetches`: pass a dict (the scan does) to record an unreachable live source as a
+    `fetch_failed` gate instead of raising `LiveSourceUnavailable`; the dict maps variable id to the error."""
     cat = ctx.catalog
     if variable_id not in cat.variables:
         raise KeyError(f"unknown variable {variable_id}")
@@ -260,9 +512,16 @@ def analyze_region(
             raise KeyError(f"no declared season {season_id} for {variable_id} in {region_id}")
         season = Season(id=ds.id, name=ds.name, months=ds.months)
 
-    series = ctx.series(variable_id, region)
+    series, fetch_err = _fetch(ctx, variable_id, region, failed_fetches)
+    if fetch_err is not None:
+        g = _fetch_failed_gate(fetch_err)
+        return AnalysisResult(
+            **base, provenance=None, window=None, season=season, gates=Gates(passed=False, checks=[g]),
+            verdict=cant_tell(var, region, [g.detail]),
+        )
     if series is None or not np.isfinite(series.values).any():
-        g = no_data()
+        # all fill values (the source answered but has nothing here) differs from "not fetched / not saved"
+        g = no_data(all_fill=series is not None or ctx.sources.all_fill(var, region))
         return AnalysisResult(
             **base, provenance=None, window=None, season=season, gates=Gates(passed=False, checks=[g]),
             verdict=cant_tell(var, region, [g.detail]),
@@ -287,11 +546,16 @@ def analyze_region(
     bc = bbox_chip(series.provenance, region, var.grid_deg)
     if bc:
         chips.append(bc)
+    nb = near_bound_chip(p, var, season.months if season else None)
+    if nb:
+        chips.append(nb)
     if series.provenance and series.provenance.source_kind == "nasa_power" and region.geometry.kind == "shape":
         chips.append(Chip(
             code="area_is_bounding_box", severity="info",
             text=Text(simple="We use the rectangle around this place. It includes some land and lake nearby.",
-                      scientific="NASA POWER mean over the shape's bounding box (includes neighbouring areas)."),
+                      scientific="NASA POWER mean over the shape's bounding box (includes neighbouring areas).",
+                      simple_es="Usamos el rectángulo que rodea este lugar. Incluye algo de tierra y lagos cercanos.",
+                      scientific_es="Media de NASA POWER sobre la caja envolvente de la forma (incluye áreas vecinas)."),
         ))
     if window.reason == "drift_cut":
         art = next(a for a in var.artifacts if a.action == "end_window_before")
@@ -304,7 +568,11 @@ def analyze_region(
             code="drift_years_included", severity="warning",
             text=Text(simple=f"This period includes years after {art.start[:4]} that may be affected by satellite drift.",
                       scientific=f"Window includes data from {art.start} onwards affected by {art.kind}: "
-                                 f"{art.note.scientific}"),
+                                 f"{art.note.scientific}",
+                      simple_es=f"Este periodo incluye años después de {art.start[:4]} que pueden estar afectados "
+                                "por el desvío del satélite.",
+                      scientific_es=f"La ventana incluye datos desde {art.start} afectados por {art.kind}: "
+                                    f"{art.note.scientific_es or art.note.scientific}"),
         ))
 
     if season:
@@ -312,10 +580,14 @@ def analyze_region(
         sel_t, sel_y, f = sy.astype(float) + 0.5, sm_, 1
     else:
         sel_t, sel_y, f = p.t_window, p.anomalies_window, 12
-    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f)
+    pub = published_match(cat, region, var)  # known before the trend: AR6 entry for this place and variable
+    selection = stage1(var, region, theme_id, checks, flagged, sel_t, sel_y, gate_years, f, published=pub)
+    # Until a verdict exists the finding says "too soon"; the final return replaces it with the real agreement.
+    pub_finding, pub_context = published_for_result(cat, region, var, m=pub)
     common = dict(
         **base, provenance=series.provenance, window=window, season=season, gates=gates, selection=selection,
         series=points, yearly_series=_yearly(p), seasonal_share=_r(p.seasonal_share, 3),
+        published=pub_finding, published_context=pub_context,
     )
     if not gates.passed:
         reasons = [c.detail for c in checks if not c.passed]
@@ -323,7 +595,9 @@ def analyze_region(
     try:
         core = _core(p, season)
     except ValueError as exc:
-        detail = Text(simple="there isn't enough usable data here", scientific=f"Analysis not possible: {exc}.")
+        detail = Text(simple="We couldn't run the checks on this data.", scientific=f"Analysis not possible: {exc}.",
+                      simple_es="No pudimos hacer las pruebas con estos datos.",
+                      scientific_es=f"Análisis no posible: {exc}.")
         return AnalysisResult(**common, chips=chips, verdict=cant_tell(var, region, [detail]))
 
     tt = core.tt
@@ -336,10 +610,15 @@ def analyze_region(
         checks_run.append("leave-one-year-out")
         if base_sig and loyo.flip_years:
             yrs = ", ".join(str(y) for y in loyo.flip_years)
+            # R5: the plain sentence names at most 3 years; the scientific one keeps the full list
+            shown = ", ".join(str(y) for y in loyo.flip_years[:3])
+            extra = len(loyo.flip_years) - 3
             chips.append(Chip(
                 code="rests_on_few_years", severity="warning",
-                text=Text(simple=f"The answer changes if we leave out {yrs}.",
-                          scientific=f"Leave-one-year-out changes sign or significance when dropping {yrs}."),
+                text=Text(simple=f"The answer changes if we leave out {shown}" + (f" and {extra} more." if extra > 0 else "."),
+                          scientific=f"Leave-one-year-out changes sign or significance when dropping {yrs}.",
+                          simple_es=f"La respuesta cambia si dejamos fuera {shown}" + (f" y {extra} más." if extra > 0 else "."),
+                          scientific_es=f"Al omitir un año a la vez, el signo o la significancia cambian al quitar {yrs}."),
             ))
         if window.reason == "drift_cut" and start is None and end is None:
             pf = prepare(series, full_window(series))
@@ -353,21 +632,32 @@ def analyze_region(
                     chips.append(Chip(
                         code="drift_changes_verdict", severity="warning",
                         text=Text(simple="The answer changes if we include the years after the satellite drifted.",
-                                  scientific=f"Including post-{window.end[:4]} data changes the label to {lab_full}."),
+                                  scientific=f"Including post-{window.end[:4]} data changes the label to {lab_full}.",
+                                  simple_es="La respuesta cambia si incluimos los años en que el satélite se desvió.",
+                                  scientific_es=f"Incluir datos posteriores a {window.end[:4]} cambia la etiqueta a {lab_full}."),
                     ))
             except ValueError:
                 pass
-        if var.cross_check:
-            other = cat.variables[var.cross_check]
-            rob.cross_check = _compare(ctx, other, region, window, season, tt.slope_per_year, other.id)
-            if rob.cross_check:
+        other = cat.variables[var.cross_check] if var.cross_check else None
+        # The same model delivered twice (e.g. MERRA-2 direct and via POWER) is never a second opinion.
+        same_source = other is not None and var.source.instrument_id is not None and (
+            other.source.instrument_id, other.source.platform) == (var.source.instrument_id, var.source.platform)
+        if other is not None and not same_source:
+            rob.cross_check = contrast_instruments(ctx, var, other, region, window, series, season, tt, failed_fetches)
+            cc = rob.cross_check
+            if cc.outcome != "only_one":
                 checks_run.append("cross-check source")
-            if rob.cross_check and base_sig and not rob.cross_check.same_sign:
+            # the partner is sure over its overlap and points the other way from the HEADLINE (not overlap vs overlap)
+            if cc.outcome == "disagree" and base_sig:
                 chips.append(Chip(
                     code="cross_check_disagrees", severity="warning",
                     text=Text(simple=f"A second source ({other.name.simple.lower()}) shows the opposite direction.",
                               scientific=f"Cross-check {other.name.scientific} has the opposite sign "
-                                         f"({rob.cross_check.slope_per_decade:+g} per decade)."),
+                                         f"({cc.slope_per_decade:+g} per decade).",
+                              simple_es=f"Una segunda fuente ({(other.name.simple_es or other.name.simple).lower()}) "
+                                        "muestra la dirección contraria.",
+                              scientific_es=f"El contraste {other.name.scientific_es or other.name.scientific} tiene el "
+                                            f"signo opuesto ({cc.slope_per_decade:+g} por década)."),
                 ))
         if region.comparison_region:
             comp = cat.regions[region.comparison_region]
@@ -378,7 +668,10 @@ def analyze_region(
                 chips.append(Chip(
                     code="spatial_disagrees", severity="warning",
                     text=Text(simple=f"The neighbouring area ({comp.name.simple}) shows the opposite direction.",
-                              scientific=f"Comparison region {comp.name.scientific} has the opposite sign."),
+                              scientific=f"Comparison region {comp.name.scientific} has the opposite sign.",
+                              simple_es=f"El área vecina ({comp.name.simple_es or comp.name.simple}) muestra la dirección contraria.",
+                              scientific_es=f"La región de comparación {comp.name.scientific_es or comp.name.scientific} "
+                                            "tiene el signo opuesto."),
                 ))
 
     # Breaks are checked only at catalogued artifact dates (no generic change-point test,
@@ -396,7 +689,10 @@ def analyze_region(
                     code="excluded_years_unusual", severity="info",
                     text=Text(simple=f"The left-out years look unusual from {sm2[:4]}, which fits the satellite drift.",
                               scientific=f"Post-window anomalies depart from the fitted trend from {sm2} "
-                                         "(consistent with the documented artifact)."),
+                                         "(consistent with the documented artifact).",
+                              simple_es=f"Los años que dejamos fuera se ven raros desde {sm2[:4]}. Encaja con el desvío del satélite.",
+                              scientific_es=f"Las anomalías posteriores a la ventana se apartan de la tendencia ajustada "
+                                            f"desde {sm2} (coherente con el artefacto documentado)."),
                 ))
 
     then_now = _then_now(p, core, var, season)
@@ -407,7 +703,7 @@ def analyze_region(
         slope_per_decade=tt.slope_per_year * 10, ci_low=tt.ci_low_per_year * 10, ci_high=tt.ci_high_per_year * 10,
         p_a=tt.p_mk_hr, p_b=tt.p_ols, p_c=core.p_c, r1=tt.r1, n_eff=tt.n_eff,
         years_needed=core.years_needed, years_available=core.years_available, alpha=ctx.alpha, warning_chips=warn,
-        checks_run=checks_run, then_now=then_now,
+        checks_run=checks_run, then_now=then_now, selection=selection,
     ))
     tests = [
         SignificanceTest(name="mk_hamed_rao", p=float(tt.p_mk_hr), statistic=_r(tt.z_mk_hr), decisive=True),
@@ -415,8 +711,10 @@ def analyze_region(
     ]
     if core.p_c is not None:
         tests.append(SignificanceTest(name="seasonal_mk", p=float(core.p_c), statistic=_r(core.z_c), decisive=False))
+    # C3: the same AR6 entry stage 1 used, now compared with our verdict (never causal wording).
+    pub_final, _ = published_for_result(cat, region, var, verdict.label, tt.slope_per_year * 10, m=pub)
     return AnalysisResult(
-        **common,
+        **{**common, "published": pub_final},
         season_series=[YearPoint(year=int(y), anomaly=_r(a)) for y, a in zip(core.years, core.y)] if season else None,
         trend=Trend(
             slope_per_decade=_r(tt.slope_per_year * 10, 6),

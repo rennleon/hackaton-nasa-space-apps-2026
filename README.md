@@ -63,6 +63,23 @@ docker build -f backend/Dockerfile -t trend-detective-api .
 docker compose up api
 ```
 
+## Deploying
+
+- Set `EARTHDATA_TOKEN` as a server secret (host environment variable), never in the repo or the web build.
+- `TD_GIOVANNI_OFFLINE=1` makes the server use only the committed Giovanni cache: no calls to NASA Giovanni.
+- The live endpoints (`/custom/scan`, `/custom/variables/*`) are rate limited in-process (per server process, reset
+  on restart; no Redis). Over the limit the API answers HTTP 429 with `Retry-After` and a plain message in
+  `detail` (English) and `detail_es` (Spanish). Cached answers do not use the global live budget.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TD_RATE_PER_MIN` | `20` | Requests per minute per client IP (steady rate) |
+| `TD_RATE_BURST` | `10` | Requests one client IP can make at once before waiting |
+| `TD_LIVE_PER_MIN` | `60` | All clients together: new (uncached) live computations per minute |
+| `TD_TRUST_PROXY` | unset | `1` = take the client IP from the last `X-Forwarded-For` entry. Set it only behind a proxy you control, which must add that header |
+
+Set a limit to `0` to turn it off.
+
 ## How the analysis works
 
 One fixed protocol (see the MVP spec in the team doc): default window = full record, ending in Dec 2021 for

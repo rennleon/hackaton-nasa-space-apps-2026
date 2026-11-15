@@ -44,13 +44,84 @@
         "significant": {
           "title": "Significant",
           "type": "boolean"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "enum": [
+                "agree",
+                "same_direction_one_unsure",
+                "disagree",
+                "both_unsure",
+                "only_one"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome"
+        },
+        "against_instrument": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Against Instrument"
+        },
+        "window_start": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Window Start"
+        },
+        "window_end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Window End"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "against",
         "slope_per_decade",
         "same_sign",
-        "significant"
+        "significant",
+        "outcome",
+        "against_instrument",
+        "window_start",
+        "window_end",
+        "text"
       ],
       "title": "Comparison",
       "type": "object"
@@ -338,6 +409,115 @@
       "title": "Provenance",
       "type": "object"
     },
+    "PublishedFinding": {
+      "description": "A checked statement from published science (e.g. IPCC AR6 regional assessment) for this place.",
+      "properties": {
+        "statement": {
+          "$ref": "#/$defs/Text"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "confidence_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence Es"
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "up",
+                "down",
+                "either"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "agreement": {
+          "anyOf": [
+            {
+              "enum": [
+                "agrees",
+                "differs",
+                "too_soon"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agreement"
+        },
+        "ar6_region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ar6 Region"
+        },
+        "scope": {
+          "default": "mean",
+          "enum": [
+            "mean",
+            "extremes"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "partial": {
+          "default": false,
+          "title": "Partial",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "statement",
+        "source",
+        "confidence",
+        "confidence_es",
+        "direction",
+        "agreement",
+        "ar6_region",
+        "scope",
+        "partial"
+      ],
+      "title": "PublishedFinding",
+      "type": "object"
+    },
     "RegionRef": {
       "properties": {
         "id": {
@@ -552,6 +732,7 @@
     },
     "Text": {
       "additionalProperties": false,
+      "description": "One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English\nwhen they are missing, so they stay optional in the schema (existing consumers keep compiling).",
       "properties": {
         "simple": {
           "title": "Simple",
@@ -560,6 +741,30 @@
         "scientific": {
           "title": "Scientific",
           "type": "string"
+        },
+        "simple_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Simple Es"
+        },
+        "scientific_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scientific Es"
         }
       },
       "required": [
@@ -595,6 +800,18 @@
         "kid_label": {
           "title": "Kid Label",
           "type": "string"
+        },
+        "kid_label_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kid Label Es"
         }
       },
       "required": [
@@ -603,7 +820,8 @@
         "year_now",
         "value_now",
         "kid_scale",
-        "kid_label"
+        "kid_label",
+        "kid_label_es"
       ],
       "title": "ThenNow",
       "type": "object"
@@ -699,6 +917,54 @@
         },
         "units": {
           "$ref": "#/$defs/UnitsInfo"
+        },
+        "instrument_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instrument Id"
+        },
+        "platform": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Platform"
+        },
+        "delivered_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delivered By"
+        },
+        "cell_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cell Deg"
         }
       },
       "required": [
@@ -708,7 +974,11 @@
         "definition",
         "source_type",
         "instrument",
-        "units"
+        "units",
+        "instrument_id",
+        "platform",
+        "delivered_by",
+        "cell_deg"
       ],
       "title": "VariableRef",
       "type": "object"
@@ -999,6 +1269,24 @@
       "title": "Chips",
       "type": "array"
     },
+    "published": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PublishedFinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "published_context": {
+      "items": {
+        "$ref": "#/$defs/PublishedFinding"
+      },
+      "title": "Published Context",
+      "type": "array"
+    },
     "verdict": {
       "$ref": "#/$defs/Verdict"
     }
@@ -1024,6 +1312,8 @@
     "detectability",
     "robustness",
     "chips",
+    "published",
+    "published_context",
     "verdict"
   ],
   "title": "AnalysisResult",

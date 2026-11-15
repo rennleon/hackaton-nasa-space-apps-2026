@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TD_POWER_OFFLINE: "1" # tests never call NASA POWER; the committed cache serves pre-loaded regions
+      TD_GIOVANNI_OFFLINE: "1" # never call Giovanni from CI; the committed cache serves pre-loaded data
     defaults:
       run:
         working-directory: backend

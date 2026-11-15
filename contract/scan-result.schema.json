@@ -1,5 +1,227 @@
 {
   "$defs": {
+    "Comparison": {
+      "description": "Sign comparison with another series (cross-check source or spatial box).",
+      "properties": {
+        "against": {
+          "title": "Against",
+          "type": "string"
+        },
+        "slope_per_decade": {
+          "title": "Slope Per Decade",
+          "type": "number"
+        },
+        "same_sign": {
+          "title": "Same Sign",
+          "type": "boolean"
+        },
+        "significant": {
+          "title": "Significant",
+          "type": "boolean"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "enum": [
+                "agree",
+                "same_direction_one_unsure",
+                "disagree",
+                "both_unsure",
+                "only_one"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome"
+        },
+        "against_instrument": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Against Instrument"
+        },
+        "window_start": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Window Start"
+        },
+        "window_end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Window End"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "against",
+        "slope_per_decade",
+        "same_sign",
+        "significant",
+        "outcome",
+        "against_instrument",
+        "window_start",
+        "window_end",
+        "text"
+      ],
+      "title": "Comparison",
+      "type": "object"
+    },
+    "PlaceProfile": {
+      "description": "What kind of place this is, from facts known before any trend (long-term means, elevation, maps).",
+      "properties": {
+        "ar6_region_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ar6 Region Code"
+        },
+        "ar6_region_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ar6 Region Name"
+        },
+        "climate_group": {
+          "anyOf": [
+            {
+              "enum": [
+                "tropical",
+                "dry",
+                "temperate",
+                "cold",
+                "polar"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Climate Group"
+        },
+        "climate_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Climate Code"
+        },
+        "high_up": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "High Up"
+        },
+        "elevation_m_model": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elevation M Model"
+        },
+        "wet_months": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Wet Months",
+          "type": "array"
+        },
+        "dry_months": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Dry Months",
+          "type": "array"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "ar6_region_code",
+        "ar6_region_name",
+        "climate_group",
+        "climate_code",
+        "high_up",
+        "elevation_m_model",
+        "wet_months",
+        "dry_months",
+        "text"
+      ],
+      "title": "PlaceProfile",
+      "type": "object"
+    },
     "RegionRef": {
       "properties": {
         "id": {
@@ -130,6 +352,57 @@
             }
           ],
           "default": null
+        },
+        "availability": {
+          "default": "available",
+          "enum": [
+            "available",
+            "no_data_here",
+            "too_short",
+            "too_many_gaps",
+            "fetch_failed",
+            "box_too_large"
+          ],
+          "title": "Availability",
+          "type": "string"
+        },
+        "instrument_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instrument Id"
+        },
+        "yearly_series": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/YearPoint"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Yearly Series"
+        },
+        "cross_check": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Comparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -146,13 +419,18 @@
         "worth_investigating",
         "mdt_per_decade",
         "why",
-        "reason"
+        "reason",
+        "availability",
+        "instrument_id",
+        "yearly_series",
+        "cross_check"
       ],
       "title": "ScanEntry",
       "type": "object"
     },
     "Text": {
       "additionalProperties": false,
+      "description": "One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English\nwhen they are missing, so they stay optional in the schema (existing consumers keep compiling).",
       "properties": {
         "simple": {
           "title": "Simple",
@@ -161,6 +439,30 @@
         "scientific": {
           "title": "Scientific",
           "type": "string"
+        },
+        "simple_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Simple Es"
+        },
+        "scientific_es": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scientific Es"
         }
       },
       "required": [
@@ -191,6 +493,30 @@
         "decimals"
       ],
       "title": "UnitsInfo",
+      "type": "object"
+    },
+    "YearPoint": {
+      "properties": {
+        "year": {
+          "title": "Year",
+          "type": "integer"
+        },
+        "anomaly": {
+          "title": "Anomaly",
+          "type": "number"
+        },
+        "in_window": {
+          "default": true,
+          "title": "In Window",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "year",
+        "anomaly",
+        "in_window"
+      ],
+      "title": "YearPoint",
       "type": "object"
     }
   },
@@ -253,6 +579,17 @@
       },
       "title": "Entries",
       "type": "array"
+    },
+    "place": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PlaceProfile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [
@@ -265,7 +602,8 @@
     "window_start",
     "window_end",
     "common_window",
-    "entries"
+    "entries",
+    "place"
   ],
   "title": "ScanResult",
   "type": "object"

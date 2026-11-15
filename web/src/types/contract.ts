@@ -22,6 +22,8 @@ export interface AnalysisResult {
   detectability: Detectability | null;
   robustness: Robustness;
   chips: Chip[];
+  published: PublishedFinding | null;
+  published_context: PublishedFinding[];
   verdict: Verdict;
 }
 /**
@@ -34,6 +36,9 @@ export interface RegionRef {
   name: Text;
 }
 /**
+ * One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English
+ * when they are missing, so they stay optional in the schema (existing consumers keep compiling).
+ *
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
  * via the `definition` "Text".
  */
@@ -41,6 +46,8 @@ export interface RegionRef {
 export interface Text {
   simple: string;
   scientific: string;
+  simple_es?: string | null;
+  scientific_es?: string | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -55,6 +62,10 @@ export interface VariableRef {
   source_type: "observed" | "model";
   instrument: string;
   units: UnitsInfo;
+  instrument_id: string | null;
+  platform: string | null;
+  delivered_by: string | null;
+  cell_deg: number | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -181,6 +192,7 @@ export interface ThenNow {
   value_now: number;
   kid_scale: number;
   kid_label: string;
+  kid_label_es: string | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -271,6 +283,11 @@ export interface Comparison {
   slope_per_decade: number;
   same_sign: boolean;
   significant: boolean;
+  outcome: ("agree" | "same_direction_one_unsure" | "disagree" | "both_unsure" | "only_one") | null;
+  against_instrument: string | null;
+  window_start: string | null;
+  window_end: string | null;
+  text: Text | null;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -281,6 +298,24 @@ export interface Chip {
   code: string;
   severity: "info" | "warning";
   text: Text;
+}
+/**
+ * A checked statement from published science (e.g. IPCC AR6 regional assessment) for this place.
+ *
+ * This interface was referenced by `AnalysisResult`'s JSON-Schema
+ * via the `definition` "PublishedFinding".
+ */
+
+export interface PublishedFinding {
+  statement: Text;
+  source: string;
+  confidence: string | null;
+  confidence_es: string | null;
+  direction: ("up" | "down" | "either") | null;
+  agreement: ("agrees" | "differs" | "too_soon") | null;
+  ar6_region: string | null;
+  scope: "mean" | "extremes";
+  partial: boolean;
 }
 /**
  * This interface was referenced by `AnalysisResult`'s JSON-Schema
@@ -309,6 +344,7 @@ export interface ScanResult {
   window_end: string | null;
   common_window: boolean;
   entries: ScanEntry[];
+  place: PlaceProfile | null;
 }
 /**
  * This interface was referenced by `ScanResult`'s JSON-Schema
@@ -331,9 +367,25 @@ export interface ScanEntry {
   mdt_per_decade: number | null;
   why: Text;
   reason: Text | null;
+  availability: "available" | "no_data_here" | "too_short" | "too_many_gaps" | "fetch_failed" | "box_too_large";
+  instrument_id: string | null;
+  yearly_series: YearPoint[] | null;
+  cross_check: Comparison | null;
 }
 /**
  * This interface was referenced by `ScanResult`'s JSON-Schema
  * via the `definition` "UnitsInfo".
  */
+
+export interface PlaceProfile {
+  ar6_region_code: string | null;
+  ar6_region_name: string | null;
+  climate_group: ("tropical" | "dry" | "temperate" | "cold" | "polar") | null;
+  climate_code: string | null;
+  high_up: boolean | null;
+  elevation_m_model: number | null;
+  wet_months: number[];
+  dry_months: number[];
+  text: Text | null;
+}
 

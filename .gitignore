@@ -11,3 +11,9 @@ web/dist/
 .DS_Store
 .idea/
 .vscode/
+# Secrets (Earthdata token etc.)
+.env
+.env.*
+!.env.example
+# Giovanni per-cell raw CSVs (rebuildable work area; the box/ and point/ series are committed)
+data/cache/giovanni/cells/

@@ -27,10 +27,15 @@ class Model(BaseModel):
 
 
 class Text(Model):
-    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
+    """One sentence in both registers. `*_es` are the Spanish versions; the front end falls back to English
+    when they are missing, so they stay optional in the schema (existing consumers keep compiling)."""
+
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=False)
 
     simple: str
     scientific: str
+    simple_es: str | None = None
+    scientific_es: str | None = None
 
 
 class RegionRef(Model):
@@ -52,6 +57,10 @@ class VariableRef(Model):
     source_type: Literal["observed", "model"]
     instrument: str
     units: UnitsInfo
+    instrument_id: str | None = None  # key into catalog/instruments.yaml
+    platform: str | None = None  # satellite, e.g. "Aqua"; None for models
+    delivered_by: str | None = None  # service that delivers it, e.g. "NASA POWER" (not an instrument)
+    cell_deg: float | None = None  # grid cell size of the product (a "point" = one cell)
 
 
 class Provenance(Model):
@@ -102,6 +111,7 @@ class ThenNow(Model):
     value_now: float
     kid_scale: float
     kid_label: str
+    kid_label_es: str | None = None
 
 
 class FitPoint(Model):
@@ -170,6 +180,12 @@ class Comparison(Model):
     slope_per_decade: float
     same_sign: bool
     significant: bool
+    # Instrument contrast (same quantity, different instrument, overlapping years only):
+    outcome: Literal["agree", "same_direction_one_unsure", "disagree", "both_unsure", "only_one"] | None = None
+    against_instrument: str | None = None
+    window_start: str | None = None
+    window_end: str | None = None
+    text: Text | None = None  # one plain sentence for each view
 
 
 class Robustness(Model):
@@ -217,6 +233,38 @@ class Verdict(Model):
     notes: list[Text] = Field(default_factory=list)
 
 
+Availability = Literal["available", "no_data_here", "too_short", "too_many_gaps", "fetch_failed", "box_too_large"]
+
+
+class PublishedFinding(Model):
+    """A checked statement from published science (e.g. IPCC AR6 regional assessment) for this place."""
+
+    statement: Text
+    source: str  # full citation incl. table/page
+    confidence: str | None = None  # as worded by the source, e.g. "high confidence"
+    confidence_es: str | None = None
+    direction: Literal["up", "down", "either"] | None = None  # None when the source says "unclear"
+    agreement: Literal["agrees", "differs", "too_soon"] | None = None  # our result vs the statement; never causal
+    # None when direction is unclear or either: nothing to compare with.
+    ar6_region: str | None = None  # AR6 acronym the statement is about (GLOBAL_LAND for a worldwide pattern)
+    scope: Literal["mean", "extremes"] = "mean"  # "extremes": about extremes or events, shown as context only
+    partial: bool = False  # the statement holds for parts of the region, so "differs" is never claimed
+
+
+class PlaceProfile(Model):
+    """What kind of place this is, from facts known before any trend (long-term means, elevation, maps)."""
+
+    ar6_region_code: str | None = None  # IPCC AR6 WGI reference region, e.g. "NWS"
+    ar6_region_name: str | None = None
+    climate_group: Literal["tropical", "dry", "temperate", "cold", "polar"] | None = None
+    climate_code: str | None = None  # Koppen-Geiger main code from POWER climatology, e.g. "Cfb"
+    high_up: bool | None = None
+    elevation_m_model: float | None = None  # model-grid elevation (NASA POWER); not a precise height
+    wet_months: list[int] = Field(default_factory=list)
+    dry_months: list[int] = Field(default_factory=list)
+    text: Text | None = None  # "Your place is dry and hot, high in the mountains."
+
+
 class AnalysisResult(Model):
     schema_version: str = SCHEMA_VERSION
     engine_version: str
@@ -238,6 +286,8 @@ class AnalysisResult(Model):
     detectability: Detectability | None = None
     robustness: Robustness = Field(default_factory=Robustness)
     chips: list[Chip] = Field(default_factory=list)
+    published: PublishedFinding | None = None  # what scientists found here, for the MEAN we tested
+    published_context: list[PublishedFinding] = Field(default_factory=list)  # extremes, Scientific view only
     verdict: Verdict
 
 
@@ -259,6 +309,10 @@ class ScanEntry(Model):
     mdt_per_decade: float | None
     why: Text  # R1: why this variable is (or isn't) worth investigating here
     reason: Text | None = None  # why it can't tell, when applicable
+    availability: Availability = "available"  # does this place have usable data for it
+    instrument_id: str | None = None
+    yearly_series: list[YearPoint] | None = None  # for the card sparkline
+    cross_check: Comparison | None = None  # instrument contrast, when a partner exists
 
 
 class ScanResult(Model):
@@ -272,3 +326,4 @@ class ScanResult(Model):
     window_end: str | None  # lengths are compared fairly (detail views keep the full record)
     common_window: bool
     entries: list[ScanEntry]
+    place: PlaceProfile | None = None

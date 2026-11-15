@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { formatPlace, parsePlace, placeRegion, validatePlace, wrapLon, type Place } from './place'
 import { parseHash, toHash } from './route'
+import { setLang } from '../i18n'
+import { rememberPlaceName } from './placeNames'
+import { chosenName } from './places'
 
 describe('place encoding', () => {
   it('round-trips a point and a box', () => {
@@ -24,6 +27,26 @@ describe('place encoding', () => {
     const r = placeRegion({ kind: 'point', lat: 1, lon: 2 })
     expect(r.id.startsWith('custom_')).toBe(true)
     expect(r.name).toEqual({ simple: 'Your place', scientific: 'Point 1, 2' })
+  })
+})
+
+describe('ready-made examples keep their own name', () => {
+  const delhi: Place = { kind: 'point', lat: 28.61, lon: 77.21 }
+  afterEach(() => setLang('en'))
+  it('names an example point without any remembered name (shared link, demo, "Where else?")', () => {
+    expect(placeRegion(delhi).name.simple).toBe('Delhi, India')
+    expect(placeRegion(delhi).name.scientific).toContain('Delhi, India (Point 28.61, 77.21)')
+    expect(placeRegion({ kind: 'point', lat: -3.1, lon: -60.02 }).name.simple).toBe('Amazon rainforest near Manaus, Brazil')
+  })
+  it('uses the Spanish name in Spanish, and ignores a stale remembered name', () => {
+    rememberPlaceName(formatPlace(delhi), 'Your place')
+    setLang('es')
+    expect(placeRegion({ kind: 'point', lat: -3.1, lon: -60.02 }).name.simple).toBe('Selva amazónica cerca de Manaos, Brasil')
+    expect(placeRegion(delhi).name.simple).toBe('Delhi, India')
+  })
+  it('chosenName gives the example name for a nameless point, but keeps a map pin as "Your place"', () => {
+    expect(chosenName({ kind: 'place', place: delhi, name: null, viaMap: false }, '', 'Your place')).toBe('Delhi, India')
+    expect(chosenName({ kind: 'place', place: { kind: 'point', lat: 1, lon: 2 }, name: null, viaMap: true }, '', 'Your place')).toBe('Your place')
   })
 })
 

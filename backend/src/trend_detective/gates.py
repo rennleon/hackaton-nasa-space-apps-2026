@@ -11,16 +11,40 @@ from .prepare import Prepared
 MIN_YEARS = 15.0
 MIN_CELLS = 4.0
 MIN_COMPLETENESS = 0.9
-MAX_FLOOR_FRACTION = 0.3
+# Many-zero-months gate. Declared before any result is seen (CLAUDE.md statistics rules): if more than
+# 30% of the months in the analysis window sit at zero (or at/below the card's `floor`), the series is
+# mostly ties. Ties make the Mann-Kendall S statistic and Sen's median slope degenerate (slope pinned at
+# 0, p-values unreliable), so the gate fails instead of reporting a number. 30% leaves rainy-season series
+# alone (dry months are a minority) and stops year-round-dry places (a few wet months a year).
+MAX_ZERO_MONTH_SHARE = 0.3
+
+# Near-bound chip: humidity-like series on a 0-100 scale flatten close to the bound (saturation).
+BOUND_MARGIN = 5.0
+BOUNDED_DISPLAY_UNITS = ("%RH", "%")
 
 
-def no_data() -> GateCheck:
+def no_data(all_fill: bool = False) -> GateCheck:
+    """`all_fill`: the source answered, but every cell and month was a fill value (nothing measured here,
+    e.g. a land-only product over the sea). Otherwise the series simply is not saved for this place."""
+    if all_fill:
+        return GateCheck(
+            code="all_fill",
+            passed=False,
+            detail=Text(
+                simple="This measurement has no values for this place.",
+                scientific="The source answered with fill (undefined) values for every cell and month.",
+                simple_es="Esta medición no tiene valores para este lugar.",
+                scientific_es="La fuente respondió con valores de relleno (indefinidos) en todas las celdas y meses.",
+            ),
+        )
     return GateCheck(
         code="no_data",
         passed=False,
         detail=Text(
-            simple="We don't have this data for this place yet.",
+            simple="We don't have this data saved for this place yet.",
             scientific="No series loaded for this variable and region.",
+            simple_es="Aún no tenemos estos datos guardados para este lugar.",
+            scientific_es="No se cargó ninguna serie para esta variable y región.",
         ),
     )
 
@@ -43,6 +67,11 @@ def fitness(
                     if inside
                     else "This data does not cover this place.",
                     scientific=f"Variable coverage {variable.coverage} vs region bbox {region.geometry.bbox}.",
+                    simple_es="Estos datos cubren este lugar."
+                    if inside
+                    else "Estos datos no cubren este lugar.",
+                    scientific_es=f"Cobertura de la variable {variable.coverage} frente a la caja de la región "
+                                  f"{region.geometry.bbox}.",
                 ),
             )
         )
@@ -59,6 +88,11 @@ def fitness(
                     else "One place: we use the map square around it.",
                     scientific=f"Single {variable.grid_deg}° grid cell"
                     + (" at the box centre (box below the source's regional minimum)." if small_box else "."),
+                    simple_es="Tu caja es pequeña, así que usamos el cuadrado del mapa en su centro."
+                    if small_box
+                    else "Un solo lugar: usamos el cuadrado del mapa que lo rodea.",
+                    scientific_es=f"Una sola celda de {variable.grid_deg}°"
+                    + (" en el centro de la caja (caja menor que el mínimo regional de la fuente)." if small_box else "."),
                 ),
             )
         )
@@ -71,6 +105,8 @@ def fitness(
                 detail=Text(
                     simple=f"About {cells:.0f} map squares cover this place (we need at least {MIN_CELLS:.0f}).",
                     scientific=f"≈{cells:.1f} grid cells at {variable.grid_deg}° (minimum {MIN_CELLS:.0f}).",
+                    simple_es=f"Unos {cells:.0f} cuadrados del mapa cubren este lugar (necesitamos al menos {MIN_CELLS:.0f}).",
+                    scientific_es=f"≈{cells:.1f} celdas de {variable.grid_deg}° (mínimo {MIN_CELLS:.0f}).",
                 ),
             )
         )
@@ -81,6 +117,9 @@ def fitness(
             detail=Text(
                 simple=f"{years:.0f} years of data (we need at least {MIN_YEARS:.0f}).",
                 scientific=f"{years:.1f} {unit} in the analysis window (minimum {MIN_YEARS:.0f}).",
+                simple_es=f"{years:.0f} años de datos (necesitamos al menos {MIN_YEARS:.0f}).",
+                scientific_es=f"{years:.1f} {'años-de-temporada' if unit == 'season-years' else 'años'} en la ventana "
+                              f"de análisis (mínimo {MIN_YEARS:.0f}).",
             ),
         )
     )
@@ -88,7 +127,7 @@ def fitness(
 
 
 def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None) -> list[GateCheck]:
-    """Completeness and floor checks over the window, or over the season's months only."""
+    """Completeness and zero-month checks over the window, or over the season's months only."""
     vals = p.values_window
     if months:
         cal = np.array([int(m[5:7]) for m in p.months_window])
@@ -99,37 +138,83 @@ def quality(p: Prepared, variable: VariableCard, months: list[int] | None = None
             code="completeness",
             passed=completeness >= MIN_COMPLETENESS,
             detail=Text(
-                simple=f"{completeness:.0%} of the months have data (we need {MIN_COMPLETENESS:.0%}).",
+                simple=f"{completeness * 100:.0f} of every 100 months have data (we need {MIN_COMPLETENESS * 100:.0f}).",
                 scientific=f"Completeness {completeness:.1%} within the window (minimum {MIN_COMPLETENESS:.0%}).",
+                simple_es=f"{completeness * 100:.0f} de cada 100 meses tienen datos (necesitamos {MIN_COMPLETENESS * 100:.0f}).",
+                scientific_es=f"Completitud de {completeness:.1%} en la ventana (mínimo {MIN_COMPLETENESS:.0%}).",
             ),
         )
     ]
-    if variable.floor is not None:
-        finite = vals[np.isfinite(vals)]
-        frac = float((finite <= variable.floor + 1e-9).mean()) if finite.size else 1.0
-        checks.append(
-            GateCheck(
-                code="floor",
-                passed=frac < MAX_FLOOR_FRACTION,
-                detail=Text(
-                    simple=f"{frac:.0%} of the months are at zero, so a trend would mean little."
-                    if frac >= MAX_FLOOR_FRACTION
-                    else "The values are not stuck at zero.",
-                    scientific=f"{frac:.1%} of months at the floor value {variable.floor} "
-                    f"(maximum {MAX_FLOOR_FRACTION:.0%}).",
-                ),
-            )
+    # Zero months: exactly zero for every variable (negatives are legitimate, e.g. winter temperature),
+    # at or below the card floor when one is declared (e.g. rainfall floor 0).
+    finite = vals[np.isfinite(vals)]
+    if finite.size == 0:
+        frac = 1.0
+    elif variable.floor is not None:
+        frac = float((finite <= variable.floor + 1e-9).mean())
+    else:
+        frac = float((np.abs(finite) <= 1e-9).mean())
+    zero_level = variable.floor if variable.floor is not None else 0.0
+    checks.append(
+        GateCheck(
+            code="zero_months",
+            passed=frac <= MAX_ZERO_MONTH_SHARE,
+            detail=Text(
+                simple="It hardly ever rains here, so monthly numbers can't show a trend."
+                if frac > MAX_ZERO_MONTH_SHARE
+                else "The values are not stuck at zero.",
+                scientific=f"{frac:.1%} of months in the window are at or below {zero_level:g} "
+                f"(maximum {MAX_ZERO_MONTH_SHARE:.0%}; ties make Mann–Kendall and Sen's slope degenerate).",
+                simple_es="Aquí casi nunca llueve. Los números mensuales no pueden mostrar un cambio."
+                if frac > MAX_ZERO_MONTH_SHARE
+                else "Los valores no se quedan pegados en cero.",
+                scientific_es=f"{frac:.1%} de los meses de la ventana están en o por debajo de {zero_level:g} "
+                f"(máximo {MAX_ZERO_MONTH_SHARE:.0%}; los empates vuelven degeneradas la prueba de Mann–Kendall "
+                "y la pendiente de Sen).",
+            ),
         )
+    )
     return checks
 
 
+def near_bound_chip(p: Prepared, variable: VariableCard, months: list[int] | None = None) -> Chip | None:
+    """Info chip when a 0-100 series (display units %RH or %) has its window mean within 5 of a bound."""
+    if variable.units.display not in BOUNDED_DISPLAY_UNITS:
+        return None
+    vals = p.values_window
+    if months:
+        cal = np.array([int(m[5:7]) for m in p.months_window])
+        vals = vals[np.isin(cal, months)]
+    finite = vals[np.isfinite(vals)]
+    if finite.size == 0:
+        return None
+    mean = float(finite.mean())
+    if BOUND_MARGIN < mean < 100 - BOUND_MARGIN:
+        return None
+    return Chip(
+        code="near_bound",
+        severity="info",
+        text=Text(
+            simple="This is close to its top or bottom limit, so changes can look smaller.",
+            scientific=f"Window mean {mean:.1f} {variable.units.display} is within {BOUND_MARGIN:g} of the 0–100 "
+            "bound; a trend near a bound can flatten (saturation), so the slope may understate the change.",
+            simple_es="Está cerca de su límite máximo o mínimo. Por eso los cambios se ven menores.",
+            scientific_es=f"La media de la ventana, {mean:.1f} {variable.units.display}, está a menos de {BOUND_MARGIN:g} del "
+            "límite de la escala 0–100; una tendencia cerca de un límite puede aplanarse (saturación), así que la "
+            "pendiente puede subestimar el cambio.",
+        ),
+    )
+
+
 def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> Chip | None:
-    """Rule 3: the box we get should be the box we asked for. Giovanni's 'Data Bounding
-    Box' is interpreted as grid-cell centres (assumption), so edges are centres ± grid/2."""
-    if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox" or prov.source_kind != "giovanni_csv":
+    """Rule 3: the box we get should be the box we asked for. Giovanni CSV 'Data Bounding
+    Box' is interpreted as grid-cell centres (assumption), so edges are centres ± grid/2; the Giovanni API
+    source stores the cell edges already."""
+    if prov is None or prov.data_bbox is None or region.geometry.kind != "bbox" or prov.source_kind not in ("giovanni_csv", "giovanni_api"):
         return None
     w, s, e, n = prov.data_bbox
-    h = grid_deg / 2
+    # Giovanni CSV 'Data Bounding Box' is cell centres; the API source already stores cell EDGES.
+    h = 0.0 if prov.source_kind == "giovanni_api" else grid_deg / 2
     edges = [w - h, s - h, e + h, n + h]
     if max(abs(a - b) for a, b in zip(edges, region.geometry.bbox)) <= grid_deg / 4:
         return None
@@ -141,6 +226,9 @@ def bbox_chip(prov: Provenance | None, region: RegionCard, grid_deg: float) -> C
             simple="The satellite data covers a slightly different area than the box we asked for.",
             scientific=f"Returned grid cells span {ew:g}…{ee:g}°E, {es:g}…{en:g}°N (data bounding box read as "
             f"cell centres) vs requested {region.geometry.bbox}.",
+            simple_es="El satélite cubre un área algo distinta de la que pedimos.",
+            scientific_es=f"Las celdas devueltas abarcan {ew:g}…{ee:g}°E, {es:g}…{en:g}°N (caja de datos leída como "
+            f"centros de celda) frente a {region.geometry.bbox} solicitado.",
         ),
     )
 

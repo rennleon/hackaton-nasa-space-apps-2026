@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -16,6 +16,7 @@ from . import ENGINE_VERSION
 from .catalog import Geometry, RegionCard
 from .contract import AnalysisResult, ScanResult, Text
 from .engine import EngineContext, analyze
+from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
 from .sources.power import validate_geometry
@@ -33,6 +34,15 @@ app.add_middleware(
 async def live_source_down(_request: Request, exc: LiveSourceUnavailable) -> JSONResponse:
     """A live source (NASA POWER) is unreachable: 503, never a cached 'no data' answer."""
     return JSONResponse(status_code=503, content={"detail": f"Live data source unavailable: {exc}"})
+
+
+@app.exception_handler(RateLimited)
+async def rate_limited(_request: Request, exc: RateLimited) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"detail": MESSAGE, "detail_es": MESSAGE_ES},
+        headers={"Retry-After": str(exc.retry_after)},
+    )
 
 
 @lru_cache(maxsize=1)
@@ -150,37 +160,60 @@ def custom_region(kind: str, c: tuple[float, ...]) -> RegionCard:
     if kind == "point":
         lon, lat = c
         rid = f"custom_pt_{_num(lat)}_{_num(lon)}"
-        name = Text(simple="Your place", scientific=f"Point {lat:.2f}, {lon:.2f}")
+        name = Text(simple="Your place", scientific=f"Point {lat:.2f}, {lon:.2f}",
+                    simple_es="Tu lugar", scientific_es=f"Punto {lat:.2f}, {lon:.2f}")
         desc = Text(
             simple="A spot you picked on the map.",
             scientific=f"User-chosen point at latitude {lat:.2f}, longitude {lon:.2f} (NASA POWER grid cell).",
+            simple_es="Un lugar que elegiste en el mapa.",
+            scientific_es=f"Punto elegido por el usuario en latitud {lat:.2f}, longitud {lon:.2f} (celda de la rejilla de NASA POWER).",
         )
         geom = Geometry(kind="point", bbox=[lon, lat, lon, lat])
     else:
         w, s, e, n = c
         rid = "custom_" + "_".join(_num(x) for x in (w, s, e, n))
-        name = Text(simple="Your place", scientific=f"Custom box {w:.2f} to {e:.2f} E, {s:.2f} to {n:.2f} N")
+        name = Text(simple="Your place", scientific=f"Custom box {w:.2f} to {e:.2f} E, {s:.2f} to {n:.2f} N",
+                    simple_es="Tu lugar", scientific_es=f"Caja personalizada {w:.2f} a {e:.2f} E, {s:.2f} a {n:.2f} N")
         desc = Text(
             simple="A box you picked on the map.",
             scientific=f"User-chosen box, west {w:.2f}, south {s:.2f}, east {e:.2f}, north {n:.2f}; area mean of NASA POWER grid points.",
+            simple_es="Una zona que elegiste en el mapa.",
+            scientific_es=f"Caja elegida por el usuario: oeste {w:.2f}, sur {s:.2f}, este {e:.2f}, norte {n:.2f}; "
+                          "media de área de los puntos de la rejilla de NASA POWER.",
         )
         geom = Geometry(kind="bbox", bbox=list(c))
     return RegionCard(id=rid, name=name, description=desc, regime="user-defined", geometry=geom, listed=False)
 
 
+class _NotCacheable(Exception):
+    """Raised inside an lru_cache'd function so the value is returned but never stored
+    (lru_cache does not cache exceptions)."""
+
+    def __init__(self, value):
+        self.value = value
+
+
 @lru_cache(maxsize=256)
+@counts_as_live
 def _custom_scan_cached(kind: str, c: tuple[float, ...], theme: str) -> ScanResult:
-    return scan_region(ctx(), custom_region(kind, c), theme)
+    result = scan_region(ctx(), custom_region(kind, c), theme)
+    down = [e for e in result.entries if e.availability == "fetch_failed"]
+    if down and len(down) == len(result.entries):
+        raise LiveSourceUnavailable("no data source answered")  # handled as HTTP 503; never cached
+    if down:
+        raise _NotCacheable(result)  # some live source was down: answer, but do not remember it
+    return result
 
 
 @lru_cache(maxsize=512)
+@counts_as_live
 def _custom_analyze_cached(kind: str, c: tuple[float, ...], variable: str, start: str | None, end: str | None):
     from .engine import analyze_region
 
     return analyze_region(ctx(), custom_region(kind, c), variable, start=start, end=end)
 
 
-@app.get("/custom/scan", response_model=ScanResult)
+@app.get("/custom/scan", response_model=ScanResult, dependencies=[Depends(limit_client)])
 def custom_scan(
     theme: str = Query(...), bbox: str | None = None, lat: float | None = None, lon: float | None = None
 ) -> ScanResult:
@@ -189,11 +222,13 @@ def custom_scan(
         raise HTTPException(404, f"unknown theme {theme}")
     try:
         return _custom_scan_cached(kind, c, theme)
+    except _NotCacheable as partial:
+        return partial.value
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
 
 
-@app.get("/custom/variables/{variable}", response_model=AnalysisResult)
+@app.get("/custom/variables/{variable}", response_model=AnalysisResult, dependencies=[Depends(limit_client)])
 def custom_result(
     variable: str,
     bbox: str | None = None,

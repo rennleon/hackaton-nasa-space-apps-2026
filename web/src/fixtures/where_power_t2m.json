@@ -1,0 +1,41 @@
+{
+  "variable_id": "power_t2m",
+  "generated": "2026-11-15",
+  "places": [
+    {
+      "place_id": "cajamarca_highlands", "name": {"simple": "Cajamarca highlands", "scientific": "Cajamarca highlands (Peru)"}, "kind": "region", "region_id": "cajamarca_highlands", "lat": null, "lon": null, "label": "region",
+      "certainty": "sure", "direction": "up", "slope_per_decade": 0.31, "ci_low": 0.18, "ci_high": 0.44,
+      "units": {"display": "°C", "simple": "degrees", "decimals": 2}, "window_start": "1984-01", "window_end": "2025-12", "availability": "available",
+      "headline": {"simple": "Yes, Cajamarca is getting warmer.", "scientific": "Warming, both tests agree."},
+      "how_much": {"simple": "In 1985 a normal day was 14 degrees. In 2024 it was 15.", "scientific": "+0.31 °C per decade [0.18, 0.44]."}
+    },
+    {
+      "place_id": "wisconsin", "name": {"simple": "Wisconsin", "scientific": "Wisconsin (USA)"}, "kind": "region", "region_id": "wisconsin", "lat": null, "lon": null, "label": "region",
+      "certainty": "maybe", "direction": "up", "slope_per_decade": 0.12, "ci_low": -0.02, "ci_high": 0.26,
+      "units": {"display": "°C", "simple": "degrees", "decimals": 2}, "window_start": "1984-01", "window_end": "2025-12", "availability": "available",
+      "headline": {"simple": "Maybe a little warmer.", "scientific": "One test agrees."},
+      "how_much": {"simple": "In 1985 a normal day was 7 degrees. In 2024 it was 7.", "scientific": "+0.12 °C per decade [-0.02, 0.26]."}
+    },
+    {
+      "place_id": "ex_delhi", "name": {"simple": "Delhi, India", "scientific": "Delhi (28.61, 77.21)"}, "kind": "example", "region_id": null, "lat": 28.61, "lon": 77.21, "label": "example",
+      "certainty": "sure", "direction": "up", "slope_per_decade": 0.42, "ci_low": 0.25, "ci_high": 0.6,
+      "units": {"display": "°C", "simple": "degrees", "decimals": 2}, "window_start": "1984-01", "window_end": "2025-12", "availability": "available",
+      "headline": {"simple": "Yes, Delhi is getting warmer.", "scientific": "Warming, both tests agree."},
+      "how_much": {"simple": "In 1985 a normal day was 24 degrees. In 2024 it was 26.", "scientific": "+0.42 °C per decade [0.25, 0.60]."}
+    },
+    {
+      "place_id": "ex_manaus", "name": {"simple": "Manaus, Brazil", "scientific": "Manaus (-3.10, -60.02)"}, "kind": "example", "region_id": null, "lat": -3.1, "lon": -60.02, "label": "example",
+      "certainty": "too_soon", "direction": null, "slope_per_decade": 0.05, "ci_low": -0.1, "ci_high": 0.2,
+      "units": {"display": "°C", "simple": "degrees", "decimals": 2}, "window_start": "1984-01", "window_end": "2025-12", "availability": "available",
+      "headline": {"simple": "Too soon to tell.", "scientific": "Not detectable yet."},
+      "how_much": {"simple": "We need to watch for more years.", "scientific": "+0.05 °C per decade [-0.10, 0.20]."}
+    },
+    {
+      "place_id": "ex_tamanrasset", "name": {"simple": "Tamanrasset, Algeria", "scientific": "Tamanrasset (22.79, 5.53)"}, "kind": "example", "region_id": null, "lat": 22.79, "lon": 5.53, "label": "example",
+      "certainty": "cant_tell", "direction": null, "slope_per_decade": null, "ci_low": null, "ci_high": null,
+      "units": {"display": "°C", "simple": "degrees", "decimals": 2}, "window_start": null, "window_end": null, "availability": "no_data_here",
+      "headline": {"simple": "No data here.", "scientific": "No usable series."},
+      "how_much": {"simple": "", "scientific": ""}
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+/* Verdict chip. Colours come from the one verdict palette in styles.css; every state also has an icon and a word. */
+.vchip { display: inline-flex; align-items: center; gap: 0.4em; padding: 3px 12px 3px 8px; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.9rem; white-space: normal; }
+.vchip svg { flex: none; }
+.vchip-sure { color: var(--v-sure); background: var(--v-sure-bg); }
+.vchip-maybe { color: var(--v-maybe); background: var(--v-maybe-bg); }
+.vchip-too_soon { color: var(--v-soon); background: var(--v-soon-bg); }
+.vchip-cant_tell { color: var(--v-cant); background: transparent; border: 2px dashed currentColor; padding: 1px 10px 1px 6px; }

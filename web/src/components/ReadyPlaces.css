@@ -1,0 +1,11 @@
+.ready h2 { margin-bottom: 0.8rem; }
+.ready-row { list-style: none; margin: 0; padding: 4px 4px 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: 1rem; }
+.ready-card { display: flex; }
+.ready-card > button { flex: 1; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 0; border-radius: var(--radius); padding: 1rem 1.1rem; cursor: pointer; display: grid; gap: 0.35rem; align-content: start; box-shadow: var(--shadow), 0 0 0 1px var(--hairline); transition: box-shadow 0.15s, transform 0.15s; }
+.ready-card > button:hover:not(:disabled) { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); transform: translateY(-2px); }
+.ready-card > button:disabled { opacity: 0.55; cursor: not-allowed; }
+.ready-card.is-selected > button { box-shadow: var(--shadow), 0 0 0 3px var(--accent); }
+.ready-tag { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.ready-name { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; line-height: 1.25; }
+.ready-caption { font-size: 0.9rem; color: var(--muted); }
+

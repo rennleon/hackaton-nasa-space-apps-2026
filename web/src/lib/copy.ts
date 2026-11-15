@@ -8,22 +8,20 @@ export type VerdictLabelName = Verdict['label']
 
 const tx = (simple: string, scientific: string): Text => ({ simple, scientific })
 
-export const CERTAINTY_STEPS: { id: Exclude<Certainty, 'cant_tell'>; icon: string; text: Text }[] = [
-  { id: 'too_soon', icon: '⏳', text: tx('Too soon to tell', 'Not detectable yet') },
-  { id: 'maybe', icon: '🤔', text: tx('Maybe, not sure yet', 'Borderline or fragile') },
-  { id: 'sure', icon: '✔', text: tx("Sure it's real", 'Significant') },
+export const CERTAINTY_STEPS: { id: Exclude<Certainty, 'cant_tell'>; icon: 'soon' | 'maybe' | 'sure'; text: Text }[] = [
+  { id: 'too_soon', icon: 'soon', text: tx('Too soon to tell', 'Not detectable yet') },
+  { id: 'maybe', icon: 'maybe', text: tx('Maybe, not sure yet', 'Borderline or fragile') },
+  { id: 'sure', icon: 'sure', text: tx("Sure it's real", 'Significant') },
 ]
 
-export const CERTAINTY_CANT_TELL = { icon: '?', text: tx("We can't tell here", "Can't tell here") }
+export const CERTAINTY_CANT_TELL = { icon: 'cant' as const, text: tx("We can't tell here", "Can't tell here") }
 
 export const COPY = {
   meterLabel: tx('How sure are we?', 'Evidence level'),
   tellMeMore: tx('Tell me more', 'Details'),
   modelTag: tx('computer model estimate', 'model / reanalysis'),
   observedTag: tx('satellite measurement', 'observation'),
-  whyLooked: tx('Why we looked at this', 'Selection checks (stage 1)'),
-  worthYes: tx('Worth a closer look', 'Worth investigating'),
-  worthNo: tx('Not a good fit here', 'Not selected (stage 1)'),
+  whyLooked: tx('Can we trust this?', 'Can we trust this? Evidence checks'),
   checkPass: tx('OK', 'Pass'),
   checkCaution: tx('Careful', 'Caution'),
   checkFail: tx('No', 'Fail'),
@@ -36,10 +34,9 @@ export const COPY = {
   yearsOfData: (n: number): Text => tx(`We looked at ${n} years of data.`, `${n} years of data in the window.`),
   chartTitle: tx('One dot for every year', 'Yearly means and trend'),
   chartCaption: tx(
-    'Each dot is one year. The orange line shows where things are heading. Grey dots were left out.',
+    'Each dot is one year. The orange line shows where things are heading. Grey rings were left out.',
     'Yearly means of the de-seasonalised values with the Sen trend line. Open circles are outside the window.',
   ),
-  chartAxis: tx('← lower · higher →', 'Anomaly'),
   chartDotsIn: tx('Used in the answer', 'In window'),
   chartDotsOut: tx('Left out', 'Outside window'),
   chartLine: tx('Where it is heading', 'Trend'),
