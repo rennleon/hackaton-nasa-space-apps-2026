@@ -5,6 +5,8 @@ import { DataProvider, GlossaryProvider, ViewProvider, useView } from './context
 import { useL } from './lib/findingsCopy'
 import { useT } from './i18n'
 import { Sources } from './screens/Sources'
+import { HowItWorks } from './screens/HowItWorks'
+import { useH } from './lib/howCopy'
 import './App.css'
 import { parseHash, toHash, type Route } from './lib/route'
 import { useAsync } from './lib/useAsync'
@@ -90,8 +92,10 @@ export default function App({ client: injected }: { client?: DataClient }) {
 
 function TopNav() {
   const l = useL()
+  const h = useH()
   return (
     <nav className="topnav">
+      <a href="#/how">{h('how.link')}</a>
       <a href="#/sources">{l('sources.link')}</a>
       <ViewToggle />
       <LangToggle />
@@ -102,10 +106,11 @@ function TopNav() {
 function Footer() {
   const { view } = useView()
   const l = useL()
+  const h = useH()
   return (
     <footer className="footer">
       {l('common.footer')} ·{' '}
-      <a href="#/sources">{l('sources.link')}</a>
+      <a href="#/how">{h('how.link')}</a> · <a href="#/sources">{l('sources.link')}</a>
       {view === 'scientific' && <> · v{__APP_VERSION__}</>}
     </footer>
   )
@@ -121,6 +126,8 @@ function Screen({ route, go }: { route: Route; go: (r: Route) => void }) {
       return <Shortlist route={route} go={goKeep} />
     case 'variable':
       return <VariableView route={route} go={goKeep} />
+    case 'how':
+      return <HowItWorks />
     case 'sources':
       return <Sources />
     default:

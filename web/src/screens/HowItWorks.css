@@ -1,0 +1,19 @@
+.how h1 { margin-bottom: 0.4rem; }
+.how-flow { max-width: 720px; margin: 1.2rem auto 0; display: flex; flex-direction: column; gap: 1.6rem; }
+.how-band { min-width: 0; }
+.how-band-title { margin: 0 0 0.8rem; padding: 0.35rem 0.9rem; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block; max-width: 100%; }
+.how-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: stretch; }
+.how-step { position: relative; min-width: 0; border-radius: 12px; border-left: 5px solid var(--accent); overflow-wrap: anywhere; }
+.how-band-clean .how-step { border-left-color: var(--v-maybe-fill); }
+.how-band-trend .how-step { border-left-color: var(--trend); }
+.how-band-check .how-step { border-left-color: var(--v-sure-fill); }
+.how-step h3 { margin: 0.1rem 0 0.3rem; }
+.how-n { margin: 0; }
+.how-text { margin: 0.2rem 0; }
+.how-code { margin: 0.5rem 0 0; }
+.how-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em; background: var(--surface-2); padding: 1px 6px; border-radius: 6px; }
+.how-link { display: flex; justify-content: center; color: var(--muted); padding: 0.25rem 0; }
+.how-arrow { flex: none; }
+.how-pic { margin: 0.8rem 0 0.2rem; padding: 0.6rem 0.8rem; max-width: 100%; box-shadow: none; background: var(--surface-2); border-radius: var(--radius-sm); }
+.how-pic svg { display: block; width: 100%; height: auto; }
+.how-pic-cap { display: flex; justify-content: space-between; margin-top: 0.2rem; }

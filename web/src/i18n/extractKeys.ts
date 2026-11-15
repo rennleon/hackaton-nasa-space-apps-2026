@@ -5,6 +5,7 @@ import { join, relative } from 'node:path'
 import ts from 'typescript'
 import { FC } from '../lib/findingsCopy'
 import { S } from '../lib/sourceLabels'
+import { HOW } from '../lib/howCopy'
 import { COPY, CERTAINTY_CANT_TELL, CERTAINTY_STEPS } from '../lib/copy'
 import { SHORTLIST_META, VERDICT_META } from '../lib/labels'
 import { DEMOS } from '../lib/demos'
@@ -138,6 +139,7 @@ const both = (key: string, p: Pair, suffix: [string, string], file: string): Key
 export function dynamicUses(): KeyUse[] {
   const out: KeyUse[] = []
   // useL: bare key when both registers read the same, else `.simple` / `.scientific`
+  for (const [k, p] of Object.entries(HOW)) out.push(...both(k, p, ['simple', 'scientific'], 'lib/howCopy.ts'))
   for (const [k, p] of Object.entries(FC)) {
     out.push(...both(k, p, ['simple', 'scientific'], 'lib/findingsCopy.ts'))
   }
