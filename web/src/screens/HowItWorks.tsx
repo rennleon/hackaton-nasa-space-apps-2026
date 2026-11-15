@@ -66,7 +66,9 @@ function useTopbarHeight(ref: React.RefObject<HTMLElement | null>) {
     const bar = document.querySelector<HTMLElement>('.topbar')
     const el = ref.current
     if (!bar || !el) return
-    const set = () => el.style.setProperty('--how-top', `${bar.offsetHeight}px`)
+    // on the root, so the stage bar AND the bands (siblings of the bar) read the same height
+    const root = document.documentElement
+    const set = () => root.style.setProperty('--how-top', `${bar.offsetHeight}px`)
     set()
     if (typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(set)

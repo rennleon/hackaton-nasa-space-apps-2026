@@ -135,6 +135,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
                 <EmptyState themeId={themeId} set={set} />
               </>
             )}
+            {available.length > 0 && <h2 className="visually-hidden">{l('findings.facts.cards')}</h2>}
             {available.length > 0 && (
               <ul className="fgrid">
                 {available.map((e) => (
@@ -159,19 +160,25 @@ function PlaceFacts({ profile, bbox }: { profile: PlaceProfile | null | undefine
   const sci = view === 'scientific'
   const facts: { key: string; label: string; value: string }[] = []
   let fromModel = false
-  if (profile?.climate_group) {
+  // A mixed box (homogeneity check) has no one climate, height or rainy season: the backend text says "different
+  // kinds of places", so the facts do too, and the box-average values are not shown as if they described it.
+  const mixed = profile?.homogeneity?.kind === 'mixed'
+  if (mixed) {
+    facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile?.climate_code ? l('findings.facts.mixedMean', { code: profile.climate_code }) : l('findings.facts.mixed') })
+    fromModel = true
+  } else if (profile?.climate_group) {
     const word = l(`findings.climate.${profile.climate_group}` as FKey)
     facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile.climate_code ? `${word} (${profile.climate_code})` : word })
     fromModel = true
   }
+  // height only when the place is high up, in both views (the Scientific view adds the model-grid metres)
   const elev = profile?.elevation_m_model
-  const metres = elev != null ? l('findings.facts.elev', { m: Math.round(elev).toLocaleString(numberLocale()) }) : null
-  const height = sci ? [profile?.high_up ? l('findings.facts.highUp') : null, metres].filter(Boolean).join(' · ') : profile?.high_up ? l('findings.facts.highUp') : ''
-  if (height) {
-    facts.push({ key: 'height', label: l('findings.facts.height'), value: height })
+  if (!mixed && profile?.high_up) {
+    const metres = sci && elev != null ? l('findings.facts.elev', { m: Math.round(elev).toLocaleString(numberLocale()) }) : null
+    facts.push({ key: 'height', label: l('findings.facts.height'), value: [l('findings.facts.highUp'), metres].filter(Boolean).join(' · ') })
     fromModel = true
   }
-  const runs = monthRuns(profile?.wet_months ?? [])
+  const runs = mixed ? [] : monthRuns(profile?.wet_months ?? [])
   if (runs.length > 0) {
     const month = (m: number) => capFirst(new Date(2000, m - 1, 1).toLocaleString(numberLocale(), { month: 'long' }))
     facts.push({ key: 'wet', label: l('findings.facts.wet'), value: runs.map(([a, b]) => (a === b ? month(a) : `${month(a)} – ${month(b)}`)).join(', ') })

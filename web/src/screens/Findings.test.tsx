@@ -100,7 +100,7 @@ describe('Findings screen', () => {
     const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
     expect(shown).toMatchObject({ Climate: 'Mild', Height: 'High above the sea', 'Rainy months': 'January – April' })
     expect(shown.Area).toMatch(/^About [\d,]+ × [\d,]+ km$/)
-    expect(screen.getByText('Climate, height and rainy months are computer model estimates.')).toBeInTheDocument()
+    expect(screen.getByText('All but the area come from a computer model estimate.')).toBeInTheDocument()
     // a tile per certainty level that is present: number plus icon plus words
     const tiles = [...container.querySelectorAll('.summary-tiles li')]
     expect(tiles.length).toBeGreaterThan(0)
@@ -117,6 +117,24 @@ describe('Findings screen', () => {
     expect(screen.queryByRole('button', { name: 'Update' })).toBeNull()
     await user.type(screen.getByLabelText('From'), '2005')
     await waitFor(() => expect(window.location.hash).toMatch(/start=2005/))
+  })
+
+  it('a mixed box shows "Mixed" and no box-average height or rainy months', async () => {
+    const scan = v2Scan()
+    const mixedRich: ScanResult = {
+      ...scan,
+      place: {
+        ...scan.place!, climate_group: 'temperate', climate_code: 'Cfb', elevation_m_model: 2092, high_up: true, wet_months: [1, 2, 3, 4],
+        homogeneity: { kind: 'mixed', n_cells: 54, climate_groups: { B: 42, C: 7 }, precip_min: 0.04, precip_max: 2.42, t2m_min: 8.4, t2m_max: 25.5, elev_min: 0, elev_max: 3843, reasons: [], suggestions: [], text: { simple: 'This box mixes different kinds of places.', scientific: 'Mixed.' } },
+      },
+    }
+    const { container } = open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => mixedRich })
+    await screen.findByText(/\d of \d measurements? shows? a clear change\./)
+    const facts = container.querySelector('dl[aria-label="About this place"]')!
+    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
+    expect(shown.Climate).toBe('Mixed')
+    expect(shown).not.toHaveProperty('Height')
+    expect(shown).not.toHaveProperty('Rainy months')
   })
 
   it('a whole card opens the result', async () => {

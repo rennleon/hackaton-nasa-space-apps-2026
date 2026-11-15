@@ -181,8 +181,8 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
             </div>
             <Charts result={res.data} fromList={fromList && !(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable} />
           </div>
-          <HowStrip />
           <WhereElse variableId={card.id} route={route} go={go} />
+          <HowStrip />
         </>
       )}
     </div>
