@@ -12,11 +12,13 @@ export interface Route {
   start?: string
   end?: string
   demo?: string
+  /** "How it works" only: the stage to scroll to (`get`, `clean`, `trend` or `check`) */
+  stage?: string
   step?: number
 }
 
 const SCREENS: Screen[] = ['home', 'theme', 'shortlist', 'variable', 'sources', 'how']
-const KEYS = ['region', 'place', 'theme', 'variable', 'season', 'start', 'end', 'demo'] as const
+const KEYS = ['region', 'place', 'theme', 'variable', 'season', 'start', 'end', 'demo', 'stage'] as const
 
 export function parseHash(hash: string): Route {
   const raw = hash.replace(/^#\/?/, '')

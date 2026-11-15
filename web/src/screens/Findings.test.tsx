@@ -86,6 +86,39 @@ describe('Findings screen', () => {
     expect(bannedIn(container.textContent ?? '')).toEqual([])
   })
 
+  it('lays out the redesigned page: back link, theme chip, real place facts, count tiles, how strip, years of data card', async () => {
+    const user = userEvent.setup()
+    const scan = v2Scan()
+    const rich: ScanResult = { ...scan, place: { ...scan.place!, climate_group: 'temperate', climate_code: 'Cfb', elevation_m_model: 2092, wet_months: [1, 2, 3, 4] } }
+    const { container } = open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => rich })
+    await screen.findByText(/\d of \d measurements? shows? a clear change\./)
+    // a way back, and the question as a chip
+    expect(screen.getByRole('button', { name: 'Pick a different place' })).toBeInTheDocument()
+    expect(container.querySelector('.theme-chip')?.textContent).toBe('Water')
+    // facts: only what the scan carries, in kid words (climate, height, rainy months) plus the size of the box
+    const facts = container.querySelector('dl[aria-label="About this place"]')!
+    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
+    expect(shown).toMatchObject({ Climate: 'Mild', Height: 'High above the sea', 'Rainy months': 'January – April' })
+    expect(shown.Area).toMatch(/^About [\d,]+ × [\d,]+ km$/)
+    expect(screen.getByText('Climate, height and rainy months are computer model estimates.')).toBeInTheDocument()
+    // a tile per certainty level that is present: number plus icon plus words
+    const tiles = [...container.querySelectorAll('.summary-tiles li')]
+    expect(tiles.length).toBeGreaterThan(0)
+    tiles.forEach((t) => {
+      expect(t.querySelector('svg')).not.toBeNull()
+      expect(t.textContent).toMatch(/^\d+(Sure it's real|Maybe, not sure yet|Too soon to tell|We can't tell here)$/)
+    })
+    // the method strip sits after the summary, and the years of data are a visible card (not collapsed)
+    expect(screen.getByRole('heading', { level: 2, name: 'How we worked this out' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /Get the data/ })[0]).toHaveAttribute('href', '#/how?stage=get')
+    expect(container.querySelector('details.coverage')).toBeNull()
+    expect(container.querySelector('.timeline')).not.toBeNull()
+    // the form row keeps its instant apply: a year typed changes the route, no Update button
+    expect(screen.queryByRole('button', { name: 'Update' })).toBeNull()
+    await user.type(screen.getByLabelText('From'), '2005')
+    await waitFor(() => expect(window.location.hash).toMatch(/start=2005/))
+  })
+
   it('a whole card opens the result', async () => {
     const user = userEvent.setup()
     open('#/shortlist?region=cajamarca_west&theme=water')

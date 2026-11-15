@@ -13,15 +13,22 @@ const ICON: Record<Certainty, React.ReactNode> = {
   cant_tell: <path d="M6.2 6.3a1.9 1.9 0 1 1 2.7 1.7c-.6.3-.9.7-.9 1.4M8 11.6v.1" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />,
 }
 
+/** The small round icon of a verdict (decorative: the word always sits next to it). */
+export function CertaintyIcon({ certainty, size = 16 }: { certainty: Certainty; size?: number }) {
+  return (
+    <svg viewBox="0 0 16 16" width={size} height={size} aria-hidden="true" focusable="false">
+      <circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeDasharray={certainty === 'cant_tell' ? '2.2 2' : undefined} />
+      {ICON[certainty]}
+    </svg>
+  )
+}
+
 /** One verdict per card: icon + word, never colour alone. Grey too soon, amber maybe, teal sure, dashed can't tell. */
 export function VerdictChip({ certainty }: { certainty: Certainty }) {
   const l = useL()
   return (
     <span className={`vchip vchip-${certainty}`}>
-      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
-        <circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeDasharray={certainty === 'cant_tell' ? '2.2 2' : undefined} />
-        {ICON[certainty]}
-      </svg>
+      <CertaintyIcon certainty={certainty} />
       {l(`findings.chip.${certainty}` as FKey)}
     </span>
   )
