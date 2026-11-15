@@ -8,6 +8,10 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Added
+- "Do the parts of your box agree?": for a box, the result page counts how many grid cells go the same way
+  as the box average, and how many go the opposite way with a sure trend of their own (Benjamini–Hochberg
+  FDR across the cells; Wilks 2016). It tests whether the box mixes opposite changes that cancel out. Counts
+  only, no map; shown in "Tell me more", skipped in the scan, and never changes the verdict.
 - "How it works" page (`#/how`): the whole data pipeline as a step-by-step flow, in both views and
   both languages.
 - "The change is bigger in some months than in others": an info chip (context only, never changes the

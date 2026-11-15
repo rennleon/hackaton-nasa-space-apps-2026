@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { AnalysisResult, Comparison, Text } from '../types/contract'
 import { fmt, useResultCopy } from '../lib/resultCopy'
 import { Term } from './Term'
+import { TermText } from './TermText'
 import { Icon, type IconName } from './ResultIcons'
 import './VariableView.css'
 
@@ -36,7 +37,7 @@ function outcomeOf(c: Comparison): Outcome {
  * Replaces the old "Why we looked at this" list, so "the change is real" and "hard to spot with this record" read together.
  */
 export function TrustPanel({ result }: { result: AnalysisResult }) {
-  const { s, c, bx, view } = useResultCopy()
+  const { s, c, t, bx, view } = useResultCopy()
   const simple = view === 'simple'
   const sel = result.selection
   const statusWord = (st: Status) =>
@@ -86,6 +87,46 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
         ]
       : []
 
+  const ca = result.robustness?.cell_agreement ?? null
+  const cells: Row[] = ca ? [cellRow(ca)] : []
+
+  // One sentence per verdict, with "small squares" (grid cells) linked to the glossary. Keys stay literal for the i18n check.
+  function cellRow(x: NonNullable<typeof ca>): Row {
+    const vars = { n: x.n_cells, k: x.n_same_sign, m: x.n_opposite, sure: x.n_opposite_sure, sq: '{sq}' }
+    const word = s('result.trust.cells.sq', 'small squares', 'grid cells')
+    const verdictWord =
+      x.verdict === 'agree' ? s('result.trust.cells.vAgree', '', 'agree') : x.verdict === 'mostly' ? s('result.trust.cells.vMostly', '', 'mostly agree') : s('result.trust.cells.vMixed', '', 'mixed')
+    const text = !simple
+      ? s('result.trust.cells.count', '', 'Cells with the box\'s sign of slope: {k} of {n}. Opposite: {m}, of which {sure} significant (Benjamini–Hochberg FDR, α = 0.05).', vars)
+      : x.verdict === 'agree' && x.n_same_sign === x.n_cells
+        ? t('result.trust.cells.agreeAll', 'We checked {n} {sq} in your box. All go the same way.', vars)
+        : x.verdict === 'agree'
+          ? t('result.trust.cells.agree', 'We checked {n} {sq} in your box. {k} go the same way.', vars)
+          : x.verdict === 'mostly'
+            ? t('result.trust.cells.mostly', 'We checked {n} {sq} in your box. {k} go the same way. A few do not.', vars)
+            : t('result.trust.cells.mixed', 'We checked {n} {sq} in your box. Parts of your box go opposite ways. They may cancel out.', vars)
+    return {
+      key: 'cells',
+      status: x.verdict === 'agree' ? 'pass' : x.verdict === 'mixed' ? 'caution' : 'info',
+      text: '',
+      extra: (
+        <>
+          <TermText text={text} terms={{ sq: <Term id="grid_cell">{word}</Term> }} />
+          {!simple && (
+            <span className="muted small">
+              {' '}
+              {s('result.trust.cells.rule', '', 'Result: {verdict}. Agree: at least 80% of cells share the box\'s sign and no opposite cell is sure. Mixed: an opposite cell is sure, or under 60% share it.', { verdict: verdictWord })}{' '}
+              <a href="https://doi.org/10.1175/BAMS-D-15-00267.1" target="_blank" rel="noreferrer">
+                {s('result.trust.cells.ref', '', 'Wilks (2016), Bull. Amer. Meteor. Soc. 97(12):2263–2273')}
+              </a>
+              .
+            </span>
+          )}
+        </>
+      ),
+    }
+  }
+
   const pub = result.published
   const agreeText: Record<NonNullable<NonNullable<typeof pub>['agreement']>, { st: Status; text: Text }> = {
     agrees: { st: 'pass', text: { simple: 'This matches what scientists found.', scientific: 'Agrees with the published assessment.' } },
@@ -98,6 +139,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
     { id: 'quality', icon: 'data', title: s('result.trust.quality', 'Is the data good?', 'Data quality'), rows: quality },
     { id: 'record', icon: 'record', title: s('result.trust.record', 'Is the record long enough?', 'Long enough record'), rows: record },
     { id: 'second', icon: 'pair', title: s('result.trust.second', 'Does another instrument agree?', 'Second opinion'), rows: second },
+    { id: 'cells', icon: 'data', title: s('result.trust.cells', 'Do the parts of your box agree?', 'Agreement between cells'), rows: cells },
   ] as Group[]).filter((g) => g.rows.length > 0 || g.id === 'record')
 
   const na = s('result.trust.na', '', 'n/a')
@@ -134,7 +176,7 @@ export function TrustPanel({ result }: { result: AnalysisResult }) {
                   <span>
                     <span className="visually-hidden">{statusWord(row.status)}: </span>
                     {row.text}
-                    {row.extra && <> {row.extra}</>}
+                    {row.extra && <>{row.text ? ' ' : ''}{row.extra}</>}
                   </span>
                 </li>
               ))}

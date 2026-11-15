@@ -254,3 +254,10 @@
     scientific: The Intergovernmental Panel on Climate Change Sixth Assessment Report (2021), Working Group I. Its confidence words (for example high confidence, likely) are the panel's own, and are not our "how sure are we" meter.
     simple_es: "Cientos de científicos leyeron todos los estudios y anotaron en qué coinciden. Citamos lo que dicen de cada región."
     scientific_es: "Sexto Informe de Evaluación del Grupo Intergubernamental de Expertos sobre el Cambio Climático (2021), Grupo de Trabajo I. Sus palabras de confianza (por ejemplo confianza alta, probable) son las del panel y no son nuestro medidor de qué tan seguros estamos."
+- id: grid_cell
+  term: { simple: small squares, scientific: grid cells, simple_es: "cuadritos", scientific_es: "celdas de la malla" }
+  definition:
+    simple: A satellite or computer model measures the Earth in small squares. Your box is made of many of them.
+    scientific: One cell of the product's regular latitude-longitude grid. A box mean is the cos(latitude)-weighted mean of the cells inside it.
+    simple_es: "Un satélite o un modelo de computadora mide la Tierra en cuadritos. Tu zona está hecha de muchos cuadritos."
+    scientific_es: "Una celda de la malla regular de latitud y longitud del producto. La media de una zona es el promedio de las celdas que contiene, ponderado por el coseno de la latitud."
