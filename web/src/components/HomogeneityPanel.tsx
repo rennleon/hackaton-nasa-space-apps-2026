@@ -34,7 +34,7 @@ function Icon({ kind }: { kind: Homogeneity['kind'] }) {
  * "Is this one kind of place?" Computed before any trend (long-term means only). A mixed box can hide opposite
  * changes, so the panel says so and offers each part that is itself one kind of place. The rules are project heuristics.
  */
-export function HomogeneityPanel({ homogeneity: h, route, go }: { homogeneity: Homogeneity | null | undefined; route: Route; go: (r: Route) => void }) {
+export function HomogeneityPanel({ homogeneity: h, route, go, canTry = true }: { homogeneity: Homogeneity | null | undefined; route: Route; go: (r: Route) => void; /** a suggested part is a new custom box: offer it only when the live service is on */ canTry?: boolean }) {
   const t = useT()
   const { view } = useView()
   if (!h) return null
@@ -100,7 +100,7 @@ export function HomogeneityPanel({ homogeneity: h, route, go }: { homogeneity: H
           </ul>
         )
       )}
-      {h.kind === 'mixed' && h.suggestions.length > 0 && (
+      {canTry && h.kind === 'mixed' && h.suggestions.length > 0 && (
         <ul className="homog-try">
           {h.suggestions.map((s) => (
             <li key={s.bbox.join(',')}>

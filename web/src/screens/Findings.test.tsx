@@ -136,6 +136,16 @@ describe('Findings screen', () => {
     expect(window.location.hash).not.toMatch(/start=/)
   })
 
+  it('a start year typed on the shortlist is kept, and the end stays open (not the shared window end)', async () => {
+    const user = userEvent.setup()
+    const s = scanFile('cajamarca_west', 'water')
+    const shared = { ...base, scan: async () => ({ ...s, common_window: true, window_start: '2002-09', window_end: '2021-12' }) }
+    open('#/shortlist?region=cajamarca_west&theme=water&start=2005', shared)
+    await user.click(await screen.findByRole('button', { name: 'Open Afternoon humidity' }))
+    await waitFor(() => expect(window.location.hash).toMatch(/start=2005/))
+    expect(window.location.hash).not.toMatch(/end=/)
+  })
+
   it('shows the loading state, then the cards', async () => {
     let release: (s: ScanResult) => void = () => {}
     const slow = { ...base, scan: () => new Promise<ScanResult>((r) => { release = r }) }

@@ -197,3 +197,24 @@ def test_profile_has_homogeneity_for_the_cached_preloaded_boxes(ctx):
 def test_profile_without_cache_has_no_homogeneity(tmp_path):
     bare = EngineContext(Catalog.load(ROOT / "catalog"), SourceChain([PowerSource(cache_dir=tmp_path, offline=True)]))
     assert profile_place(bare, bare.catalog.regions["wisconsin"]).homogeneity is None
+
+
+def test_failed_climatology_call_is_remembered_and_not_retried(tmp_path, monkeypatch):
+    """A hanging/failing climatology endpoint costs one short try, not one per scan (review finding 5)."""
+    import urllib.request
+
+    from trend_detective import homogeneity as H
+
+    calls = []
+
+    def boom(req, timeout):
+        calls.append(timeout)
+        raise TimeoutError("hang")
+
+    monkeypatch.setattr(urllib.request, "urlopen", boom)
+    monkeypatch.setattr(H, "_recent_failures", {})
+    box = [-81.0, -9.0, -77.0, -5.0]
+    assert H.compute_homogeneity(tmp_path, False, "bbox", box) is None
+    assert H.compute_homogeneity(tmp_path, False, "bbox", box) is None
+    assert calls and all(t == H.QUICK_TIMEOUT_S for t in calls)
+    assert len(calls) == len(H.PARAMS)  # one try per parameter, then remembered

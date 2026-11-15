@@ -55,7 +55,7 @@ describe('Variable view, Simple', () => {
     const asked: unknown[] = []
     window.location.hash = '#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&start=2002-09&end=2021-12'
     render(<App client={{ ...client, analyze: async (_r, v, o) => { asked.push(o); return fixture(v) } }} />)
-    expect(await screen.findByTestId('same-years-note')).toHaveTextContent('Same years as the list, so the answer is the same.')
+    expect(await screen.findByTestId('same-years-note')).toHaveTextContent('Same years as the list.')
     expect(asked[0]).toEqual({ start: '2002-09', end: '2021-12', seasonId: undefined })
     expect(screen.getByRole('button', { name: 'Use all the years we have' })).toBeInTheDocument()
   })

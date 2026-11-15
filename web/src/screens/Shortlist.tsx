@@ -54,7 +54,8 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
     // open the variable page on the SAME years this card's verdict used (the scan's shared window, as YYYY-MM),
     // so the card and the page give the same answer; the page offers "all the years we have" from there
     // a season asks a different question than the card's all-months answer: then the page keeps its own default
-    const shared = !declared && data?.common_window && data.window_start && data.window_end
+    const typed = Boolean(route.start || route.end) // years typed on the shortlist win, both ends as typed
+    const shared = !declared && !typed && data?.common_window && data.window_start && data.window_end
     go({
       screen: 'variable', region: custom ? undefined : region.id, place: route.place, theme: themeId, variable: e.variable_id,
       season: declared ? route.season : undefined,
@@ -72,7 +73,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
         <h1 id="res-h">{placeName}</h1>
         {theme && <p className="findings-q">{tx(theme.question, view)}</p>}
         {placeText && <p className="muted place-text">{placeText}</p>}
-        <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} />
+        <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} canTry={client.customPlaces !== false} />
         <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
       </header>
 

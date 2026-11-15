@@ -143,7 +143,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
           )}
           {fromList && res.data.window && !(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable && (
             <p className="muted small" data-testid="same-years-note">
-              {s('result.sameYears', 'Same years as the list, so the answer is the same.', 'Same window as the shortlist card (shared window across the theme), so the verdict matches the card. Use the full record to see this variable on its own.')}
+              {s('result.sameYears', 'Same years as the list.', 'Same window as the shortlist card (shared window across the theme). The card is also corrected for testing all the theme\'s variables at once (Benjamini–Hochberg), so it can be more cautious than this page. Use the full record to see this variable on its own.')}
             </p>
           )}
           {res.data.window && (

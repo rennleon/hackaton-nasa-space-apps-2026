@@ -45,11 +45,11 @@ const terms = [
   { id: 'mixed_place', term: t('mixed place', 'mixed region'), definition: t('A box with very different places.', 'Cells differ strongly.') },
 ]
 
-function show(h: Homogeneity | null | undefined, view: 'simple' | 'scientific' = 'simple', go = vi.fn()) {
+function show(h: Homogeneity | null | undefined, view: 'simple' | 'scientific' = 'simple', go = vi.fn(), canTry = true) {
   render(
     <ViewProvider initial={view}>
       <GlossaryProvider terms={terms as never}>
-        <HomogeneityPanel homogeneity={h} route={{ screen: 'shortlist', theme: 'water', place: 'box:-81,-9,-77,-5', start: '2003-01' }} go={go} />
+        <HomogeneityPanel homogeneity={h} route={{ screen: 'shortlist', theme: 'water', place: 'box:-81,-9,-77,-5', start: '2003-01' }} go={go} canTry={canTry} />
       </GlossaryProvider>
     </ViewProvider>,
   )
@@ -74,6 +74,12 @@ describe('HomogeneityPanel (Simple view)', () => {
     const go = show(MIXED)
     await userEvent.setup().click(screen.getByRole('button', { name: 'Try just the dry low part' }))
     expect(go).toHaveBeenCalledWith({ screen: 'shortlist', theme: 'water', place: 'box:-81,-9,-79.5,-7' })
+  })
+
+  it('no live service (static site): no "Try just" buttons that would lead to an error', () => {
+    show(MIXED, 'simple', vi.fn(), false)
+    expect(screen.getByText('Mixed place')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Try just/ })).toBeNull()
   })
 
   it('keeps the reasons behind "Tell me more"', () => {

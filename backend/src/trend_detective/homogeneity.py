@@ -22,6 +22,7 @@ import json
 import logging
 import math
 import os
+import time
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -100,6 +101,33 @@ def _url(param: str, box: list[float]) -> str:
             f"&latitude-min={s}&latitude-max={n}&format=json")
 
 
+# The check is context only and runs inside the live custom scan: one short try, and a failure is remembered for a
+# few minutes, so a hanging climatology endpoint can never hold a scan (or every retry) for minutes.
+QUICK_TIMEOUT_S = 10
+FAIL_MEMORY_S = 300.0
+_recent_failures: dict[str, float] = {}
+
+
+def _quick_get(url: str) -> dict:
+    import urllib.error
+    import urllib.request
+
+    if time.monotonic() - _recent_failures.get(url, -1e9) < FAIL_MEMORY_S:
+        raise LiveSourceUnavailable("NASA POWER climatology failed recently; not asking again yet")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": P.USER_AGENT})
+        with urllib.request.urlopen(req, timeout=QUICK_TIMEOUT_S) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        _recent_failures[url] = time.monotonic()
+        if 400 <= exc.code < 500:
+            raise P.PowerRequestRejected(f"NASA POWER rejected the request: HTTP {exc.code}") from exc
+        raise LiveSourceUnavailable(f"NASA POWER climatology failed: {exc}") from exc
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        _recent_failures[url] = time.monotonic()
+        raise LiveSourceUnavailable(f"NASA POWER climatology failed: {exc}") from exc
+
+
 def _load_doc(cache_dir: Path, offline: bool, param: str, box: list[float]) -> dict | None:
     path = cache_path(cache_dir, param, box)
     if path.exists():
@@ -110,7 +138,7 @@ def _load_doc(cache_dir: Path, offline: bool, param: str, box: list[float]) -> d
     if offline:
         return None
     try:
-        doc = P._http_get_json(_url(param, box))
+        doc = _quick_get(_url(param, box))
     except (P.PowerRequestRejected, LiveSourceUnavailable) as exc:
         log.warning("homogeneity: no POWER climatology (%s)", exc)
         return None
