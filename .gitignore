@@ -11,3 +11,7 @@ web/dist/
 .DS_Store
 .idea/
 .vscode/
+# Secrets (Earthdata token etc.)
+.env
+.env.*
+!.env.example

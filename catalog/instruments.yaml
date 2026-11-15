@@ -1,0 +1,100 @@
+# Instrument cards: the satellite instruments and computer models our variables come from.
+# A variable card points here with source.instrument_id. NASA POWER is a delivery service,
+# not an instrument: its variables point at merra2 and carry source.delivered_by: NASA POWER.
+# live: giovanni (Giovanni cloud API) | power (NASA POWER API) | offline (only a manual export)
+
+- id: airs
+  name: { simple: AIRS, scientific: "AIRS (Atmospheric Infrared Sounder)" }
+  kind: satellite
+  platform: Aqua
+  since: 2002
+  measures:
+    simple: How warm and how damp the air is near the ground, by day and by night.
+    scientific: Surface air temperature, surface relative humidity and many profile fields, twice daily (≈13:30 and ≈01:30 local overpass), Level-3 monthly 1° grid.
+  how:
+    simple: It reads the heat glow of the air from space, twice a day.
+    scientific: Hyperspectral infrared sounder (2378 channels); retrievals from cloud-cleared radiances.
+  live: giovanni
+  link: https://airs.jpl.nasa.gov/
+
+- id: gpm_imerg
+  name: { simple: GPM rain satellites, scientific: "GPM IMERG (Integrated Multi-satellitE Retrievals for GPM)" }
+  kind: satellite
+  platform: GPM Core Observatory and partner satellites
+  since: 2000
+  measures:
+    simple: How much rain and snow falls.
+    scientific: Merged multi-satellite precipitation, gauge-adjusted (Final Run), monthly 0.1° grid; TRMM era before 2014, GPM era after.
+  how:
+    simple: Many satellites watch clouds and rain, and rain gauges on the ground check them.
+    scientific: Passive-microwave and infrared estimates intercalibrated to the GPM core radar/radiometer, bias-adjusted with GPCC gauges.
+  live: giovanni
+  link: https://gpm.nasa.gov/data/imerg
+
+- id: omi
+  name: { simple: OMI, scientific: "OMI (Ozone Monitoring Instrument)" }
+  kind: satellite
+  platform: Aura
+  since: 2004
+  measures:
+    simple: How hazy the air is, and how much of some polluting gases it holds.
+    scientific: Aerosol optical depth (OMAERUV), tropospheric NO₂ (OMNO2d), SO₂, ozone; daily Level-3 0.25° grids.
+  how:
+    simple: It looks at sunlight bouncing back from the air and sees what the air holds.
+    scientific: UV-visible imaging spectrometer measuring backscattered solar radiance.
+  live: giovanni
+  link: https://aura.gsfc.nasa.gov/omi.html
+
+- id: merra2
+  name: { simple: MERRA-2 computer model, scientific: "MERRA-2 (Modern-Era Retrospective analysis for Research and Applications, Version 2)" }
+  kind: model
+  since: 1980
+  measures:
+    simple: Past weather everywhere on Earth, like temperature, rain, damp air and haze.
+    scientific: Global atmospheric reanalysis (0.5° × 0.625°), assimilating satellite, station, balloon and aircraft observations, incl. aerosol optical depth.
+  how:
+    simple: A computer rebuilds past weather from millions of real measurements.
+    scientific: GEOS-5 model with 3D-Var assimilation; observing-system changes over time can shift long-term values.
+  live: power
+  link: https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/
+
+- id: gldas
+  name: { simple: GLDAS land computer model, scientific: "GLDAS (Global Land Data Assimilation System)" }
+  kind: model
+  since: 2000
+  measures:
+    simple: How wet the ground is, how much water goes back into the air, and snow.
+    scientific: Noah land-surface model v2.1, monthly 0.25° grid; soil moisture, evapotranspiration, snow water equivalent, runoff. Land only.
+  how:
+    simple: A computer works out how wet the ground is from rain, sun and weather.
+    scientific: Offline land-surface model forced by observation-based meteorology and precipitation.
+  live: giovanni
+  link: https://ldas.gsfc.nasa.gov/gldas
+
+- id: modis
+  name: { simple: MODIS, scientific: "MODIS (Moderate Resolution Imaging Spectroradiometer)" }
+  kind: satellite
+  platform: Terra and Aqua
+  since: 2000
+  measures:
+    simple: How hazy the air is.
+    scientific: Aerosol optical depth at 550 nm (Dark Target / Deep Blue combined), Level-3 monthly 1° grid.
+  how:
+    simple: A camera in space sees how much the haze dims the ground below.
+    scientific: 36-band imaging radiometer; aerosol retrieval over dark and bright surfaces.
+  live: offline
+  link: https://modis.gsfc.nasa.gov/
+
+- id: mopitt
+  name: { simple: MOPITT, scientific: "MOPITT (Measurements Of Pollution In The Troposphere)" }
+  kind: satellite
+  platform: Terra
+  since: 2000
+  measures:
+    simple: How much carbon monoxide, a smoky gas, the air holds.
+    scientific: Total-column carbon monoxide, Level-3 monthly 1° grid.
+  how:
+    simple: It looks at heat and sunlight from below and spots the smoky gas.
+    scientific: Gas-correlation radiometer in thermal and near infrared.
+  live: offline
+  link: https://www2.acom.ucar.edu/mopitt

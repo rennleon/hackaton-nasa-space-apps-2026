@@ -38,6 +38,22 @@ class Source(Card):
     instrument: str
     platform: str | None = None
     type: Literal["observed", "model"]
+    instrument_id: str | None = None  # key into catalog/instruments.yaml
+    delivered_by: str | None = None  # e.g. "NASA POWER": a delivery service, not an instrument
+
+
+class InstrumentCard(Card):
+    """A satellite instrument or computer model that our variables come from (catalog/instruments.yaml)."""
+
+    id: str
+    name: Text
+    kind: Literal["satellite", "model"]
+    platform: str | None = None
+    since: int
+    measures: Text  # what it gives us
+    how: Text  # how it measures, in kid words for simple
+    live: Literal["giovanni", "power", "offline"]
+    link: str | None = None
 
 
 class Artifact(Card):
@@ -75,7 +91,10 @@ class VariableCard(Card):
     record_start: str
     record_end: str | None = None
     coverage: Literal["global"] | list[float] = "global"  # or [W, S, E, N]
-    cadence: Literal["monthly"] = "monthly"
+    cadence: Literal["monthly", "daily"] = "monthly"  # daily is averaged to months by the source
+    min_valid_days: int | None = None  # daily only: a month counts only with at least this many valid days
+    domain: Literal["any", "land", "ocean"] = "any"
+    listed: bool = True  # false hides the card from every list (e.g. offline-only with no data)
     floor: float | None = None
     artifacts: list[Artifact] = Field(default_factory=list)
     cross_check: str | None = None
@@ -94,6 +113,10 @@ class VariableCard(Card):
             source_type=self.source.type,
             instrument=self.source.instrument,
             units=self.units.info(),
+            instrument_id=self.source.instrument_id,
+            platform=self.source.platform,
+            delivered_by=self.source.delivered_by,
+            cell_deg=self.grid_deg,
         )
 
 
@@ -168,6 +191,7 @@ class Catalog(BaseModel):
     themes: dict[str, ThemeCard]
     regions: dict[str, RegionCard]
     glossary: dict[str, GlossaryTerm]
+    instruments: dict[str, InstrumentCard] = Field(default_factory=dict)
 
     def theme_members(self, theme_id: str) -> list[tuple[VariableCard, Role]]:
         return [(v, v.themes[theme_id]) for v in self.variables.values() if theme_id in v.themes]
@@ -182,12 +206,18 @@ class Catalog(BaseModel):
         themes = {d["id"]: ThemeCard(**d) for d in read("themes.yaml")}
         regions = {d["id"]: RegionCard(**d) for d in read("regions.yaml")}
         glossary = {d["id"]: GlossaryTerm(**d) for d in read("glossary.yaml")}
-        cat = cls(variables=variables, themes=themes, regions=regions, glossary=glossary)
+        instruments = (
+            {d["id"]: InstrumentCard(**d) for d in read("instruments.yaml")}
+            if (catalog_dir / "instruments.yaml").exists() else {}
+        )
+        cat = cls(variables=variables, themes=themes, regions=regions, glossary=glossary, instruments=instruments)
         cat.validate_links()
         return cat
 
     def validate_links(self) -> None:
         for v in self.variables.values():
+            if v.source.instrument_id and self.instruments and v.source.instrument_id not in self.instruments:
+                raise ValueError(f"{v.id}: unknown instrument_id {v.source.instrument_id}")
             if v.cross_check and v.cross_check not in self.variables:
                 raise ValueError(f"{v.id}: unknown cross_check {v.cross_check}")
             for t in v.themes:

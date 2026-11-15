@@ -33,6 +33,7 @@ def main() -> None:
     dump(out / "catalog" / "themes.json", [t.model_dump(mode="json") for t in cat.themes.values()])
     dump(out / "catalog" / "variables.json", [v.model_dump(mode="json") for v in cat.variables.values()])
     dump(out / "catalog" / "glossary.json", [g.model_dump(mode="json") for g in cat.glossary.values()])
+    dump(out / "catalog" / "instruments.json", [i.model_dump(mode="json") for i in cat.instruments.values()])
 
     for region in cat.regions.values():
         cache: dict = {}

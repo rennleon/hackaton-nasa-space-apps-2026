@@ -22,7 +22,7 @@
   definition:
     simple: How close the air near the ground is to being full of water vapour, measured from space at about 1:30 in the afternoon.
     scientific: AIRS/Aqua Level-3 monthly surface relative humidity, ascending (≈13:30 local) overpass, 1° grid.
-  source: { instrument: AIRS, platform: Aqua, type: observed }
+  source: { instrument: AIRS, platform: Aqua, type: observed, instrument_id: airs }
   units: { native: "%", display: "%RH", simple: humidity points, scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 1.0
   record_start: 2002-09
@@ -44,7 +44,7 @@
   definition:
     simple: How close the air near the ground is to being full of water vapour, measured from space at about 1:30 at night.
     scientific: AIRS/Aqua Level-3 monthly surface relative humidity, descending (≈01:30 local) overpass, 1° grid.
-  source: { instrument: AIRS, platform: Aqua, type: observed }
+  source: { instrument: AIRS, platform: Aqua, type: observed, instrument_id: airs }
   units: { native: "%", display: "%RH", simple: humidity points, scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 1.0
   record_start: 2002-09
@@ -66,7 +66,7 @@
   definition:
     simple: How warm the air near the ground is at about 1:30 in the afternoon, measured from space.
     scientific: AIRS/Aqua Level-3 monthly surface air temperature, ascending overpass, 1° grid.
-  source: { instrument: AIRS, platform: Aqua, type: observed }
+  source: { instrument: AIRS, platform: Aqua, type: observed, instrument_id: airs }
   units: { native: K, display: "°C", simple: "°C", scale: 1.0, offset: -273.15, decimals: 2 }
   grid_deg: 1.0
   record_start: 2002-09
@@ -90,7 +90,7 @@
   definition:
     simple: How warm the air near the ground is at about 1:30 at night, measured from space.
     scientific: AIRS/Aqua Level-3 monthly surface air temperature, descending overpass, 1° grid.
-  source: { instrument: AIRS, platform: Aqua, type: observed }
+  source: { instrument: AIRS, platform: Aqua, type: observed, instrument_id: airs }
   units: { native: K, display: "°C", simple: "°C", scale: 1.0, offset: -273.15, decimals: 2 }
   grid_deg: 1.0
   record_start: 2002-09
@@ -114,7 +114,7 @@
   definition:
     simple: How warm the air is 2 metres above the ground, worked out by a computer model that combines many measurements.
     scientific: MERRA-2 monthly mean 2-m air temperature, 0.5°×0.625° grid; a reanalysis, not an independent observation.
-  source: { instrument: MERRA-2, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: K, display: "°C", simple: "°C", scale: 1.0, offset: -273.15, decimals: 2 }
   grid_deg: 0.5
   record_start: 1980-01
@@ -132,7 +132,7 @@
   definition:
     simple: How much rain and snow falls, measured by satellites.
     scientific: GPM IMERG final monthly precipitation (V07), 0.1° grid; multi-satellite, gauge-adjusted.
-  source: { instrument: GPM IMERG, platform: GPM, type: observed }
+  source: { instrument: GPM IMERG, platform: GPM, type: observed, instrument_id: gpm_imerg }
   units: { native: mm/hr, display: mm/day, simple: mm of rain per day, scale: 24.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.1
   record_start: 1998-01
@@ -149,7 +149,7 @@
   definition:
     simple: How much rain falls, worked out by a computer model.
     scientific: MERRA-2 monthly bias-corrected total precipitation, 0.5°×0.625° grid.
-  source: { instrument: MERRA-2, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: kg m-2 s-1, display: mm/day, simple: mm of rain per day, scale: 86400.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.5
   record_start: 1980-01
@@ -166,7 +166,7 @@
   definition:
     simple: How much water is in the top 10 cm of soil, worked out by a computer model.
     scientific: GLDAS-2.1 Noah monthly soil moisture content, 0–10 cm layer, 0.25° grid; model estimate.
-  source: { instrument: GLDAS, platform: null, type: model }
+  source: { instrument: GLDAS, platform: null, type: model, instrument_id: gldas }
   units: { native: kg m-2, display: kg/m², simple: mm of water in the topsoil, scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.25
   record_start: 2000-01
@@ -198,7 +198,7 @@
   definition:
     simple: How much water goes up into the air from soil, lakes and plants, worked out by a computer model.
     scientific: GLDAS-2.1 Noah monthly evapotranspiration, 0.25° grid; model estimate.
-  source: { instrument: GLDAS, platform: null, type: model }
+  source: { instrument: GLDAS, platform: null, type: model, instrument_id: gldas }
   units: { native: kg m-2 s-1, display: mm/day, simple: mm of water per day, scale: 86400.0, offset: 0.0, decimals: 3 }
   grid_deg: 0.25
   record_start: 2000-01
@@ -230,7 +230,7 @@
   definition:
     simple: How much dust, smoke and pollution blocks sunlight. 0 is perfectly clear; 1 is very hazy.
     scientific: MODIS-Aqua Collection 6.1 monthly AOD at 550 nm, Dark Target + Deep Blue combined, 1° grid.
-  source: { instrument: MODIS, platform: Aqua, type: observed }
+  source: { instrument: MODIS, platform: Aqua, type: observed, instrument_id: modis }
   units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3 }
   grid_deg: 1.0
   record_start: 2002-07
@@ -252,7 +252,7 @@
   definition:
     simple: The same haze measurement from a second satellite, used to double-check.
     scientific: MODIS-Terra Collection 6.1 monthly AOD at 550 nm, Dark Target + Deep Blue combined, 1° grid.
-  source: { instrument: MODIS, platform: Terra, type: observed }
+  source: { instrument: MODIS, platform: Terra, type: observed, instrument_id: modis }
   units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3 }
   grid_deg: 1.0
   record_start: 2000-03
@@ -274,7 +274,7 @@
   definition:
     simple: Haze worked out by a computer model. It uses the satellite data, so it is not a fully separate check.
     scientific: MERRA-2 monthly total aerosol extinction AOD; assimilates MODIS AOD, so not independent of it.
-  source: { instrument: MERRA-2, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: "1", display: AOD, simple: points on the haze scale, scale: 1.0, offset: 0.0, decimals: 3 }
   grid_deg: 0.5
   record_start: 1980-01
@@ -290,7 +290,7 @@
   definition:
     simple: Tiny particles made mostly by power plants and industry, worked out by a computer model.
     scientific: MERRA-2 monthly surface SO₄ mass concentration.
-  source: { instrument: MERRA-2, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: kg m-3, display: µg/m³, simple: micrograms per cubic metre, scale: 1.0e9, offset: 0.0, decimals: 2 }
   grid_deg: 0.5
   record_start: 1980-01
@@ -306,7 +306,7 @@
   definition:
     simple: Tiny particles that come mostly from fires and smoke, worked out by a computer model.
     scientific: MERRA-2 monthly surface organic carbon mass concentration.
-  source: { instrument: MERRA-2, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2 }
   units: { native: kg m-3, display: µg/m³, simple: micrograms per cubic metre, scale: 1.0e9, offset: 0.0, decimals: 2 }
   grid_deg: 0.5
   record_start: 1980-01
@@ -322,7 +322,7 @@
   definition:
     simple: A gas released by fires and engines, measured from space. It helps confirm smoke.
     scientific: MOPITT Level-3 monthly retrieved CO total column, daytime, 1° grid.
-  source: { instrument: MOPITT, platform: Terra, type: observed }
+  source: { instrument: MOPITT, platform: Terra, type: observed, instrument_id: mopitt }
   units: { native: mol/cm2, display: 10¹⁸ molecules/cm², simple: units of smoke gas, scale: 1.0e-18, offset: 0.0, decimals: 3 }
   grid_deg: 1.0
   record_start: 2000-03
@@ -340,7 +340,7 @@
   definition:
     simple: How warm the air is 2 metres above the ground, from NASA's POWER service for any place you pick.
     scientific: NASA POWER monthly T2M, area mean over the requested box; derived from MERRA-2.
-  source: { instrument: NASA POWER, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2, delivered_by: NASA POWER }
   units: { native: "°C", display: "°C", simple: "°C", scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.5
   record_start: 1981-01
@@ -359,7 +359,7 @@
   definition:
     simple: How much rain falls, from NASA's POWER service for any place you pick.
     scientific: NASA POWER monthly PRECTOTCORR, area mean over the requested box; derived from MERRA-2.
-  source: { instrument: NASA POWER, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2, delivered_by: NASA POWER }
   units: { native: mm/day, display: mm/day, simple: mm of rain per day, scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.5
   record_start: 1981-01
@@ -377,7 +377,7 @@
   definition:
     simple: How full of water vapour the air is near the ground, from NASA's POWER service for any place you pick.
     scientific: NASA POWER monthly RH2M, area mean over the requested box; derived from MERRA-2.
-  source: { instrument: NASA POWER, platform: null, type: model }
+  source: { instrument: MERRA-2, platform: null, type: model, instrument_id: merra2, delivered_by: NASA POWER }
   units: { native: "%", display: "%RH", simple: humidity points, scale: 1.0, offset: 0.0, decimals: 2 }
   grid_deg: 0.5
   record_start: 1981-01
