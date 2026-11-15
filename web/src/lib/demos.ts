@@ -79,8 +79,8 @@ export const DEMOS: Demo[] = [
         route: { screen: 'variable', region: 'cajamarca_highlands', theme: 'water', variable: 'airs_rh_surf_day' },
         target: 'where',
         caption: tx(
-          'Where else? Only Cajamarca says "Sure it\'s real". The other four places say "Too soon to tell".',
-          'The same variable in the other four ready-made places, each analysed separately over 2002 to 2021: none is significant.',
+          'Only Cajamarca says "Sure it\'s real". Four places say "Too soon to tell". The high-mountain box has too few map squares to tell.',
+          'The same variable in the other ready-made places, each analysed separately over 2002 to 2021: none of the four other places is significant, and the highland-only box cannot be tested (2 AIRS cells; the gate needs 4).',
         ),
       },
     ],
