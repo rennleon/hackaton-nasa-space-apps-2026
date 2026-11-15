@@ -1,0 +1,20 @@
+.place-search { max-width: 44rem; }
+.place-search-label { display: block; font-weight: 600; margin-bottom: 0.3rem; }
+.place-search-row { display: flex; gap: 0.6rem; align-items: stretch; flex-wrap: wrap; }
+.place-search-box { position: relative; flex: 1 1 18rem; min-width: 0; }
+.place-search-box input { width: 100%; font: inherit; font-size: 1.1rem; padding: 0.7rem 0.9rem; border: 2px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
+.place-search-box input:focus-visible { border-color: var(--accent); }
+.place-search-row .btn { padding: 0.6rem 1.1rem; }
+.place-results { position: absolute; z-index: 900; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); max-height: 22rem; overflow-y: auto; }
+.place-results[hidden] { display: none; }
+.place-result { display: flex; flex-direction: column; padding: 0.5rem 0.7rem; border-radius: 6px; cursor: pointer; }
+.place-result.is-active, .place-result:hover { background: var(--accent); color: var(--accent-text); }
+.place-result-name { font-weight: 600; }
+.place-result-detail { font-size: 0.85rem; opacity: 0.85; }
+.place-search-status { min-height: 1.4rem; }
+.place-search-status p { margin: 0.3rem 0 0; }
+.place-search > .muted { margin: 0.3rem 0 0; }
+
+@media (max-width: 720px) {
+  .place-search-row .btn { flex: 1 1 100%; }
+}
