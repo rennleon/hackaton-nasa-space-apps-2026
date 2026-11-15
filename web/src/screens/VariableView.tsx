@@ -15,6 +15,7 @@ import { COPY } from '../lib/copy'
 import { LiveNotice } from '../components/LiveNotice'
 import { WhereElse } from '../components/WhereElse'
 import { parsePlace, placeRegion } from '../lib/place'
+import { YourYears } from '../components/YourYears'
 
 /** Route years are `YYYY` (typed by the user) or `YYYY-MM` (handed over by a shortlist card: its exact shared window). */
 export function periodMonth(v: string | undefined, edge: 'start' | 'end'): string | undefined {
@@ -41,6 +42,14 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
     if (!customPeriod) return client.result(region.id, card.id, route.season)
     return client.analyze(region.id, card.id, { start: pStart, end: pEnd, seasonId: route.season })
   }, [region?.id, card?.id, route.place, route.season, route.start, route.end])
+
+  // years the user typed (not a card's shared window): also fetch the declared default answer to show beside it
+  const userPeriod = customPeriod && !fromList
+  const declared = useAsync(async () => {
+    if (!userPeriod || !region || !card) return null
+    if (place) return client.customResult(place, card.id, {})
+    return client.result(region.id, card.id, route.season)
+  }, [userPeriod, region?.id, card?.id, route.place, route.season])
 
   const [start, setStart] = useState(route.start?.slice(0, 4) ?? '')
   const [end, setEnd] = useState(route.end?.slice(0, 4) ?? '')
@@ -162,6 +171,9 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
           )}
           <div className="variable-grid">
             <div className="variable-main">
+              {userPeriod && !(res.data as { customPeriodUnavailable?: boolean }).customPeriodUnavailable && (
+                <YourYears mine={res.data} declared={declared.loading ? null : declared.data} />
+              )}
               <VerdictCard result={res.data} />
               <TrustPanel result={res.data} />
               <StartYears result={res.data} />

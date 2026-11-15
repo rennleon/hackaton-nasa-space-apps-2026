@@ -8,6 +8,8 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Added
+- "Your years" box on the result page: typed-in years are labelled as the user's choice and the declared
+  window's answer is shown beside it, so a period picked after looking cannot pass as the main finding.
 - "What if we start in another year?" panel on the result page: the same trend tests re-run for start years
   from the first full year to the last one that still leaves 15 years (window end fixed). Context only: the
   headline stays on the declared window. New `start_years` field on the result (not for declared seasons or

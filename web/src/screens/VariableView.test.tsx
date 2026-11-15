@@ -60,6 +60,22 @@ describe('Variable view, Simple', () => {
     expect(screen.getByRole('button', { name: 'Use all the years we have' })).toBeInTheDocument()
   })
 
+  it('typed-in years: labelled as your years, with the all-years answer beside it', async () => {
+    const { container } = open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&start=2010&end=2020')
+    const box = await screen.findByTestId('your-years')
+    expect(box).toHaveTextContent('You picked these years.')
+    expect(box).toHaveTextContent(/Your years \(\d{4} to \d{4}\):/)
+    expect(await screen.findByText(/All the years we have/)).toBeInTheDocument()
+    expect(box).toHaveTextContent('Picking years after looking can fool us. Trust all the years more.')
+    expect(bannedIn(container.textContent ?? '')).toEqual([])
+  })
+
+  it('a card\'s shared window is not "your years"', async () => {
+    open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day&start=2002-09&end=2021-12')
+    await screen.findByTestId('same-years-note')
+    expect(screen.queryByTestId('your-years')).toBeNull()
+  })
+
   it('cannot tell: distinct state', async () => {
     open('#/variable?region=cajamarca_west&theme=water&variable=gpm_precip')
     expect(await screen.findByText("We can't tell here")).toBeInTheDocument()

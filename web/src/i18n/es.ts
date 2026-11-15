@@ -859,5 +859,19 @@ const es: Record<string, string> = {
   'result.trust.cells.vMostly.sci': 'en su mayoría de acuerdo',
   'result.trust.cells.vMixed.sci': 'mixto',
   'result.trust.cells.ref.sci': 'Wilks (2016), Bull. Amer. Meteor. Soc. 97(12):2263–2273',
+  // ---------- "Your years" box on the result page (typed-in custom period)
+  'result.yours.aria': 'Tus años y todos los años',
+  'result.yours.title.simple': 'Tú elegiste estos años.',
+  'result.yours.title.sci': 'Ventana elegida por el usuario',
+  'result.yours.mine.simple': 'Tus años ({from} a {to}):',
+  'result.yours.mine.sci': 'Tu ventana ({from} a {to}):',
+  'result.yours.all.simple': 'Todos los años que tenemos ({from} a {to}):',
+  'result.yours.all.sci': 'Ventana declarada por defecto ({from} a {to}):',
+  'result.yours.same.simple': 'Las dos respuestas coinciden.',
+  'result.yours.same.sci': 'Las dos ventanas dan la misma certeza.',
+  'result.yours.differ.simple': 'Las respuestas no son iguales.',
+  'result.yours.differ.sci': 'Las dos ventanas dan distinta certeza.',
+  'result.yours.warn.simple': 'Elegir años después de mirar puede engañarnos. Confía más en todos los años.',
+  'result.yours.warn.sci': 'Elegir una ventana después de ver los datos aumenta los falsos positivos (sensibilidad al año de inicio y de fin; Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1). La ventana declarada es la referencia; mira el panel de años de inicio para ver cada año de inicio.',
 }
 export default es
