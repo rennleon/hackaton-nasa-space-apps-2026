@@ -1031,5 +1031,12 @@ const es: Record<string, string> = {
   'guide.noPlace': 'No encontramos ese lugar. Elige uno abajo.',
   'guide.source.llm': 'Sugerido por un ayudante de IA (Claude)',
   'guide.source.keywords': 'Encontrado por palabras clave',
+
+  // Suggested questions (SuggestedQuestions, step 2 of the start card)
+  'suggest.title.simple': 'Ideas para {place}',
+  'suggest.title.scientific': 'Preguntas sugeridas para {place}',
+  'suggest.titleHere.simple': 'Ideas para este lugar',
+  'suggest.titleHere.scientific': 'Preguntas sugeridas para este lugar',
+  'suggest.thinking': 'Pensando en tu lugar…',
 }
 export default es

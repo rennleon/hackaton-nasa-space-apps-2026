@@ -3,7 +3,7 @@ import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types
 import type { Place } from '../lib/place'
 import type { Bbox, ClimateGrid, ClimateParam } from '../lib/climate'
 import type { GuideAnswer } from '../lib/guideKeywords'
-import { getJson, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
+import { getJson, type AnalysisOutcome, type AnalyzeOptions, type DataClient, type SuggestAnswer, type SuggestRequest } from './client'
 
 function qs(params: Record<string, string | undefined>) {
   const p = new URLSearchParams()
@@ -54,6 +54,9 @@ export class ApiClient implements DataClient {
   }
   guide(text: string, lang: string) {
     return getJson<GuideAnswer>(`${this.base}/guide`, { method: 'POST', body: { text, lang } })
+  }
+  suggest(req: SuggestRequest, lang: string) {
+    return getJson<SuggestAnswer>(`${this.base}/guide/suggest`, { method: 'POST', body: { ...req, lang } })
   }
   customResult(place: Place, variableId: string, opts: { start?: string; end?: string }) {
     const extra = [opts.start ? `start=${opts.start}` : '', opts.end ? `end=${opts.end}` : ''].filter(Boolean).join('&')
