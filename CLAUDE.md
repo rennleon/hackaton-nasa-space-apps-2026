@@ -105,9 +105,8 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
 - User decisions (Nov 15, v4):
   - No deployment for the submission: the GitHub repo link plus a demo video is enough (replaces the public-link
     part of R6).
-  - "AI variable suggestions" moved out of the parking lot: "Ask the detective" (`POST /guide`) uses the Claude
-    API with `ANTHROPIC_API_KEY` in `backend/.env` (server-side only); it may only pick catalog ids, its free-text
-    reason is replaced by a template when it could read as a trend or causal claim, and keywords answer offline.
+  - No LLM in the app (tried Claude for "ask the detective" and suggested questions, removed the same night). The
+    step-2 text box is a keyword matcher over the catalog; "AI variable suggestions" stays in the parking lot.
   - Gamification: congratulations on "Sure it's real" and a detective notebook kept in the browser only. No
     server storage of finds. Sharing is a copied report / JSON and a link to the Earthdata Forum; never auto-post
     or "notify NASA" (no intake API exists for this).

@@ -116,9 +116,8 @@ The web app is at http://localhost:5173 and the API at http://localhost:8000. Th
 highlands, Wisconsin and the example points) work offline, from static files, so the demo never depends on a live
 NASA service. See "Run it" above for `npm run lan` and the other options.
 
-**AI use.** The team used AI coding assistants (Claude Code by Anthropic) to help write code and text. An optional
-in-app helper uses the Claude API to suggest which variables fit a typed question; it never computes or changes
-results. All numbers come from NASA data and our statistics code. This is also disclosed on the app's Sources page.
+**AI use.** The team used AI coding assistants (Claude Code by Anthropic) to help write code and text. The app
+itself uses no AI. All numbers come from NASA data and our statistics code. This is also disclosed on the app's Sources page.
 
 **Data credits.** Every number comes from NASA satellite instruments and models (Giovanni, GES DISC, NASA POWER).
 Instruments, datasets and links are on the app's Sources page (`#/sources`), and the references we checked are in

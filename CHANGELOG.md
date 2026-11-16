@@ -8,10 +8,8 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Added
-- "Ask the detective" in step 2: type what you want to investigate; an AI helper (Claude API, server-side key)
-  picks a question and variables from the catalog only, with a keyword matcher when there is no key or no network.
-- Suggested questions in step 2 (`POST /guide/suggest`): Claude picks up to three catalog questions that fit the
-  kind of place (name and position rounded to about 10 km); one click opens them. Hidden without Claude.
+- "Or ask in your own words" in step 2: type what you want to investigate and a keyword matcher over the
+  catalog (EN/ES, works offline) suggests a question and the variables that can answer it.
 - "You found a real change!" panel on "Sure it's real" results, a detective notebook of saved finds (kept in
   the browser only), and "Copy report" / "Download JSON" to share a find.
 - AI-use disclosure and "not endorsed by NASA" line on the Sources page; README submission section.
