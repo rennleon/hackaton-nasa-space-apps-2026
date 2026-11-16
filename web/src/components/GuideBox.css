@@ -1,14 +1,13 @@
-/* "Ask the detective": one sentence in, a suggested question and its variables out. */
-.guide-box { display: grid; gap: 0.9rem; padding: 1.3rem; }
-.guide-title { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.3rem; }
+/* Step 2, "Or ask in your own words": one sentence in, a suggested question and its variables out. */
+.guide-box { display: grid; gap: 0.7rem; }
 .guide-form { display: grid; gap: 0.4rem; }
 .guide-label { font-weight: 600; }
 .guide-row { display: flex; gap: 0.7rem; flex-wrap: wrap; }
-.guide-input { flex: 1 1 18rem; min-width: 0; box-sizing: border-box; font: inherit; font-size: 1rem; min-height: 3rem; padding: 0 1rem; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); }
+.guide-input { flex: 1 1 14rem; min-width: 0; box-sizing: border-box; font: inherit; font-size: 1rem; min-height: 2.75rem; padding: 0 1rem; border: 1px solid var(--hairline); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); }
 .guide-input::placeholder { color: var(--muted); opacity: 1; }
 .guide-input:focus-visible { border-color: var(--accent); }
-.guide-row .btn { min-height: 3rem; padding: 0 1.3rem; }
-.guide-result { display: grid; gap: 0.7rem; }
+.guide-row .btn { min-height: 2.75rem; padding: 0 1.3rem; }
+.guide-result { display: grid; gap: 0.6rem; padding: 0.2rem 0 0; }
 .guide-result:empty { display: none; }
 .guide-reason { margin: 0; font-size: 1.05rem; }
 .guide-theme { margin: 0; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
