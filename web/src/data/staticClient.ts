@@ -3,6 +3,7 @@ import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types
 import type { Place } from '../lib/place'
 import type { Bbox, ClimateGrid, ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
+import { keywordGuide, type GuideAnswer } from '../lib/guideKeywords'
 import { getJson, LiveDataUnavailable, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
 
 /** Reads the precomputed JSON files under `<base>/data/`. */
@@ -53,6 +54,11 @@ export class StaticClient implements DataClient {
     if (win) return win
     const res = await this.result(regionId, variableId, opts.seasonId)
     return opts.start || opts.end ? { ...res, customPeriodUnavailable: true } : res
+  }
+  /** No AI here: the keyword route over the catalog files. */
+  async guide(text: string, lang: string): Promise<GuideAnswer> {
+    const [themes, variables, glossary] = await Promise.all([this.themes(), this.variables(), this.glossary()])
+    return keywordGuide(text, lang, { themes, variables, glossary })
   }
   private climIndex?: Promise<{ id: string; bbox: Bbox; params: string[] }[]>
   /**

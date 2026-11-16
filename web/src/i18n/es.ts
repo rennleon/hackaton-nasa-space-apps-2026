@@ -957,5 +957,23 @@ const es: Record<string, string> = {
   'result.yours.differ.sci': 'Las dos ventanas dan distinta certeza.',
   'result.yours.warn.simple': 'Elegir años después de mirar puede engañarnos. Confía más en todos los años.',
   'result.yours.warn.sci': 'Elegir una ventana después de ver los datos aumenta los falsos positivos (sensibilidad al año de inicio y de fin; Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1). La ventana declarada es la referencia; mira el panel de años de inicio para ver cada año de inicio.',
+  // Detective guide (GuideBox on the start screen)
+  'guide.title.simple': 'Pregúntale al detective',
+  'guide.title.scientific': 'Describe lo que quieres investigar',
+  'guide.label.simple': '¿Qué quieres averiguar?',
+  'guide.label.scientific': 'Describe tu pregunta en una frase',
+  'guide.placeholder': 'Por ejemplo: ¿Hay más humo cerca de mi pueblo?',
+  'guide.ask': 'Preguntar',
+  'guide.thinking': 'Pensando…',
+  'guide.vars.simple': 'Esto puede ayudar:',
+  'guide.vars.scientific': 'Variables que pueden responderla:',
+  'guide.open.simple': 'Muéstrame esta pregunta',
+  'guide.open.scientific': 'Abrir esta pregunta',
+  'guide.usePlace': 'Usar {place} como mi lugar',
+  'guide.hintOnly': 'Escribiste {place}. Elige un lugar abajo y luego haz esta pregunta.',
+  'guide.pickFirst': 'Elige un lugar abajo y luego haz esta pregunta.',
+  'guide.noPlace': 'No encontramos ese lugar. Elige uno abajo.',
+  'guide.source.llm': 'Sugerido por un ayudante de IA (Claude)',
+  'guide.source.keywords': 'Encontrado por palabras clave',
 }
 export default es
