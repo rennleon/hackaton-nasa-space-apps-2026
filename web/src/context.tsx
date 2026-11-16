@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import type { DataClient } from './data/client'
 import type { Catalog, GlossaryTerm, Text } from './types/catalog'
 import { type ViewMode } from './lib/text'
@@ -36,6 +36,10 @@ export function ViewProvider({ children, initial }: { children: ReactNode; initi
       /* ignore */
     }
   }, [])
+  // <html data-view> drives the bigger base font of the Simple view (styles.css), before paint
+  useLayoutEffect(() => {
+    document.documentElement.dataset.view = view
+  }, [view])
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `lang` is a deliberate dependency: Text objects pick their Spanish variant
   const value = useMemo(() => ({ view, setView, t: (x: Text | string | null | undefined) => pickText(x, view) }), [view, setView, lang])
   return <ViewContext.Provider value={value}>{children}</ViewContext.Provider>

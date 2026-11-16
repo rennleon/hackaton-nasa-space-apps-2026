@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { GlossaryProvider, ViewProvider, useView } from '../context'
 import { Term } from './Term'
 import { ViewToggle } from './ViewToggle'
+import { HeaderMenu } from './HeaderMenu'
 import { Badge } from './Badge'
 import { SHORTLIST_META } from '../lib/labels'
 
@@ -53,11 +54,57 @@ describe('view switch', () => {
     const user = userEvent.setup()
     wrap(<><ViewToggle /><Probe /><Term id="trend" /></>)
     expect(screen.getByText('kid text')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     expect(screen.getByText('science text')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'linear trend' })).toBeInTheDocument()
     expect(screen.getByRole('tooltip')).toHaveTextContent('Average rate of change.')
-    expect(screen.getByRole('button', { name: 'Scientific' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('switch', { name: 'Scientific view' })).toHaveAttribute('aria-checked', 'true')
+  })
+  it('is one switch that flips both ways and drives the Simple font size on <html>', async () => {
+    const user = userEvent.setup()
+    wrap(<><ViewToggle /><Probe /></>)
+    const sw = screen.getByRole('switch', { name: 'Scientific view' })
+    expect(sw).toHaveAttribute('aria-checked', 'false')
+    expect(document.documentElement.dataset.view).toBe('simple')
+    await user.click(sw)
+    expect(sw).toHaveAttribute('aria-checked', 'true')
+    expect(document.documentElement.dataset.view).toBe('scientific')
+    expect(screen.getByText('science text')).toBeInTheDocument()
+    await user.click(sw)
+    expect(sw).toHaveAttribute('aria-checked', 'false')
+    expect(document.documentElement.dataset.view).toBe('simple')
+    expect(screen.getByText('kid text')).toBeInTheDocument()
+    sw.focus()
+    await user.keyboard(' ')
+    expect(sw).toHaveAttribute('aria-checked', 'true')
+  })
+})
+
+describe('HeaderMenu', () => {
+  it('opens, closes on Escape (focus back on the button) and on an outside click', async () => {
+    const user = userEvent.setup()
+    wrap(<><p>outside</p><HeaderMenu /></>)
+    const btn = screen.getByRole('button', { name: 'Settings menu' })
+    expect(screen.queryByRole('switch', { name: 'Dark mode' })).not.toBeInTheDocument()
+    await user.click(btn)
+    expect(screen.getByRole('switch', { name: /Español/ })).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('switch', { name: 'Dark mode' })).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(btn).toHaveAttribute('aria-expanded', 'false')
+    expect(btn).toHaveFocus()
+    await user.click(btn)
+    const dark = screen.getByRole('switch', { name: 'Dark mode' })
+    const before = dark.getAttribute('aria-checked')
+    await user.click(dark)
+    expect(dark).toHaveAttribute('aria-checked', before === 'true' ? 'false' : 'true')
+    expect(document.documentElement.dataset.theme).toBe(before === 'true' ? 'light' : 'dark')
+    // the row label names the current mode
+    expect(screen.getByText(before === 'true' ? 'Light mode' : 'Dark mode')).toBeInTheDocument()
+    await user.click(dark)
+    expect(screen.getByText(before === 'true' ? 'Dark mode' : 'Light mode')).toBeInTheDocument()
+    expect(btn).toHaveAttribute('aria-expanded', 'true') // clicks inside keep it open
+    await user.click(screen.getByText('outside'))
+    expect(btn).toHaveAttribute('aria-expanded', 'false')
   })
 })
 

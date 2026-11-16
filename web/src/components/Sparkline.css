@@ -4,4 +4,8 @@
 .spark-line { stroke: var(--trend); stroke-width: 2.5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .trend-arrow { color: var(--muted); flex: none; }
 .trend-arrow.trend-sure { color: var(--trend); }
-.spark.spark-wide { max-width: none; height: auto; aspect-ratio: 4 / 1; }
+/* wide form on cards: bigger, darker dots and a bolder line, so the chart is the first thing the eye finds */
+.spark.spark-wide { max-width: none; height: auto; aspect-ratio: 10 / 3; }
+.spark-wide .spark-dot { fill: var(--text-2); }
+.spark-wide .spark-out { fill: var(--spark-bg, var(--surface)); stroke: var(--muted); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.spark-wide .spark-line { stroke-width: 3.5; }

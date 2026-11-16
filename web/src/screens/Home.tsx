@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { HeroGlobe } from '../components/HeroGlobe'
 import { useData } from '../context'
 import { CoordsForm } from '../components/CoordsForm'
 import { PlaceChooser } from '../components/PlaceChooser'
@@ -19,12 +20,12 @@ import './Home.css'
 type TabId = 'search' | 'places' | 'map' | 'coords'
 const TABS: { id: TabId; icon: PlaceIconName }[] = [
   { id: 'search', icon: 'search' },
-  { id: 'places', icon: 'mountain' },
   { id: 'map', icon: 'pin' },
   { id: 'coords', icon: 'grid' },
+  { id: 'places', icon: 'mountain' },
 ]
 
-/** Start: one card in two steps. Step 1 picks a place (search, ready-made, map or numbers), step 2 asks a question. */
+/** Start: one card in two steps. Step 1 picks a place (search, map, numbers or ready-made), step 2 asks a question. */
 export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
   const { catalog, client } = useData()
   const { s } = useStartT()
@@ -57,18 +58,6 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
   const demoStepTab = route?.demo ? demoTab() : null
   // "Use this spot" only takes a pin or box tapped on the map, never an earlier pick from another tab
   const mapPick = picked?.kind === 'place' && picked.viaMap ? picked : null
-  const demoRow = (credit: boolean) => (
-    <div className="start-demo">
-      <span className="start-demo-label">{s('start.demo.notSure', 'Not sure? Watch a demo')}</span>
-      {DEMOS.map((d) => (
-        <button key={d.id} type="button" className="chip chip-btn" onClick={() => go(demoStart(d))}>
-          <Icon name="play" size={14} />
-          {s(`demo.${d.id}.label`, d.label.simple, d.label.scientific)}
-        </button>
-      ))}
-      {credit && <span className="start-credit">{s('start.search.credit', 'Place search uses Open-Meteo.')}</span>}
-    </div>
-  )
   useEffect(() => {
     if (demoStepTab) setTab(demoStepTab)
   }, [demoStepTab, route?.step])
@@ -117,16 +106,26 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
 
   return (
     <div className="page start">
+      <HeroGlobe />
       <section className="hero" aria-labelledby="hero-h">
-        <span className="chip">{s('start.hero.chip', 'Free · Every number comes from NASA')}</span>
-        <h1 id="hero-h">{s('start.hero.title', 'Is the Earth changing where you live?')}</h1>
+        <h1 id="hero-h">{s('start.hero.title', 'Earth trends, measured and tested')}</h1>
         <p className="lead">
           {s(
             'start.hero.lead',
-            'Satellites have watched Earth for over 20 years. Pick a place and we will check.',
-            'Explore NASA satellite and reanalysis records for a place, remove the seasonal cycle, fit a trend, and read an honest significance verdict with its caveats.',
+            'We measure how a place is changing. Then we check how sure we are.',
+            'Rate of change per 10 years with a 95% range, tested with persistence-aware Mann–⁠Kendall and OLS t-tests on de-seasonalised NASA data.',
           )}
         </p>
+        {/* the two guided demos run on saved results, so they work offline and from any step */}
+        <div className="hero-demos" role="group" aria-labelledby="hero-demos-label">
+          <span id="hero-demos-label" className="hero-demos-label">{s('start.hero.demo', 'Watch a demo')}</span>
+          {DEMOS.map((d) => (
+            <button key={d.id} type="button" className="btn btn-primary hero-demo" onClick={() => go(demoStart(d))}>
+              <Icon name="play" size={16} />
+              {s(`demo.${d.id}.label`, d.label.simple, d.label.scientific)}
+            </button>
+          ))}
+        </div>
       </section>
 
       <section ref={card} className="card start-wizard" aria-label={s('start.wizard.label', 'Find your place')}>
@@ -183,21 +182,17 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
                     onLocate={(lat, lon) => choose(namedPoint(lat, lon, s('start.place.here', 'Where you are', 'Your location')))}
                   />
                   {liveOff && <p className="muted">{s('start.search.off', 'Searching for any place needs our live service. Try a ready-made place.', 'Place search requires the API (VITE_API_URL not set).')}</p>}
-                  {demoRow(true)}
+                  <p className="start-credit">{s('start.search.credit', 'Place search uses Open-Meteo.')}</p>
                 </>
               )}
               {tab === 'places' && (
-                <>
-                  <ReadyPlaces
-                    regions={listed}
-                    liveOff={liveOff && !client.staticExamples}
-                    selectedId={picked?.kind === 'region' ? picked.region.id : undefined}
-                    onRegion={(r) => choose({ kind: 'region', region: r })}
-                    onExample={(e: ExamplePlace) => choose(namedPoint(e.lat, e.lon, s(`start.example.${e.id}.name`, e.name)))}
-                  />
-                  {/* without the live service the Search tab is off, so the offline demos show here too */}
-                  {liveOff && demoRow(false)}
-                </>
+                <ReadyPlaces
+                  regions={listed}
+                  liveOff={liveOff && !client.staticExamples}
+                  selectedId={picked?.kind === 'region' ? picked.region.id : undefined}
+                  onRegion={(r) => choose({ kind: 'region', region: r })}
+                  onExample={(e: ExamplePlace) => choose(namedPoint(e.lat, e.lon, s(`start.example.${e.id}.name`, e.name)))}
+                />
               )}
               {tab === 'map' && (
                 <PlaceChooser

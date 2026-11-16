@@ -97,3 +97,30 @@ a mechanical verdict label, written in both registers. Scans across a theme use 
 
 Data access goes through `SeriesSource` (`backend/src/trend_detective/sources/`), so a live Giovanni fetcher
 can replace step 1 without touching the engine.
+
+## Submission
+
+**What it does.** Earth System Trend Detective helps students and the public find out what is changing in a place,
+by how much, and whether the change is real. A user picks a plain question (heat, water, air), sees which NASA
+variables can answer it, chooses a place, and gets a many-year chart with the seasonal cycle removed, the rate of
+change per 10 years with a 95% range, and an honest "how sure are we" verdict. A real change can be saved to a local
+"detective notebook" and shared as a plain-text report or JSON file (nothing is sent to a server).
+
+**Run it locally.** Needs Node ≥ 20 and [uv](https://docs.astral.sh/uv/). From the repo root:
+
+```bash
+npm install && npm run dev
+```
+
+The web app is at http://localhost:5173 and the API at http://localhost:8000. The pre-loaded places (Cajamarca
+highlands, Wisconsin and the example points) work offline, from static files, so the demo never depends on a live
+NASA service. See "Run it" above for `npm run lan` and the other options.
+
+**AI use.** The team used AI coding assistants (Claude Code by Anthropic) to help write code and text. The app
+itself uses no AI. All numbers come from NASA data and our statistics code. This is also disclosed on the app's Sources page.
+
+**Data credits.** Every number comes from NASA satellite instruments and models (Giovanni, GES DISC, NASA POWER).
+Instruments, datasets and links are on the app's Sources page (`#/sources`), and the references we checked are in
+[`docs/sources-checked.md`](docs/sources-checked.md).
+
+This is a NASA Space Apps Challenge project. It is not endorsed by NASA.

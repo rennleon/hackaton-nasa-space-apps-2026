@@ -1,21 +1,26 @@
-import { setLang, useLang, useT, type Lang } from '../i18n'
+import { setLang, useLang, useT } from '../i18n'
+import { Switch } from './Switch'
 
-const OPTIONS: { id: Lang; short: string; name: string }[] = [
-  { id: 'en', short: 'EN', name: 'English' },
-  { id: 'es', short: 'ES', name: 'Español' },
-]
-
-/** EN / ES switch. Each button names its own language in that language, so it is readable before switching. */
+/** EN / ES as one switch: "EN [knob] ES". On = Español. The knob shows a globe. */
 export function LangToggle() {
   const lang = useLang()
   const t = useT()
+  const es = lang === 'es'
   return (
-    <div role="group" aria-label={t('app.lang.label', 'Language')} className="view-toggle lang-toggle">
-      {OPTIONS.map((o) => (
-        <button key={o.id} type="button" lang={o.id} aria-pressed={lang === o.id} aria-label={`${o.name} (${o.short})`} title={o.name} onClick={() => setLang(o.id)}>
-          {o.short}
-        </button>
-      ))}
-    </div>
+    <Switch
+      className="lang-switch"
+      checked={es}
+      onChange={(on) => setLang(on ? 'es' : 'en')}
+      label={t('app.lang.switch', 'Español (Spanish)')}
+      title={es ? 'English' : 'Español'}
+      left={<span lang="en">EN</span>}
+      right={<span lang="es">ES</span>}
+      knob={
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" />
+        </svg>
+      }
+    />
   )
 }

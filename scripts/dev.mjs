@@ -94,10 +94,16 @@ function newest(dir) {
   }
   return t
 }
+// The results are committed to git, so start from them. Recomputing on every start was slow, and on a machine
+// without the per-cell Giovanni files it silently dropped the cell-agreement check from committed results.
+// Recompute on purpose with `npm run dev -- --precompute` or `npm run precompute`.
 const stamp = path.join(WEB, 'public', 'data', 'catalog', 'regions.json')
-const inputs = ['catalog', 'data', path.join('backend', 'src')].map((d) => newest(path.join(ROOT, d)))
-if (existsSync(stamp) && statSync(stamp).mtimeMs >= Math.max(...inputs)) {
-  log('setup', 'Static results are up to date; skipping precompute.')
+const FORCE = process.argv.includes('--precompute')
+const inputs = FORCE ? [] : ['catalog', path.join('backend', 'src')].map((d) => newest(path.join(ROOT, d)))
+if (!FORCE && existsSync(stamp)) {
+  if (statSync(stamp).mtimeMs < Math.max(...inputs)) {
+    log('setup', 'Using the committed results. Catalog or engine changed since: run `npm run precompute` if you need new numbers.')
+  } else log('setup', 'Static results are up to date; skipping precompute.')
 } else if (!run('setup', 'uv', ['run', 'python', 'scripts/precompute.py'], BACKEND, { TD_POWER_OFFLINE: '1' }).ok) {
   fail('Precompute failed. See the error above.')
 }

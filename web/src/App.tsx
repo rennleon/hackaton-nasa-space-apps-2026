@@ -2,24 +2,27 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient, defaultApiUrl } from './data'
 import type { DataClient } from './data/client'
 import { DataProvider, GlossaryProvider, ViewProvider, useView } from './context'
-import { useL } from './lib/findingsCopy'
-import { useT } from './i18n'
+import { lIn, useL } from './lib/findingsCopy'
+import { tIn, useLang, useT } from './i18n'
 import { Sources } from './screens/Sources'
 import { HowItWorks } from './screens/HowItWorks'
-import { useH } from './lib/howCopy'
+import { hIn, useH } from './lib/howCopy'
 import './App.css'
 import { parseHash, toHash, type Route } from './lib/route'
 import { useAsync } from './lib/useAsync'
 import { demoById, prepareDemo } from './lib/demos'
 import type { Catalog } from './types/catalog'
 import { ViewToggle } from './components/ViewToggle'
-import { LangToggle } from './components/LangToggle'
-import { ThemeToggle } from './components/ThemeToggle'
+import { HeaderMenu } from './components/HeaderMenu'
+import { Stable } from './components/Switch'
+import { BrandLogo } from './components/BrandLogo'
 import { Home } from './screens/Home'
 import { ThemePicker } from './screens/ThemePicker'
 import { Shortlist } from './screens/Shortlist'
 import { VariableView } from './screens/VariableView'
 import { DemoOverlay } from './screens/DemoOverlay'
+import { Notebook } from './screens/Notebook'
+import { useFinds } from './lib/myFinds'
 
 function useRoute(): [Route, (r: Route) => void] {
   const [route, setRoute] = useState<Route>(() => parseHash(window.location.hash))
@@ -47,6 +50,7 @@ export default function App({ client: injected }: { client?: DataClient }) {
   const cat = useAsync(() => loadCatalog(client), [client])
   const [route, go] = useRoute()
   const t = useT()
+  const lang = useLang()
   if (route.demo) prepareDemo(route.demo) // an example place shows its real name from the first screen
 
   return (
@@ -57,12 +61,13 @@ export default function App({ client: injected }: { client?: DataClient }) {
       <header className="topbar">
         <div className="topbar-in">
           <button type="button" className="brand" onClick={() => go({ screen: 'home' })}>
-            <span className="brand-logo" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z" /></svg>
+            <BrandLogo />
+            <span className="brand-name">
+              <Stable texts={[tIn('en', 'app.title', 'Trend Detective'), tIn('es', 'app.title', 'Trend Detective')]} active={lang === 'es' ? 1 : 0} lang={['en', 'es']} />
             </span>
-            {t('app.title', 'Earth System Trend Detective')}
           </button>
           <TopNav screen={route.screen} />
+          <HeaderMenu />
         </div>
       </header>
       <main id="main">
@@ -97,36 +102,90 @@ export default function App({ client: injected }: { client?: DataClient }) {
 }
 
 function TopNav({ screen }: { screen: Route['screen'] }) {
-  const l = useL()
-  const h = useH()
+  const { view } = useView()
+  const lang = useLang()
   const t = useT()
+  const active = lang === 'es' ? 1 : 0
+  // each link keeps the width of its longer language, so switching language never shifts the header
+  const how = <Stable texts={[hIn('en', 'how.link', view), hIn('es', 'how.link', view)]} active={active} lang={['en', 'es']} />
+  const sources = <Stable texts={[lIn('en', 'sources.link', view), lIn('es', 'sources.link', view)]} active={active} lang={['en', 'es']} />
   return (
     <nav className="topnav" aria-label={t('app.nav.label', 'Main')}>
-      <a className="topnav-link" href="#/how" aria-current={screen === 'how' ? 'page' : undefined}>
-        {h('how.link')}
-      </a>
-      <a className="topnav-link" href="#/sources" aria-current={screen === 'sources' ? 'page' : undefined}>
-        {l('sources.link')}
-      </a>
+      <div className="topnav-links">
+        <a className="topnav-link" href="#/how" aria-current={screen === 'how' ? 'page' : undefined}>
+          {how}
+        </a>
+        <a className="topnav-link" href="#/sources" aria-current={screen === 'sources' ? 'page' : undefined}>
+          {sources}
+        </a>
+        <NotebookLink screen={screen} />
+      </div>
       <ViewToggle />
-      <LangToggle />
-      <ThemeToggle />
     </nav>
   )
 }
 
+function NotebookLink({ screen }: { screen: Route['screen'] }) {
+  const t = useT()
+  const n = useFinds().length
+  return (
+    <a className="topnav-link" href="#/notebook" aria-current={screen === 'notebook' ? 'page' : undefined}>
+      {t('finds.nav', 'My notebook')}
+      {n > 0 && <span className="mono"> ({n})</span>}
+    </a>
+  )
+}
+
+const EXTERNAL = { target: '_blank', rel: 'noopener noreferrer' } as const
+
+/** Footer in four short columns (who we are, pages, NASA data, credits) and a bottom line with the challenge. */
 function Footer() {
   const { view } = useView()
   const l = useL()
   const h = useH()
+  const t = useT()
   return (
     <footer className="footer">
       <div className="footer-in">
-        <p>{l('common.footer')}</p>
-        <div className="footer-links">
-          <a href="#/how">{h('how.link')}</a>
-          <a href="#/sources">{l('sources.link')}</a>
-          {view === 'scientific' && <span className="mono">v{__APP_VERSION__}</span>}
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <p className="footer-name">
+              <BrandLogo size={30} />
+              {t('app.title', 'Trend Detective')}
+            </p>
+            <p className="footer-tagline">{t('footer.tagline', 'Earth trends, measured and tested')}</p>
+          </div>
+          <nav className="footer-col" aria-labelledby="footer-explore">
+            <h2 id="footer-explore" className="footer-head">{t('footer.explore', 'Explore')}</h2>
+            <ul>
+              <li><a href="#/how">{h('how.link')}</a></li>
+              <li><a href="#/sources">{l('sources.link')}</a></li>
+            </ul>
+          </nav>
+          <div className="footer-col">
+            <h2 className="footer-head">{t('footer.data', 'NASA data')}</h2>
+            <ul>
+              <li><a href="https://giovanni.gsfc.nasa.gov/" {...EXTERNAL}>NASA Giovanni (GES DISC)</a></li>
+              <li><a href="https://power.larc.nasa.gov/" {...EXTERNAL}>NASA POWER</a></li>
+              <li>{t('footer.data.kinds', 'Satellites and computer models')}</li>
+            </ul>
+          </div>
+          <div className="footer-col">
+            <h2 className="footer-head">{t('footer.credits', 'Credits')}</h2>
+            <ul>
+              <li>
+                {t('footer.credits.map', 'Map data ©')}{' '}
+                <a href="https://www.openstreetmap.org/copyright" {...EXTERNAL}>
+                  {t('footer.credits.osm', 'OpenStreetMap contributors')}
+                </a>
+              </li>
+              <li>{t('footer.credits.engine', 'Results worked out by our own analysis engine')}</li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>{t('footer.challenge', 'Made for the NASA Space Apps Challenge 2026')}</p>
+          {view === 'scientific' && <p className="mono">v{__APP_VERSION__}</p>}
         </div>
       </div>
     </footer>
@@ -147,6 +206,8 @@ function Screen({ route, go }: { route: Route; go: (r: Route) => void }) {
       return <HowItWorks />
     case 'sources':
       return <Sources />
+    case 'notebook':
+      return <Notebook go={go} />
     default:
       return <Home go={go} route={route} />
   }

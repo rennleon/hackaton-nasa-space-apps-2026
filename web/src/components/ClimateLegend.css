@@ -10,3 +10,4 @@
 @media (max-width: 720px) {
   .clim-scale li { font-size: 0.75rem; }
 }
+.clim-note { font-weight: 600; }

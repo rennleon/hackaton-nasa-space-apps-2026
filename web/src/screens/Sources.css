@@ -50,3 +50,7 @@
   .src-grid { grid-template-columns: 1fr; }
   .card.src-card { padding: 1.2rem; }
 }
+
+/* AI use and no-endorsement note */
+.src-ai { margin-top: 2.4rem; max-width: 70ch; }
+.src-ai ul { padding-left: 1.2rem; }

@@ -55,7 +55,8 @@ describe('Findings screen', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Cajamarca' })).toBeInTheDocument()
     expect(screen.getByText('Your place is high up and fairly dry.')).toBeInTheDocument()
     // results first
-    const cards = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
+    // card titles only: the method strip's step titles are level-3 headings too
+    const cards = within(container.querySelector('.fgrid') as HTMLElement).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
     // the first card is the first entry with a result in the saved scan (the order follows the data)
     const withResult = v2Scan().entries.filter((e) => (e.availability ?? 'available') === 'available' && e.shortlist_label !== 'cant_tell').map((e) => e.name.simple)
     expect(withResult).toContain(cards[0])
@@ -68,6 +69,8 @@ describe('Findings screen', () => {
     // the legend names each instrument once, with its kind, and links to the sources page
     const legend = container.querySelector('.legend')!
     expect(legend.querySelector('.legend-label')?.textContent).toMatch(/^Instruments.* in this list:$/)
+    expect(screen.getByRole('heading', { level: 2, name: /Instruments.* in this list:/ })).toBeInTheDocument()
+    legend.querySelectorAll('li a').forEach((a) => expect(a.querySelector('svg')).not.toBeNull())
     const names = [...legend.querySelectorAll('li')].map((li) => li.textContent)
     expect(names).toContain('AIRS (satellite)')
     expect(new Set(names).size).toBe(names.length)
@@ -96,11 +99,19 @@ describe('Findings screen', () => {
     expect(screen.getByRole('button', { name: 'Pick a different place' })).toBeInTheDocument()
     expect(container.querySelector('.theme-chip')?.textContent).toBe('Water')
     // facts: only what the scan carries, in kid words (climate, height, rainy months) plus the size of the box
-    const facts = container.querySelector('dl[aria-label="About this place"]')!
-    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
+    // the facts are chips in the header, right under the place name, each with a small picture
+    const facts = container.querySelector('.findings-head dl[aria-label="About this place"]')!
+    expect(facts.previousElementSibling?.tagName).toBe('H1')
+    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('.fact-v')!.textContent]))
     expect(shown).toMatchObject({ Climate: 'Mild', Height: 'High above the sea', 'Rainy months': 'January – April' })
     expect(shown.Area).toMatch(/^About [\d,]+ × [\d,]+ km$/)
-    expect(screen.getByText('All but the area come from a computer model estimate.')).toBeInTheDocument()
+    facts.querySelectorAll('.fact dt').forEach((dt) => expect(dt.querySelector('svg')).not.toBeNull())
+    // model facts still say "computer model estimate" (tooltip and screen reader); the measured area does not
+    const climate = facts.querySelector('.fact-climate')!
+    expect(climate.getAttribute('title')).toBe('Climate: Mild (computer model estimate)')
+    expect(climate.querySelector('dd')!.textContent).toBe('Mild (computer model estimate)')
+    expect(facts.querySelector('.fact-area')!.textContent).not.toMatch(/model/)
+    expect(container.textContent).not.toContain('All but the area')
     // a tile per certainty level that is present: number plus icon plus words
     const tiles = [...container.querySelectorAll('.summary-tiles li')]
     expect(tiles.length).toBeGreaterThan(0)
@@ -110,7 +121,9 @@ describe('Findings screen', () => {
     })
     // the method strip sits after the summary, and the years of data are a visible card (not collapsed)
     expect(screen.getByRole('heading', { level: 2, name: 'How we worked this out' })).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: /Get the data/ })[0]).toHaveAttribute('href', '#/how?stage=get')
+    // its four stages open a floating list of steps instead of linking away
+    expect(container.querySelector('.howstrip summary')).toHaveTextContent('Get the data')
+    expect(container.querySelector('.howstrip-stage a')).toBeNull()
     expect(container.querySelector('details.coverage')).toBeNull()
     expect(container.querySelector('.timeline')).not.toBeNull()
     // the form row keeps its instant apply: a year typed changes the route, no Update button
@@ -131,7 +144,7 @@ describe('Findings screen', () => {
     const { container } = open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => mixedRich })
     await screen.findByText(/\d of \d measurements? shows? a clear change\./)
     const facts = container.querySelector('dl[aria-label="About this place"]')!
-    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('dd')!.textContent]))
+    const shown = Object.fromEntries([...facts.querySelectorAll('.fact')].map((f) => [f.querySelector('dt')!.textContent, f.querySelector('.fact-v')!.textContent]))
     expect(shown.Climate).toBe('Mixed')
     expect(shown).not.toHaveProperty('Height')
     expect(shown).not.toHaveProperty('Rainy months')
@@ -257,14 +270,25 @@ describe('Findings screen', () => {
     // significant on its own, but not after correcting for the many variables scanned
     const scan: ScanResult = {
       ...s,
-      entries: s.entries.map((e) => (e === target ? { ...e, verdict_label: 'significant' as const, shortlist_label: 'possibly_changing' as const } : { ...e, shortlist_label: 'no_detectable_change' as const, verdict_label: 'no_detectable_change' as const })),
+      entries: s.entries.map((e) =>
+        e === target
+          ? { ...e, verdict_label: 'significant' as const, shortlist_label: 'possibly_changing' as const, yearly_series: [...target.yearly_series!, { year: 2015, anomaly: 1, in_window: false }] }
+          : { ...e, shortlist_label: 'no_detectable_change' as const, verdict_label: 'no_detectable_change' as const },
+      ),
     }
     const total = splitEntries(scan.entries).available.length
     open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => scan })
     const card = (await screen.findByRole('button', { name: 'Open Afternoon humidity' })).closest('li')!
     expect(within(card).getByText('Maybe, not sure yet')).toBeInTheDocument()
     expect(within(card).queryByText("Sure it's real")).toBeNull()
-    expect(within(card).getByText('Years used here: 2003 to 2014')).toBeInTheDocument()
+    // the card's years live in the chart's label and the key's tooltip, not in a line under every chart
+    expect(within(card).getByRole('img', { name: 'One dot for each year, 2003 to 2015. Full dots are the years used here, 2003 to 2014. Empty dots are left out.' })).toBeInTheDocument()
+    expect(card.querySelector('.fcard-key')?.getAttribute('title')).toBe('Years used here: 2003 to 2014')
+    expect(card.querySelector('.fcard-key')?.textContent).toBe('years usedleft out')
+    // direction: the arrow only, named for screen readers and in the tooltip, never as visible words
+    const arrow = within(card).getByRole('img', { name: /^Heading (up|down)$/ })
+    expect(arrow.closest('.fcard-dir')?.getAttribute('title')).toBe(arrow.getAttribute('aria-label'))
+    expect(within(card).queryByText(/^Heading (up|down)$/)).toBeNull()
     expect(screen.getByText(`We can't see a clear change yet. We looked at ${total} measurements.`)).toBeInTheDocument()
   })
 
@@ -272,9 +296,24 @@ describe('Findings screen', () => {
     const user = userEvent.setup()
     open('#/shortlist?region=cajamarca_west&theme=water')
     await screen.findByText(/shows? a clear change/)
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     await waitFor(() => expect(document.querySelector('.source-compact')?.textContent).toMatch(/^Instrument: \S.+\((Aqua satellite|Terra satellite|satellites?|computer model)\)$/))
     expect(screen.getAllByText(/adj\. p = /).length).toBeGreaterThan(0)
+  })
+
+  it('each card shows its reason line (R1) in both views, and none when the reason is empty', async () => {
+    const user = userEvent.setup()
+    const s = scanFile('cajamarca_west', 'water')
+    const why = { simple: 'Scientists expect this to change here.', scientific: 'Expected change: cited regional study.' }
+    const scan: ScanResult = { ...s, entries: s.entries.map((e) => (e.variable_id === 'airs_rh_surf_day' ? { ...e, why } : e.variable_id === 'airs_rh_surf_night' ? { ...e, why: { simple: '', scientific: '' } } : e)) }
+    open('#/shortlist?region=cajamarca_west&theme=water', { ...base, scan: async () => scan })
+    const cardOf = async (name: string) => (await screen.findByRole('button', { name: `Open ${name}` })).closest('li')!
+    const day = await cardOf('Afternoon humidity')
+    expect(day.querySelector('.fcard-why')?.textContent).toBe('Why look at this: Scientists expect this to change here.')
+    const night = s.entries.find((e) => e.variable_id === 'airs_rh_surf_night')!
+    expect((await cardOf(night.name.simple)).querySelector('.fcard-why')).toBeNull()
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
+    await waitFor(() => expect(document.querySelector('[data-demo="finding-airs_rh_surf_day"] .fcard-why')?.textContent).toBe('Rationale: Expected change: cited regional study.'))
   })
 })
 
@@ -324,7 +363,7 @@ describe('Where our data comes from', () => {
     const user = userEvent.setup()
     open('#/sources')
     await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     const airs = screen.getByRole('heading', { level: 3, name: 'AIRS' }).closest('li')!
     expect(within(airs).getByRole('link', { name: /Surface relative humidity \(daytime/ })).toBeInTheDocument()
   })

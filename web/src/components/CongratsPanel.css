@@ -1,0 +1,45 @@
+/* "You found a real change!" panel, share buttons and the notebook list. Colour is never the only signal: star icon + words. */
+.congrats { position: relative; overflow: hidden; margin-top: 1.2rem; border: 2px solid var(--v-sure-fill); background: var(--v-sure-bg); }
+.congrats-top { position: relative; display: flex; align-items: center; gap: 0.9rem; }
+.congrats-top h3 { margin: 0; color: var(--v-sure); }
+.congrats-body { margin: 0.2rem 0 0; }
+.congrats-medal { flex: none; display: inline-grid; place-items: center; width: 3.4rem; height: 3.4rem; border-radius: 50%; background: var(--v-sure-fill); color: var(--accent-text); animation: congrats-pop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.congrats-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; margin-top: 0.9rem; }
+.congrats-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-pill); background: var(--surface); border: 1px solid var(--hairline); color: var(--text); font-size: 0.9rem; font-weight: 600; text-decoration: none; }
+.congrats-badge:hover { border-color: var(--accent); color: var(--accent); }
+
+.share { position: relative; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px dashed var(--border); }
+.share-title { margin: 0 0 0.5rem; font-weight: 700; }
+.share-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.share-status { font-weight: 600; color: var(--v-sure); min-height: 1.2em; }
+.share-forum { margin: 0.7rem 0 0; color: var(--text-2); font-size: 0.95rem; }
+
+/* CSS-only confetti: shapes differ (square, round, bar, diamond), so it never relies on colour */
+.confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.confetti-bit { position: absolute; top: -12px; width: 9px; height: 9px; opacity: 0; animation: confetti-fall 2.4s ease-in 1 both; background: var(--v-sure-fill); }
+.confetti-0 { background: var(--v-sure-fill); }
+.confetti-1 { background: var(--v-maybe-fill); border-radius: 50%; }
+.confetti-2 { background: var(--trend); width: 4px; height: 13px; }
+.confetti-3 { background: var(--accent); transform: rotate(45deg); }
+
+@keyframes confetti-fall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(220px) rotate(300deg); }
+}
+@keyframes congrats-pop {
+  0% { transform: scale(0.3) rotate(-30deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
+  .congrats-medal { animation: none; }
+}
+
+/* My detective notebook */
+.notebook .lead { max-width: 60ch; }
+.notebook-list { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: 1rem; }
+.find-item h2 { font-size: 1.25rem; margin: 0; }
+.find-meta { margin: 0.3rem 0; color: var(--text-2); }
+.find-sure { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px; border-radius: var(--radius-pill); background: var(--v-sure-bg); color: var(--v-sure); font-weight: 700; font-size: 0.9rem; }
+.find-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.8rem; }
+.notebook-empty { text-align: center; padding: 2rem 1rem; }

@@ -11,11 +11,13 @@ from functools import lru_cache
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 
 from . import ENGINE_VERSION
 from .catalog import Geometry, RegionCard
 from .contract import AnalysisResult, ScanResult, Text
 from .engine import EngineContext, analyze
+from .guide import guide as run_guide
 from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client, limit_map
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
@@ -25,7 +27,7 @@ app = FastAPI(title="Earth System Trend Detective API", version=ENGINE_VERSION)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in (os.environ.get("TD_ALLOWED_ORIGINS") or "*").split(",") if o.strip()],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -164,9 +166,9 @@ def custom_region(kind: str, c: tuple[float, ...]) -> RegionCard:
                     simple_es="Tu lugar", scientific_es=f"Punto {lat:.2f}, {lon:.2f}")
         desc = Text(
             simple="A spot you picked on the map.",
-            scientific=f"User-chosen point at latitude {lat:.2f}, longitude {lon:.2f} (NASA POWER grid cell).",
+            scientific=f"User-chosen point at latitude {lat:.2f}, longitude {lon:.2f}; each variable uses the grid cell of its own source that contains it.",
             simple_es="Un lugar que elegiste en el mapa.",
-            scientific_es=f"Punto elegido por el usuario en latitud {lat:.2f}, longitud {lon:.2f} (celda de la rejilla de NASA POWER).",
+            scientific_es=f"Punto elegido por el usuario en latitud {lat:.2f}, longitud {lon:.2f}; cada variable usa la celda de la rejilla de su propia fuente que lo contiene.",
         )
         geom = Geometry(kind="point", bbox=[lon, lat, lon, lat])
     else:
@@ -176,10 +178,10 @@ def custom_region(kind: str, c: tuple[float, ...]) -> RegionCard:
                     simple_es="Tu lugar", scientific_es=f"Caja personalizada {w:.2f} a {e:.2f} E, {s:.2f} a {n:.2f} N")
         desc = Text(
             simple="A box you picked on the map.",
-            scientific=f"User-chosen box, west {w:.2f}, south {s:.2f}, east {e:.2f}, north {n:.2f}; area mean of NASA POWER grid points.",
+            scientific=f"User-chosen box, west {w:.2f}, south {s:.2f}, east {e:.2f}, north {n:.2f}; each variable is the area mean of its own source's grid cells in the box.",
             simple_es="Una zona que elegiste en el mapa.",
             scientific_es=f"Caja elegida por el usuario: oeste {w:.2f}, sur {s:.2f}, este {e:.2f}, norte {n:.2f}; "
-                          "media de área de los puntos de la rejilla de NASA POWER.",
+                          "cada variable es la media de área de las celdas de la rejilla de su propia fuente dentro de la caja.",
         )
         geom = Geometry(kind="bbox", bbox=list(c))
     return RegionCard(id=rid, name=name, description=desc, regime="user-defined", geometry=geom, listed=False)
@@ -268,3 +270,24 @@ def custom_result(
         raise HTTPException(404, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+class GuideRequest(BaseModel):
+    text: str = Field(max_length=2000)
+    lang: str = "en"
+
+
+class GuideResponse(BaseModel):
+    theme: str | None
+    variables: list[str]
+    place_hint: str | None
+    reason: str
+    source: str  # always "keywords"
+
+
+@app.post("/guide", response_model=GuideResponse, dependencies=[Depends(limit_client)])
+def guide_route(body: GuideRequest) -> GuideResponse:
+    """The detective guide: typed words -> the best question and its variables (deterministic keywords)."""
+    if not body.text.strip():
+        raise HTTPException(400, "text is empty")
+    return GuideResponse(**run_guide(body.text, body.lang, ctx().catalog))

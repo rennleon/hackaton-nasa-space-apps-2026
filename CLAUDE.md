@@ -102,6 +102,14 @@ The Scientific view keeps the full numbers. Every claim on screen must exist in 
     "Where else?" strip (same variable's verdict across the ready-made places). Trend map stays parked.
   - Spanish as a second UI language (EN/ES toggle, English default; submission materials stay in English).
   - Progress and resources for live data: `docs/data-integration-tracker.md`.
+- User decisions (Nov 15, v4):
+  - No deployment for the submission: the GitHub repo link plus a demo video is enough (replaces the public-link
+    part of R6).
+  - No LLM in the app (tried Claude for "ask the detective" and suggested questions, removed the same night). The
+    step-2 text box is a keyword matcher over the catalog; "AI variable suggestions" stays in the parking lot.
+  - Gamification: congratulations on "Sure it's real" and a detective notebook kept in the browser only. No
+    server storage of finds. Sharing is a copied report / JSON and a link to the Earthdata Forum; never auto-post
+    or "notify NASA" (no intake API exists for this).
 - Known breaks (Nov 15): when the window crosses any flagged break (frozen model emissions, model input changes,
   OMI row anomaly, MODIS orbit drift), "Sure it's real" drops to "Maybe, not sure yet". The record is still kept.
 - Releases (Nov 15): v2.0.0 (PR #2) and v2.1.0 (PRs #3 and #4, the v3 work and UI redesign) are on `main`
