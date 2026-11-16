@@ -109,7 +109,7 @@ describe('Sources: AI use', () => {
     open('#/sources')
     expect(await screen.findByRole('heading', { name: 'How we used AI' })).toBeInTheDocument()
     expect(screen.getByText(/Claude Code by Anthropic/)).toBeInTheDocument()
-    expect(screen.getByText(/uses the Claude API/)).toBeInTheDocument()
+    expect(screen.getByText('The app itself uses no AI.')).toBeInTheDocument()
     expect(screen.getByText('This is a NASA Space Apps Challenge project. It is not endorsed by NASA.')).toBeInTheDocument()
     await act(async () => setLang('es'))
     expect(await screen.findByRole('heading', { name: 'Cómo usamos la IA' })).toBeInTheDocument()

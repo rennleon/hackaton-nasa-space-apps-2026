@@ -13,18 +13,6 @@ export interface AnalyzeOptions {
 /** An AnalysisResult, optionally flagged when the requested custom period could not be served. */
 export type AnalysisOutcome = AnalysisResult & { customPeriodUnavailable?: boolean }
 
-/** Questions an AI helper suggests for a place: catalog theme ids, each with a short reason. `none` = no suggestions (no key, or no live API). */
-export interface SuggestRequest {
-  /** the place's display name; null for an unnamed map pin */
-  place: string | null
-  lat: number | null
-  lon: number | null
-}
-export interface SuggestAnswer {
-  suggestions: { theme: string; why: string | null }[]
-  source: 'llm' | 'none'
-}
-
 export interface DataClient {
   /** False when no live API is configured, so custom places cannot work. Missing means true. */
   readonly customPlaces?: boolean
@@ -44,8 +32,6 @@ export interface DataClient {
   climatology?(param: ClimateParam, bbox: Bbox): Promise<ClimateGrid>
   /** The detective guide: typed words -> the best question and its variables. Optional so a test fake still type-checks. */
   guide?(text: string, lang: string): Promise<GuideAnswer>
-  /** Up to three catalog questions that fit the kind of place. Optional so a test fake still type-checks. */
-  suggest?(req: SuggestRequest, lang: string): Promise<SuggestAnswer>
 }
 
 /** The live API cannot be reached (or is not configured), so a custom place cannot be served. */

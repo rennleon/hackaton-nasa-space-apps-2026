@@ -96,9 +96,6 @@ export function GuideBox({ onAsk }: Props) {
                 </div>
               </>
             )}
-            <p className="guide-source muted small">
-              {answer.source === 'llm' ? s('guide.source.llm', 'Suggested by an AI helper (Claude)') : s('guide.source.keywords', 'Matched by keywords')}
-            </p>
           </>
         )}
       </div>
