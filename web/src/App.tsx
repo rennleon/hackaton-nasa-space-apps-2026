@@ -20,6 +20,8 @@ import { ThemePicker } from './screens/ThemePicker'
 import { Shortlist } from './screens/Shortlist'
 import { VariableView } from './screens/VariableView'
 import { DemoOverlay } from './screens/DemoOverlay'
+import { Notebook } from './screens/Notebook'
+import { useFinds } from './lib/myFinds'
 
 function useRoute(): [Route, (r: Route) => void] {
   const [route, setRoute] = useState<Route>(() => parseHash(window.location.hash))
@@ -108,10 +110,22 @@ function TopNav({ screen }: { screen: Route['screen'] }) {
       <a className="topnav-link" href="#/sources" aria-current={screen === 'sources' ? 'page' : undefined}>
         {l('sources.link')}
       </a>
+      <NotebookLink screen={screen} />
       <ViewToggle />
       <LangToggle />
       <ThemeToggle />
     </nav>
+  )
+}
+
+function NotebookLink({ screen }: { screen: Route['screen'] }) {
+  const t = useT()
+  const n = useFinds().length
+  return (
+    <a className="topnav-link" href="#/notebook" aria-current={screen === 'notebook' ? 'page' : undefined}>
+      {t('finds.nav', 'My notebook')}
+      {n > 0 && <span className="mono"> ({n})</span>}
+    </a>
   )
 }
 
@@ -147,6 +161,8 @@ function Screen({ route, go }: { route: Route; go: (r: Route) => void }) {
       return <HowItWorks />
     case 'sources':
       return <Sources />
+    case 'notebook':
+      return <Notebook go={go} />
     default:
       return <Home go={go} route={route} />
   }

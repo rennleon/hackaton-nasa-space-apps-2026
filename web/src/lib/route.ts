@@ -1,4 +1,4 @@
-export type Screen = 'home' | 'theme' | 'shortlist' | 'variable' | 'sources' | 'how'
+export type Screen = 'home' | 'theme' | 'shortlist' | 'variable' | 'sources' | 'how' | 'notebook'
 
 export interface Route {
   screen: Screen
@@ -17,7 +17,7 @@ export interface Route {
   step?: number
 }
 
-const SCREENS: Screen[] = ['home', 'theme', 'shortlist', 'variable', 'sources', 'how']
+const SCREENS: Screen[] = ['home', 'theme', 'shortlist', 'variable', 'sources', 'how', 'notebook']
 const KEYS = ['region', 'place', 'theme', 'variable', 'season', 'start', 'end', 'demo', 'stage'] as const
 
 export function parseHash(hash: string): Route {

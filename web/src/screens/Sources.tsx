@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useData, useView } from '../context'
-import { tx } from '../i18n'
+import { tx, useT } from '../i18n'
 import { Term } from '../components/Term'
 import { INSTRUMENTS, type Instrument } from '../lib/instruments'
 import { useL, type FKey } from '../lib/findingsCopy'
@@ -184,6 +184,25 @@ export function Sources() {
       )}
       {group('src-model', 'model', <ModelIcon />, s('sp.modelTitle'), models)}
       {group('src-off', 'off', <BoxIcon />, s('sp.notUsedTitle'), notUsed, undefined, s('sp.notUsedWhy'))}
+      <AiUse />
     </div>
+  )
+}
+
+/** How AI was used (submission disclosure) and the "no endorsement" line. Same words in both views. */
+function AiUse() {
+  const t = useT()
+  return (
+    <section className="src-section src-ai" aria-labelledby="src-ai-h">
+      <h2 id="src-ai-h">{t('sources.ai.title', 'How we used AI')}</h2>
+      <ul>
+        <li>{t('sources.ai.coding', 'AI coding assistants (Claude Code by Anthropic) helped us write code and text.')}</li>
+        <li>{t('sources.ai.helper', 'An optional helper in the app uses the Claude API. It suggests which variables fit a question you type.')}</li>
+        <li>{t('sources.ai.never', 'The helper never works out results and never changes them.')}</li>
+        <li>{t('sources.ai.numbers', 'All numbers come from NASA data and our own statistics code.')}</li>
+      </ul>
+      <h2 id="src-noend-h">{t('sources.ai.noEndTitle', 'No endorsement')}</h2>
+      <p>{t('sources.ai.noEnd', 'This is a NASA Space Apps Challenge project. It is not endorsed by NASA.')}</p>
+    </section>
   )
 }
