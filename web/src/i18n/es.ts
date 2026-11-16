@@ -917,7 +917,7 @@ const es: Record<string, string> = {
   'start.clim.avg': 'promedio de muchos años',
   'start.clim.loading.simple': 'Buscando los colores…',
   'start.clim.loading.scientific': 'Cargando la climatología…',
-  'start.clim.none.simple': 'Por ahora no tenemos colores para este lugar.',
+  'start.clim.none.simple': 'Aquí no hay colores sin internet. Elige un lugar ya preparado.',
   'start.clim.none.scientific': 'No hay climatología para esta vista (sin conexión, o fuera de los lugares precalculados).',
   'start.clim.span.simple': 'En este mapa: de {lo} a {hi}.',
   'start.clim.span.scientific': 'Valores en esta vista: de {lo} a {hi}{unit}.',
@@ -957,5 +957,9 @@ const es: Record<string, string> = {
   'result.yours.differ.sci': 'Las dos ventanas dan distinta certeza.',
   'result.yours.warn.simple': 'Elegir años después de mirar puede engañarnos. Confía más en todos los años.',
   'result.yours.warn.sci': 'Elegir una ventana después de ver los datos aumenta los falsos positivos (sensibilidad al año de inicio y de fin; Liebmann et al. 2010, doi:10.1175/2010BAMS3030.1). La ventana declarada es la referencia; mira el panel de años de inicio para ver cada año de inicio.',
+
+  // Map colours follow the pin and the view (place-chooser hints)
+  'start.clim.far': 'Acércate para ver los colores.',
+  'start.clim.partial': 'Los colores solo se ven cerca del centro del mapa. Acércate para ver más.',
 }
 export default es

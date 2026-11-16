@@ -25,6 +25,20 @@ function Fit({ bounds, enabled }: { bounds: LatLngBoundsExpression; enabled: boo
   return null
 }
 
+/** Flies to a patch of about 8 degrees around `target.center` [lat, lon] each time `target.token` changes. */
+function FlyTo({ target }: { target: { center: [number, number]; token: number } | null | undefined }) {
+  const map = useMap()
+  const token = target?.token
+  useEffect(() => {
+    if (!target) return
+    const [lat, lon] = target.center
+    map.flyToBounds([[lat - 4, lon - 4], [lat + 4, lon + 4]], { duration: 0.8 })
+    // only a new token flies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, token])
+  return null
+}
+
 function Clicks({ onClick }: { onClick: (lat: number, lon: number) => void }) {
   useMapEvents({ click: (e) => onClick(e.latlng.lat, e.latlng.lng) })
   return null
@@ -60,12 +74,14 @@ interface Props {
   autoFit?: boolean
   /** called with the visible [W,S,E,N] on load and after every pan or zoom */
   onViewChange?: (view: Bbox) => void
+  /** fly the map to a patch around this [lat, lon] whenever `token` changes */
+  flyTo?: { center: [number, number]; token: number } | null
   /** extra map layers (drawn under the chosen place and the regions) */
   children?: ReactNode
 }
 
 /** Leaflet map with each region drawn as a rectangle. Region lists next to it give the keyboard route. */
-export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending, autoFit, onViewChange, children }: Props) {
+export function RegionMap({ regions, selectedId, onSelect, visibleIds, className, onMapClick, draft, pending, autoFit, onViewChange, flyTo, children }: Props) {
   const { t } = useView()
   const tt = useT()
   const shown = visibleIds ? regions.filter((r) => visibleIds.includes(r.id)) : regions
@@ -77,6 +93,7 @@ export function RegionMap({ regions, selectedId, onSelect, visibleIds, className
       <MapContainer bounds={bounds} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }} aria-label={tt('map.aria', 'Map of regions')}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Fit bounds={bounds} enabled={autoFit !== false} />
+        <FlyTo target={flyTo} />
         {onMapClick && <Clicks onClick={onMapClick} />}
         {onViewChange && <ViewWatcher onChange={onViewChange} />}
         {children}

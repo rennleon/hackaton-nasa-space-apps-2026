@@ -30,7 +30,7 @@ describe('ClimateCells on the real map', () => {
       </ViewProvider>,
     )
     const fills = [...container.querySelectorAll('path.leaflet-interactive')].map((p) => p.getAttribute('fill'))
-    expect(fills).toEqual(['#eff3ff', '#08519c', '#6baed6'])
+    expect(fills).toEqual(['#dde8f8', '#08519c', '#6baed6'])
     expect(onViewChange).toHaveBeenCalled()
     expect(onViewChange.mock.calls[0][0]).toHaveLength(4)
   })
