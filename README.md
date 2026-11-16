@@ -24,19 +24,16 @@ Every answer comes in a **Simple** view a 9-year-old can read and a **Scientific
 Also: two guided demos to watch, a kid-word dictionary for every term, *"Too soon to tell, we'd know in about N
 more years"* instead of "no change", and **"Where else?"** to see the same variable trend differently by region.
 
-## The pipeline
+## The pipeline: 16 steps in 4 stages
 
-```mermaid
-flowchart LR
-    A["📍 Place<br/>ready-made, map, search, coordinates"] --> B["❓ Question<br/>heat · water · air"]
-    B --> C["🛰️ Select variables<br/>before any trend:<br/>coverage, length, breaks,<br/>minimum detectable trend"]
-    C --> D["📥 Get NASA data<br/>Giovanni · POWER<br/>(saved results offline)"]
-    D --> E["🧹 Prepare<br/>monthly values,<br/>area-weighted box mean,<br/>remove seasonal cycle"]
-    E --> F["📈 Trend<br/>Sen's slope per 10 years<br/>+ 95% range"]
-    F --> G["🧪 Test<br/>Mann–Kendall (Hamed–Rao)<br/>+ t-test (n_eff)<br/>both must agree"]
-    G --> H["🔍 Check<br/>leave-one-year-out, start years,<br/>second source, known breaks"]
-    H --> I["💬 Explain<br/>Simple + Scientific,<br/>EN / ES"]
-```
+![Four stages: get the data, clean it, find the trend, check and explain](docs/images/7-how-stages.jpg)
+
+![The 16 steps from your question to the answer, as shown on the app's How it works page](docs/images/8-how-journey.jpg)
+
+In science terms: monthly NASA series → area-weighted box mean → seasonal cycle removed → **Sen's slope** per 10
+years with a Hamed–Rao 95% range → **Mann–Kendall (Hamed–Rao)** and **OLS t-test with effective sample size** must
+both agree at α = 0.05 → robustness checks (leave one year out, other start years, second source, known breaks).
+The same path is in the app at *How it works*.
 
 ## See it
 
