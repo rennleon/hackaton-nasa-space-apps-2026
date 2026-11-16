@@ -67,7 +67,7 @@ def test_keyword_reason_language_and_no_ids():
     en = g.keyword_guide("more smoke", "en", CAT)["reason"]
     es = g.keyword_guide("más humo", "es", CAT)["reason"]
     assert "Smoke" in en or "smoke" in en.lower()
-    assert "Pick a place" in en and "Elige un lugar" in es
+    assert "Open it" in en and "Ábrela" in es
 
 
 def test_place_hint():

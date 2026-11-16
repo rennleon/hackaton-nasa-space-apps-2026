@@ -38,8 +38,8 @@ describe('keywordGuide', () => {
   })
 
   it('writes the reason in Spanish for es', () => {
-    expect(keywordGuide('más humo', 'es', cat).reason).toContain('Elige un lugar')
-    expect(keywordGuide('more smoke', 'en', cat).reason).toContain('Pick a place')
+    expect(keywordGuide('más humo', 'es', cat).reason).toContain('Ábrela')
+    expect(keywordGuide('more smoke', 'en', cat).reason).toContain('Open it')
   })
 
   it('finds a typed place name, never coordinates', () => {

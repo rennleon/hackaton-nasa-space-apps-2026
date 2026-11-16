@@ -179,8 +179,8 @@ def _themes_score(text: str, catalog: Catalog, weights: dict[str, float]) -> dic
 def _reason(theme_id: str, catalog: Catalog, lang: str) -> str:
     name = _plain(catalog.themes[theme_id].name, lang)
     if lang == "es":
-        return f"Tus palabras encajan con «{name}». Elige un lugar y lo miramos."
-    return f"Your words match “{name}”. Pick a place and we will look."
+        return f"Tus palabras encajan con «{name}». Ábrela y miramos los datos."
+    return f"Your words match “{name}”. Open it and we will check the data."
 
 
 NO_MATCH = {

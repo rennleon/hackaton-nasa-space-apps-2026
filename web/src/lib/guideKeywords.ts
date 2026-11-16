@@ -121,8 +121,8 @@ export const NO_MATCH = {
 
 export function matchReason(themeName: string, lang: string): string {
   return lang === 'es'
-    ? `Tus palabras encajan con «${themeName}». Elige un lugar y lo miramos.`
-    : `Your words match “${themeName}”. Pick a place and we will look.`
+    ? `Tus palabras encajan con «${themeName}». Ábrela y miramos los datos.`
+    : `Your words match “${themeName}”. Open it and we will check the data.`
 }
 
 export function keywordGuide(rawText: string, lang: string, cat: GuideCatalog): GuideAnswer {
