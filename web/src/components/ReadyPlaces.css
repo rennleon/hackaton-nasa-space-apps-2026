@@ -1,11 +1,22 @@
 .ready { display: grid; gap: 0.9rem; }
 .ready-intro { margin: 0; color: var(--muted); font-size: 0.9rem; }
-.ready-row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); gap: 0.8rem; }
+/* six cards: 3 columns x 2 rows; 2 columns on tablets, 1 on phones */
+.ready-row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 900px) { .ready-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .ready-row { grid-template-columns: minmax(0, 1fr); } }
 .ready-card { display: flex; }
-.ready-card > button { flex: 1; min-width: 0; min-height: 44px; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 1.1rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; transition: border-color 0.15s, box-shadow 0.15s; }
-.ready-card > button:hover:not(:disabled) { border-color: var(--accent); }
+.ready-card > button { flex: 1; min-width: 0; min-height: 44px; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 1.1rem 1.2rem 1rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.55rem; align-items: stretch; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+.ready-card > button:hover:not(:disabled) { border-color: var(--accent); box-shadow: 0 6px 18px rgb(0 0 0 / 0.08); transform: translateY(-2px); }
 .ready-card > button:disabled { opacity: 0.55; cursor: not-allowed; }
 .ready-card.is-selected > button { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-.ready-tag { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+/* icon tile with the category badge beside it */
+.ready-top { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.2rem; min-width: 0; }
+.ready-tag { min-width: 0; padding: 0.3rem 0.65rem; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; line-height: 1.25; }
 .ready-name { font-family: var(--font-head); font-size: 1.15rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
-.ready-caption { font-size: 0.875rem; color: var(--muted); }
+/* long scientific captions are clamped so the cards line up; the full text stays in the DOM and in the tooltip */
+.ready-caption { font-size: 0.875rem; color: var(--muted); line-height: 1.45; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+/* footer pinned to the bottom: data source + arrow */
+.ready-foot { margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--hairline); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.78rem; font-weight: 600; color: var(--text-2); }
+.ready-go { flex: none; color: var(--accent); transition: transform 0.15s; }
+.ready-card > button:hover:not(:disabled) .ready-go { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) { .ready-card > button:hover:not(:disabled) { transform: none; } }

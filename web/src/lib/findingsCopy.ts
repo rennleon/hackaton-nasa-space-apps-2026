@@ -2,7 +2,7 @@
 // Every entry has a Simple wording (for a primary-school child, R5) and a Scientific one. Components read them
 // with useL(), which routes through the i18n helper under the key `<entry key>` (same words in both views) or `<entry key>.<view>`, so Spanish can be added
 // in i18n/es.ts without touching a component. findingsCopy.test.ts bans technical words in the Simple strings.
-import { useT } from '../i18n'
+import { tIn, useT, type Lang } from '../i18n'
 import { useView } from '../context'
 
 export interface Pair {
@@ -29,7 +29,7 @@ export const FC = {
   'findings.facts.cards': p('Measurements'),
   'findings.facts.highUp': p('High above the sea', 'High up'),
   'findings.facts.elev': p('{m} m', '{m} m (model grid)'),
-  'findings.facts.model': p('All but the area come from a computer model estimate.', 'All but the area: model climatology (NASA POWER, MERRA-2 based).'),
+  'findings.facts.modelTag': p('computer model estimate', 'model climatology, NASA POWER, MERRA-2 based'),
   'findings.climate.tropical': p('Warm all year', 'Tropical'),
   'findings.climate.dry': p('Dry'),
   'findings.climate.temperate': p('Mild', 'Temperate'),
@@ -84,6 +84,7 @@ export const FC = {
   // cards
   'findings.open': p('Open {name}', 'Open {name}'),
   'findings.hardToSpot': p('Hard to spot with this record', 'Low detectability with this record'),
+  'findings.why': p('Why look at this', 'Rationale'),
   'findings.secondOpinion': p('Second opinion'),
   'findings.second.agree': p('Two instruments agree', 'Instruments agree (same direction, both significant)'),
   'findings.second.same_direction_one_unsure': p('Same direction, one not sure yet', 'Same direction, only one significant'),
@@ -95,6 +96,13 @@ export const FC = {
   'findings.heading.flat': p('Staying level', 'Flat'),
   'findings.spark': p('One dot for each year, {from} to {to}.', 'Yearly de-seasonalised means, {from} to {to}.'),
   'findings.cardYears': p('Years used here: {from} to {to}', 'Window {from}–{to} (shared across the scan)'),
+  // the chart's label when some dots are left out: the card's own years live here (and in the summary), not in a line under every chart
+  'findings.sparkUsed': p(
+    'One dot for each year, {from} to {to}. Full dots are the years used here, {ufrom} to {uto}. Empty dots are left out.',
+    'Yearly de-seasonalised means, {from} to {to}. Filled: shared window {ufrom}–{uto}. Hollow: outside the window.',
+  ),
+  'findings.key.used': p('years used', 'in window'),
+  'findings.key.out': p('left out', 'outside window'),
   'findings.adjP': p('adj. p = {p}'),
   // verdict chip
   'findings.chip.too_soon': p('Too soon to tell', 'Not detectable yet'),
@@ -145,9 +153,6 @@ export const FC = {
   'sources.kind.satellite': p('Satellite', 'Satellite instrument'),
   'sources.kind.model': p('Computer model', 'Model / reanalysis'),
   'sources.viaPower': p('via NASA POWER'),
-  'common.footer': p(
-    'Map data © OpenStreetMap contributors. Data: NASA satellites and models, via NASA Giovanni (GES DISC) and NASA POWER. Results computed by our analysis engine.',
-  ),
 } as const satisfies Record<string, Pair>
 
 export type FKey = keyof typeof FC
@@ -161,4 +166,10 @@ export function useL() {
     const pair: Pair = FC[key]
     return t(pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view], vars)
   }
+}
+
+/** One label in a given language and view (the header reserves the width of both languages). */
+export function lIn(lang: Lang, key: FKey, view: 'simple' | 'scientific'): string {
+  const pair: Pair = FC[key]
+  return tIn(lang, pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view])
 }

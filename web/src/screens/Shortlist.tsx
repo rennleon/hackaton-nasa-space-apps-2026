@@ -96,6 +96,7 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
         <div className="findings-title">
           <p className="eyebrow">{l('findings.eyebrow')}</p>
           <h1 id="res-h">{placeName}</h1>
+          <PlaceFacts profile={data?.place} bbox={region.geometry.bbox} area={place?.kind === 'point' ? 'pin' : region.geometry.kind === 'shape' ? 'shape' : 'box'} />
           {parentTheme && theme && (
             <p className="muted small findings-crumb">
               {tx(parentTheme.name, view)} <span aria-hidden="true">›</span> {tx(theme.name, view)}
@@ -113,7 +114,6 @@ export function Shortlist({ route, go }: { route: Route; go: (r: Route) => void 
           {placeText && <p className="muted place-text">{placeText}</p>}
           <HomogeneityPanel homogeneity={data?.place?.homogeneity} route={route} go={go} canTry={client.customPlaces !== false} />
         </div>
-        <PlaceFacts profile={data?.place} bbox={region.geometry.bbox} area={place?.kind === 'point' ? 'pin' : region.geometry.kind === 'shape' ? 'shape' : 'box'} />
       </header>
 
       <EditBar route={route} region={region} custom={custom} themeId={themeId} set={set} go={go} years={years} />
@@ -159,46 +159,71 @@ function PlaceFacts({ profile, bbox, area }: { profile: PlaceProfile | null | un
   const { view } = useView()
   const l = useL()
   const sci = view === 'scientific'
-  const facts: { key: string; label: string; value: string }[] = []
-  let fromModel = false
+  // `model`: the fact comes from the NASA POWER model climatology, so its chip says "computer model estimate"
+  const facts: { key: FactKind; label: string; value: string; model?: boolean }[] = []
   // A mixed box (homogeneity check) has no one climate, height or rainy season: the backend text says "different
   // kinds of places", so the facts do too, and the box-average values are not shown as if they described it.
   const mixed = profile?.homogeneity?.kind === 'mixed'
   if (mixed) {
-    facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile?.climate_code ? l('findings.facts.mixedMean', { code: profile.climate_code }) : l('findings.facts.mixed') })
-    fromModel = true
+    facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile?.climate_code ? l('findings.facts.mixedMean', { code: profile.climate_code }) : l('findings.facts.mixed'), model: true })
   } else if (profile?.climate_group) {
     const word = l(`findings.climate.${profile.climate_group}` as FKey)
-    facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile.climate_code ? `${word} (${profile.climate_code})` : word })
-    fromModel = true
+    facts.push({ key: 'climate', label: l('findings.facts.climate'), value: sci && profile.climate_code ? `${word} (${profile.climate_code})` : word, model: true })
   }
   // height only when the place is high up, in both views (the Scientific view adds the model-grid metres)
   const elev = profile?.elevation_m_model
   if (!mixed && profile?.high_up) {
     const metres = sci && elev != null ? l('findings.facts.elev', { m: Math.round(elev).toLocaleString(numberLocale()) }) : null
-    facts.push({ key: 'height', label: l('findings.facts.height'), value: [l('findings.facts.highUp'), metres].filter(Boolean).join(' · ') })
-    fromModel = true
+    facts.push({ key: 'height', label: l('findings.facts.height'), value: [l('findings.facts.highUp'), metres].filter(Boolean).join(' · '), model: true })
   }
   const runs = mixed ? [] : monthRuns(profile?.wet_months ?? [])
   if (runs.length > 0) {
     const month = (m: number) => capFirst(new Date(2000, m - 1, 1).toLocaleString(numberLocale(), { month: 'long' }))
-    facts.push({ key: 'wet', label: l('findings.facts.wet'), value: runs.map(([a, b]) => (a === b ? month(a) : `${month(a)} – ${month(b)}`)).join(', ') })
-    fromModel = true
+    facts.push({ key: 'wet', label: l('findings.facts.wet'), value: runs.map(([a, b]) => (a === b ? month(a) : `${month(a)} – ${month(b)}`)).join(', '), model: true })
   }
   const areaLabel = area === 'pin' ? l('findings.facts.areaPin') : area === 'shape' ? l('findings.facts.areaShape') : l('findings.facts.area')
   facts.push({ key: 'area', label: areaLabel, value: l(area === 'pin' ? 'findings.facts.areaPinValue' : 'findings.facts.areaValue', sizeParts(bbox)) })
+  const modelTag = l('findings.facts.modelTag')
   return (
-    <div className="findings-facts">
-      <dl className="facts-grid" aria-label={l('findings.facts.aria')}>
-        {facts.map((f) => (
-          <div key={f.key} className="card fact">
-            <dt className="eyebrow">{f.label}</dt>
-            <dd>{f.value}</dd>
-          </div>
-        ))}
-      </dl>
-      {fromModel && <p className="muted small facts-note">{l('findings.facts.model')}</p>}
-    </div>
+    <dl className="findings-facts" aria-label={l('findings.facts.aria')}>
+      {facts.map((f) => (
+        <div key={f.key} className={`fact fact-${f.key}`} title={f.model ? `${f.label}: ${f.value} (${modelTag})` : undefined}>
+          <dt>
+            <FactIcon kind={f.key} />
+            {f.label}
+          </dt>
+          <dd>
+            <span className="fact-v">{f.value}</span>
+            {f.model && <span className="visually-hidden"> ({modelTag})</span>}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+type FactKind = 'climate' | 'height' | 'wet' | 'area'
+
+/** Small line pictures for the place facts: thermometer with a leaf, mountain, raindrop, measured box. */
+function FactIcon({ kind }: { kind: FactKind }) {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {kind === 'climate' && (
+        <>
+          <path d="M9 14.5V5a2 2 0 1 0-4 0v9.5a3.5 3.5 0 1 0 4 0Z" />
+          <path d="M7 15V9" />
+          <path d="M13 20c0-5 3-8 8-8 0 5-3 8-8 8Zm0 0 4-4" />
+        </>
+      )}
+      {kind === 'height' && <path d="m2 20 7-12 4 6 3-4 6 10Z" />}
+      {kind === 'wet' && <path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z" />}
+      {kind === 'area' && (
+        <>
+          <rect x="4" y="7" width="16" height="13" rx="1.5" strokeDasharray="3 2.5" />
+          <path d="M4 3.5h16M4 2v3M20 2v3" />
+        </>
+      )}
+    </svg>
   )
 }
 
@@ -347,22 +372,25 @@ function Legend({ entries, variables }: { entries: ScanEntry[]; variables: Varia
   })
   if (list.length === 0) return null
   return (
-    <div className="legend">
-      <p className="legend-label small">{rich('legend.label', {}, { instrument: <Term id="instrument">{s('legend.instruments')}</Term> })}</p>
-      <ul className="inline-list small">
+    <section className="legend" aria-labelledby="legend-h">
+      <h2 id="legend-h" className="legend-label">{rich('legend.label', {}, { instrument: <Term id="instrument">{s('legend.instruments')}</Term> })}</h2>
+      <ul className="legend-list">
         {list.map((i) => {
-          const key = i.kind === 'model' ? 'legend.model' : manySatellites(i.platform) ? 'legend.satMany' : 'legend.sat'
+          const model = i.kind === 'model'
+          const key = model ? 'legend.model' : manySatellites(i.platform) ? 'legend.satMany' : 'legend.sat'
           return (
             <li key={i.id}>
-              <a href={instrumentHref(i.id)}>
-                <InstrumentIcon model={i.kind === 'model'} />
+              <a href={instrumentHref(i.id)} className={model ? 'legend-chip legend-model' : 'legend-chip legend-sat'}>
+                <span className="legend-ico">
+                  <InstrumentIcon model={model} />
+                </span>
                 {s(key, { name: shortName(i) })}
               </a>
             </li>
           )
         })}
       </ul>
-    </div>
+    </section>
   )
 }
 
@@ -471,17 +499,23 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
   const used = years ? years.filter((y) => y.in_window).map((y) => y.year) : []
   const usedFrom = used.length > 1 ? Math.min(...used) : null
   const usedTo = used.length > 1 ? Math.max(...used) : null
+  const someOut = years != null && used.length < years.length
+  const sparkSpan = years ? { from: years[0].year, to: years[years.length - 1].year } : { from: 0, to: 0 }
+  const sparkLabel =
+    someOut && usedFrom != null && usedTo != null ? l('findings.sparkUsed', { ...sparkSpan, ufrom: usedFrom, uto: usedTo }) : l('findings.spark', sparkSpan)
   const name = tx(e.name, view)
+  // R1: the reason this variable is worth a look (a cited expectation, or what this record can detect)
+  const why = tx(e.why, view).trim()
   const sure = certainty === 'sure'
   const dec = e.units.decimals
   return (
     <li className={`fcard fcard-${certainty}`} data-demo={`finding-${e.variable_id}`}>
       <div className="fcard-top">
         <VerdictChip certainty={certainty} />
+        {/* the arrow's shape says the direction (colour only backs it up); its words go to screen readers and the tooltip */}
         {dir && (
-          <span className={`fcard-dir${sure ? ' fcard-dir-sure' : ''}`}>
+          <span className={`fcard-dir fcard-dir-${dir}`} title={l(`findings.heading.${dir}` as FKey)}>
             <TrendArrow direction={dir} sure={sure} label={l(`findings.heading.${dir}` as FKey)} />
-            <span aria-hidden="true">{l(`findings.heading.${dir}` as FKey)}</span>
           </span>
         )}
       </div>
@@ -496,24 +530,47 @@ export function FindingCard({ e, card, onOpen }: { e: ScanEntry; card?: Variable
       {years && (
         <div className="fcard-chart">
           <div className="fcard-panel">
-            <Sparkline wide series={years} label={l('findings.spark', { from: years[0].year, to: years[years.length - 1].year })} />
-          </div>
-          <div className="fcard-axis small muted">
-            <span className="mono">{years[0].year}</span>
-            {usedFrom != null && usedTo != null && <span className="fcard-years">{l('findings.cardYears', { from: usedFrom, to: usedTo })}</span>}
-            <span className="mono">{years[years.length - 1].year}</span>
+            <Sparkline wide series={years} label={sparkLabel} />
+            <div className="fcard-axis small muted">
+              <span className="mono">{years[0].year}</span>
+              {/* only when some dots are left out: what full and empty dots mean (the years are in the tooltip, the chart label and the summary) */}
+              {someOut && usedFrom != null && usedTo != null && (
+                <span className="fcard-key" aria-hidden="true" title={l('findings.cardYears', { from: usedFrom, to: usedTo })}>
+                  <span className="fcard-key-item">
+                    <span className="fcard-key-dot" />
+                    {l('findings.key.used')}
+                  </span>
+                  <span className="fcard-key-item">
+                    <span className="fcard-key-dot fcard-key-out" />
+                    {l('findings.key.out')}
+                  </span>
+                </span>
+              )}
+              <span className="mono">{years[years.length - 1].year}</span>
+            </div>
           </div>
         </div>
       )}
-      {!e.worth_investigating && !sure && <p className="fcard-rec small muted">{l('findings.hardToSpot')}</p>}
-      <SourceTag compact variable={variableRefFromEntry(e, card)} />
-      {view === 'scientific' && (
-        <p className="muted small">
-          {e.slope_per_decade != null && formatSlope(e.slope_per_decade, e.units, view)}
-          {e.p_adjusted != null && <> · {l('findings.adjP', { p: e.p_adjusted.toFixed(3) })}</>}
-          {e.mdt_per_decade != null && <> · {l('findings.mdt', { mdt: plainNum(e.mdt_per_decade, dec), unit: e.units.display })}</>}
-        </p>
-      )}
+      <div className="fcard-notes">
+        {!e.worth_investigating && !sure && <p className="fcard-rec small muted">{l('findings.hardToSpot')}</p>}
+        {why && (
+          <p className="fcard-why small muted">
+            <span className="fcard-why-label">{l('findings.why')}:</span> {why}
+          </p>
+        )}
+        {view === 'scientific' && (
+          <p className="muted small">
+            {[
+              e.slope_per_decade != null ? formatSlope(e.slope_per_decade, e.units, view) : null,
+              e.p_adjusted != null ? l('findings.adjP', { p: e.p_adjusted.toFixed(3) }) : null,
+              e.mdt_per_decade != null ? l('findings.mdt', { mdt: plainNum(e.mdt_per_decade, dec), unit: e.units.display }) : null,
+            ]
+              .filter((x) => x != null)
+              .join(' · ')}
+          </p>
+        )}
+        <SourceTag compact variable={variableRefFromEntry(e, card)} />
+      </div>
       {e.cross_check && <SecondOpinion c={e.cross_check} own={e.instrument_id ?? (card?.source as { instrument_id?: string | null } | undefined)?.instrument_id ?? null} />}
     </li>
   )

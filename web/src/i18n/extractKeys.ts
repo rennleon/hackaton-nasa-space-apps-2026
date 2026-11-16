@@ -88,7 +88,7 @@ export function literalUses(): { uses: KeyUse[]; dynamic: { template: string; fi
       if (ts.isCallExpression(n) && ts.isIdentifier(n.expression)) {
         const fn = n.expression.text
         const a = n.arguments
-        const keyArg = fn === 'sv' ? a[1] : a[0]
+        const keyArg = fn === 'sv' || fn === 'tIn' ? a[1] : a[0]
         const first = keyArg
         if (first && ts.isTemplateExpression(first) && ['t', 'tt', 's', 'sv', 'c'].includes(fn)) dynamic.push({ template: first.getText(), file })
         // `cond ? 'a.b' : 'c.d'` -> both keys
@@ -96,6 +96,7 @@ export function literalUses(): { uses: KeyUse[]; dynamic: { template: string; fi
         for (const key of keys) {
         if (key && /^[a-z][\w]*(\.[\w]+)+$/.test(key)) {
           if (fn === 't' || fn === 'tt') uses.push({ key, en: lit(a[1]) ?? null, file })
+          else if (fn === 'tIn') uses.push({ key, en: lit(a[2]) ?? null, file })
           else if (fn === 'c' && resultCopy) {
             const obj = textObject(a[1])
             if (obj && obj.simple === obj.scientific) uses.push({ key, en: obj.simple, file })

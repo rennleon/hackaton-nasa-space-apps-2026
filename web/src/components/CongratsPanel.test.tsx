@@ -96,7 +96,7 @@ describe('CongratsPanel', () => {
     const user = userEvent.setup()
     open(SURE)
     await screen.findByTestId('congrats')
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     const panel = await screen.findByTestId('congrats')
     expect(panel).toHaveTextContent('Trend detected')
     expect(panel).toHaveTextContent('Both persistence-aware tests agree at the 95% level.')

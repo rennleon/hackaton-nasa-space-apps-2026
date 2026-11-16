@@ -66,7 +66,23 @@ export function detailText(detail: unknown): string | undefined {
   return parts.filter(Boolean).join('; ') || undefined
 }
 
-export async function getJson<T>(url: string, init?: { method: 'POST'; body: unknown }): Promise<T> {
+/**
+ * Requests still on the wire, by URL. React StrictMode runs every effect twice in development, and two screens can
+ * ask for the same file at once: identical GET requests share one fetch. Entries leave when they settle (no caching).
+ * POST requests (the guide box) are never shared.
+ */
+const inflight = new Map<string, Promise<unknown>>()
+
+export function getJson<T>(url: string, init?: { method: 'POST'; body: unknown }): Promise<T> {
+  if (init) return fetchJson<T>(url, init)
+  const pending = inflight.get(url)
+  if (pending) return pending as Promise<T>
+  const p = fetchJson<T>(url).finally(() => inflight.delete(url))
+  inflight.set(url, p)
+  return p
+}
+
+async function fetchJson<T>(url: string, init?: { method: 'POST'; body: unknown }): Promise<T> {
   const res = await fetch(
     url,
     init

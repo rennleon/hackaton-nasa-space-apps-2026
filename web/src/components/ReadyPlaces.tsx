@@ -33,28 +33,57 @@ export function ReadyPlaces({ regions, liveOff, selectedId, onRegion, onExample 
         {regions.map((r) => (
           <li key={r.id} className={selectedId === r.id ? 'ready-card is-selected' : 'ready-card'} data-demo={`ready-${r.id}`}>
             <button type="button" onClick={() => onRegion(r)} aria-pressed={selectedId === r.id}>
-              <span className="tile tone-blue">
-                <PlaceIcon name={regionIcon(r.id)} />
-              </span>
-              <span className="ready-tag">{view === 'simple' ? s('start.ready.saved', 'Ready to go') : r.regime}</span>
-              <span className="ready-name">{tx(r.name)}</span>
-              <span className="ready-caption">{tx(r.description)}</span>
+              <CardBody
+                icon={regionIcon(r.id)}
+                tone="blue"
+                tag={view === 'simple' ? s('start.ready.saved', 'Ready to go') : r.regime}
+                name={tx(r.name)}
+                caption={tx(r.description)}
+                source={s('start.ready.src.saved', 'Saved NASA data', 'Pre-loaded · works offline')}
+              />
             </button>
           </li>
         ))}
         {EXAMPLE_PLACES.map((e) => (
           <li key={e.id} className="ready-card" data-demo={`ready-${e.id}`}>
             <button type="button" onClick={() => onExample(e)} disabled={liveOff}>
-              <span className={`tile tone-${EXAMPLE_LOOK[e.id]?.tone ?? 'gray'}`}>
-                <PlaceIcon name={EXAMPLE_LOOK[e.id]?.icon ?? 'pin'} />
-              </span>
-              <span className="ready-tag">{s(`start.example.${e.id}.tag`, e.tag.simple, e.tag.scientific)}</span>
-              <span className="ready-name">{s(`start.example.${e.id}.name`, e.name)}</span>
-              <span className="ready-caption">{s(`start.example.${e.id}.caption`, e.caption.simple, e.caption.scientific)}</span>
+              <CardBody
+                icon={EXAMPLE_LOOK[e.id]?.icon ?? 'pin'}
+                tone={EXAMPLE_LOOK[e.id]?.tone ?? 'gray'}
+                tag={s(`start.example.${e.id}.tag`, e.tag.simple, e.tag.scientific)}
+                name={s(`start.example.${e.id}.name`, e.name)}
+                caption={s(`start.example.${e.id}.caption`, e.caption.simple, e.caption.scientific)}
+                source={s('start.ready.src.live', 'Live NASA data', 'NASA POWER · live')}
+              />
             </button>
           </li>
         ))}
       </ul>
     </div>
+  )
+}
+
+/** One card: icon tile with the category beside it, the name, a short caption (long ones are clamped; the full
+ *  text stays in the page and shows on hover), and a footer with where the data comes from. */
+function CardBody({ icon, tone, tag, name, caption, source }: { icon: PlaceIconName; tone: Tone; tag: string; name: string; caption: string; source: string }) {
+  return (
+    <>
+      <span className="ready-top">
+        <span className={`tile tone-${tone}`}>
+          <PlaceIcon name={icon} />
+        </span>
+        <span className={`ready-tag tone-${tone}`}>{tag}</span>
+      </span>
+      <span className="ready-name">{name}</span>
+      <span className="ready-caption" title={caption}>
+        {caption}
+      </span>
+      <span className="ready-foot">
+        <span className="ready-src">{source}</span>
+        <svg className="ready-go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </span>
+    </>
   )
 }

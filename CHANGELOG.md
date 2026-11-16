@@ -21,6 +21,41 @@ for how to release and how to roll back.
 ## [2.1.0] - 2026-11-15
 
 ### Changed
+- Header: shorter name "Trend Detective" / "Detective de tendencias" with a statistics logo (bars and a rising
+  trend line). Simple/Scientific, EN/ES and dark mode are on/off switches whose knob shows an icon (smiley /
+  flask, globe, sun / moon); language and dark mode sit in a settings menu (hamburger) at the top right. The
+  header uses fixed sizes and each label keeps the width of its longer language, so switching language no longer
+  moves or resizes it (one row above 980px, two rows below, chosen by width only).
+- Start page title "Earth trends, measured and tested" / "Tendencias de la Tierra, medidas y comprobadas", with a
+  Simple and a Scientific description. Switching language cross-fades the page softly (view transitions; instant
+  with reduced motion or in browsers without support).
+- Start page: the "Free · Every number comes from NASA" pill is gone; the hero title uses Space Grotesk; a quiet
+  dotted Earth turns slowly behind the hero (one turn every 90 s) (canvas, land points baked from Natural Earth 1:110m by
+  `web/scripts/make-globe-dots.mjs`; still for reduced motion, paused off-screen).
+- Footer organised into columns (name and tagline, Explore, NASA data with links to Giovanni and POWER, Credits
+  with the OpenStreetMap copyright link) and a bottom line with the challenge and, in the Scientific view, the
+  version. One logo component for header and footer.
+- Ready-made places: 3 x 2 grid (2 columns on tablets, 1 on phones); the category is a coloured badge next to the
+  icon; long captions are clamped to four lines (full text kept in the page and on hover); each card ends with
+  where the data comes from (saved / live NASA POWER) and an arrow.
+- Shortlist cards show each variable's reason ("Why look at this" / "Rationale"): a cited statement or what the
+  record can detect (R1).
+- "Watch a demo" buttons in the start-page hero, always visible (replace the chips that only showed on two tabs).
+- More space in the start-page hero between the title, the demo buttons and the place form (scales with width).
+- Place tabs: Search, On the map, Coordinates, then Ready-made places (last).
+- Question cards (step 2): title on one row with the icon, smaller fonts, chips and padding (chips keep 44px tap
+  height); chips sit right under the question.
+- Findings page: Climate and Area (and height / rainy months when known) are icon chips under the place title,
+  model-based ones say "computer model estimate" in their tooltip; the "All but the area…" note is gone. Smaller
+  summary with each count beside its label. "How we worked this out" stages are no longer links: each opens a
+  floating list of its steps (one at a time, closes on outside click or Escape). The instruments strip is a
+  highlighted card with icon + satellite/computer model chips.
+- Measurement cards: smaller verdict chip with an arrow-only direction badge beside it (green up, red down; the
+  words stay for screen readers and in the tooltip), calmer spacing, a larger chart with a "years used / left out"
+  key (replaces "Years used here"), full definitions, and a clean "Worked out by / Measured by" row with an icon.
+- Pre-loaded regions read their saved results first (scan, default and declared-season results); the API is asked
+  only for missing files or other periods. Identical in-flight requests are shared, so a scan is fetched once.
+- A user-chosen point or box no longer says "NASA POWER grid cell": each variable uses its own source's grid.
 - New look (v3 design): warm light theme by default; the dark theme keeps the deep-space navy palette (follows the system, or the
   switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
   page links and segmented Simple/Scientific and EN/ES switches.

@@ -86,7 +86,7 @@ describe('Variable view, Simple', () => {
     const user = userEvent.setup()
     open('#/variable?region=cajamarca_west&theme=water&variable=airs_rh_surf_day')
     await screen.findByRole('heading', { level: 2, name: /afternoons are getting more humid/i })
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     await waitFor(() => expect(screen.getAllByText(/Sen's slope \+1\.48 %RH per decade/).length).toBeGreaterThan(0))
     expect(screen.getByText('Can we trust this? Evidence checks')).toBeInTheDocument()
     expect(screen.getByText(/Lag-1 autocorrelation/)).toBeInTheDocument()

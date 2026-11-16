@@ -77,10 +77,11 @@ describe('demo on the real screens', () => {
       it(`${d.id} step ${i + 1}: "${st.target}" is on the screen`, async () => {
         window.location.hash = toHash({ ...st.route, demo: d.id, step: i })
         const { container } = render(<App client={client} />)
-        await waitFor(() => expect(container.querySelector(`[data-demo="${st.target}"]`), `${st.target} on ${window.location.hash}`).not.toBeNull(), { timeout: 4000 })
+        // the variable page renders a lot; under a full parallel run it can take over 4 s, so allow more time
+        await waitFor(() => expect(container.querySelector(`[data-demo="${st.target}"]`), `${st.target} on ${window.location.hash}`).not.toBeNull(), { timeout: 12000 })
         expect(await screen.findByRole('dialog')).toBeInTheDocument()
         expect(screen.getByText(st.caption.simple)).toBeInTheDocument()
-      })
+      }, 15000)
     }
   }
 

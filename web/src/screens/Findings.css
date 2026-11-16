@@ -7,9 +7,9 @@
 .findings .findings-back { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; min-height: 2rem; padding: 0; text-decoration: none; }
 .findings .findings-back:hover { text-decoration: underline; }
 
-/* header: place name and question on the left, a few facts on the right */
-.findings-head { display: flex; flex-wrap: wrap; gap: 1.5rem 2rem; align-items: flex-end; }
-.findings-title { flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+/* header: place name, its facts as small chips right under it, then the question */
+.findings-head { display: flex; flex-direction: column; gap: 1rem; }
+.findings-title { min-width: 0; display: flex; flex-direction: column; gap: 0.7rem; }
 .findings-title > * { margin: 0; }
 .findings-head h1 { font-size: clamp(2.2rem, 1.4rem + 3.6vw, 3.5rem); overflow-wrap: anywhere; }
 .findings-crumb { margin: 0; }
@@ -18,11 +18,13 @@
 .findings-q { margin: 0; font-size: 1.25rem; font-weight: 500; }
 .place-text { max-width: 60ch; }
 
-.findings-facts { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-.facts-grid { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
-.card.fact { padding: 0.7rem 0.9rem; box-shadow: none; border-radius: var(--radius-md); min-width: 0; }
-.fact dd { margin: 4px 0 0; font-weight: 600; overflow-wrap: anywhere; }
-.facts-note { margin: 0; }
+/* place facts: "Climate: Mixed", "Area: About 190 × 110 km" as pills with a small picture */
+.findings-facts { margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.fact { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 0.35rem; min-width: 0; max-width: 100%; padding: 5px 12px; border-radius: var(--radius-pill); border: 1px solid var(--hairline); background: var(--surface); font-size: 0.88rem; line-height: 1.3; }
+.fact dt { display: inline-flex; align-items: center; color: var(--text-2); font-weight: 500; }
+.fact dt::after { content: ':'; }
+.fact dt svg { flex: none; margin-right: 6px; color: var(--accent); }
+.fact dd { margin: 0; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
 
 /* edit form: labelled fields, every change applies at once */
 .card.editform { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.9rem 1rem; padding: 1.1rem; }
@@ -40,54 +42,71 @@ select.input option, select.input optgroup { background: var(--surface); color: 
 .years-pair .input { min-width: 0; }
 .editform-hint { flex-basis: 100%; margin: 0; }
 
-/* summary: headline, strongest, notes; count tiles on the right */
-.card.summary { display: flex; flex-wrap: wrap; align-items: center; gap: 1.2rem 2.5rem; padding: 1.7rem; }
-.summary-text { flex: 999 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+/* summary: headline, strongest, notes; compact count tiles ("4 ◑ Maybe, not sure yet") on the right */
+.card.summary { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 2rem; padding: 1.1rem 1.4rem; }
+.summary-text { flex: 999 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 0.35rem; }
 .summary-text > p { margin: 0; }
-.summary-main { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem); line-height: 1.15; }
-.summary-sub { font-size: 1.1rem; color: var(--text-2); }
-.summary-tiles { flex: 1 1 260px; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.count-tile { flex: 1 1 7rem; min-width: 0; padding: 0.9rem 1rem; border-radius: var(--radius-md); }
-.count-tile-n { display: block; font-family: var(--font-head); font-weight: 700; font-size: 2.25rem; line-height: 1; }
-.count-tile-w { display: flex; align-items: flex-start; gap: 6px; margin-top: 0.45rem; font-size: 0.9rem; font-weight: 600; line-height: 1.25; }
-.count-tile-w svg { flex: none; margin-top: 1px; }
+.summary-main { margin: 0; font-size: clamp(1.2rem, 1rem + 0.8vw, 1.5rem); line-height: 1.2; }
+.summary-sub { font-size: 1rem; color: var(--text-2); }
+.summary-tiles { flex: 0 1 auto; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0.45rem; }
+.count-tile { display: flex; align-items: center; gap: 0.6rem; min-width: 0; padding: 0.4rem 0.85rem; border-radius: var(--radius-sm); }
+.count-tile-n { flex: none; min-width: 1.2ch; font-family: var(--font-head); font-weight: 700; font-size: 1.5rem; line-height: 1; }
+.count-tile-w { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; line-height: 1.25; }
+.count-tile-w svg { flex: none; }
 .count-tile-sure { color: var(--v-sure); background: var(--v-sure-bg); }
 .count-tile-maybe { color: var(--v-maybe); background: var(--v-maybe-bg); }
 .count-tile-too_soon { color: var(--v-soon); background: var(--v-soon-bg); }
 .count-tile-cant_tell { color: var(--v-cant); background: transparent; border: 2px dashed currentColor; }
 
-/* instruments in this list: one chip each */
-.findings .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.8rem; margin: 0; }
-.findings .legend-label { margin: 0; font-weight: 600; color: var(--text-2); }
-.findings .legend .inline-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.findings .legend .inline-list li + li::before { content: none; }
-.findings .legend a { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-pill); border: 1px solid var(--hairline); background: var(--surface); color: var(--text); font-size: 0.85rem; font-weight: 500; text-decoration: none; }
-.findings .legend a:hover { border-color: var(--accent); color: var(--accent); }
+/* instruments in this list: a light bar with a heading, one chip each (icon + "satellite" / "computer model") */
+.findings .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem 1.1rem; margin: 0; padding: 0.9rem 1.2rem; border-radius: var(--radius); border: 1px solid var(--hairline); background: var(--accent-soft); }
+.findings .legend-label { margin: 0; font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.findings .legend-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.findings .legend-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 2.5rem; padding: 4px 14px 4px 5px; border-radius: 1.25rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.95rem; font-weight: 600; text-decoration: none; }
+.findings .legend-chip:hover { border-color: var(--accent); color: var(--accent); }
+.findings .legend-chip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.findings .legend-ico { flex: none; display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; }
+.findings .legend-ico svg { width: 18px; height: 18px; }
+.findings .legend-sat .legend-ico { background: var(--accent-soft); color: var(--accent); }
+.findings .legend-model .legend-ico { background: var(--surface-2); color: var(--text-2); }
 
 /* cards */
 .fgrid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 1rem; }
-.fcard { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 0.9rem; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow); transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; min-width: 0; }
+.fcard { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 1.1rem; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 1.4rem; box-shadow: var(--shadow); transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; min-width: 0; }
 .fcard:hover { box-shadow: var(--shadow-hover); border-color: var(--accent); transform: translateY(-2px); }
 .fcard p { margin: 0; overflow-wrap: anywhere; }
-.fcard-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem 0.8rem; }
-.fcard-dir { display: inline-flex; align-items: center; gap: 5px; font-size: 0.88rem; font-weight: 600; color: var(--muted); }
-.fcard-dir-sure { color: var(--trend); }
-.fcard-dir .trend-arrow { width: 18px; height: 18px; }
-.fcard-title { display: flex; flex-direction: column; gap: 0.35rem; }
-.fcard-name { margin: 0; font-size: 1.4rem; line-height: 1.15; }
+/* chip and arrow sit together on one row; the chip is small so the name leads */
+.fcard-top { display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 0.4rem 0.5rem; }
+.fcard .vchip { font-size: 0.78rem; line-height: 1.25; padding: 2px 10px 2px 6px; gap: 0.35em; }
+.fcard .vchip svg { width: 14px; height: 14px; }
+.fcard .vchip-cant_tell { border-width: 1.5px; padding: 1px 9px 1px 5px; }
+/* direction: the arrow shape is the cue; green up / red down only backs it up (tooltip and accessible name give the words) */
+.fcard-dir { position: relative; z-index: 1; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: var(--muted); }
+.fcard-dir-up { color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.fcard-dir-down { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.fcard-dir .trend-arrow, .fcard-dir .trend-arrow.trend-sure { width: 18px; height: 18px; color: inherit; }
+.fcard-title { display: flex; flex-direction: column; gap: 0.4rem; }
+.fcard-name { margin: 0; font-size: 1.35rem; line-height: 1.2; }
 .fcard-open { font: inherit; color: var(--text); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; letter-spacing: inherit; }
 .fcard-open::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }
 .fcard-open:focus-visible { outline: none; }
 .fcard-open:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 3px; }
-.fcard-def { font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.fcard-chart { display: flex; flex-direction: column; gap: 0.4rem; }
-.fcard-panel { padding: 8px 10px; border-radius: var(--radius-sm); background: var(--bg); }
-.fcard-axis { flex-wrap: wrap; display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
-.fcard-axis .mono { font-size: 0.8rem; }
-.fcard-years { order: 3; flex-basis: 100%; }
-.fcard-rec { font-weight: 600; }
-.fcard .source-tag, .fcard .source-tag.source-model { align-self: flex-start; background: transparent; box-shadow: none; padding: 0; border-radius: 0; color: var(--text-2); }
-.fcard-second { margin-top: auto !important; padding-top: 0.9rem; border-top: 1px solid var(--hairline); color: var(--text-2); }
+/* shown in full: the definition is short, and a cut-off sentence ("A computer mod...") hides the model label */
+.fcard-def { font-size: 0.92rem; line-height: 1.5; }
+.fcard-chart { display: flex; flex-direction: column; }
+.fcard-panel { --spark-bg: color-mix(in srgb, var(--bg) 60%, var(--surface)); display: flex; flex-direction: column; gap: 6px; padding: 14px 14px 8px; border-radius: var(--radius-sm); background: var(--spark-bg); border: 1px solid var(--hairline); }
+.fcard-axis { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; padding: 0 2px; line-height: 1.3; }
+.fcard-axis .mono { font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.fcard-key { position: relative; z-index: 1; display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 0.1rem 0.7rem; font-size: 0.75rem; cursor: help; }
+.fcard-key-item { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+.fcard-key-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--text-2); }
+.fcard-key-dot.fcard-key-out { background: var(--spark-bg); box-shadow: inset 0 0 0 1.5px var(--muted); }
+.fcard-notes { display: flex; flex-direction: column; gap: 0.6rem; }
+.fcard-rec { font-weight: 600; color: var(--text-2); }
+.fcard-why { overflow-wrap: anywhere; line-height: 1.5; } /* shown in full: the reason is a claim, so it is never clipped */
+.fcard-why-label { font-weight: 600; color: var(--text-2); }
+.fcard-notes .source-tag { margin-top: 0.15rem; }
+.fcard-second { margin-top: auto !important; padding-top: 0.85rem; border-top: 1px solid var(--hairline); color: var(--text-2); line-height: 1.5; }
 .fcard-second strong { color: var(--text); }
 
 .unavail { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 0.6rem 1.4rem; box-shadow: var(--shadow); }
@@ -126,12 +145,12 @@ select.input option, select.input optgroup { background: var(--surface); color: 
   .findings { padding: 1.1rem 1rem 3rem; gap: 1.2rem; }
   .findings-body { gap: 1.2rem; }
   .findings-head { gap: 1rem; }
-  .findings-title { flex-basis: 100%; }
-  .findings-facts { flex-basis: 100%; }
+  .findings .legend { padding: 0.8rem 0.9rem; }
   .card.editform { padding: 1rem; }
   .field-place, .field-question, .field-years, .field-season { flex: 1 1 100%; }
-  .card.summary { padding: 1.2rem; }
+  .card.summary { padding: 1rem; }
   .summary-text, .summary-tiles { flex-basis: 100%; }
+  .summary-tiles { flex-direction: row; flex-wrap: wrap; }
   .fgrid { grid-template-columns: minmax(0, 1fr); }
   .fcard { padding: 1.15rem; }
   .findings .timeline { grid-template-columns: minmax(0, 1fr); padding: 1.15rem; }
