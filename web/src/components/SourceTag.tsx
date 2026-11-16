@@ -29,7 +29,7 @@ function KindIcon({ kind }: { kind: SourceInfo['kind'] }) {
  * Full form (result page): two labelled lines.
  *   Simple:     "Measured by: AIRS, an instrument on the Aqua satellite" (the page title already names the variable)
  *   Scientific: "Variable: Surface relative humidity (AIRS3STM v7.0 · RelHumSurf_A)" / "Instrument: AIRS · Aqua satellite · since 2002 · 1° grid"
- * Compact form (cards): icon + "Measured by AIRS (Aqua satellite)".
+ * Compact form (cards): one quiet row, round icon badge + "Measured by AIRS (Aqua satellite)" (a model says "computer model estimate").
  * A variable is the quantity we trend. An instrument is a sensor on a satellite or a computer model.
  * NASA POWER is a delivery service ("via NASA POWER"), never the instrument.
  */
@@ -50,8 +50,10 @@ export function SourceTag({ variable, compact = false }: { variable: VariableRef
     const key = model ? (info.viaPower ? 'src.compact.modelPower' : 'src.compact.model') : info.many ? 'src.compact.satMany' : 'src.compact.sat'
     return (
       <span className={`source-tag source-compact source-${info.kind}`}>
-        <KindIcon kind={info.kind} />
-        <span>{rich(key, { platform }, { name })}</span>
+        <span className="source-badge">
+          <KindIcon kind={info.kind} />
+        </span>
+        <span className="source-text">{rich(key, { platform }, { name })}</span>
       </span>
     )
   }

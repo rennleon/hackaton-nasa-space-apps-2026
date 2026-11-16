@@ -23,7 +23,7 @@
   --shadow-hover: 0 2px 4px rgb(21 32 29 / 0.08), 0 14px 30px rgb(21 32 29 / 0.1);
   --scrim: rgb(21 32 29 / 0.45);
   --trend: #b4410f; --trend-soft: #fbe9df; --water: #d3e3e8;
-  --danger: #b42318; --danger-bg: #fde8e6;
+  --danger: #b42318; --danger-bg: #fde8e6; --success: #157f3c;
   --v-sure: #0f6e66; --v-sure-fill: #0f8f84; --v-sure-bg: #dcf0ec;
   --v-maybe: #7a4a00; --v-maybe-fill: #c77f00; --v-maybe-bg: #fdebc2;
   --v-soon: #4d5652; --v-soon-fill: #6b7570; --v-soon-bg: #e8e8e4;
@@ -50,7 +50,7 @@
     --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.4), 0 14px 32px rgb(0 0 0 / 0.38);
     --scrim: rgb(2 8 20 / 0.6);
     --trend: #ff9f4a; --trend-soft: #3d2a17; --water: #14304a;
-    --danger: #ff9d92; --danger-bg: #4a1f1b;
+    --danger: #ff9d92; --danger-bg: #4a1f1b; --success: #5fd88a;
     --v-sure: #7fe3d6; --v-sure-fill: #2fb5a8; --v-sure-bg: #0f3a3b;
     --v-maybe: #f6c969; --v-maybe-fill: #e69a1a; --v-maybe-bg: #3d3010;
     --v-soon: #c3cddb; --v-soon-fill: #8493a8; --v-soon-bg: #243350;
@@ -68,7 +68,7 @@
   --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.4), 0 14px 32px rgb(0 0 0 / 0.38);
   --scrim: rgb(2 8 20 / 0.6);
   --trend: #ff9f4a; --trend-soft: #3d2a17; --water: #14304a;
-  --danger: #ff9d92; --danger-bg: #4a1f1b;
+  --danger: #ff9d92; --danger-bg: #4a1f1b; --success: #5fd88a;
   --v-sure: #7fe3d6; --v-sure-fill: #2fb5a8; --v-sure-bg: #0f3a3b;
   --v-maybe: #f6c969; --v-maybe-fill: #e69a1a; --v-maybe-bg: #3d3010;
   --v-soon: #c3cddb; --v-soon-fill: #8493a8; --v-soon-bg: #243350;

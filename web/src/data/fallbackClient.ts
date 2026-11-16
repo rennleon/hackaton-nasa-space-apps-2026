@@ -3,7 +3,11 @@ import type { Bbox, ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
 import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient } from './client'
 
-/** Tries the API first and falls back to the static twin when it fails. */
+/**
+ * Catalog reads try the API first. A pre-loaded region's results (default settings, declared seasons, each theme's
+ * shared window) come from the precomputed files first: the same engine wrote them, so the numbers are the same,
+ * with no wait and no network. The API answers only what has no file (another period, a region not precomputed).
+ */
 export class FallbackClient implements DataClient {
   constructor(
     private api: DataClient,
@@ -21,19 +25,18 @@ export class FallbackClient implements DataClient {
   themes = () => this.either((c) => c.themes())
   variables = () => this.either((c) => c.variables())
   glossary = () => this.either((c) => c.glossary())
-  scan = (r: string, t: string) => this.either((c) => c.scan(r, t))
-  result = (r: string, v: string, s?: string) => this.either((c) => c.result(r, v, s))
+  scan = (r: string, t: string) => this.fallback.scan(r, t).catch(() => this.api.scan(r, t))
+  result = (r: string, v: string, s?: string) => this.fallback.result(r, v, s).catch(() => this.api.result(r, v, s))
 
   /** The live grid first; the precomputed windows (ready-made places) when the API is down or not configured. */
   climatology = (p: ClimateParam, b: Bbox) => this.either((c) => (c.climatology ? c.climatology(p, b) : Promise.reject(new Error('no climate layer'))))
 
   async analyze(regionId: string, variableId: string, opts: AnalyzeOptions): Promise<AnalysisOutcome> {
-    try {
-      return await this.api.analyze(regionId, variableId, opts)
-    } catch {
-      // The static twin holds the shared windows; any other custom period gets the default (or season) result and a flag.
-      return this.fallback.analyze(regionId, variableId, opts)
-    }
+    // The static twin holds the default, the declared seasons and the shared windows. Any other period comes back
+    // flagged: ask the API, and if it is down too, show the flagged default with its notice.
+    const pre: AnalysisOutcome | null = await this.fallback.analyze(regionId, variableId, opts).catch(() => null)
+    if (pre && !pre.customPeriodUnavailable) return pre
+    return this.api.analyze(regionId, variableId, opts).catch((err) => (pre ? pre : Promise.reject(err)))
   }
 
   /** No static twin for a custom place: the API's rejection of bad input passes through, anything else is "unavailable". */

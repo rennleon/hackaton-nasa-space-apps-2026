@@ -5,8 +5,8 @@ import './Sparkline.css'
 const W = 120
 const H = 38
 const PAD = 4
-/** The wide form fills a card: the same dots and line on a 4:1 canvas, so the dots stay round. */
-const WIDE = { w: 320, h: 80, pad: 10, r: 2.6 }
+/** The wide form fills a card: the same dots and line on a 10:3 canvas (the viewBox scales evenly, so the dots stay round). */
+const WIDE = { w: 320, h: 96, pad: 10, r: 3.4 }
 
 /** Least-squares line through the dots, only used to draw the line (the verdict comes from the engine). */
 function fit(pts: { x: number; y: number }[]): { a: number; b: number } | null {
@@ -51,7 +51,7 @@ export function Sparkline({ series, label, wide = false }: { series: YearPoint[]
   )
 }
 
-/** Trend arrow: filled when the verdict is sure, outline otherwise. Always paired with a text label. */
+/** Trend arrow. Its shape carries the direction; `label` is its accessible name (the card adds a tooltip and the colour). */
 export function TrendArrow({ direction, sure, label }: { direction: Direction; sure: boolean; label: string }) {
   const rotate = direction === 'up' ? 0 : direction === 'down' ? 180 : 90
   return (

@@ -29,7 +29,7 @@ export const FC = {
   'findings.facts.cards': p('Measurements'),
   'findings.facts.highUp': p('High above the sea', 'High up'),
   'findings.facts.elev': p('{m} m', '{m} m (model grid)'),
-  'findings.facts.model': p('All but the area come from a computer model estimate.', 'All but the area: model climatology (NASA POWER, MERRA-2 based).'),
+  'findings.facts.modelTag': p('computer model estimate', 'model climatology, NASA POWER, MERRA-2 based'),
   'findings.climate.tropical': p('Warm all year', 'Tropical'),
   'findings.climate.dry': p('Dry'),
   'findings.climate.temperate': p('Mild', 'Temperate'),
@@ -84,6 +84,7 @@ export const FC = {
   // cards
   'findings.open': p('Open {name}', 'Open {name}'),
   'findings.hardToSpot': p('Hard to spot with this record', 'Low detectability with this record'),
+  'findings.why': p('Why look at this', 'Rationale'),
   'findings.secondOpinion': p('Second opinion'),
   'findings.second.agree': p('Two instruments agree', 'Instruments agree (same direction, both significant)'),
   'findings.second.same_direction_one_unsure': p('Same direction, one not sure yet', 'Same direction, only one significant'),
@@ -95,6 +96,13 @@ export const FC = {
   'findings.heading.flat': p('Staying level', 'Flat'),
   'findings.spark': p('One dot for each year, {from} to {to}.', 'Yearly de-seasonalised means, {from} to {to}.'),
   'findings.cardYears': p('Years used here: {from} to {to}', 'Window {from}–{to} (shared across the scan)'),
+  // the chart's label when some dots are left out: the card's own years live here (and in the summary), not in a line under every chart
+  'findings.sparkUsed': p(
+    'One dot for each year, {from} to {to}. Full dots are the years used here, {ufrom} to {uto}. Empty dots are left out.',
+    'Yearly de-seasonalised means, {from} to {to}. Filled: shared window {ufrom}–{uto}. Hollow: outside the window.',
+  ),
+  'findings.key.used': p('years used', 'in window'),
+  'findings.key.out': p('left out', 'outside window'),
   'findings.adjP': p('adj. p = {p}'),
   // verdict chip
   'findings.chip.too_soon': p('Too soon to tell', 'Not detectable yet'),

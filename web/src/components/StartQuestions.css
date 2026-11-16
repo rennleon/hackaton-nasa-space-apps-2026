@@ -5,12 +5,18 @@
 .sq-place:focus { outline: none; }
 .sq-place:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
 .sq-ask { margin: 0; font-size: 1.1rem; font-family: var(--font-body); letter-spacing: 0; }
-.sq-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: 0.8rem; }
+.sq-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr)); gap: 0.7rem; }
 /* the card is the <li>: the main button and the sub-topic row sit one under the other inside it (no nested buttons) */
-.sq-grid > li { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding-bottom: 1rem; transition: border-color 0.15s; }
+.sq-grid > li { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding-bottom: 0.8rem; transition: border-color 0.15s; }
 .sq-grid > li:hover, .sq-grid > li:focus-within { border-color: var(--accent); }
-.sq-grid > li .subtopics { padding: 0.4rem 1.3rem 0; }
-.sq-card { width: 100%; flex: 1; min-height: 44px; text-align: left; font: inherit; background: transparent; color: var(--text); border: 0; border-radius: var(--radius); padding: 1.3rem 1.3rem 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+.sq-grid > li .subtopics { padding: 0.2rem 1rem 0; gap: 0.3rem; }
+.sq-grid .subtopics-label { font-size: 0.8rem; }
+.sq-grid .subtopics-list { gap: 0.4rem; }
+/* chips: smaller text and padding, but still a 44px tap target */
+.sq-grid .subtopic-btn { font-size: 0.85rem; gap: 0.35rem; padding: 0.2rem 0.7rem; }
+/* icon tile and name share the first row; the question spans the full width below */
+.sq-card { width: 100%; min-height: 44px; text-align: left; font: inherit; background: transparent; color: var(--text); border: 0; border-radius: var(--radius); padding: 1rem 1rem 0.3rem; cursor: pointer; display: grid; grid-template-columns: auto 1fr; align-items: center; align-content: start; gap: 0.45rem 0.65rem; }
 .sq-card:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
-.sq-name { font-family: var(--font-head); font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
-.sq-q { color: var(--muted); }
+.sq-card .tile { width: 34px; height: 34px; }
+.sq-name { font-family: var(--font-head); font-size: 1.15rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+.sq-q { grid-column: 1 / -1; color: var(--muted); font-size: 0.95rem; line-height: 1.45; }

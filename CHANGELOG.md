@@ -25,6 +25,24 @@ for how to release and how to roll back.
 - Ready-made places: 3 x 2 grid (2 columns on tablets, 1 on phones); the category is a coloured badge next to the
   icon; long captions are clamped to four lines (full text kept in the page and on hover); each card ends with
   where the data comes from (saved / live NASA POWER) and an arrow.
+- Shortlist cards show each variable's reason ("Why look at this" / "Rationale"): a cited statement or what the
+  record can detect (R1).
+- "Watch a demo" buttons in the start-page hero, always visible (replace the chips that only showed on two tabs).
+- More space in the start-page hero between the title, the demo buttons and the place form (scales with width).
+- Place tabs: Search, On the map, Coordinates, then Ready-made places (last).
+- Question cards (step 2): title on one row with the icon, smaller fonts, chips and padding (chips keep 44px tap
+  height); chips sit right under the question.
+- Findings page: Climate and Area (and height / rainy months when known) are icon chips under the place title,
+  model-based ones say "computer model estimate" in their tooltip; the "All but the area…" note is gone. Smaller
+  summary with each count beside its label. "How we worked this out" stages are no longer links: each opens a
+  floating list of its steps (one at a time, closes on outside click or Escape). The instruments strip is a
+  highlighted card with icon + satellite/computer model chips.
+- Measurement cards: smaller verdict chip with an arrow-only direction badge beside it (green up, red down; the
+  words stay for screen readers and in the tooltip), calmer spacing, a larger chart with a "years used / left out"
+  key (replaces "Years used here"), full definitions, and a clean "Worked out by / Measured by" row with an icon.
+- Pre-loaded regions read their saved results first (scan, default and declared-season results); the API is asked
+  only for missing files or other periods. Identical in-flight requests are shared, so a scan is fetched once.
+- A user-chosen point or box no longer says "NASA POWER grid cell": each variable uses its own source's grid.
 - New look (v3 design): warm light theme by default; the dark theme keeps the deep-space navy palette (follows the system, or the
   switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
   page links and segmented Simple/Scientific and EN/ES switches.

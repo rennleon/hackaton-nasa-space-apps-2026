@@ -64,7 +64,6 @@ export const HOW = {
   'how.stagesLabel': p('The four stages', 'Pipeline stages'),
   'how.stageSteps': p('Steps {from} to {to}', 'Steps {from}–{to}'),
   'how.strip.title': p('How we worked this out', 'How this was computed'),
-  'how.strip.label': p('The four stages of how we worked this out', 'Pipeline stages, each opens the matching part of the method page'),
   'how.strip.all': p('See every step', 'See every step of the method'),
   'how.finish': p('You get your answer.', 'Output: the verdict, chart and checks on the result page.'),
 

@@ -8,6 +8,8 @@ import { geocodeUrl, searchPlaces, useGeocodeSearch, type GeoResult } from '../l
 import { recallPlaceName } from '../lib/placeNames'
 import { parsePlace, placeRegion } from '../lib/place'
 import { bannedIn } from '../lib/copy.test'
+import { DEMOS, demoStart } from '../lib/demos'
+import { toHash } from '../lib/route'
 
 const cat = (n: string) => JSON.parse(readFileSync(`public/data/catalog/${n}.json`, 'utf8'))
 const client: DataClient = {
@@ -194,14 +196,14 @@ describe('start screen', () => {
     const user = userEvent.setup()
     open()
     const tabs = await screen.findAllByRole('tab')
-    expect(tabs.map((t) => t.textContent)).toEqual(['Search', 'Ready-made places', 'On the map', 'Coordinates'])
+    expect(tabs.map((t) => t.textContent)).toEqual(['Search', 'On the map', 'Coordinates', 'Ready-made places'])
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByText('Pick a place').closest('li')).toHaveAttribute('aria-current', 'step')
     expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]) // roving tabindex
     tabs[0].focus()
-    await user.keyboard('{ArrowRight}')
-    expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
-    expect(tabs[1]).toHaveFocus()
+    await user.keyboard('{ArrowLeft}') // wraps from the first tab to the last one, Ready-made places
+    expect(tabs[3]).toHaveAttribute('aria-selected', 'true')
+    expect(tabs[3]).toHaveFocus()
     await user.click(within(screen.getByRole('tabpanel')).getByRole('button', { name: /Wisconsin/ }))
     const heading = await screen.findByRole('heading', { name: 'Wisconsin' })
     expect(heading).toHaveFocus()
@@ -210,6 +212,25 @@ describe('start screen', () => {
     await user.click(screen.getByRole('button', { name: 'Pick a different place' }))
     expect(await screen.findByRole('tab', { name: 'Ready-made places', selected: true })).toHaveFocus()
     expect(screen.queryByText('What do you want to know?')).not.toBeInTheDocument()
+  })
+
+  it('shows "Watch a demo" in the hero on first load, and a demo button opens its first step', async () => {
+    const user = userEvent.setup()
+    open()
+    const hero = within(await screen.findByRole('group', { name: 'Watch a demo' }))
+    expect(hero.getAllByRole('button').map((b) => b.textContent)).toEqual(DEMOS.map((d) => d.label.simple))
+    await user.click(hero.getByRole('button', { name: DEMOS[1].label.simple }))
+    await waitFor(() => expect(window.location.hash).toBe(toHash(demoStart(DEMOS[1]))))
+  })
+
+  it('keeps the demo buttons after a place is picked', async () => {
+    const user = userEvent.setup()
+    open()
+    await user.click((await ready()).getByRole('button', { name: /Wisconsin/ }))
+    await screen.findByText('What do you want to know?')
+    const hero = within(screen.getByRole('group', { name: 'Watch a demo' }))
+    await user.click(hero.getByRole('button', { name: DEMOS[0].label.simple }))
+    await waitFor(() => expect(window.location.hash).toBe(toHash(demoStart(DEMOS[0]))))
   })
 
   it('uses no banned words in the Simple view, before and after choosing a place', async () => {
