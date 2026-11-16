@@ -7,19 +7,6 @@ for how to release and how to roll back.
 
 ## [Unreleased]
 
-### Added
-- "Or ask in your own words" in step 2: type what you want to investigate and a keyword matcher over the
-  catalog (EN/ES, works offline) suggests a question and the variables that can answer it.
-- "You found a real change!" panel on "Sure it's real" results, a detective notebook of saved finds (kept in
-  the browser only), and "Copy report" / "Download JSON" to share a find.
-- AI-use disclosure and "not endorsed by NASA" line on the Sources page; README submission section.
-
-### Fixed
-- Map hint colours follow the pin, the box and the view (up to four 10° windows), are easier to see, and say
-  honestly when they cover only part of the map or need internet.
-
-## [2.1.0] - 2026-11-15
-
 ### Changed
 - Header: shorter name "Trend Detective" / "Detective de tendencias" with a statistics logo (bars and a rising
   trend line). Simple/Scientific, EN/ES and dark mode are on/off switches whose knob shows an icon (smiley /
@@ -56,6 +43,21 @@ for how to release and how to roll back.
 - Pre-loaded regions read their saved results first (scan, default and declared-season results); the API is asked
   only for missing files or other periods. Identical in-flight requests are shared, so a scan is fetched once.
 - A user-chosen point or box no longer says "NASA POWER grid cell": each variable uses its own source's grid.
+
+### Added
+- "Or ask in your own words" in step 2: type what you want to investigate and a keyword matcher over the
+  catalog (EN/ES, works offline) suggests a question and the variables that can answer it.
+- "You found a real change!" panel on "Sure it's real" results, a detective notebook of saved finds (kept in
+  the browser only), and "Copy report" / "Download JSON" to share a find.
+- AI-use disclosure and "not endorsed by NASA" line on the Sources page; README submission section.
+
+### Fixed
+- Map hint colours follow the pin, the box and the view (up to four 10° windows), are easier to see, and say
+  honestly when they cover only part of the map or need internet.
+
+## [2.1.0] - 2026-11-15
+
+### Changed
 - New look (v3 design): warm light theme by default; the dark theme keeps the deep-space navy palette (follows the system, or the
   switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
   page links and segmented Simple/Scientific and EN/ES switches.
