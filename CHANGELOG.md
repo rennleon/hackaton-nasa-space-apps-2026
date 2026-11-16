@@ -8,6 +8,23 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Changed
+- Header: shorter name "Trend Detective" / "Detective de tendencias" with a statistics logo (bars and a rising
+  trend line). Simple/Scientific, EN/ES and dark mode are on/off switches whose knob shows an icon (smiley /
+  flask, globe, sun / moon); language and dark mode sit in a settings menu (hamburger) at the top right. The
+  header uses fixed sizes and each label keeps the width of its longer language, so switching language no longer
+  moves or resizes it (one row above 980px, two rows below, chosen by width only).
+- Start page title "Earth trends, measured and tested" / "Tendencias de la Tierra, medidas y comprobadas", with a
+  Simple and a Scientific description. Switching language cross-fades the page softly (view transitions; instant
+  with reduced motion or in browsers without support).
+- Start page: the "Free · Every number comes from NASA" pill is gone; the hero title uses Space Grotesk; a quiet
+  dotted Earth turns slowly behind the hero (one turn every 90 s) (canvas, land points baked from Natural Earth 1:110m by
+  `web/scripts/make-globe-dots.mjs`; still for reduced motion, paused off-screen).
+- Footer organised into columns (name and tagline, Explore, NASA data with links to Giovanni and POWER, Credits
+  with the OpenStreetMap copyright link) and a bottom line with the challenge and, in the Scientific view, the
+  version. One logo component for header and footer.
+- Ready-made places: 3 x 2 grid (2 columns on tablets, 1 on phones); the category is a coloured badge next to the
+  icon; long captions are clamped to four lines (full text kept in the page and on hover); each card ends with
+  where the data comes from (saved / live NASA POWER) and an arrow.
 - New look (v3 design): warm light theme by default; the dark theme keeps the deep-space navy palette (follows the system, or the
   switch now in the top bar); Bricolage Grotesque headings, Inter text, JetBrains Mono for years. Header with
   page links and segmented Simple/Scientific and EN/ES switches.

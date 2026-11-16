@@ -31,7 +31,7 @@ describe('App smoke', () => {
     await user.click(await screen.findByRole('button', { name: /Water/ }))
     expect((await screen.findAllByText('Afternoon humidity')).length).toBeGreaterThan(0)
     expect(screen.getAllByText("Sure it's real").length).toBeGreaterThan(0)
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     await waitFor(() => expect(screen.getAllByText(/%RH\/decade|%RH per decade/).length).toBeGreaterThan(0))
   })
 })

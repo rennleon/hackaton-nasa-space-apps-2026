@@ -5,7 +5,7 @@
 // Placeholders such as {name} must stay exactly as in the English default.
 const es: Record<string, string> = {
   // ---------- app shell
-  'app.title': 'Detective de Tendencias del Sistema Tierra',
+  'app.title': 'Detective de tendencias',
   'app.skip': 'Saltar al contenido',
   'app.loading': 'Cargando…',
   'app.catalogError': 'No se pudo cargar el catálogo: {message}',
@@ -13,10 +13,22 @@ const es: Record<string, string> = {
   'app.view.label': 'Nivel de lectura',
   'app.view.simple': 'Simple',
   'app.view.scientific': 'Científico',
+  'app.view.switch': 'Vista científica',
+  'app.menu.label': 'Menú de ajustes',
+  'app.theme.dark': 'Modo oscuro',
+  'app.theme.light': 'Modo claro',
+  'app.lang.switch': 'Español',
   'app.nav.label': 'Principal',
   'map.aria': 'Mapa de regiones',
-  'common.footer':
-    'Datos del mapa © colaboradores de OpenStreetMap. Datos: satélites y modelos de la NASA, vía Giovanni (GES DISC) y NASA POWER. Resultados calculados por nuestro motor de análisis.',
+  'footer.tagline': 'Tendencias de la Tierra, medidas y comprobadas',
+  'footer.explore': 'Explorar',
+  'footer.data': 'Datos de la NASA',
+  'footer.data.kinds': 'Satélites y modelos de computadora',
+  'footer.credits': 'Créditos',
+  'footer.credits.map': 'Datos del mapa ©',
+  'footer.credits.osm': 'colaboradores de OpenStreetMap',
+  'footer.credits.engine': 'Resultados calculados por nuestro propio motor de análisis',
+  'footer.challenge': 'Hecho para el NASA Space Apps Challenge 2026',
   'common.source.satellite': 'Satélite',
   'common.source.satelliteOf': 'Satélite {platform}',
   'common.source.model.simple': 'Estimación de un modelo de computadora',
@@ -71,10 +83,10 @@ const es: Record<string, string> = {
   'demo.auto': 'Avanzar solo',
 
   // ---------- start screen
-  'start.hero.title': '¿La Tierra está cambiando donde vives?',
-  'start.hero.lead.simple': 'Los satélites miran la Tierra desde hace más de 20 años. Elige un lugar y lo revisamos.',
+  'start.hero.title': 'Tendencias de la Tierra, medidas y comprobadas',
+  'start.hero.lead.simple': 'Medimos cómo cambia un lugar. Luego vemos qué tan seguros estamos.',
   'start.hero.lead.scientific':
-    'Explora registros satelitales y de reanálisis de la NASA para un lugar, quita el ciclo estacional, ajusta una tendencia y lee un veredicto de significancia honesto, con sus salvedades.',
+    'Tasa de cambio cada 10 años con un rango del 95 %, comprobada con las pruebas de Mann–⁠Kendall y t de MCO que tienen en cuenta la persistencia, sobre datos de la NASA sin el ciclo estacional.',
   'start.steps.one.simple': 'Elige un lugar',
   'start.steps.one.scientific': 'Elige un lugar',
   'start.steps.two.simple': 'Haz una pregunta',
@@ -102,6 +114,10 @@ const es: Record<string, string> = {
   'start.area.box.simple': 'Tu caja mide unos {w} × {h} km.',
   'start.area.box.scientific': 'Caja: unos {w} × {h} km.',
   'start.ready.saved': 'Listo para usar',
+  'start.ready.src.saved.simple': 'Datos guardados de la NASA',
+  'start.ready.src.saved.scientific': 'Precargado · funciona sin conexión',
+  'start.ready.src.live.simple': 'Datos de la NASA en vivo',
+  'start.ready.src.live.scientific': 'NASA POWER · en vivo',
   'start.example.delhi.name': 'Delhi, India',
   'start.example.delhi.tag.simple': 'Ciudad grande',
   'start.example.delhi.tag.scientific': 'Megaciudad',
@@ -193,7 +209,6 @@ const es: Record<string, string> = {
   'theme.choose.simple': 'Elegir un lugar',
   'theme.choose.scientific': 'Elegir una región',
   // wizard card: stepper, tabs, ready-made grid, map action, typed numbers
-  'start.hero.chip': 'Gratis · Cada número viene de la NASA',
   'start.wizard.label': 'Encuentra tu lugar',
   'start.stepper.label': 'Progreso',
   'start.stepper.done': 'hecho',

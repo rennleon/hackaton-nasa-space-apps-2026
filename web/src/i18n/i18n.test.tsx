@@ -64,8 +64,8 @@ const BANNED_ES = [
   /valor p/i, /significativ/i, /significancia/i, /d[ée]cada/i, /anomal[ií]a/i, /autocorrelaci/i, /puntos porcentuales/i, /intervalo de confianza/i,
   /estad[ií]stic/i, /mann|kendall|hamed|\bols\b|t-test/i, /\bprueba/i, /sin cambio/i, /causad[oa] por/i, /%\s*hr\b|%RH|kg\s*m|\bK\b/,
 ]
-// Scientific-only strings that happen to share one key for both views, and the page footer (English one is as long).
-const SCIENTIFIC_ONLY = [/^where\.col\./, /^findings\.adjP$/, /^result\.trust\.(mdt|noSlope|yr)/, /^common\.footer$/]
+// Scientific-only strings that happen to share one key for both views.
+const SCIENTIFIC_ONLY = [/^where\.col\./, /^findings\.adjP$/, /^result\.trust\.(mdt|noSlope|yr)/]
 const isScientificKey = (k: string) => /\.(sci|scientific)$/.test(k) || SCIENTIFIC_ONLY.some((re) => re.test(k))
 
 describe('Spanish Simple copy (R5)', () => {
@@ -147,24 +147,35 @@ describe('language toggle', () => {
   it('switches the page to Spanish, sets lang, and remembers the choice', async () => {
     const user = userEvent.setup()
     const { unmount } = render(<App client={client} />)
-    const group = screen.getByRole('group', { name: 'Language' })
-    const en = within(group).getByRole('button', { name: /English/ })
-    const esBtn = within(group).getByRole('button', { name: /Español/ })
-    expect(en).toHaveAttribute('aria-pressed', 'true')
-    expect(esBtn).toHaveAttribute('aria-pressed', 'false')
-    expect(esBtn).toHaveAttribute('lang', 'es')
-    expect(await screen.findByRole('heading', { name: /Is the Earth changing where you live\?/ })).toBeInTheDocument()
+    // language and dark mode live in the settings menu at the top right
+    expect(screen.queryByRole('switch', { name: /Español/ })).not.toBeInTheDocument()
+    const menuBtn = screen.getByRole('button', { name: 'Settings menu' })
+    expect(menuBtn).toHaveAttribute('aria-expanded', 'false')
+    await user.click(menuBtn)
+    expect(menuBtn).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('switch', { name: 'Dark mode' })).toBeInTheDocument()
+    const esBtn = screen.getByRole('switch', { name: /Español/ })
+    expect(esBtn).toHaveAttribute('aria-checked', 'false')
+    expect(await screen.findByRole('heading', { name: 'Earth trends, measured and tested' })).toBeInTheDocument()
 
     await user.click(esBtn)
     expect(getLang()).toBe('es')
     expect(document.documentElement.lang).toBe('es')
     expect(localStorage.getItem('td.lang')).toBe('es')
-    expect(esBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(esBtn).toHaveAttribute('aria-checked', 'true')
     // one whole screen, in Spanish
-    expect(await screen.findByRole('heading', { name: '¿La Tierra está cambiando donde vives?' })).toBeInTheDocument()
-    expect(screen.getByRole('group', { name: 'Idioma' })).toBeInTheDocument()
-    expect(screen.getByRole('group', { name: 'Nivel de lectura' })).toBeInTheDocument()
-    expect(screen.getByText('Detective de Tendencias del Sistema Tierra')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Tendencias de la Tierra, medidas y comprobadas' })).toBeInTheDocument()
+    expect(screen.getByText('Idioma')).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: 'Modo oscuro' })).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: 'Vista científica' })).toHaveAttribute('aria-checked', 'false')
+    // the title keeps both widths reserved, but only the Spanish one is visible and read out
+    const header = within(screen.getByRole('banner'))
+    expect(header.getByText('Detective de tendencias')).toHaveAttribute('data-active', 'true')
+    expect(header.getByText('Trend Detective')).toHaveAttribute('aria-hidden', 'true')
+    const footer = within(screen.getByRole('contentinfo'))
+    expect(footer.getByText('Hecho para el NASA Space Apps Challenge 2026')).toBeInTheDocument()
+    expect(footer.getByRole('link', { name: 'colaboradores de OpenStreetMap' })).toHaveAttribute('href', 'https://www.openstreetmap.org/copyright')
+    expect(screen.getByRole('button', { name: 'Detective de tendencias' })).toBeInTheDocument()
     expect(screen.getByText('Saltar al contenido')).toBeInTheDocument()
     expect(screen.queryByText('Skip to content')).not.toBeInTheDocument()
     await user.click(screen.getByRole('tab', { name: 'Lugares ya preparados' }))

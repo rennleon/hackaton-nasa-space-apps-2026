@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { HeroGlobe } from '../components/HeroGlobe'
 import { useData } from '../context'
 import { CoordsForm } from '../components/CoordsForm'
 import { PlaceChooser } from '../components/PlaceChooser'
@@ -117,14 +118,14 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
 
   return (
     <div className="page start">
+      <HeroGlobe />
       <section className="hero" aria-labelledby="hero-h">
-        <span className="chip">{s('start.hero.chip', 'Free · Every number comes from NASA')}</span>
-        <h1 id="hero-h">{s('start.hero.title', 'Is the Earth changing where you live?')}</h1>
+        <h1 id="hero-h">{s('start.hero.title', 'Earth trends, measured and tested')}</h1>
         <p className="lead">
           {s(
             'start.hero.lead',
-            'Satellites have watched Earth for over 20 years. Pick a place and we will check.',
-            'Explore NASA satellite and reanalysis records for a place, remove the seasonal cycle, fit a trend, and read an honest significance verdict with its caveats.',
+            'We measure how a place is changing. Then we check how sure we are.',
+            'Rate of change per 10 years with a 95% range, tested with persistence-aware Mann–⁠Kendall and OLS t-tests on de-seasonalised NASA data.',
           )}
         </p>
       </section>

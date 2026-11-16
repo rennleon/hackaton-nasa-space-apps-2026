@@ -2,7 +2,7 @@
 // Every entry has a Simple wording (for a primary-school child, R5) and a Scientific one. Components read them
 // with useL(), which routes through the i18n helper under the key `<entry key>` (same words in both views) or `<entry key>.<view>`, so Spanish can be added
 // in i18n/es.ts without touching a component. findingsCopy.test.ts bans technical words in the Simple strings.
-import { useT } from '../i18n'
+import { tIn, useT, type Lang } from '../i18n'
 import { useView } from '../context'
 
 export interface Pair {
@@ -145,9 +145,6 @@ export const FC = {
   'sources.kind.satellite': p('Satellite', 'Satellite instrument'),
   'sources.kind.model': p('Computer model', 'Model / reanalysis'),
   'sources.viaPower': p('via NASA POWER'),
-  'common.footer': p(
-    'Map data © OpenStreetMap contributors. Data: NASA satellites and models, via NASA Giovanni (GES DISC) and NASA POWER. Results computed by our analysis engine.',
-  ),
 } as const satisfies Record<string, Pair>
 
 export type FKey = keyof typeof FC
@@ -161,4 +158,10 @@ export function useL() {
     const pair: Pair = FC[key]
     return t(pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view], vars)
   }
+}
+
+/** One label in a given language and view (the header reserves the width of both languages). */
+export function lIn(lang: Lang, key: FKey, view: 'simple' | 'scientific'): string {
+  const pair: Pair = FC[key]
+  return tIn(lang, pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view])
 }

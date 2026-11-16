@@ -2,7 +2,7 @@
 // Same pattern as findingsCopy.ts: every entry has a Simple wording (R5, a primary-school child) and a Scientific one,
 // read with useH(), which routes through the i18n helper under `<key>` (same words in both views) or `<key>.<view>`.
 // Spanish lives in i18n/es.ts; i18n/extractKeys.ts lists these keys so a test fails when one has no Spanish.
-import { useT } from '../i18n'
+import { tIn, useT, type Lang } from '../i18n'
 import { useView } from '../context'
 
 interface Pair {
@@ -161,4 +161,10 @@ export function useH() {
     const pair: Pair = HOW[key]
     return t(pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view], vars)
   }
+}
+
+/** One label in a given language and view (the header reserves the width of both languages). */
+export function hIn(lang: Lang, key: HKey, view: 'simple' | 'scientific'): string {
+  const pair: Pair = HOW[key]
+  return tIn(lang, pair.simple === pair.scientific ? key : `${key}.${view}`, pair[view])
 }

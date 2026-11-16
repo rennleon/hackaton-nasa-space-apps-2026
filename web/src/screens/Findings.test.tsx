@@ -272,7 +272,7 @@ describe('Findings screen', () => {
     const user = userEvent.setup()
     open('#/shortlist?region=cajamarca_west&theme=water')
     await screen.findByText(/shows? a clear change/)
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     await waitFor(() => expect(document.querySelector('.source-compact')?.textContent).toMatch(/^Instrument: \S.+\((Aqua satellite|Terra satellite|satellites?|computer model)\)$/))
     expect(screen.getAllByText(/adj\. p = /).length).toBeGreaterThan(0)
   })
@@ -324,7 +324,7 @@ describe('Where our data comes from', () => {
     const user = userEvent.setup()
     open('#/sources')
     await screen.findByRole('heading', { level: 1, name: 'Where our data comes from' })
-    await user.click(screen.getByRole('button', { name: 'Scientific' }))
+    await user.click(screen.getByRole('switch', { name: 'Scientific view' }))
     const airs = screen.getByRole('heading', { level: 3, name: 'AIRS' }).closest('li')!
     expect(within(airs).getByRole('link', { name: /Surface relative humidity \(daytime/ })).toBeInTheDocument()
   })
