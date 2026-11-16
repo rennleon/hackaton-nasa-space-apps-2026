@@ -17,6 +17,7 @@ import { WhereElse } from '../components/WhereElse'
 import { parsePlace, placeRegion } from '../lib/place'
 import { YourYears } from '../components/YourYears'
 import { HowStrip } from '../components/HowStrip'
+import { CongratsPanel } from '../components/CongratsPanel'
 
 /** Route years are `YYYY` (typed by the user) or `YYYY-MM` (handed over by a shortlist card: its exact shared window). */
 export function periodMonth(v: string | undefined, edge: 'start' | 'end'): string | undefined {
@@ -176,6 +177,7 @@ export function VariableView({ route, go }: { route: Route; go: (r: Route) => vo
                 <YourYears mine={res.data} declared={declared.loading ? null : declared.data} />
               )}
               <VerdictCard result={res.data} />
+              <CongratsPanel result={res.data} route={route} placeLabel={cleanInternal(bx(region.name), 'simple')} />
               <TrustPanel result={res.data} />
               <StartYears result={res.data} />
             </div>
