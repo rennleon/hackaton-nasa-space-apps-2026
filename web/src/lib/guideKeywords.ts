@@ -10,7 +10,7 @@ export interface GuideAnswer {
   /** a place name the user typed (never coordinates) */
   place_hint: string | null
   reason: string
-  source: 'llm' | 'keywords'
+  source: 'keywords'
 }
 
 export interface GuideCatalog {

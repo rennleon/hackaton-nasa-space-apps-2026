@@ -1,7 +1,7 @@
 import type { Place } from '../lib/place'
 import type { Bbox, ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
-import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient, type SuggestRequest } from './client'
+import { HttpError, LiveDataUnavailable, type AnalyzeOptions, type AnalysisOutcome, type DataClient } from './client'
 
 /** Tries the API first and falls back to the static twin when it fails. */
 export class FallbackClient implements DataClient {
@@ -22,7 +22,6 @@ export class FallbackClient implements DataClient {
   variables = () => this.either((c) => c.variables())
   glossary = () => this.either((c) => c.glossary())
   guide = (text: string, lang: string) => this.either((c) => (c.guide ? c.guide(text, lang) : Promise.reject(new Error('no guide'))))
-  suggest = (req: SuggestRequest, lang: string) => this.either((c) => (c.suggest ? c.suggest(req, lang) : Promise.reject(new Error('no suggest'))))
   scan = (r: string, t: string) => this.either((c) => c.scan(r, t))
   result = (r: string, v: string, s?: string) => this.either((c) => c.result(r, v, s))
 

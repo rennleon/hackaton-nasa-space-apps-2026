@@ -196,9 +196,8 @@ function AiUse() {
     <section className="src-section src-ai" aria-labelledby="src-ai-h">
       <h2 id="src-ai-h">{t('sources.ai.title', 'How we used AI')}</h2>
       <ul>
-        <li>{t('sources.ai.coding', 'AI coding assistants (Claude Code by Anthropic) helped us write code and text.')}</li>
-        <li>{t('sources.ai.helper', 'An optional helper in the app uses the Claude API. It suggests which variables fit a question you type.')}</li>
-        <li>{t('sources.ai.never', 'The helper never works out results and never changes them.')}</li>
+        <li>{t('sources.ai.coding', 'The team used AI coding assistants (Claude Code by Anthropic) to help write code and text.')}</li>
+        <li>{t('sources.ai.never', 'The app itself uses no AI.')}</li>
         <li>{t('sources.ai.numbers', 'All numbers come from NASA data and our own statistics code.')}</li>
       </ul>
       <h2 id="src-noend-h">{t('sources.ai.noEndTitle', 'No endorsement')}</h2>

@@ -1007,9 +1007,8 @@ const es: Record<string, string> = {
   'finds.report.date': 'Fecha',
   'finds.report.link': 'Enlace',
   'sources.ai.title': 'Cómo usamos la IA',
-  'sources.ai.coding': 'Asistentes de IA para programar (Claude Code, de Anthropic) nos ayudaron a escribir código y textos.',
-  'sources.ai.helper': 'Un ayudante opcional de la app usa la API de Claude. Sugiere qué variables encajan con una pregunta que escribes.',
-  'sources.ai.never': 'El ayudante nunca calcula los resultados y nunca los cambia.',
+  'sources.ai.coding': 'Usamos asistentes de IA (Claude Code, de Anthropic) para escribir código y textos.',
+  'sources.ai.never': 'La app en sí no usa IA.',
   'sources.ai.numbers': 'Todos los números vienen de datos de la NASA y de nuestro propio código de análisis.',
   'sources.ai.noEndTitle': 'Sin respaldo oficial',
   'sources.ai.noEnd': 'Este es un proyecto del NASA Space Apps Challenge. La NASA no lo respalda.',
@@ -1023,14 +1022,5 @@ const es: Record<string, string> = {
   'guide.vars.scientific': 'Variables que pueden responderla:',
   'guide.open.simple': 'Muéstrame esta pregunta',
   'guide.open.scientific': 'Abrir esta pregunta',
-  'guide.source.llm': 'Sugerido por un ayudante de IA (Claude)',
-  'guide.source.keywords': 'Encontrado por palabras clave',
-
-  // Suggested questions (SuggestedQuestions, step 2 of the start card)
-  'suggest.title.simple': 'Ideas para {place}',
-  'suggest.title.scientific': 'Preguntas sugeridas para {place}',
-  'suggest.titleHere.simple': 'Ideas para este lugar',
-  'suggest.titleHere.scientific': 'Preguntas sugeridas para este lugar',
-  'suggest.thinking': 'Pensando en tu lugar…',
 }
 export default es

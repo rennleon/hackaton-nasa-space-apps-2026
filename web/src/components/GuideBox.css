@@ -16,5 +16,4 @@
 .guide-vars ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .guide-actions { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
 .guide-actions p { margin: 0; }
-.guide-source { margin: 0; }
 @media (max-width: 720px) { .guide-row .btn { flex: 1 1 100%; } }
