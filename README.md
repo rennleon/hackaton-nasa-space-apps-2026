@@ -100,6 +100,9 @@ can replace step 1 without touching the engine.
 
 ## Submission
 
+**Demo video (29 s):** https://rennleon.github.io/hackaton-nasa-space-apps-2026/ (file: `docs/trend-detective-demo.mp4`).
+The video was scripted, recorded and captioned with Claude Code; an AI-disclosure line is burned into every frame.
+
 **What it does.** Earth System Trend Detective helps students and the public find out what is changing in a place,
 by how much, and whether the change is real. A user picks a plain question (heat, water, air), sees which NASA
 variables can answer it, chooses a place, and gets a many-year chart with the seasonal cycle removed, the rate of
