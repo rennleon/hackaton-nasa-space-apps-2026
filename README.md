@@ -288,6 +288,14 @@ touching the engine.
 - The version is in `VERSION` (shown in the footer in the Scientific view and at `/health`). Releases are git tags
   `vX.Y.Z` with a GitHub Release each: `npm run release -- patch|minor|major`. See [RELEASING.md](RELEASING.md)
   and [CHANGELOG.md](CHANGELOG.md).
+**Demo video (29 s):** https://rennleon.github.io/hackaton-nasa-space-apps-2026/ (file: `docs/trend-detective-demo.mp4`).
+The video was scripted, recorded and captioned with Claude Code; an AI-disclosure line is burned into every frame.
+
+**What it does.** Earth System Trend Detective helps students and the public find out what is changing in a place,
+by how much, and whether the change is real. A user picks a plain question (heat, water, air), sees which NASA
+variables can answer it, chooses a place, and gets a many-year chart with the seasonal cycle removed, the rate of
+change per 10 years with a 95% range, and an honest "how sure are we" verdict. A real change can be saved to a local
+"detective notebook" and shared as a plain-text report or JSON file (nothing is sent to a server).
 
 ## Credits, AI use and references
 
