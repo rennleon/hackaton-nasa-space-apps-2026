@@ -100,7 +100,16 @@ const subs = new Set<() => void>()
 
 const isFind = (x: unknown): x is Find => {
   const f = x as Find | null
-  return !!f && typeof f === 'object' && typeof f.id === 'string' && typeof f.saved_at === 'string' && !!f.route && typeof f.route === 'object' && typeof f.variable_id === 'string'
+  if (!f || typeof f !== 'object') return false
+  const str = (v: unknown) => typeof v === 'string'
+  const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v)
+  // every field the notebook and the report read, so an old or hand-edited entry is skipped, not a crash
+  return (
+    str(f.id) && str(f.saved_at) && !!f.route && typeof f.route === 'object' && str(f.variable_id) &&
+    str(f.variable_name) && str(f.place_label) && str(f.window_start) && str(f.window_end) &&
+    str(f.units) && str(f.source) && str(f.dataset) && Array.isArray(f.tests) &&
+    num(f.slope_per_10y) && num(f.ci_low) && num(f.ci_high) && num(f.decimals)
+  )
 }
 
 /** All saved finds, newest first. Never throws. The same array is returned until something changes. */

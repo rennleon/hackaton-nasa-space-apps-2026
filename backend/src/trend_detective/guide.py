@@ -246,7 +246,11 @@ Never invent a place and never give coordinates.
 
 # words a reason must not contain: it would claim a result or a cause (CLAUDE.md: never "caused by", "proves", "no change")
 _BANNED_REASON = re.compile(
-    r"\d|caused by|proves?\b|no change|p-value|significan|per decade|per 10|causa|prueba que|sin cambio|significativ",
+    # Free text from the model reaches the Simple view, so anything that could be a causal or trend claim
+    # (or a banned word) falls back to the fixed template reason. Prompt injection can only pick a catalog id.
+    r"\d|%|caus|because|proves?\b|no change|p-value|significan|decade|anomal|statistic|confiden|per 10"
+    r"|hotter|colder|wetter|drier|warmer|cooler|smokier|hazier|increas|decreas|rising|falling|getting"
+    r"|porque|prueba|sin cambio|significativ|d[eé]cada|anomal[ií]a|estad[ií]stic|aument|disminu|m[aá]s (?:caliente|seco|h[uú]medo|fr[ií]o)",
     re.IGNORECASE,
 )
 
@@ -315,8 +319,9 @@ def validate_llm_output(data: object, catalog: Catalog, lang: str, text: str) ->
         return None
     raw_ids = data.get("variables")
     ids: list[str] = []
+    members = {v.id for v, _r in catalog.theme_members(theme)}
     for vid in raw_ids if isinstance(raw_ids, list) else []:
-        if isinstance(vid, str) and vid in catalog.variables and vid not in ids:
+        if isinstance(vid, str) and vid in members and vid not in ids:
             ids.append(vid)
     ids = ids[:MAX_VARIABLES]
     if not ids:  # the model named only unknown ids: take the theme's own variables
@@ -325,7 +330,10 @@ def validate_llm_output(data: object, catalog: Catalog, lang: str, text: str) ->
     reason = re.sub(r"\s+", " ", reason).strip()[:MAX_REASON_CHARS] if isinstance(reason, str) else ""
     if not reason or _BANNED_REASON.search(reason):
         reason = _reason(theme, catalog, lang)
-    place = clean_place(data.get("place_hint")) or place_from_text(text)
+    place = clean_place(data.get("place_hint"))
+    if place and fold(place) not in fold(text):  # only a place the user actually typed
+        place = None
+    place = place or place_from_text(text)
     return {"theme": theme, "variables": ids, "place_hint": place, "reason": reason, "source": "llm"}
 
 
@@ -369,6 +377,9 @@ def llm_guide(text: str, lang: str = "en", catalog: Catalog | None = None) -> di
         return None
     except anthropic.APIStatusError as exc:
         log.warning("guide: Claude returned HTTP %s, using keywords", exc.status_code)
+        return None
+    except anthropic.AnthropicError as exc:  # anything else from the SDK (credentials, response validation)
+        log.warning("guide: Claude call failed (%s), using keywords", type(exc).__name__)
         return None
     if resp.stop_reason in ("refusal", "max_tokens"):
         log.warning("guide: Claude stop_reason=%s, using keywords", resp.stop_reason)

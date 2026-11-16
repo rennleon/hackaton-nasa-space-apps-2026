@@ -243,3 +243,20 @@ def test_endpoint_empty_is_400(client):
 def test_endpoint_uses_llm_when_available(client, monkeypatch, with_key):
     use(monkeypatch, FakeClient(reply(GOOD)))
     assert client.post("/guide", json={"text": "smoke", "lang": "es"}).json()["source"] == "llm"
+
+
+def test_validate_injected_claims_fall_back_to_template():
+    for bad in ("Cars cause hotter afternoons here.", "Smoke is increasing because of fires.",
+                "La lluvia aumenta cada década.", "Most nights are warmer now."):
+        out = g.validate_llm_output({"theme": "heat", "variables": ["power_t2m"], "place_hint": "", "reason": bad}, CAT, "en", "x")
+        assert out["reason"] == g._reason("heat", CAT, "en"), bad
+
+
+def test_validate_keeps_only_theme_members_and_typed_places():
+    other = next(v for v in CAT.variables if "heat" not in CAT.variables[v].themes)
+    out = g.validate_llm_output(
+        {"theme": "heat", "variables": [other, "power_t2m"], "place_hint": "Atlantis", "reason": "Fits."},
+        CAT, "en", "is it hot here",
+    )
+    assert other not in out["variables"] and "power_t2m" in out["variables"]
+    assert out["place_hint"] != "Atlantis"
