@@ -11,13 +11,11 @@ from functools import lru_cache
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 
 from . import ENGINE_VERSION
 from .catalog import Geometry, RegionCard
 from .contract import AnalysisResult, ScanResult, Text
 from .engine import EngineContext, analyze
-from .guide import guide as run_guide
 from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client, limit_map
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
@@ -270,24 +268,3 @@ def custom_result(
         raise HTTPException(404, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
-
-
-class GuideRequest(BaseModel):
-    text: str = Field(max_length=2000)
-    lang: str = "en"
-
-
-class GuideResponse(BaseModel):
-    theme: str | None
-    variables: list[str]
-    place_hint: str | None
-    reason: str
-    source: str  # always "keywords"
-
-
-@app.post("/guide", response_model=GuideResponse, dependencies=[Depends(limit_client)])
-def guide_route(body: GuideRequest) -> GuideResponse:
-    """The detective guide: typed words -> the best question and its variables (deterministic keywords)."""
-    if not body.text.strip():
-        raise HTTPException(400, "text is empty")
-    return GuideResponse(**run_guide(body.text, body.lang, ctx().catalog))

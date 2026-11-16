@@ -45,8 +45,6 @@ for how to release and how to roll back.
 - A user-chosen point or box no longer says "NASA POWER grid cell": each variable uses its own source's grid.
 
 ### Added
-- "Or ask in your own words" in step 2: type what you want to investigate and a keyword matcher over the
-  catalog (EN/ES, works offline) suggests a question and the variables that can answer it.
 - "You found a real change!" panel on "Sure it's real" results, a detective notebook of saved finds (kept in
   the browser only), and "Copy report" / "Download JSON" to share a find.
 - AI-use disclosure and "not endorsed by NASA" line on the Sources page; README submission section.

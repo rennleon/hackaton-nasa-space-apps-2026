@@ -198,7 +198,6 @@ describe('start screen', () => {
     const tabs = await screen.findAllByRole('tab')
     expect(tabs.map((t) => t.textContent)).toEqual(['Search', 'On the map', 'Coordinates', 'Ready-made places'])
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
-    expect(screen.queryByLabelText('Or ask in your own words')).not.toBeInTheDocument() // the guide box lives in step 2
     expect(screen.getByText('Pick a place').closest('li')).toHaveAttribute('aria-current', 'step')
     expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]) // roving tabindex
     tabs[0].focus()
@@ -213,16 +212,6 @@ describe('start screen', () => {
     await user.click(screen.getByRole('button', { name: 'Pick a different place' }))
     expect(await screen.findByRole('tab', { name: 'Ready-made places', selected: true })).toHaveFocus()
     expect(screen.queryByText('What do you want to know?')).not.toBeInTheDocument()
-  })
-
-  it('step 2 shows the guide box; asking in words and clicking "Show me this question" opens that question', async () => {
-    const user = userEvent.setup()
-    open()
-    await user.click((await ready()).getByRole('button', { name: /Wisconsin/ }))
-    await user.type(await screen.findByLabelText('Or ask in your own words'), 'more smoke in the air')
-    await user.click(screen.getByRole('button', { name: 'Ask' }))
-    await user.click(await screen.findByRole('button', { name: 'Show me this question' }))
-    await waitFor(() => expect(window.location.hash).toBe('#/shortlist?region=wisconsin&theme=smoke_haze'))
   })
 
   it('shows "Watch a demo" in the hero on first load, and a demo button opens its first step', async () => {

@@ -1033,15 +1033,5 @@ const es: Record<string, string> = {
   'sources.ai.numbers': 'Todos los números vienen de datos de la NASA y de nuestro propio código de análisis.',
   'sources.ai.noEndTitle': 'Sin respaldo oficial',
   'sources.ai.noEnd': 'Este es un proyecto del NASA Space Apps Challenge. La NASA no lo respalda.',
-  // Detective guide (GuideBox in step 2 of the start screen)
-  'guide.label.simple': 'O pregunta con tus propias palabras',
-  'guide.label.scientific': 'O describe tu pregunta',
-  'guide.placeholder': 'Por ejemplo: ¿Hay más humo aquí?',
-  'guide.ask': 'Preguntar',
-  'guide.thinking': 'Pensando…',
-  'guide.vars.simple': 'Esto puede ayudar:',
-  'guide.vars.scientific': 'Variables que pueden responderla:',
-  'guide.open.simple': 'Muéstrame esta pregunta',
-  'guide.open.scientific': 'Abrir esta pregunta',
 }
 export default es
