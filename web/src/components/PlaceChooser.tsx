@@ -4,7 +4,7 @@ import { placeBbox, placeRegion, validatePlace, wrapLon, type Place, type PlaceP
 import { sizeParts, type Chosen } from '../lib/places'
 import { useStartT } from '../lib/startT'
 import type { RegionCard } from '../types/catalog'
-import { CLIMATE_LAYERS, bboxKey, layerById, type Bbox, type ClimateLayerId } from '../lib/climate'
+import { CLIMATE_LAYERS, bboxKey, climateTooFar, gridCovers, layerById, type Bbox, type ClimateLayerId } from '../lib/climate'
 import { ClimateCells } from './ClimateCells'
 import { ClimateLegend, useClimateWords } from './ClimateLegend'
 import { useProblemText } from './CoordsForm'
@@ -37,7 +37,7 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace, action }: Pro
   const [view, setView] = useState<Bbox | null>(null)
   const onViewChange = useCallback((b: Bbox) => setView((prev) => (prev && bboxKey(prev) === bboxKey(b) ? prev : b)), [])
   const layer = layerId ? layerById(layerId) : null
-  const { grid, status } = useClimateGrid(client, layer, view)
+  const [fly, setFly] = useState<{ center: [number, number]; token: number } | null>(null)
   const { words } = useClimateWords()
 
   const problemText = useProblemText()
@@ -46,6 +46,12 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace, action }: Pro
     setMode(m)
     setCorner(null)
     setMapProblem(null)
+  }
+
+  // turning a colour on while the map shows the whole world: fly in to where the child is looking or has pointed
+  const toggleLayer = (id: ClimateLayerId) => {
+    setLayerId(layerId === id ? null : id)
+    if (layerId !== id && view && climateTooFar(view)) setFly((f) => ({ center: focusLatLon ?? [(view[1] + view[3]) / 2, (view[0] + view[2]) / 2], token: (f?.token ?? 0) + 1 }))
   }
 
   const onMapClick = (latRaw: number, lonRaw: number) => {
@@ -71,6 +77,15 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace, action }: Pro
   // Outline of what is chosen. A pin from the map is drawn as a marker plus its square, so a pin never turns
   // into a box without being shown; other choices zoom the map to a selected rectangle instead.
   const drawn = chosen?.kind === 'place' ? chosen : null
+  // the colours follow the pin or box the child chose (or the first corner of a box in the making)
+  const focusLatLon: [number, number] | null = corner
+    ? [corner.lat, corner.lon]
+    : drawn
+      ? (([w, s, e, n]) => [(s + n) / 2, (w + e) / 2] as [number, number])(placeBbox(drawn.place))
+      : null
+  const focus: [number, number] | null = focusLatLon ? [focusLatLon[1], focusLatLon[0]] : null
+  const { grid, status } = useClimateGrid(client, layer, view, focus)
+  const partial = !!(grid && view && !gridCovers(grid, view))
   const synthetic = useMemo(() => (drawn && !drawn.viaMap ? placeRegion(drawn.place) : null), [drawn])
   const mapRegions = synthetic ? [...regions, synthetic] : regions
   const selectedId = chosen?.kind === 'region' ? chosen.region.id : synthetic?.id
@@ -101,7 +116,7 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace, action }: Pro
       </div>
       <div role="group" aria-label={s('start.clim.group', 'Colour the map', 'Map layer')} className="chooser-layers tabs">
         {CLIMATE_LAYERS.map((l) => (
-          <button key={l.id} type="button" aria-pressed={layerId === l.id} onClick={() => setLayerId(layerId === l.id ? null : l.id)}>
+          <button key={l.id} type="button" aria-pressed={layerId === l.id} onClick={() => toggleLayer(l.id)}>
             {words[l.id].toggle}
           </button>
         ))}
@@ -115,10 +130,11 @@ export function PlaceChooser({ regions, chosen, disabled, onPlace, action }: Pro
         draft={draft}
         pending={corner ? [corner.lat, corner.lon] : null}
         onViewChange={onViewChange}
+        flyTo={fly}
       >
         {layer && grid && <ClimateCells layer={layer} grid={grid} />}
       </RegionMap>
-      {layer && <ClimateLegend layer={layer} grid={grid} status={status} />}
+      {layer && <ClimateLegend layer={layer} grid={grid} status={status} partial={partial} />}
       {mapProblem && (
         <p role="alert" className="error">
           {problemText(mapProblem)}

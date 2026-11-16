@@ -14,7 +14,7 @@ export function ClimateCells({ layer, grid }: { layer: ClimateLayer; grid: Clima
         <Rectangle
           key={`${lon},${lat}`}
           bounds={cellBounds(lon, lat, grid.cell_deg)}
-          pathOptions={{ stroke: false, fillColor: layer.colors[classOf(layer, v)], fillOpacity: 0.62 }}
+          pathOptions={{ stroke: true, weight: 0.5, color: '#2b2b2b', opacity: 0.3, fillColor: layer.colors[classOf(layer, v)], fillOpacity: 0.75 }}
         >
           <Tooltip sticky>{cellText(layer, v)}</Tooltip>
         </Rectangle>

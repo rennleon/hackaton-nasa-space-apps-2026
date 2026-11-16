@@ -68,10 +68,12 @@ interface Props {
   layer: ClimateLayer
   grid: ClimateGrid | null
   status: ClimateStatus
+  /** the colours reach only part of what the map shows */
+  partial?: boolean
 }
 
 /** Colour scale, one sentence on how to read it, what the map currently spans, and where the numbers come from. */
-export function ClimateLegend({ layer, grid, status }: Props) {
+export function ClimateLegend({ layer, grid, status, partial }: Props) {
   const { s, words, num, classLabel, view } = useClimateWords()
   const w = words[layer.id]
   const values = grid?.cells.map((c) => c[2]) ?? []
@@ -94,7 +96,9 @@ export function ClimateLegend({ layer, grid, status }: Props) {
       </ol>
       {view === 'scientific' && w.unit && <p className="muted clim-unit">{s('start.clim.unitLine', 'Unit: {unit}', 'Unit: {unit}', { unit: w.unit })}</p>}
       {status === 'loading' && <p className="muted">{s('start.clim.loading', 'Getting the colours…', 'Loading climatology…')}</p>}
-      {status === 'none' && <p className="muted">{s('start.clim.none', 'We have no colours for this spot right now.', 'No climatology available for this view (offline, or outside the precomputed places).')}</p>}
+      {status === 'far' && <p className="clim-note">{s('start.clim.far', 'Zoom in to see colours.')}</p>}
+      {status === 'ready' && partial && <p className="clim-note">{s('start.clim.partial', 'Colours show only near the middle of the map. Zoom in to see more.')}</p>}
+      {status === 'none' && <p className="muted">{s('start.clim.none', 'No colours here without internet. Try a ready-made place.', 'No climatology available for this view (offline, or outside the precomputed places).')}</p>}
       {status === 'ready' && lo !== null && hi !== null && (
         <p className="muted">
           {view === 'simple' && classOf(layer, lo) === classOf(layer, hi)

@@ -1,7 +1,7 @@
 import type { AnalysisResult, ScanResult } from '../types/contract'
 import type { GlossaryTerm, RegionCard, ThemeCard, VariableCard } from '../types/catalog'
 import type { Place } from '../lib/place'
-import type { Bbox, ClimateGrid, ClimateParam } from '../lib/climate'
+import { mergeGrids, type Bbox, type ClimateGrid, type ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
 import { getJson, LiveDataUnavailable, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
 
@@ -57,8 +57,8 @@ export class StaticClient implements DataClient {
   private climIndex?: Promise<{ id: string; bbox: Bbox; params: string[] }[]>
   /**
    * Precomputed 10 x 10 degree windows around the two pre-loaded regions and the three example points
-   * (`climatology/<place>_<param>.json`). Serves the window that holds the centre of the requested box,
-   * the nearest one when several do. Anywhere else there is no file: rejects.
+   * (`climatology/<place>_<param>.json`). Serves every window that overlaps the requested box (merged),
+   * nearest first. Anywhere else there is no file: rejects.
    */
   async climatology(param: ClimateParam, bbox: Bbox): Promise<ClimateGrid> {
     this.climIndex ??= getJson<{ id: string; bbox: Bbox; params: string[] }[]>(this.url('climatology/index.json'))
@@ -72,11 +72,12 @@ export class StaticClient implements DataClient {
     const cx = (bbox[0] + bbox[2]) / 2
     const cy = (bbox[1] + bbox[3]) / 2
     const dist = (w: Bbox) => Math.hypot((w[0] + w[2]) / 2 - cx, (w[1] + w[3]) / 2 - cy)
-    const hit = index
-      .filter((p) => p.params.includes(param) && cx >= p.bbox[0] && cx <= p.bbox[2] && cy >= p.bbox[1] && cy <= p.bbox[3])
-      .sort((a, b) => dist(a.bbox) - dist(b.bbox))[0]
-    if (!hit) throw new LiveDataUnavailable('No precomputed climate map for this part of the world')
-    return getJson<ClimateGrid>(this.url(`climatology/${hit.id}_${param}.json`))
+    const hits = index
+      .filter((p) => p.params.includes(param) && bbox[0] < p.bbox[2] && bbox[2] > p.bbox[0] && bbox[1] < p.bbox[3] && bbox[3] > p.bbox[1])
+      .sort((a, b) => dist(a.bbox) - dist(b.bbox))
+    if (!hits.length) throw new LiveDataUnavailable('No precomputed climate map for this part of the world')
+    const grids = await Promise.all(hits.map((h) => getJson<ClimateGrid>(this.url(`climatology/${h.id}_${param}.json`))))
+    return grids.length === 1 ? grids[0] : mergeGrids(grids)!
   }
   /** The three ready-made example points are precomputed; any other place needs the live API. */
   customScan(place: Place, themeId: string): Promise<ScanResult> {
