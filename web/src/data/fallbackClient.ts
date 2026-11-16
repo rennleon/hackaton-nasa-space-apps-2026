@@ -25,7 +25,6 @@ export class FallbackClient implements DataClient {
   themes = () => this.either((c) => c.themes())
   variables = () => this.either((c) => c.variables())
   glossary = () => this.either((c) => c.glossary())
-  guide = (text: string, lang: string) => this.either((c) => (c.guide ? c.guide(text, lang) : Promise.reject(new Error('no guide'))))
   scan = (r: string, t: string) => this.fallback.scan(r, t).catch(() => this.api.scan(r, t))
   result = (r: string, v: string, s?: string) => this.fallback.result(r, v, s).catch(() => this.api.result(r, v, s))
 
