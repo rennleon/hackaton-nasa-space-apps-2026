@@ -18,6 +18,7 @@ from .catalog import Geometry, RegionCard
 from .contract import AnalysisResult, ScanResult, Text
 from .engine import EngineContext, analyze
 from .guide import guide as run_guide
+from .guide import suggest_questions
 from .ratelimit import MESSAGE, MESSAGE_ES, RateLimited, counts_as_live, limit_client, limit_map
 from .scan import scan, scan_region
 from .sources import LiveSourceUnavailable
@@ -291,3 +292,26 @@ def guide_route(body: GuideRequest) -> GuideResponse:
     if not body.text.strip():
         raise HTTPException(400, "text is empty")
     return GuideResponse(**run_guide(body.text, body.lang, ctx().catalog))
+
+
+class SuggestRequest(BaseModel):
+    place: str | None = Field(default=None, max_length=200)
+    lat: float | None = None
+    lon: float | None = None
+    lang: str = "en"
+
+
+class Suggestion(BaseModel):
+    theme: str
+    why: str | None
+
+
+class SuggestResponse(BaseModel):
+    suggestions: list[Suggestion]
+    source: str  # "llm" or "none"
+
+
+@app.post("/guide/suggest", response_model=SuggestResponse, dependencies=[Depends(limit_client)])
+def suggest_route(body: SuggestRequest) -> SuggestResponse:
+    """Questions that fit the chosen place (Claude); empty when Claude is not available."""
+    return SuggestResponse(**suggest_questions(body.place, body.lat, body.lon, body.lang))
