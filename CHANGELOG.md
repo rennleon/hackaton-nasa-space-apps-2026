@@ -7,6 +7,17 @@ for how to release and how to roll back.
 
 ## [Unreleased]
 
+### Added
+- "Ask the detective": type what you want to investigate; an AI helper (Claude API, server-side key) picks a
+  question and variables from the catalog only, with a keyword matcher when there is no key or no network.
+- "You found a real change!" panel on "Sure it's real" results, a detective notebook of saved finds (kept in
+  the browser only), and "Copy report" / "Download JSON" to share a find.
+- AI-use disclosure and "not endorsed by NASA" line on the Sources page; README submission section.
+
+### Fixed
+- Map hint colours follow the pin, the box and the view (up to four 10° windows), are easier to see, and say
+  honestly when they cover only part of the map or need internet.
+
 ## [2.1.0] - 2026-11-15
 
 ### Changed
