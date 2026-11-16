@@ -8,6 +8,9 @@ for how to release and how to roll back.
 ## [Unreleased]
 
 ### Changed
+- README rewritten for the submission: NASA Space Apps introduction, the challenge and its objectives, how the app
+  meets each one, the full feature list, the statistical method, the NASA data used, limitations, run and developer
+  guide, credits, AI use and references.
 - Header: shorter name "Trend Detective" / "Detective de tendencias" with a statistics logo (bars and a rising
   trend line). Simple/Scientific, EN/ES and dark mode are on/off switches whose knob shows an icon (smiley /
   flask, globe, sun / moon); language and dark mode sit in a settings menu (hamburger) at the top right. The
