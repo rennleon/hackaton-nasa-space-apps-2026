@@ -3,8 +3,10 @@ import { useData } from '../context'
 import { chosenBbox, chosenName, sizeParts, type Chosen } from '../lib/places'
 import { useStartT } from '../lib/startT'
 import { topLevel } from '../lib/themes'
+import { GuideBox } from './GuideBox'
 import { SubTopicRow } from './SubTopicRow'
 import { PlaceIcon } from './PlaceIcons'
+import { SuggestedQuestions } from './SuggestedQuestions'
 import { ThemeIcon } from './ThemeIcon'
 import './StartQuestions.css'
 
@@ -47,6 +49,8 @@ export const StartQuestions = forwardRef<HTMLHeadingElement, Props>(function Sta
         </button>
       </div>
       <h3 className="sq-ask">{s('start.question.title', 'What do you want to know?', 'Choose a question')}</h3>
+      <SuggestedQuestions chosen={chosen} onAsk={onAsk} />
+      <GuideBox onAsk={onAsk} />
       <ul className="sq-grid">
         {topLevel(catalog.themes).map((th) => (
           <li key={th.id}>

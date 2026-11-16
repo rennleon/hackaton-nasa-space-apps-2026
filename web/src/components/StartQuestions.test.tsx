@@ -40,3 +40,16 @@ describe('StartQuestions sub-topics', () => {
     expect(onAsk).toHaveBeenLastCalledWith('heat')
   })
 })
+
+describe('StartQuestions guide box', () => {
+  it('shows "Or ask in your own words" in step 2, above the three cards, and opens the suggested question', async () => {
+    const onAsk = show()
+    const input = screen.getByLabelText('Or ask in your own words')
+    const grid = document.querySelector('.sq-grid') as Element
+    expect(input.compareDocumentPosition(grid) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    await userEvent.type(input, 'more smoke in the air')
+    await userEvent.click(screen.getByRole('button', { name: 'Ask' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Show me this question' }))
+    expect(onAsk).toHaveBeenCalledWith('smoke_haze')
+  })
+})

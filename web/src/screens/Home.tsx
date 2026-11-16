@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useData } from '../context'
 import { CoordsForm } from '../components/CoordsForm'
-import { GuideBox } from '../components/GuideBox'
 import { PlaceChooser } from '../components/PlaceChooser'
 import { PlaceIcon, type PlaceIconName } from '../components/PlaceIcons'
 import { PlaceSearch } from '../components/PlaceSearch'
@@ -129,13 +128,6 @@ export function Home({ go, route }: { go: (r: Route) => void; route?: Route }) {
           )}
         </p>
       </section>
-
-      <GuideBox
-        chosen={chosen}
-        canSearchPlace={!liveOff}
-        onAsk={(theme) => chosen && go(routeFor(chosen, theme))}
-        onPlace={(r: GeoResult) => choose(namedPoint(Math.round(r.lat * 100) / 100, Math.round(r.lon * 100) / 100, r.label))}
-      />
 
       <section ref={card} className="card start-wizard" aria-label={s('start.wizard.label', 'Find your place')}>
         <div className="start-progress">
