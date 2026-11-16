@@ -81,7 +81,10 @@ _SYNONYMS_RAW: dict[str, tuple[str, ...]] = {
     "hot": ("heat",), "hotter": ("heat",), "heat": ("heat",), "warm": ("heat",), "warmer": ("heat",),
     "warming": ("heat",), "temperature": ("heat",), "cold": ("heat",), "cooler": ("heat",), "colder": ("heat",),
     "calor": ("heat",), "caliente": ("heat",), "caluroso": ("heat",), "temperatura": ("heat",),
-    "frio": ("heat",), "fresco": ("heat",), "climate": ("heat",), "clima": ("heat",),
+    "frio": ("heat",), "fresco": ("heat",), "climate": ("heat",), "clima": ("heat",), "weather": ("heat",), "tiempo": ("heat",),
+    "meteorologia": ("heat",), "sunny": ("heat",), "sun": ("heat",), "sol": ("heat",), "summer": ("heat",),
+    "verano": ("heat",), "winter": ("heat",), "invierno": ("heat",), "degrees": ("heat",), "grados": ("heat",),
+    "snow": ("rain",), "nieve": ("rain",),
     "afternoon": ("hot_afternoons",), "afternoons": ("hot_afternoons",), "daytime": ("hot_afternoons",),
     "midday": ("hot_afternoons",), "tarde": ("hot_afternoons",), "tardes": ("hot_afternoons",),
     "night": ("warm_nights",), "nights": ("warm_nights",), "nighttime": ("warm_nights",),
@@ -376,7 +379,7 @@ def llm_guide(text: str, lang: str = "en", catalog: Catalog | None = None) -> di
         log.warning("guide: Claude unreachable, using keywords")
         return None
     except anthropic.APIStatusError as exc:
-        log.warning("guide: Claude returned HTTP %s, using keywords", exc.status_code)
+        log.warning("guide: Claude returned HTTP %s (%s), using keywords", exc.status_code, str(exc.message)[:300])
         return None
     except anthropic.AnthropicError as exc:  # anything else from the SDK (credentials, response validation)
         log.warning("guide: Claude call failed (%s), using keywords", type(exc).__name__)
@@ -504,7 +507,7 @@ def _suggest_llm(place: str, lat: float | None, lon: float | None, lang: str, ca
             output_config={"effort": "low", "format": {"type": "json_schema", "schema": suggest_schema(catalog)}},
         )
     except anthropic.AnthropicError as exc:
-        log.warning("suggest: Claude call failed (%s)", type(exc).__name__)
+        log.warning("suggest: Claude call failed (%s: %s)", type(exc).__name__, str(exc)[:300])
         return None
     if resp.stop_reason in ("refusal", "max_tokens"):
         log.warning("suggest: Claude stop_reason=%s", resp.stop_reason)
