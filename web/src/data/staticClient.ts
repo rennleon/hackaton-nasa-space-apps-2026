@@ -4,7 +4,7 @@ import type { Place } from '../lib/place'
 import { mergeGrids, type Bbox, type ClimateGrid, type ClimateParam } from '../lib/climate'
 import { exampleAt } from '../lib/places'
 import { keywordGuide, type GuideAnswer } from '../lib/guideKeywords'
-import { getJson, LiveDataUnavailable, type AnalysisOutcome, type AnalyzeOptions, type DataClient } from './client'
+import { getJson, LiveDataUnavailable, type AnalysisOutcome, type AnalyzeOptions, type DataClient, type SuggestAnswer } from './client'
 
 /** Reads the precomputed JSON files under `<base>/data/`. */
 export class StaticClient implements DataClient {
@@ -59,6 +59,10 @@ export class StaticClient implements DataClient {
   async guide(text: string, lang: string): Promise<GuideAnswer> {
     const [themes, variables, glossary] = await Promise.all([this.themes(), this.variables(), this.glossary()])
     return keywordGuide(text, lang, { themes, variables, glossary })
+  }
+  /** No AI here: no suggestions. */
+  async suggest(): Promise<SuggestAnswer> {
+    return { suggestions: [], source: 'none' }
   }
   private climIndex?: Promise<{ id: string; bbox: Bbox; params: string[] }[]>
   /**

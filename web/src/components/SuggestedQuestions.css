@@ -1,0 +1,13 @@
+/* Questions an AI helper suggests for the chosen place: icon + words, one tappable row each. */
+.suggest { display: grid; gap: 0.6rem; }
+.suggest-thinking { margin: 0; }
+.suggest-title { margin: 0; font-size: 1.1rem; font-family: var(--font-body); letter-spacing: 0; }
+.suggest-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr)); gap: 0.6rem; }
+.suggest-btn { width: 100%; height: 100%; min-height: 44px; box-sizing: border-box; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius); padding: 0.8rem 1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.7rem; transition: border-color 0.15s; }
+.suggest-btn:hover { border-color: var(--accent); }
+.suggest-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.suggest-icon { flex: none; display: inline-flex; margin-top: 0.1rem; color: var(--accent); }
+.suggest-text { display: grid; gap: 0.2rem; min-width: 0; }
+.suggest-q { font-weight: 600; overflow-wrap: anywhere; }
+.suggest-why { overflow-wrap: anywhere; }
+.suggest-source { margin: 0; }
